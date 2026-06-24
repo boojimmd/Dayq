@@ -2525,6 +2525,18 @@ let cfg={theme:'auto',persian:true,confetti:false,name:'',company:'',city:'',vis
 let curTab='all',selIco='pill',selPri_='high',selBagIco='brief';
 
 /* ══ BOOT ══ */
+function _syncLayoutVars(){
+  const tb=document.querySelector('.topbar');
+  const nv=document.querySelector('.nav');
+  if(tb){
+    const h=tb.getBoundingClientRect().height;
+    if(h>0) document.documentElement.style.setProperty('--topbar-h', h+'px');
+  }
+  if(nv){
+    const h=nv.getBoundingClientRect().height;
+    if(h>0) document.documentElement.style.setProperty('--nav-h', h+'px');
+  }
+}
 function boot(){
   loadAll();loadProjects();applyTheme(cfg.theme);
   // ── Recurring + Alarm Clock ──
@@ -2707,6 +2719,11 @@ function boot(){
     goBtn.addEventListener('touchstart', e=>{e.preventDefault();quickCapture();},{passive:false});
   }
   initBulkLongPress();
+  // ارتفاع واقعی توپ‌بار/ناوبری را اندازه بگیر — به‌جای فرض ثابت تخمینی
+  _syncLayoutVars();
+  setTimeout(_syncLayoutVars, 350); // بعد از لود کامل فونت، دوباره چک کن
+  window.addEventListener('resize', _syncLayoutVars);
+  window.addEventListener('orientationchange', ()=>setTimeout(_syncLayoutVars, 200));
   // focus timer
 }
 
