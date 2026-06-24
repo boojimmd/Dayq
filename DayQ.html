@@ -141,6 +141,9 @@ input,textarea{user-select:text;-webkit-user-select:text;}
 }
 .tbrow{display:flex;align-items:center;justify-content:space-between;padding-bottom:12px;padding-top:4px;}
 .greeting{font-size:.62rem;color:var(--t3);font-weight:600;letter-spacing:.05em;text-transform:uppercase;}
+.greeting-row{display:flex;align-items:center;gap:6px;}
+.wx-chip{font-size:.62rem;color:var(--t3);font-weight:600;display:none;align-items:center;gap:3px;}
+.wx-chip.show{display:inline-flex;}
 .pg-title{font-size:1.35rem;font-weight:800;letter-spacing:-.03em;line-height:1.15;margin-top:1px;}
 .pg-title em{font-style:normal;color:var(--a);}
 .hbtns{display:flex;gap:6px;}
@@ -1514,7 +1517,7 @@ select.fi{
 <div class="topbar" id="topbar">
   <div class="tbrow">
     <div>
-      <div class="greeting" id="greeting">سلام!</div>
+      <div class="greeting-row"><div class="greeting" id="greeting">سلام!</div><span id="wxChip" class="wx-chip"></span></div>
       <div class="pg-title" id="pageTitle">امروز چیکار<em> داری؟</em></div>
     </div>
     <div class="hbtns">
@@ -2554,6 +2557,7 @@ function boot(){
   setGreeting();updateClock();setInterval(updateClock,30000);
   syncToggles();syncThemePills();syncProfile();_refreshWorkHoursSub();_refreshArchiveSub();_refreshPushSub();
   if(cfg.pushWorkerUrl) initPush();
+  initWeather();
   renderTasks();renderBag();updateMeStats();
   // overdue modal — فقط صبح (۶ تا ۱۲) نشون بده
   const _h=new Date().getHours();
@@ -4628,6 +4632,44 @@ function savePushSettings(){
 function _refreshPushSub(){
   const el=document.getElementById('pushSub');
   if(el) el.textContent=cfg.pushWorkerUrl?'فعال':'غیرفعال';
+}
+/* ══ آب‌وهوا — فقط یک‌بار موقع باز شدن، بالای صفحه ══ */
+const WX_CODE_MAP={
+  0:['آفتابی','☀️'],1:['تاحدی آفتابی','🌤️'],2:['نیمه‌ابری','⛅'],3:['ابری','☁️'],
+  45:['مه','🌫️'],48:['مه یخی','🌫️'],
+  51:['باران ریز','🌦️'],53:['باران ریز','🌦️'],55:['باران ریز','🌦️'],
+  61:['بارانی','🌧️'],63:['بارانی','🌧️'],65:['باران شدید','🌧️'],
+  71:['برفی','🌨️'],73:['برفی','🌨️'],75:['برف شدید','❄️'],
+  80:['رگبار','🌦️'],81:['رگبار','🌦️'],82:['رگبار شدید','🌧️'],
+  95:['طوفان','⛈️'],96:['طوفان تگرگ','⛈️'],99:['طوفان تگرگ','⛈️'],
+};
+function initWeather(){
+  try{
+    const cache=JSON.parse(localStorage.getItem('dq5_weather')||'null');
+    if(cache && cache.day===mrTodayKey()){ _showWeather(cache.temp,cache.code); return; }
+  }catch(e){}
+  if(!('geolocation' in navigator)) return;
+  navigator.geolocation.getCurrentPosition(
+    pos=>{
+      const {latitude,longitude}=pos.coords;
+      fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`)
+        .then(r=>r.json())
+        .then(d=>{
+          const cw=d.current_weather; if(!cw) return;
+          const temp=Math.round(cw.temperature);
+          localStorage.setItem('dq5_weather',JSON.stringify({day:mrTodayKey(),temp,code:cw.weathercode}));
+          _showWeather(temp,cw.weathercode);
+        }).catch(()=>{});
+    },
+    ()=>{}, {timeout:8000}
+  );
+}
+function _showWeather(temp,code){
+  const info=WX_CODE_MAP[code]||['',''];
+  const el=document.getElementById('wxChip');
+  if(!el) return;
+  el.innerHTML=`${info[1]} ${num(temp)}°`;
+  el.classList.add('show');
 }
 async function initPush(){
   if(!cfg.pushWorkerUrl) return;
