@@ -1077,7 +1077,7 @@ select.fi{
 .wv-header{display:flex;border-bottom:1px solid var(--b2);}
 .wv-day-hdr{flex:1;text-align:center;padding:8px 2px;border-left:1px solid var(--b2);}
 .wv-day-hdr:last-child{border-left:none;}
-.wv-day-name{font-size:.58rem;font-weight:700;color:var(--t3);}
+.wv-day-name{font-size:.52rem;font-weight:700;color:var(--t3);line-height:1.25;white-space:normal;word-break:keep-all;}
 .wv-day-num{font-size:.82rem;font-weight:700;font-family:var(--mono);margin-top:2px;}
 .wv-day-hdr.wv-today .wv-day-num{color:var(--a);background:var(--am);
   border-radius:50%;width:24px;height:24px;display:flex;align-items:center;
@@ -1576,17 +1576,7 @@ select.fi{
   <div class="nlp-preview" id="nlpPreview" style="display:none;margin:4px 18px 6px;background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r2);padding:8px 12px;flex-wrap:wrap;gap:6px;align-items:center;position:relative;z-index:10;"></div>
 
   <!-- Countdown -->
-  <div class="cd-banner">
-    <div class="cdrw">
-      <svg width="58" height="58" viewBox="0 0 58 58"><circle class="cdt" cx="29" cy="29" r="26"/><circle class="cdf" id="cdFill" cx="29" cy="29" r="26"/></svg>
-      <div class="cdc"><span class="cdn" id="cdNum">—</span><span class="cdu" id="cdUnit">دقیقه</span></div>
-    </div>
-    <div class="cd-info">
-      <div class="cd-lbl">شروع بازدید</div>
-      <div class="cd-tv">ساعت <span id="cdTime">—:—</span></div>
-      <button class="cd-ebtn" onclick="openTimer()">تغییر <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></button>
-    </div>
-  </div>
+  
 
   
 
@@ -2796,14 +2786,8 @@ function syncProfile(){document.getElementById('profileName').value=cfg.name||''
 
 /* ══ CLOCK ══ */
 function updateClock(){
-  const vt=cfg.visitTime;if(!vt)return;
-  const now=new Date(),parts=vt.split(':').map(Number);
-  const v=new Date();v.setHours(parts[0],parts[1],0,0);
-  const diff=v-now,mins=Math.ceil(diff/60000);
-  if(diff<=0){document.getElementById('cdNum').textContent='▶';document.getElementById('cdUnit').textContent='شروع شد';document.getElementById('cdFill').style.strokeDashoffset=0;}
-  else{document.getElementById('cdNum').textContent=num(Math.min(mins,999));document.getElementById('cdUnit').textContent='دقیقه';
-    const pct=Math.min(1,(480-Math.min(mins,480))/480);document.getElementById('cdFill').style.strokeDashoffset=163-(163*pct);}
-  document.getElementById('cdTime').textContent=vt;
+  // کارت شمارش‌معکوس بازدید حذف شد — این تابع دیگر کاری ندارد
+  return;
 }
 
 /* ══ NAVIGATION ══ */
@@ -3273,17 +3257,7 @@ function renderTasks(){
     vis=tasks.filter(t=>!(t.done||t.status==='done')&&t.deadline===tomorrowKey);
   }
   else if(curTab==='waiting') {
-    // sort: overdue deadline first, then by how long waiting (updatedAt oldest first)
-    vis=tasks.filter(t=>t.status==='waiting').sort((a,b)=>{
-      const today=mrTodayKey();
-      const aOver=a.deadline&&a.deadline<today, bOver=b.deadline&&b.deadline<today;
-      if(aOver&&!bOver) return -1;
-      if(!aOver&&bOver) return 1;
-      // older updatedAt = waiting longer = more urgent
-      const aU=a.updatedAt||a.deadline||'9999';
-      const bU=b.updatedAt||b.deadline||'9999';
-      return aU<bU?-1:aU>bU?1:0;
-    });
+    vis=tasks.filter(t=>t.status==='waiting');
   }
   else if(curTab==='projects') {
     renderTasksByProject();
@@ -6189,8 +6163,8 @@ function daysToJalaliKey(totalDays){
   return `${jy}-${String(jm).padStart(2,'0')}-${String(jd).padStart(2,'0')}`;
 }
 
-const WV_DAYS = ['ش','ی','د','س','چ','پ','ج'];
-const JL_MONTHS_SHORT = ['فر','ار','خر','تی','مر','شه','مه','آب','آذ','دی','به','اس'];
+const WV_DAYS = ['شنبه','یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه'];
+const JL_MONTHS_SHORT = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
 
 function renderWeekView(){
   const hdr = document.getElementById('wvHeader');
@@ -6458,12 +6432,7 @@ function saveIntent(){
 
 function checkMorningIntent(){
   loadIntent();
-  const h=new Date().getHours();
-  const hasIntent=intentSlots.some(s=>s!==null);
-  // show modal if morning and no intent yet
-  if(h>=6 && h<12 && !hasIntent && !localStorage.getItem('dq5_intent_skip_'+mrTodayKey())){
-    setTimeout(()=>openIntentModal(), 800);
-  }
+  // پاپ‌آپ خودکار «۳ کار مهم امروز» حذف شد — کاربر درخواست کرد
   renderIntentBanner();
 }
 
