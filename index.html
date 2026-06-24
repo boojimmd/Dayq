@@ -1736,6 +1736,7 @@ select.fi{
         <div class="srow"><div class="srow-ico" style="background:var(--bluem);color:var(--blue);"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div class="srow-body"><div class="srow-ttl">برنامه زمانی</div><div class="srow-sub">نمایش کارهای زمان‌دار</div></div><div class="tgl" id="tgl-timeline" onclick="toggleS('timeline',this)"><div class="tgl-k"></div></div></div>
         <div class="srow" onclick="openWorkHours()"><div class="srow-ico" style="background:var(--ambm);color:var(--amber);"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="srow-body"><div class="srow-ttl">ساعت‌های روز کاری</div><div class="srow-sub" id="workHoursSub">عصر از ۱۷:۰۰ · پایان روز ۱۸:۰۰</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
         <div class="srow" onclick="openArchive()"><div class="srow-ico" style="background:var(--bg3);color:var(--t2);"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div><div class="srow-body"><div class="srow-ttl">آرشیو کارهای قدیمی</div><div class="srow-sub" id="archiveSub">۰ کار آرشیوشده</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+        <div class="srow" onclick="openPushSettings()"><div class="srow-ico" style="background:var(--bluem);color:var(--blue);"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div class="srow-body"><div class="srow-ttl">یادآوری واقعی (Push)</div><div class="srow-sub" id="pushSub">غیرفعال</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
       </div>
     </div>
     <div class="sg-wrap">
@@ -2198,6 +2199,18 @@ select.fi{
   </div>
 </div>
 
+<!-- SHEET: PUSH -->
+<div class="sheet" id="shPush">
+  <div class="sh-handle"></div>
+  <div class="sh-head"><div class="sh-tr"><div class="sh-ttl">یادآوری واقعی (Push)</div><button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></div>
+  <div class="sh-body">
+    <div class="f-lbl">آدرس Worker</div>
+    <input class="fi" id="pushUrlInp" placeholder="https://your-worker.workers.dev" dir="ltr" style="margin-bottom:6px;">
+    <div style="font-size:.68rem;color:var(--t3);margin-bottom:14px;">آدرسی که بعد از Deploy کردن Worker در Cloudflare می‌گیری</div>
+    <button class="sh-sub" onclick="savePushSettings()">ذخیره و فعال‌سازی</button>
+  </div>
+</div>
+
 <!-- SHEET: SYNC -->
 <div class="sheet" id="shSync">
   <div class="sh-handle"></div>
@@ -2521,7 +2534,7 @@ function svgIco(id,w=16){const ic=iconMap[id]||iconMap.check;return`<svg viewBox
 /* ══ STATE ══ */
 const SK='dq5_t',SB='dq5_b',SS='dq5_s';
 let tasks=[],bagItems=[];
-let cfg={theme:'auto',persian:true,confetti:false,name:'',company:'',city:'',visitTime:'09:00',mood:0,reflect:false,timeline:false,reflection:'',workEndTime:'18:00',eveningStart:'17:00',autoArchiveDays:30,autoArchiveOn:true};
+let cfg={theme:'auto',persian:true,confetti:false,name:'',company:'',city:'',visitTime:'09:00',mood:0,reflect:false,timeline:false,reflection:'',workEndTime:'18:00',eveningStart:'17:00',autoArchiveDays:30,autoArchiveOn:true,pushWorkerUrl:''};
 let curTab='all',selIco='pill',selPri_='high',selBagIco='brief';
 
 /* ══ BOOT ══ */
@@ -2549,7 +2562,8 @@ function boot(){
   }, {passive:true});
   buildIconGrid('iconGrid',false);buildIconGrid('bagIconGrid',true);
   setGreeting();updateClock();setInterval(updateClock,30000);
-  syncToggles();syncThemePills();syncProfile();_refreshWorkHoursSub();_refreshArchiveSub();
+  syncToggles();syncThemePills();syncProfile();_refreshWorkHoursSub();_refreshArchiveSub();_refreshPushSub();
+  if(cfg.pushWorkerUrl) initPush();
   renderTasks();renderBag();updateMeStats();
   // overdue modal — فقط صبح (۶ تا ۱۲) نشون بده
   const _h=new Date().getHours();
@@ -4614,8 +4628,74 @@ let remindTaskId = null;
 const REMIND_SK = 'dqreminders_v1';
 let reminders = {};
 
+/* ══ Push واقعی (Service Worker + سرور Cloudflare) ══ */
+const VAPID_PUBLIC_KEY = 'BLHy_UWBnNdCafS8MVTWxeLKdLy5ZS-yOUDnBp0GY6jdGgWlX9pLzgCMKAziEz07TvUtFA4jzqN57UUR6y88JMs';
+
+function _urlB64ToUint8Array(b64){
+  const pad='='.repeat((4-b64.length%4)%4);
+  const base64=(b64+pad).replace(/-/g,'+').replace(/_/g,'/');
+  const raw=atob(base64);
+  const arr=new Uint8Array(raw.length);
+  for(let i=0;i<raw.length;i++)arr[i]=raw.charCodeAt(i);
+  return arr;
+}
+
+function openPushSettings(){
+  document.getElementById('pushUrlInp').value=cfg.pushWorkerUrl||'';
+  openSheet('shPush');
+}
+function savePushSettings(){
+  cfg.pushWorkerUrl=document.getElementById('pushUrlInp').value.trim();
+  saveCfg();
+  closeAll();
+  _refreshPushSub();
+  initPush();
+}
+function _refreshPushSub(){
+  const el=document.getElementById('pushSub');
+  if(el) el.textContent=cfg.pushWorkerUrl?'فعال':'غیرفعال';
+}
+async function initPush(){
+  if(!cfg.pushWorkerUrl) return;
+  if(!('serviceWorker' in navigator)||!('PushManager' in window)){
+    toast_(svgIco('flag'),'این مرورگر از Push پشتیبانی نمی‌کند');
+    return;
+  }
+  try{
+    const perm=await Notification.requestPermission();
+    if(perm!=='granted'){ toast_(svgIco('flag'),'اجازهٔ نوتیف داده نشد'); return; }
+    const reg=await navigator.serviceWorker.register('sw.js');
+    await navigator.serviceWorker.ready;
+    let sub=await reg.pushManager.getSubscription();
+    if(!sub){
+      sub=await reg.pushManager.subscribe({
+        userVisibleOnly:true,
+        applicationServerKey:_urlB64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
+    }
+    await fetch(cfg.pushWorkerUrl.replace(/\/$/,'')+'/subscribe',{
+      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(sub.toJSON())
+    });
+    toast_(svgIco('check'),'Push فعال شد ✓');
+    _syncRemindersToServer();
+  }catch(e){
+    toast_(svgIco('flag'),'خطا در فعال‌سازی Push');
+  }
+}
+
+function _syncRemindersToServer(){
+  if(!cfg.pushWorkerUrl) return;
+  const list=Object.entries(reminders).map(([id,fireAt])=>{
+    const t=tasks.find(x=>x.id===id);
+    return {id, text:t?t.text:'یادآوری', fireAt};
+  }).filter(r=>r.fireAt>Date.now());
+  fetch(cfg.pushWorkerUrl.replace(/\/$/,'')+'/reminders',{
+    method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(list)
+  }).catch(()=>{});
+}
+
 function loadReminders(){ try{reminders=JSON.parse(localStorage.getItem(REMIND_SK))||{};}catch(e){reminders={};} }
-function saveReminders(){ try{localStorage.setItem(REMIND_SK,JSON.stringify(reminders));}catch(e){} }
+function saveReminders(){ try{localStorage.setItem(REMIND_SK,JSON.stringify(reminders));}catch(e){} _syncRemindersToServer(); }
 
 function checkNotifPermission(){
   if(!('Notification' in window)) return;
