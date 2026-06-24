@@ -1881,7 +1881,7 @@ select.fi{
     <div class="intent-handle"></div>
     <div class="intent-eyebrow"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/></svg> صبح بخیر</div>
     <div class="intent-title">امروز چه ۳ کاری مهمه؟</div>
-    <div class="intent-sub">این‌ها رو commit کن — شب بررسی می‌کنیم.</div>
+    <div class="intent-sub">سه کار مهم‌تر امروزت رو انتخاب کن یا بنویس.</div>
     <div class="intent-slots" id="intentSlots">
       <div class="intent-slot" id="islot0" onclick="openIntentPicker(0)">
         <div class="intent-slot-num">۱</div>
@@ -6408,8 +6408,6 @@ function finishOnboard(){
   ];
   tasks.push(...samples);
   saveAll(); renderTasks();
-  // show morning intent
-  setTimeout(()=>openIntentModal(), 600);
 }
 
 /* ══════════════════════════════════════════════════
