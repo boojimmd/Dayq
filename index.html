@@ -4679,30 +4679,54 @@ function _showWeather(temp,code){
   el.classList.add('show');
 }
 async function initPush(){
+  const log=[];
+  const L=(s)=>{log.push(s);};
   if(!cfg.pushWorkerUrl) return;
   if(!('serviceWorker' in navigator)||!('PushManager' in window)){
-    toast_(svgIco('flag'),'این مرورگر از Push پشتیبانی نمی‌کند');
+    alert('این مرورگر از Push پشتیبانی نمی‌کند');
     return;
   }
   try{
+    L('۱: درخواست اجازهٔ نوتیف...');
     const perm=await Notification.requestPermission();
-    if(perm!=='granted'){ toast_(svgIco('flag'),'اجازهٔ نوتیف داده نشد'); return; }
+    L('   نتیجه: '+perm);
+    if(perm!=='granted'){ alert(log.join('\n')); return; }
+
+    L('۲: ثبت Service Worker (sw.js)...');
     const reg=await navigator.serviceWorker.register('sw.js');
+    L('   ثبت شد. scope: '+reg.scope);
+
+    L('۳: صبر برای آماده‌شدن SW...');
     await navigator.serviceWorker.ready;
+    L('   آماده شد.');
+
+    L('۴: چک اشتراک قبلی...');
     let sub=await reg.pushManager.getSubscription();
+    L('   اشتراک قبلی: '+(sub?'دارد':'ندارد'));
+
     if(!sub){
+      L('۵: ساخت اشتراک جدید با کلید VAPID...');
       sub=await reg.pushManager.subscribe({
         userVisibleOnly:true,
         applicationServerKey:_urlB64ToUint8Array(VAPID_PUBLIC_KEY)
       });
+      L('   ساخته شد. endpoint: '+sub.endpoint.slice(0,50)+'...');
     }
-    await fetch(cfg.pushWorkerUrl.replace(/\/$/,'')+'/subscribe',{
+
+    L('۶: ارسال اشتراک به سرور Worker...');
+    const res=await fetch(cfg.pushWorkerUrl.replace(/\/$/,'')+'/subscribe',{
       method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(sub.toJSON())
     });
+    L('   پاسخ سرور: HTTP '+res.status);
+
+    L('✓ Push با موفقیت فعال شد.');
     toast_(svgIco('check'),'Push فعال شد ✓');
     _syncRemindersToServer();
+    alert(log.join('\n'));
   }catch(e){
-    toast_(svgIco('flag'),'خطا در فعال‌سازی Push');
+    L('❌ خطا: '+(e&&e.message?e.message:String(e)));
+    if(e&&e.name) L('   نوع خطا: '+e.name);
+    alert(log.join('\n'));
   }
 }
 
