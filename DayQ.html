@@ -3540,6 +3540,13 @@ function updateCapacityBanner(){
   const fill=document.getElementById('capBarFill');
   if(fill)fill.style.width=pct+'%';
 }
+function _updateAppBadge(count){
+  if(!('setAppBadge' in navigator)) return;
+  try{
+    if(count>0) navigator.setAppBadge(count).catch(()=>{});
+    else navigator.clearAppBadge().catch(()=>{});
+  }catch(e){/* بی‌صدا نادیده بگیر — این API روی بعضی نسخه‌ها بی‌خطا ولی بی‌اثر است */}
+}
 function updateMeta(){
   const total=tasks.length,done=tasks.filter(t=>t.done).length,rem=total-done;
   // update waiting badge
@@ -3568,6 +3575,7 @@ function updateMeta(){
     try{const[jy,jm,jd]=t.deadline.split('-').map(Number);const[ty,tm,td]=todK.split('-').map(Number);return _jalToDays(jy,jm,jd)<_jalToDays(ty,tm,td);}catch(e){return false;}
   }).length;
   const btd=document.getElementById('b-today');if(btd)btd.textContent=num(todayCnt);
+  _updateAppBadge(todayCnt);
   const tmrK=getTomorrowKey();
   const btmr=document.getElementById('b-tomorrow');if(btmr)btmr.textContent=num(tasks.filter(t=>!isDoneT(t)&&t.deadline===tmrK).length);
   document.getElementById('b-prep').textContent=num(tasks.filter(t=>t.cat==='prep'&&!isDoneT(t)).length);
