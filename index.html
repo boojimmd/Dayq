@@ -2565,6 +2565,7 @@ function boot(){
   syncToggles();syncThemePills();syncProfile();_refreshWorkHoursSub();_refreshArchiveSub();_refreshPushSub();
   if(cfg.pushWorkerUrl) initPush();
   initWeather();
+  setInterval(initWeather, 3600000);
   loadReminders();
   renderTasks();renderBag();updateMeStats();
   // overdue modal — فقط صبح (۶ تا ۱۲) نشون بده
@@ -4655,7 +4656,7 @@ const WX_CODE_MAP={
 function initWeather(){
   try{
     const cache=JSON.parse(localStorage.getItem('dq5_weather')||'null');
-    if(cache && cache.day===mrTodayKey()){ _showWeather(cache.temp,cache.code); return; }
+    if(cache && (Date.now()-cache.ts)<3600000){ _showWeather(cache.temp,cache.code); return; }
   }catch(e){}
   if(!('geolocation' in navigator)) return;
   navigator.geolocation.getCurrentPosition(
@@ -4666,7 +4667,7 @@ function initWeather(){
         .then(d=>{
           const cw=d.current_weather; if(!cw) return;
           const temp=Math.round(cw.temperature);
-          localStorage.setItem('dq5_weather',JSON.stringify({day:mrTodayKey(),temp,code:cw.weathercode}));
+          localStorage.setItem('dq5_weather',JSON.stringify({ts:Date.now(),temp,code:cw.weathercode}));
           _showWeather(temp,cw.weathercode);
         }).catch(()=>{});
     },
