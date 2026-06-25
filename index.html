@@ -7539,8 +7539,34 @@ function nlpResolveTime(txt){
 }
 
 /* ── Main Parser ── */
+// ── تصحیح فازی تایپوهای رایج کلمات تاریخ (مثل «قردا» به‌جای «فردا») ──
+function _levDist(a,b){
+  const m=a.length,n=b.length;
+  const dp=Array.from({length:m+1},()=>new Array(n+1).fill(0));
+  for(let i=0;i<=m;i++)dp[i][0]=i;
+  for(let j=0;j<=n;j++)dp[0][j]=j;
+  for(let i=1;i<=m;i++)for(let j=1;j<=n;j++){
+    dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+  }
+  return dp[m][n];
+}
+const NLP_FUZZY_KEYWORDS=['فردا','امروز','امشب','پسفردا','دیروز','دیشب'];
+function _fuzzyCorrectDateWords(text){
+  return text.split(/(\s+)/).map(tok=>{
+    if(!tok.trim()) return tok; // فاصله‌ها رو دست نزن
+    const bare=tok.replace(/[،,؟!.]/g,'');
+    if(NLP_FUZZY_KEYWORDS.includes(bare)) return tok; // خودش درسته، کاری لازم نیست
+    for(const kw of NLP_FUZZY_KEYWORDS){
+      if(Math.abs(bare.length-kw.length)>1) continue; // طول خیلی فرق داره، حتی بررسی نکن
+      if(_levDist(bare,kw)===1) return tok.replace(bare,kw);
+    }
+    return tok;
+  }).join('');
+}
+
 function nlpParse(raw){
   if(!raw||raw.trim().length<3) return null;
+  raw=_fuzzyCorrectDateWords(raw.trim());
   const n = nlpNormalize(raw);
   const result = {
     text:raw.trim(), cleanText:raw.trim(),
