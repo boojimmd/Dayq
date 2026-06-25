@@ -3434,6 +3434,7 @@ function mkCard(task){
   const callH=(task.contact&&(task.cat==='visit'||task.cat==='meeting'||task.cat==='call'))?`<a class="tc-call" href="tel:${esc(task.contact)}" onclick="event.stopPropagation()" title="تماس"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.41 2 2 0 0 1 3.57 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.5a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></a>`:'';
   const fileH=task.fileLink?`<a class="tc-call" style="background:rgba(124,58,237,.12);color:var(--purple)" href="${esc(task.fileLink)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="باز کردن لینک فایل"><svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></a>`:'';
   const locH=task.location?`<a class="tc-call" style="background:var(--bluem);color:var(--blue)" href="https://maps.google.com/?q=${encodeURIComponent(task.location)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="${esc(task.location)} — باز کردن در نقشه"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></a>`:'';
+  const remindH=reminders[task.id]?`<button class="tc-call" style="background:var(--ambm);color:var(--amber)" onclick="event.stopPropagation();openRemind('${task.id}',event)" title="یادآوری فعال است"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>`:'';
   const proj=projects&&projects.find?projects.find(p=>p.id===task.projectId):null;
   const projH=proj?`<span class="tc-tag" style="background:${proj.color}22;color:${proj.color}">${esc(proj.name)}</span>`:'';
   const recurB=(task.recur&&task.recur!=='none')?'<span class="recur-badge">↺</span>':'';
@@ -3453,7 +3454,7 @@ function mkCard(task){
       <div class="tc-meta">${tH}${dlH}${projH}${cH}${waitH}${noteD}</div>
       ${clP}
     </div>
-    ${callH}${fileH}${locH}
+    ${callH}${fileH}${locH}${remindH}
     ${(st!=='done')?`<button class="tc-focus" onclick="startFocusMode('${task.id}',event)" title="فوکوس"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></button>`:''}
     <button class="tc-more" onclick="openCardMore('${task.id}',event)" title="بیشتر"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button>`;
   return d;
