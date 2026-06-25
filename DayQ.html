@@ -2829,7 +2829,15 @@ function syncThemePills(){document.querySelectorAll('.th-pill').forEach(p=>p.cla
 /* ══ GREETING ══ */
 function setGreeting(){
   const h=new Date().getHours();const name=cfg.name?` ${cfg.name.split(' ')[0]}`:'';
-  document.getElementById('greeting').textContent=(h<12?'صبح بخیر':h<17?'ظهر بخیر':'عصر بخیر')+(name?`,${name}`:'')+'!';
+  let g;
+  if(h<5) g='شب بخیر';
+  else if(h<8) g='صبح زود بخیر';
+  else if(h<11) g='صبح بخیر';
+  else if(h<13) g='ظهر بخیر';
+  else if(h<17) g='بعدازظهر بخیر';
+  else if(h<20) g='عصر بخیر';
+  else g='شب بخیر';
+  document.getElementById('greeting').textContent=g+(name?`,${name}`:'')+'!';
   document.getElementById('meName').textContent=cfg.name||'نام شما';
   document.getElementById('meCompany').textContent=cfg.company||'شرکت / سمت';
 }
