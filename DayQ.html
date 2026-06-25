@@ -2324,6 +2324,7 @@ select.fi{
   </div>
   <div class="sh-body">
     <div class="remind-task-name" id="remindTaskName">—</div>
+    <div id="remindTaskHint" style="font-size:.72rem;color:var(--t3);margin:-8px 0 12px;display:none;"></div>
     <div class="f-lbl">زمان‌های سریع</div>
     <div class="remind-presets" id="remindPresets">
       <button class="rpreset" data-min="15"  onclick="setRemindPreset(15,this)">۱۵ دقیقه دیگر</button>
@@ -2332,7 +2333,7 @@ select.fi{
       <button class="rpreset" data-min="120" onclick="setRemindPreset(120,this)">۲ ساعت دیگر</button>
     </div>
     <div class="remind-custom-row">
-      <span class="remind-custom-lbl">ساعت دقیق</span>
+      <span class="remind-custom-lbl" id="remindCustomLbl">ساعت دقیق</span>
       <input class="remind-time-inp" type="time" id="remindTimeInp">
     </div>
     <button class="sh-sub" onclick="saveReminder()">ثبت یادآوری</button>
@@ -4747,7 +4748,7 @@ function openRemind(taskId, e){
   const remindHint=document.getElementById('remindTaskHint');
   if(remindHint){
     if(task.time){
-      remindHint.textContent='ساعت task: '+task.time+(task.deadline===getTomorrowKey()?' (فردا)':task.deadline===mrTodayKey()?' (امروز)':'');
+      remindHint.textContent='ساعت تسک: '+task.time+(task.deadline===getTomorrowKey()?' (فردا)':task.deadline===mrTodayKey()?' (امروز)':'');
       remindHint.style.display='block';
     } else {
       remindHint.style.display='none';
@@ -4780,6 +4781,18 @@ function openRemind(taskId, e){
   } else {
     timeInp.value='';
     clrBtn.style.display='none';
+  }
+  // متن دکمه‌های سریع را با محاسبهٔ واقعی‌شان هماهنگ کن
+  const presetLbl = task.time ? 'قبل' : 'دیگر';
+  document.querySelectorAll('.rpreset').forEach(p=>{
+    const m=parseInt(p.dataset.min);
+    const unit = m>=60 ? num(m/60)+' ساعت' : num(m)+' دقیقه';
+    p.textContent = `${unit} ${presetLbl}`;
+  });
+  if(task.time){
+    document.getElementById('remindCustomLbl').textContent='ساعت دقیق (همون روز تسک)';
+  } else {
+    document.getElementById('remindCustomLbl').textContent='ساعت دقیق';
   }
   openSheet('shRemind');
 }
