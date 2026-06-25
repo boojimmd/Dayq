@@ -2791,6 +2791,13 @@ function saveAll(){
     console.error('saveAll error:',e);
     toast_(svgIco('flag'),'خطا در ذخیره — حافظه پر شده؟');
   }
+  _debouncedSync();
+}
+let _debSyncT=null, _syncInProgress=false;
+function _debouncedSync(){
+  if(!cfg.syncCode || _syncInProgress) return;
+  clearTimeout(_debSyncT);
+  _debSyncT=setTimeout(()=>syncNow(), 2500);
 }
 function saveCfg(){try{localStorage.setItem(SS,JSON.stringify(cfg));}catch(e){}}
 
@@ -4787,7 +4794,8 @@ function _buildSyncDiff(currentArr, snapMap){
 }
 
 async function syncNow(){
-  if(!cfg.syncCode) return;
+  if(!cfg.syncCode || _syncInProgress) return;
+  _syncInProgress=true;
   try{
     const snap=_loadSyncSnap();
     const tasksDiff=_buildSyncDiff(tasks, snap.tasks);
@@ -4811,6 +4819,7 @@ async function syncNow(){
 
     renderTasks(); if(typeof renderProjects==='function') renderProjects();
   }catch(e){ /* اگر اینترنت نبود، بی‌صدا رد شو — دفعهٔ بعد دوباره تلاش می‌شود */ }
+  finally{ _syncInProgress=false; }
 }
 
 async function initSyncCode(){
@@ -5249,7 +5258,7 @@ let selTaskStatus = 'todo';
 const PROJ_COLORS = ['#00b87a','#2563eb','#e53e5a','#d97706','#7c3aed','#0891b2','#be185d','#64748b'];
 
 function loadProjects(){ try{projects=JSON.parse(localStorage.getItem(PROJ_SK))||[];}catch(e){projects=[];} }
-function saveProjects(){ try{localStorage.setItem(PROJ_SK,JSON.stringify(projects));}catch(e){} }
+function saveProjects(){ try{localStorage.setItem(PROJ_SK,JSON.stringify(projects));}catch(e){} _debouncedSync(); }
 
 function renderProjects(){
   loadProjects();
