@@ -6236,17 +6236,14 @@ function onEditCatChange(){
 
 function toggleWaitingStatus(){
   const t=tasks.find(t=>t.id===noteTaskId); if(!t)return;
-  const wBtn=document.getElementById('noteWaitBtn');
   if(t.status==='waiting'){
     t.status='todo'; t.done=false;
-    if(wBtn)wBtn.textContent='⏳ علامت بزن: منتظرم';
     toast_(svgIco('bell'),'از حالت انتظار خارج شد');
   } else {
     t.status='waiting'; t.done=false;
-    if(wBtn)wBtn.textContent='⏳ در انتظار — لغو';
     toast_(svgIco('bell'),'منتظرم ✓');
   }
-  saveAll(); renderTasks();
+  saveAll(); renderTasks(); closeAll();
 }
 
 function saveNote(){
