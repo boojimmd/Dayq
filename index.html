@@ -3929,7 +3929,7 @@ function addTask(){
   const status=selTaskStatus||'todo';
   const recurVal = selRecur_||'none';
   const todayK2  = mrTodayKey();
-  tasks.push({
+  const newTask={
     id:'t'+Date.now(),
     text:txt,
     iconId:selIco,
@@ -3946,7 +3946,9 @@ function addTask(){
     waitingFor:'',
     contact:'',
     fileLink:'', location:'', estimateMin:0, phase:(selTaskProjId?(document.getElementById('cmdPhase')?.value?.trim()||''):''),
-  });
+  };
+  tasks.push(newTask);
+  autoScheduleReminder(newTask);
   saveAll();closeAll();renderTasks();renderProjects();applyWidgets();
   // refresh calendar if open
   const calPage=document.getElementById('pageCalendar');
@@ -6950,6 +6952,7 @@ function saveEditTask(){
   t.projectId=newProjId||null;
   // status is only changed by toggleWaitingStatus button, not auto-set here
   t.done=(t.status==='done');
+  autoScheduleReminder(t);
   saveAll();closeAll();renderTasks();renderProjects();
   const calPg=document.getElementById('pageCalendar');
   if(calPg&&calPg.classList.contains('active'))renderCal();
