@@ -1692,7 +1692,7 @@ select.fi{
       <div class="me-av"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
       <div class="me-name" id="meName">نام شما</div>
       <div class="me-company" id="meCompany">شرکت / سمت</div>
-      <div class="me-sts">
+      <div class="me-sts" onclick="showQuickStats()" style="cursor:pointer;">
         <div class="me-st"><div class="me-stv" id="meDone">0</div><div class="me-stl">انجام شده</div></div>
         <div class="me-st"><div class="me-stv" id="meTotal">0</div><div class="me-stl">کل کارها</div></div>
         <div class="me-st"><div class="me-stv" id="mePct">0%</div><div class="me-stl">تکمیل</div></div>
@@ -2370,6 +2370,7 @@ select.fi{
       <input class="remind-time-inp" type="time" id="remindTimeInp">
     </div>
     <button class="sh-sub" onclick="saveReminder()">ثبت یادآوری</button>
+    <button class="remind-clear" id="remindSnoozeBtn" style="display:none;background:var(--ambm);color:var(--amber);border-color:rgba(217,119,6,.2);margin-bottom:8px;" onclick="snoozeReminder(remindTaskId,15);closeAll();">⏳ ۱۵ دقیقه به‌تعویق بیفت</button>
     <button class="remind-clear" id="remindClearBtn" onclick="clearReminder()" style="display:none;">حذف یادآوری</button>
   </div>
 </div>
@@ -2587,6 +2588,7 @@ function _syncLayoutVars(){
 }
 function boot(){
   loadAll();loadProjects();applyTheme(cfg.theme);
+  if(restoreFromAutoBackup()) toast_(svgIco('flag'),'داده از پشتیبان خودکار بازیابی شد');
   // ── Recurring + Alarm Clock ──
   processRecurringTasks();
   checkMissedReminders();
@@ -4928,12 +4930,14 @@ function openRemind(taskId, e){
   // show existing reminder time if set
   const existing=reminders[taskId];
   const clrBtn=document.getElementById('remindClearBtn');
+  const snzBtn=document.getElementById('remindSnoozeBtn');
   const timeInp=document.getElementById('remindTimeInp');
   document.querySelectorAll('.rpreset').forEach(p=>p.classList.remove('sel'));
   if(existing){
     const d=new Date(existing);
     timeInp.value=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
     clrBtn.style.display='block';
+    if(snzBtn)snzBtn.style.display='block';
   } else if(task.time){
     // پیش‌فرض: بر اساس category — X دقیقه قبل از ساعت task
     const defMins = SMART_REMIND_MINS[task.cat]||30;
@@ -4949,9 +4953,11 @@ function openRemind(taskId, e){
       if(!isNaN(pm)&&pm===defMins) p.classList.add('sel');
     });
     clrBtn.style.display='none';
+    if(snzBtn)snzBtn.style.display='none';
   } else {
     timeInp.value='';
     clrBtn.style.display='none';
+    if(snzBtn)snzBtn.style.display='none';
   }
   // متن دکمه‌های سریع را با محاسبهٔ واقعی‌شان هماهنگ کن
   const presetLbl = task.time ? 'قبل' : 'دیگر';
