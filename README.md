@@ -11,6 +11,7 @@
 ```
 npm install playwright
 node test_dayq.js
+node test_sync.js
 ```
 اگر چیزی FAIL داد، یعنی یک فیچر قبلی جایی خراب شده — دست به کد جدید نزن تا اول همین را پیدا کنی.
 

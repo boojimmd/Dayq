@@ -125,8 +125,25 @@ async function sendPush(subscription, payloadObj, env) {
   return res;
 }
 
+// ---------- منطق Merge برای سینک چنددستگاهی ----------
+// قانون: برای هر آیتم، آن نسخه‌ای که updatedAt بزرگ‌تر دارد می‌ماند.
+// چون «حذف» هم فقط یک تغییر با updatedAt جدید است (نه پاک‌شدن فیزیکی)،
+// این قانون به‌خودی‌خود تضمین می‌کند که یک ویرایش *جدیدتر* همیشه روی
+// یک حذف *قدیمی‌تر* برنده باشد — بدون نیاز به استثنای جدا.
+function mergeById(localArr, serverArr) {
+  const map = new Map();
+  for (const item of (serverArr || [])) map.set(item.id, item);
+  for (const item of (localArr || [])) {
+    const existing = map.get(item.id);
+    if (!existing || (item.updatedAt || 0) >= (existing.updatedAt || 0)) {
+      map.set(item.id, item);
+    }
+  }
+  return [...map.values()];
+}
+
 // ---------- خود Worker ----------
-export { buildVapidHeader, encryptPayload, sendPush };
+export { buildVapidHeader, encryptPayload, sendPush, mergeById };
 
 export default {
   async fetch(req, env) {
@@ -156,6 +173,35 @@ export default {
       const sub = JSON.parse(subRaw);
       const r = await sendPush(sub, { title: 'DayQ', body: 'پیام تست — اگر این را می‌بینی، Push کار می‌کند ✓' }, env);
       return new Response('sent, status ' + r.status, { headers: cors });
+    }
+
+    if (url.pathname === '/sync/init' && req.method === 'POST') {
+      // یک کد ۶ رقمی تصادفی بساز که قبلاً استفاده نشده
+      let code;
+      for (let i = 0; i < 5; i++) {
+        code = String(Math.floor(100000 + Math.random() * 900000));
+        const exists = await env.DAYQ_KV.get('sync:' + code);
+        if (!exists) break;
+      }
+      await env.DAYQ_KV.put('sync:' + code, JSON.stringify({ tasks: [], projects: [], updatedAt: Date.now() }));
+      return new Response(JSON.stringify({ code }), { headers: { ...cors, 'Content-Type': 'application/json' } });
+    }
+
+    if (url.pathname === '/sync/push' && req.method === 'POST') {
+      const body = await req.json(); // {code, tasks, projects}
+      const { code } = body;
+      if (!code || !/^\d{6}$/.test(code)) {
+        return new Response(JSON.stringify({ error: 'کد سینک نامعتبر است' }), { status: 400, headers: { ...cors, 'Content-Type': 'application/json' } });
+      }
+      const raw = await env.DAYQ_KV.get('sync:' + code);
+      const server = raw ? JSON.parse(raw) : { tasks: [], projects: [] };
+
+      const mergedTasks = mergeById(body.tasks, server.tasks);
+      const mergedProjects = mergeById(body.projects, server.projects);
+
+      const merged = { tasks: mergedTasks, projects: mergedProjects, updatedAt: Date.now() };
+      await env.DAYQ_KV.put('sync:' + code, JSON.stringify(merged));
+      return new Response(JSON.stringify(merged), { headers: { ...cors, 'Content-Type': 'application/json' } });
     }
 
     return new Response('DayQ push worker', { headers: cors });

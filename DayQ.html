@@ -1731,6 +1731,7 @@ select.fi{
         <div class="srow" onclick="openWorkHours()"><div class="srow-ico" style="background:var(--ambm);color:var(--amber);"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="srow-body"><div class="srow-ttl">ساعت‌های روز کاری</div><div class="srow-sub" id="workHoursSub">عصر از ۱۷:۰۰ · پایان روز ۱۸:۰۰</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
         <div class="srow" onclick="openArchive()"><div class="srow-ico" style="background:var(--bg3);color:var(--t2);"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div><div class="srow-body"><div class="srow-ttl">آرشیو کارهای قدیمی</div><div class="srow-sub" id="archiveSub">۰ کار آرشیوشده</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
         <div class="srow" onclick="openPushSettings()"><div class="srow-ico" style="background:var(--bluem);color:var(--blue);"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div class="srow-body"><div class="srow-ttl">یادآوری واقعی (Push)</div><div class="srow-sub" id="pushSub">غیرفعال</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+        <div class="srow" onclick="openSyncSettings()"><div class="srow-ico" style="background:var(--am);color:var(--a);"><svg viewBox="0 0 24 24"><path d="M21 2v6h-6M3 22v-6h6"/><path d="M3 11a9 9 0 0 1 15-6.7L21 7M21 13a9 9 0 0 1-15 6.7L3 17"/></svg></div><div class="srow-body"><div class="srow-ttl">سینک بین دستگاه‌ها</div><div class="srow-sub" id="syncSub">غیرفعال</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
       </div>
     </div>
     <div class="sg-wrap">
@@ -2260,7 +2261,30 @@ select.fi{
   </div>
 </div>
 
-<!-- SHEET: ADD PROJECT -->
+<!-- SHEET: DEVICE SYNC -->
+<div class="sheet" id="shDeviceSync">
+  <div class="sh-handle"></div>
+  <div class="sh-head"><div class="sh-tr"><div class="sh-ttl">سینک بین دستگاه‌ها</div><button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></div>
+  <div class="sh-body">
+    <div id="dsyncOffState">
+      <div style="font-size:.74rem;color:var(--t3);margin-bottom:16px;">با یک کد ۶ رقمی، گوشی و لپ‌تاپ را به هم وصل کن — کارهای هر دو با هم جمع می‌شوند.</div>
+      <button class="sh-sub" onclick="dsyncCreateNew()" style="margin-bottom:10px;">این دستگاه اول است — کد بساز</button>
+      <div class="f-lbl">یا کدی که از دستگاه دیگر گرفتی</div>
+      <input class="fi" id="dsyncCodeInp" placeholder="مثلاً ۴۸۲۹۰۱" dir="ltr" inputmode="numeric" maxlength="6" style="margin-bottom:10px;text-align:center;font-size:1.1rem;letter-spacing:.1em;">
+      <button class="sh-sub" style="background:var(--bg3);color:var(--t1);" onclick="dsyncJoin()">وصل‌شدن با این کد</button>
+    </div>
+    <div id="dsyncOnState" style="display:none;">
+      <div style="text-align:center;margin-bottom:18px;">
+        <div style="font-size:.7rem;color:var(--t3);margin-bottom:6px;">کد سینک این دستگاه</div>
+        <div id="dsyncCodeDisp" style="font-size:1.8rem;font-weight:800;letter-spacing:.12em;direction:ltr;">—</div>
+      </div>
+      <div style="font-size:.7rem;color:var(--t3);text-align:center;margin-bottom:18px;" id="dsyncLastTime">—</div>
+      <button class="sh-sub" onclick="syncNow();toast_(svgIco('check'),'سینک شد')" style="margin-bottom:10px;">همگام‌سازی دستی الان</button>
+      <button class="remind-clear" onclick="dsyncDisable()">غیرفعال‌کردن سینک</button>
+    </div>
+  </div>
+</div>
+
 <div class="sheet" id="shProject">
   <div class="sh-handle"></div>
   <div class="sh-head">
@@ -2536,7 +2560,7 @@ function svgIco(id,w=16){const ic=iconMap[id]||iconMap.check;return`<svg viewBox
 /* ══ STATE ══ */
 const SK='dq5_t',SB='dq5_b',SS='dq5_s';
 let tasks=[],bagItems=[];
-let cfg={theme:'auto',persian:true,confetti:false,name:'',company:'',city:'',visitTime:'09:00',mood:0,reflect:false,timeline:false,reflection:'',workEndTime:'18:00',eveningStart:'17:00',autoArchiveDays:30,autoArchiveOn:true,pushWorkerUrl:''};
+let cfg={theme:'auto',persian:true,confetti:false,name:'',company:'',city:'',visitTime:'09:00',mood:0,reflect:false,timeline:false,reflection:'',workEndTime:'18:00',eveningStart:'17:00',autoArchiveDays:30,autoArchiveOn:true,pushWorkerUrl:'',syncCode:''};
 let curTab='all',selIco='pill',selPri_='high',selBagIco='brief';
 
 /* ══ BOOT ══ */
@@ -2564,8 +2588,13 @@ function boot(){
   }, {passive:true});
   buildIconGrid('iconGrid',false);buildIconGrid('bagIconGrid',true);
   setGreeting();updateClock();setInterval(updateClock,30000);
-  syncToggles();syncThemePills();syncProfile();_refreshWorkHoursSub();_refreshArchiveSub();_refreshPushSub();
+  syncToggles();syncThemePills();syncProfile();_refreshWorkHoursSub();_refreshArchiveSub();_refreshPushSub();_refreshSyncSub();
   if(cfg.pushWorkerUrl) initPush();
+  if(cfg.syncCode){
+    syncNow();
+    setInterval(syncNow, 120000); // هر ۲ دقیقه، اگر اپ باز بماند
+    document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) syncNow(); });
+  }
   initWeather();
   setInterval(initWeather, 3600000);
   loadReminders();
@@ -4630,6 +4659,51 @@ function _urlB64ToUint8Array(b64){
   return arr;
 }
 
+function openSyncSettings(){
+  const onState=document.getElementById('dsyncOnState');
+  const offState=document.getElementById('dsyncOffState');
+  if(cfg.syncCode){
+    onState.style.display='block'; offState.style.display='none';
+    document.getElementById('dsyncCodeDisp').textContent=cfg.syncCode;
+    const lt=localStorage.getItem('dq5_sync_lasttime');
+    document.getElementById('dsyncLastTime').textContent=lt?'آخرین سینک: '+new Date(+lt).toLocaleTimeString('fa-IR'):'هنوز سینک نشده';
+  } else {
+    onState.style.display='none'; offState.style.display='block';
+    document.getElementById('dsyncCodeInp').value='';
+  }
+  openSheet('shDeviceSync');
+}
+async function dsyncCreateNew(){
+  const code=await initSyncCode();
+  if(!code){ toast_(svgIco('flag'),'اول آدرس Worker را تنظیم کن'); return; }
+  cfg.syncCode=code; saveCfg();
+  await syncNow();
+  _refreshSyncSub();
+  openSyncSettings();
+  toast_(svgIco('check'),'کد ساخته شد: '+code);
+}
+async function dsyncJoin(){
+  const v=document.getElementById('dsyncCodeInp').value.trim();
+  if(!/^\d{6}$/.test(v)){ toast_(svgIco('flag'),'کد باید ۶ رقم باشد'); return; }
+  if(!cfg.pushWorkerUrl){ toast_(svgIco('flag'),'اول آدرس Worker را در «یادآوری واقعی» تنظیم کن'); return; }
+  cfg.syncCode=v; saveCfg();
+  await syncNow();
+  _refreshSyncSub();
+  openSyncSettings();
+  toast_(svgIco('check'),'وصل شد ✓');
+}
+function dsyncDisable(){
+  cfg.syncCode=''; saveCfg();
+  localStorage.removeItem(SYNC_SNAP_KEY);
+  _refreshSyncSub();
+  closeAll();
+  toast_(svgIco('flag'),'سینک غیرفعال شد');
+}
+function _refreshSyncSub(){
+  const el=document.getElementById('syncSub');
+  if(el) el.textContent=cfg.syncCode?('فعال — کد '+cfg.syncCode):'غیرفعال';
+}
+
 function openPushSettings(){
   document.getElementById('pushUrlInp').value=cfg.pushWorkerUrl||'';
   openSheet('shPush');
@@ -4683,6 +4757,71 @@ function _showWeather(temp,code){
   el.innerHTML=`${svgIco(info[1],13)} ${num(temp)}°`;
   el.classList.add('show');
 }
+/* ══ سینک چنددستگاهی — بدون دست‌زدن به هیچ‌کدام از توابع موجود ══
+   روش کار: یک snapshot از آخرین وضعیت sync شده نگه می‌داریم.
+   هر بار sync، با مقایسهٔ همین snapshot با وضعیت فعلی، خودش می‌فهمد
+   چی عوض شده یا چی حذف شده — بدون نیاز به ردیابی دستی در ده‌ها تابع. */
+const SYNC_SNAP_KEY = 'dq5_sync_snap';
+
+function _loadSyncSnap(){
+  try{ return JSON.parse(localStorage.getItem(SYNC_SNAP_KEY)) || {tasks:{},projects:{}}; }
+  catch(e){ return {tasks:{},projects:{}}; }
+}
+
+function _buildSyncDiff(currentArr, snapMap){
+  const out=[]; const seen=new Set();
+  for(const item of currentArr){
+    seen.add(item.id);
+    const prev=snapMap[item.id];
+    if(!prev){ out.push({...item, updatedAt:Date.now()}); }
+    else if(JSON.stringify(prev)!==JSON.stringify(item)){ out.push({...item, updatedAt:Date.now()}); }
+    else { out.push(prev); } // بدون تغییر — همان نسخهٔ قبلی (با همان updatedAt) را بفرست
+  }
+  for(const id in snapMap){
+    if(!seen.has(id)){
+      if(snapMap[id].deleted){ out.push(snapMap[id]); } // قبلاً هم حذف‌شده بود، چیز تازه‌ای نیست
+      else { out.push({id, deleted:true, updatedAt:Date.now()}); } // همین الان حذف شد
+    }
+  }
+  return out;
+}
+
+async function syncNow(){
+  if(!cfg.syncCode) return;
+  try{
+    const snap=_loadSyncSnap();
+    const tasksDiff=_buildSyncDiff(tasks, snap.tasks);
+    const projectsDiff=_buildSyncDiff(projects||[], snap.projects);
+
+    const res=await fetch(cfg.pushWorkerUrl.replace(/\/$/,'')+'/sync/push',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({code:cfg.syncCode, tasks:tasksDiff, projects:projectsDiff})
+    });
+    if(!res.ok) return;
+    const merged=await res.json();
+
+    tasks=merged.tasks.filter(t=>!t.deleted);
+    projects=merged.projects.filter(p=>!p.deleted);
+    saveAll(); saveProjects();
+
+    const newSnapTasks={}; merged.tasks.forEach(t=>newSnapTasks[t.id]=t);
+    const newSnapProjects={}; merged.projects.forEach(p=>newSnapProjects[p.id]=p);
+    localStorage.setItem(SYNC_SNAP_KEY, JSON.stringify({tasks:newSnapTasks, projects:newSnapProjects}));
+    localStorage.setItem('dq5_sync_lasttime', String(Date.now()));
+
+    renderTasks(); if(typeof renderProjects==='function') renderProjects();
+  }catch(e){ /* اگر اینترنت نبود، بی‌صدا رد شو — دفعهٔ بعد دوباره تلاش می‌شود */ }
+}
+
+async function initSyncCode(){
+  if(!cfg.pushWorkerUrl){ toast_(svgIco('flag'),'اول آدرس Worker را در «یادآوری واقعی» تنظیم کن'); return null; }
+  try{
+    const res=await fetch(cfg.pushWorkerUrl.replace(/\/$/,'')+'/sync/init',{method:'POST'});
+    const data=await res.json();
+    return data.code;
+  }catch(e){ return null; }
+}
+
 async function initPush(){
   if(!cfg.pushWorkerUrl) return;
   if(!('serviceWorker' in navigator)||!('PushManager' in window)){
