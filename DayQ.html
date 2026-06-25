@@ -3325,7 +3325,11 @@ function renderTasks(){
     // deadline first
     if(a.deadline&&!b.deadline) return -1;
     if(!a.deadline&&b.deadline) return 1;
-    if(a.deadline&&b.deadline) return a.deadline.localeCompare(b.deadline);
+    if(a.deadline&&b.deadline){
+      const dc=a.deadline.localeCompare(b.deadline);
+      if(dc!==0) return dc; // فقط اگه واقعاً تاریخشون فرق داره، همینجا تصمیم بگیر
+      // همون روز هستن — بیفت پایین‌تر، بر اساس ساعت/اولویت تصمیم بگیر
+    }
     if(pw[a.priority]!==pw[b.priority]) return pw[a.priority]-pw[b.priority];
     if(a.time&&b.time) return a.time.localeCompare(b.time);
     if(a.time) return -1; if(b.time) return 1;
