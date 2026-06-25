@@ -2565,6 +2565,7 @@ function boot(){
   syncToggles();syncThemePills();syncProfile();_refreshWorkHoursSub();_refreshArchiveSub();_refreshPushSub();
   if(cfg.pushWorkerUrl) initPush();
   initWeather();
+  loadReminders();
   renderTasks();renderBag();updateMeStats();
   // overdue modal — فقط صبح (۶ تا ۱۲) نشون بده
   const _h=new Date().getHours();
