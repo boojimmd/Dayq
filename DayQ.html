@@ -585,7 +585,7 @@ select.fi{
 .qt:active{background:var(--am);color:var(--a);}
 
 /* TOAST */
-.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(calc(-100% - 20px));background:var(--bg1);border:1px solid var(--b1);border-radius:11px;padding:9px 14px;font-size:.78rem;font-weight:600;z-index:1000;transition:transform .25s var(--spring);display:flex;align-items:center;gap:7px;box-shadow:0 8px 26px rgba(0,0,0,.13);white-space:nowrap;max-width:88vw;}
+.toast{position:fixed;top:calc(env(safe-area-inset-top,0px) + 14px);left:50%;transform:translateX(-50%) translateY(calc(-100% - 20px));background:var(--bg1);border:1px solid var(--b1);border-radius:11px;padding:9px 14px;font-size:.78rem;font-weight:600;z-index:1000;transition:transform .25s var(--spring);display:flex;align-items:center;gap:7px;box-shadow:0 8px 26px rgba(0,0,0,.13);white-space:nowrap;max-width:88vw;}
 .toast.up{transform:translateX(-50%) translateY(0);}
 .t-ico{width:17px;height:17px;flex-shrink:0;}
 .t-ico svg{width:17px;height:17px;}
