@@ -167,7 +167,7 @@ input,textarea{user-select:text;-webkit-user-select:text;}
   transform:translateY(-1px);
 }
 .qcap svg{width:15px;height:15px;stroke:var(--t3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0;}
-.qcap-inp{flex:1;background:transparent;border:none;font-size:.86rem;font-weight:500;color:var(--t1);}
+.qcap-inp{flex:1;background:transparent;border:none;font-size:.86rem;font-weight:500;color:var(--t1);resize:none;overflow-y:auto;line-height:1.5;font-family:var(--f);padding:0;max-height:120px;}
 .qcap-inp::placeholder{color:var(--t3);}
 .qcap-inp.has-project{border-color:var(--blue)!important;}
 .qcap-inp.has-label{border-color:var(--purple)!important;}
@@ -1563,7 +1563,7 @@ select.fi{
   <div style="height:var(--topbar-h);flex-shrink:0;"></div>
   <div class="qcap" id="qcapBox" onclick="document.getElementById('qcapInp').focus()">
     <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    <input class="qcap-inp" id="qcapInp" placeholder="کار جدید... مثلاً: جلسه فردا ساعت ۳ فوری" maxlength="120" autocomplete="off" type="text" inputmode="text" enterkeyhint="done" dir="rtl">
+    <textarea class="qcap-inp" id="qcapInp" placeholder="کار جدید... مثلاً: جلسه فردا ساعت ۳ فوری" maxlength="400" autocomplete="off" rows="1" enterkeyhint="done" dir="rtl"></textarea>
     <button class="qcap-go" id="qcapGo" 
       onclick="quickCapture()"
       ontouchstart="event.preventDefault();quickCapture()">
@@ -2667,7 +2667,7 @@ function boot(){
   });
   // quick capture
   const qi=document.getElementById('qcapInp');
-  qi.addEventListener('keydown', e=>{ if(e.key==='Enter') quickCapture(); if(e.key==='Escape'){ qi.blur(); document.getElementById('qcapToolbar').classList.remove('show'); const np=document.getElementById('nlpPreview');if(np){np.style.display='none';np.innerHTML='';} } });
+  qi.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); quickCapture(); } if(e.key==='Escape'){ qi.blur(); document.getElementById('qcapToolbar').classList.remove('show'); const np=document.getElementById('nlpPreview');if(np){np.style.display='none';np.innerHTML='';} } });
   qi.addEventListener('focus', ()=>qcShowToolbar());
   qi.addEventListener('blur',  ()=>{ 
     qcHideToolbar(); 
@@ -2677,7 +2677,8 @@ function boot(){
       if(p){p.style.display='none';}
     },500);  // تأخیر بیشتر تا دکمه سبز وقت داشته باشه
   });
-  qi.addEventListener('input', e=>nlpOnInput(e.target.value));
+  const _qcAutoGrow=()=>{ qi.style.height='auto'; qi.style.height=Math.min(qi.scrollHeight,120)+'px'; };
+  qi.addEventListener('input', e=>{ nlpOnInput(e.target.value); _qcAutoGrow(); });
   qi.addEventListener('keyup',  e=>{ if(e.key!=='Enter')nlpOnInput(e.target.value); });
   qi.addEventListener('compositionend', e=>nlpOnInput(qi.value));
   // search input live
@@ -4104,6 +4105,7 @@ function quickCapture(){
 
   // reset
   document.getElementById('qcapInp').value='';
+  document.getElementById('qcapInp').style.height='auto';
   document.getElementById('qcapInp').blur();
   document.getElementById('qcapToolbar').classList.remove('show');
   const prev=document.getElementById('nlpPreview');
