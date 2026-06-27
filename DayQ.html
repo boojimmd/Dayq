@@ -346,6 +346,11 @@ input,textarea{user-select:text;-webkit-user-select:text;}
 .mirror-wrap{margin:0 18px 10px;}
 /* Overdue Morning Modal */
 .overdue-modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:900;display:flex;align-items:flex-end;justify-content:center;}
+.triage-eve-modal{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:950;display:none;align-items:center;justify-content:center;padding:20px;}
+.triage-eve-modal.open{display:flex;}
+.triage-eve-card{background:var(--bg1);border-radius:var(--r3);padding:20px;max-width:340px;width:100%;max-height:80vh;overflow-y:auto;}
+.triage-eve-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.triage-eve-ttl{font-size:1rem;font-weight:800;color:var(--t1);}
 .overdue-sheet{background:var(--bg1);border-radius:var(--r4) var(--r4) 0 0;padding:24px 20px 40px;width:100%;max-width:430px;max-height:70vh;overflow-y:auto;box-shadow:0 -4px 32px rgba(0,0,0,.18);}
 @keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
 .overdue-modal.show .overdue-sheet{animation:slideUp .35s var(--spring);}
@@ -2648,6 +2653,7 @@ function boot(){
   // overdue modal — فقط صبح (۶ تا ۱۲) نشون بده
   const _h=new Date().getHours();
   if(_h>=6&&_h<12) setTimeout(showOverdueModal, 2000);
+  setTimeout(_checkEveningTriage, 2500);
   if(cfg.mood)highlightMood(cfg.mood);
   applyWidgets();
   // profile listeners
@@ -2958,10 +2964,47 @@ function _renderTriageList(){
     </div>
   `).join('');
 }
+function _renderTriageEveList(){
+  const undone=_getTodayUndoneTasks();
+  const list=document.getElementById('triageEveList');
+  if(!list) return;
+  if(!undone.length){ closeTriageEveModal(); return; }
+  const priLabels={high:'فوری',med:'متوسط',low:'کم‌اهمیت'};
+  list.innerHTML=undone.map(t=>`
+    <div class="triage-item" data-id="${t.id}">
+      <div class="triage-task">${esc(t.text)}</div>
+      <div class="triage-meta">اولویت فعلی: ${priLabels[t.priority]||'—'}</div>
+      <div class="triage-actions">
+        <button class="triage-btn tmrw" onclick="triageMoveTomorrow('${t.id}')">فردا</button>
+        <button class="triage-btn pri" onclick="triageChangePriority('${t.id}')">تغییر فوریت</button>
+        <button class="triage-btn drop" onclick="triageDrop('${t.id}')">ولش کن</button>
+      </div>
+    </div>
+  `).join('');
+}
+function closeTriageEveModal(){
+  const m=document.getElementById('triageEveModal');
+  if(m) m.classList.remove('open');
+}
+function _checkEveningTriage(){
+  if(!cfg.eveningStart) return;
+  const [eh,em]=cfg.eveningStart.split(':').map(Number);
+  const now=new Date();
+  const eveningMins=eh*60+em, nowMins=now.getHours()*60+now.getMinutes();
+  if(nowMins<eveningMins) return;
+  const todayKey=mrTodayKey();
+  if(localStorage.getItem('dq5_triage_eve_shown')===todayKey) return;
+  const undone=_getTodayUndoneTasks();
+  if(!undone.length) return;
+  localStorage.setItem('dq5_triage_eve_shown', todayKey);
+  _renderTriageEveList();
+  document.getElementById('triageEveModal').classList.add('open');
+}
+
 function triageMoveTomorrow(id){
   const t=tasks.find(x=>x.id===id); if(!t) return;
   t.deadline=getTomorrowKey();
-  saveAll(); renderTasks(); _renderTriageList();
+  saveAll(); renderTasks(); _renderTriageList(); _renderTriageEveList();
   toast_(svgIco('check'),'به فردا منتقل شد');
 }
 function triageChangePriority(id){
@@ -2969,12 +3012,12 @@ function triageChangePriority(id){
   const order=['high','med','low'];
   const cur=order.indexOf(t.priority);
   t.priority=order[(cur+1)%3];
-  saveAll(); renderTasks(); _renderTriageList();
+  saveAll(); renderTasks(); _renderTriageList(); _renderTriageEveList();
 }
 function triageDrop(id){
   const t=tasks.find(x=>x.id===id); if(!t) return;
   t.archived=true;
-  saveAll(); renderTasks(); _renderTriageList();
+  saveAll(); renderTasks(); _renderTriageList(); _renderTriageEveList();
   toast_(svgIco('check'),'کنار گذاشته شد');
 }
 
@@ -8144,6 +8187,17 @@ boot();
 </div>
 
 <!-- OVERDUE MORNING MODAL -->
+<div class="triage-eve-modal" id="triageEveModal">
+  <div class="triage-eve-card">
+    <div class="triage-eve-head">
+      <div class="triage-eve-ttl">تعیین‌تکلیف امروز</div>
+      <button class="sh-x" onclick="closeTriageEveModal()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div style="font-size:.74rem;color:var(--t3);margin-bottom:14px;">روز رو به پایانه — این کارها هنوز تمام نشده‌اند.</div>
+    <div id="triageEveList"></div>
+  </div>
+</div>
+
 <div class="overdue-modal" id="overdueModal" style="display:none;">
   <div class="overdue-sheet">
     <div class="overdue-title"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg> کارهای عقب‌افتاده</div>
