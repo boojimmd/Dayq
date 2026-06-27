@@ -125,6 +125,63 @@ async function sendPush(subscription, payloadObj, env) {
   return res;
 }
 
+// ---------- تبدیل تاریخ شمسی به میلادی (برای فید ICS) ----------
+const CAL_DAYS_IN_MONTH = [31,31,31,31,31,31,30,30,30,30,30,29];
+function isJalaliLeap(jy) {
+  return ((((((jy-(jy>474?473:473))%2820)+2820)%2820+474+38)*682)%2816)<682;
+}
+function _jalDaysInYear(jy){ return isJalaliLeap(jy)?366:365; }
+function _jalToDays(jy,jm,jd){
+  let days=0;
+  const y=jy-1, cycles=Math.floor(y/2820), rem=y%2820;
+  days=cycles*1029983;
+  for(let i=1;i<=rem;i++) days+=_jalDaysInYear(i);
+  for(let m=1;m<jm;m++) days+=CAL_DAYS_IN_MONTH[m-1];
+  return days+jd;
+}
+function jalaliToGregorian(jy,jm,jd){
+  const diff=_jalToDays(jy,jm,jd)-_jalToDays(1403,1,1);
+  const g=new Date(2024,2,20);
+  g.setDate(g.getDate()+diff);
+  return [g.getFullYear(), g.getMonth()+1, g.getDate()];
+}
+
+// ---------- ساخت فید ICS از روی تسک‌های سینک‌شده ----------
+function _icsEscape(s){
+  return String(s||'').replace(/\\/g,'\\\\').replace(/;/g,'\\;').replace(/,/g,'\\,').replace(/\n/g,'\\n');
+}
+function buildIcsFeed(tasks){
+  const lines = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//DayQ//FA','CALSCALE:GREGORIAN'];
+  for(const t of (tasks||[])){
+    if(!t || t.deleted || !t.deadline) continue;
+    const [jy,jm,jd] = t.deadline.split('-').map(n=>parseInt(n,10));
+    if(!jy||!jm||!jd) continue;
+    const [gy,gm,gd] = jalaliToGregorian(jy,jm,jd);
+    const pad=n=>String(n).padStart(2,'0');
+    lines.push('BEGIN:VEVENT');
+    lines.push('UID:'+t.id+'@dayq.app');
+    lines.push('DTSTAMP:'+new Date().toISOString().replace(/[-:]/g,'').split('.')[0]+'Z');
+    lines.push('SUMMARY:'+_icsEscape(t.text));
+    if(t.time && /^\d{1,2}:\d{2}$/.test(t.time)){
+      const [hh,mm]=t.time.split(':').map(n=>parseInt(n,10));
+      const dtStart = `${gy}${pad(gm)}${pad(gd)}T${pad(hh)}${pad(mm)}00`;
+      let eh=hh, em=mm+30; if(em>=60){em-=60;eh+=1;} if(eh>=24)eh-=24;
+      const dtEnd = `${gy}${pad(gm)}${pad(gd)}T${pad(eh)}${pad(em)}00`;
+      lines.push('DTSTART:'+dtStart);
+      lines.push('DTEND:'+dtEnd);
+    } else {
+      const dtStart = `${gy}${pad(gm)}${pad(gd)}`;
+      const nextDay = new Date(gy,gm-1,gd+1);
+      const dtEnd = `${nextDay.getFullYear()}${pad(nextDay.getMonth()+1)}${pad(nextDay.getDate())}`;
+      lines.push('DTSTART;VALUE=DATE:'+dtStart);
+      lines.push('DTEND;VALUE=DATE:'+dtEnd);
+    }
+    lines.push('END:VEVENT');
+  }
+  lines.push('END:VCALENDAR');
+  return lines.join('\r\n');
+}
+
 // ---------- منطق Merge برای سینک چنددستگاهی ----------
 // قانون: برای هر آیتم، آن نسخه‌ای که updatedAt بزرگ‌تر دارد می‌ماند.
 // چون «حذف» هم فقط یک تغییر با updatedAt جدید است (نه پاک‌شدن فیزیکی)،
@@ -143,7 +200,7 @@ function mergeById(localArr, serverArr) {
 }
 
 // ---------- خود Worker ----------
-export { buildVapidHeader, encryptPayload, sendPush, mergeById };
+export { buildVapidHeader, encryptPayload, sendPush, mergeById, buildIcsFeed, jalaliToGregorian };
 
 export default {
   async fetch(req, env) {
@@ -202,6 +259,19 @@ export default {
       const merged = { tasks: mergedTasks, projects: mergedProjects, updatedAt: Date.now() };
       await env.DAYQ_KV.put('sync:' + code, JSON.stringify(merged));
       return new Response(JSON.stringify(merged), { headers: { ...cors, 'Content-Type': 'application/json' } });
+    }
+
+    if (url.pathname.startsWith('/calendar/') && url.pathname.endsWith('.ics') && req.method === 'GET') {
+      const code = url.pathname.replace('/calendar/', '').replace('.ics', '');
+      if (!/^\d{6}$/.test(code)) {
+        return new Response('کد سینک نامعتبر است', { status: 400, headers: cors });
+      }
+      const raw = await env.DAYQ_KV.get('sync:' + code);
+      const server = raw ? JSON.parse(raw) : { tasks: [] };
+      const ics = buildIcsFeed(server.tasks);
+      return new Response(ics, {
+        headers: { ...cors, 'Content-Type': 'text/calendar; charset=utf-8' }
+      });
     }
 
     return new Response('DayQ push worker', { headers: cors });

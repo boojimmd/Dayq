@@ -2289,6 +2289,7 @@ select.fi{
       </div>
       <div style="font-size:.7rem;color:var(--t3);text-align:center;margin-bottom:18px;" id="dsyncLastTime">—</div>
       <button class="sh-sub" onclick="syncNow();toast_(svgIco('check'),'سینک شد')" style="margin-bottom:10px;">همگام‌سازی دستی الان</button>
+      <button class="sh-sub" style="background:var(--bg3);color:var(--t1);margin-bottom:10px;" onclick="dsyncCopyCalUrl()">کپی آدرس تقویم (برای Apple Calendar)</button>
       <button class="remind-clear" onclick="dsyncDisable()">غیرفعال‌کردن سینک</button>
     </div>
   </div>
@@ -4723,6 +4724,17 @@ async function dsyncJoin(){
   _refreshSyncSub();
   openSyncSettings();
   toast_(svgIco('check'),'وصل شد ✓');
+}
+function dsyncCopyCalUrl(){
+  if(!cfg.syncCode || !cfg.pushWorkerUrl){ toast_(svgIco('flag'),'اول سینک را فعال کن'); return; }
+  const url = cfg.pushWorkerUrl.replace(/\/$/,'')+'/calendar/'+cfg.syncCode+'.ics';
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(()=>{
+      toast_(svgIco('check'),'آدرس کپی شد — در تنظیمات تقویم آیفون Paste کن');
+    }).catch(()=>{ prompt('این آدرس را کپی کن:', url); });
+  } else {
+    prompt('این آدرس را کپی کن:', url);
+  }
 }
 function dsyncDisable(){
   cfg.syncCode=''; saveCfg();
