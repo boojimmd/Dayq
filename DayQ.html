@@ -2964,11 +2964,12 @@ function _renderTriageList(){
     </div>
   `).join('');
 }
+let _triageMovedCount=0, _triageDroppedCount=0;
 function _renderTriageEveList(){
   const undone=_getTodayUndoneTasks();
   const list=document.getElementById('triageEveList');
   if(!list) return;
-  if(!undone.length){ closeTriageEveModal(); return; }
+  if(!undone.length){ _showTriageEveSummary(); return; }
   const priLabels={high:'فوری',med:'متوسط',low:'کم‌اهمیت'};
   list.innerHTML=undone.map(t=>`
     <div class="triage-item" data-id="${t.id}">
@@ -2981,6 +2982,22 @@ function _renderTriageEveList(){
       </div>
     </div>
   `).join('');
+}
+function _showTriageEveSummary(){
+  const list=document.getElementById('triageEveList');
+  if(!list) return;
+  const doneToday=tasks.filter(t=>t.deadline===mrTodayKey() && t.done).length;
+  const parts=[];
+  parts.push(num(doneToday)+' کار تمام شد');
+  if(_triageMovedCount) parts.push(num(_triageMovedCount)+' به فردا رفت');
+  if(_triageDroppedCount) parts.push(num(_triageDroppedCount)+' کنار گذاشته شد');
+  list.innerHTML=`
+    <div style="text-align:center;padding:10px 0 4px;">
+      <div style="font-size:1.6rem;margin-bottom:10px;">🌙</div>
+      <div style="font-size:.86rem;font-weight:700;color:var(--t1);margin-bottom:14px;">امروز تمام شد</div>
+      <div style="font-size:.78rem;color:var(--t2);line-height:1.9;margin-bottom:18px;">${parts.join(' · ')}</div>
+      <button class="sh-sub" onclick="closeTriageEveModal()">بستن</button>
+    </div>`;
 }
 function closeTriageEveModal(){
   const m=document.getElementById('triageEveModal');
@@ -2997,6 +3014,7 @@ function _checkEveningTriage(){
   const undone=_getTodayUndoneTasks();
   if(!undone.length) return;
   localStorage.setItem('dq5_triage_eve_shown', todayKey);
+  _triageMovedCount=0; _triageDroppedCount=0;
   _renderTriageEveList();
   document.getElementById('triageEveModal').classList.add('open');
 }
@@ -3004,6 +3022,7 @@ function _checkEveningTriage(){
 function triageMoveTomorrow(id){
   const t=tasks.find(x=>x.id===id); if(!t) return;
   t.deadline=getTomorrowKey();
+  _triageMovedCount++;
   saveAll(); renderTasks(); _renderTriageList(); _renderTriageEveList();
   toast_(svgIco('check'),'به فردا منتقل شد');
 }
@@ -3017,6 +3036,7 @@ function triageChangePriority(id){
 function triageDrop(id){
   const t=tasks.find(x=>x.id===id); if(!t) return;
   t.archived=true;
+  _triageDroppedCount++;
   saveAll(); renderTasks(); _renderTriageList(); _renderTriageEveList();
   toast_(svgIco('check'),'کنار گذاشته شد');
 }
