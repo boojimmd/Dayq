@@ -7775,25 +7775,27 @@ function _nlpDetectCat(text){
   return null;
 }
 function _nlpHasImperative(text){
-  return /(کن|کنم|بزن|بزنم|بدم|بده|بگیر|بگیرم|برم|بریم|بفرست|بفرستم|بپوش|بردار|بخر|بخرم|بشه|باشه|بشن|بسازم|بساز)\b/.test(text.trim());
+  // فعل امری/التزامی فارسی — \b با حروف فارسی کار نمی‌کند، به‌جایش پایان‌فاصله/رشته را چک می‌کنیم
+  return /(کن|کنم|بزن|بزنم|بدم|بده|بگیر|بگیرم|برم|بریم|بفرست|بفرستم|بپوش|بردار|بخر|بخرم|بشه|باشه|بشن|بسازم|بساز)(?:$|[\s.!؟،,])/.test(text.trim());
 }
 function _nlpIsFactOnly(text){
   const t = text.trim();
-  return /(است|هست|ه|ست)$/.test(t) && !_nlpHasImperative(t);
+  return /(است|هست|‌ست)$/.test(t) && !_nlpHasImperative(t);
 }
 function _nlpStartsWithKeh(text){
-  return /^(که|تا)\b/.test(text.trim());
+  // فقط «که» — «تا» را عمداً حذف کردیم چون با «تا+تاریخ» (مهلت تسک جدید) قاطی می‌شد
+  return /^که(?:\s|$)/.test(text.trim());
 }
 function _nlpEndsWithAnaphoricSuffix(text){
   const t = text.trim();
   return /(شان|مان|تان|مش|ش)\s*$/.test(t.replace(/[.!؟]$/,''));
 }
 function _nlpExtractRaObject(text){
-  const m = text.match(/([آ-ی‌]+(?:\s[آ-ی‌]+)?)\s*(?:را|رو)\b/);
+  const m = text.match(/([آ-ی‌]+(?:\s[آ-ی‌]+)?)\s*(?:را|رو)(?:$|[\s.!؟،,])/);
   return m ? m[1].trim() : null;
 }
 function _nlpHasOwnAnchor(text){
-  return /(تا\s+\S|ساعت\s*[\d۰-۹]|صبح|ظهر|عصر(?!انه)|شب(?!ی\b)|شام|فردا|امروز|پسفردا|پس‌فردا|دیروز|[\d۰-۹]+\s*روز\s*(دیگه|مونده|دیگر)|هفته[یٔ‌]?\s*(دیگه|دیگر|بعد))/.test(text);
+  return /(تا\s+\S|ساعت\s*[\d۰-۹]|صبح|ظهر|عصر(?!انه)|شب(?!ی(?:$|[\s،,]))|شام|فردا|امروز|پسفردا|پس‌فردا|دیروز|[\d۰-۹]+\s*روز\s*(دیگه|مونده|دیگر)|هفته[یٔ‌]?\s*(دیگه|دیگر|بعد))/.test(text);
 }
 
 function nlpSplitSegments(raw){

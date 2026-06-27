@@ -211,6 +211,17 @@ const seedTask = (over = {}) => Object.assign({
     await page.close();
   }
 
+  // ── فیکس: \b با حروف فارسی کار نمی‌کند — باعث ادغام غلط می‌شد ──
+  {
+    const page = await browser.newPage();
+    await page.goto(FILE);
+    await page.waitForTimeout(300);
+    const realSentence = 'زنگ بزنم به دکتر، تا فردا داسپورت رضا رو بگیرم ، تا سه روز دیگه برم داروخانه، شنبه هفت بعد آمار رو بفرستم مرکز، ساعت سه فردا ماشین هماهنگ بشه، پس فردا فایل ها آماده باشه تا ساعت ۲ ظهر';
+    const r = await page.evaluate((txt) => nlpSplitSegments(txt), realSentence);
+    check('جملهٔ واقعی پیچیده درست به ۶ بخش تقسیم می‌شود (نه ۴، باگ \\\\b)', r.length === 6);
+    await page.close();
+  }
+
   await browser.close();
 
   console.log(`\n${'═'.repeat(40)}`);
