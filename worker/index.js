@@ -274,6 +274,38 @@ export default {
       });
     }
 
+    if (url.pathname === '/test-icloud' && req.method === 'GET') {
+      const appleId = env.ICLOUD_APPLE_ID;
+      const appPassword = env.ICLOUD_APP_PASSWORD;
+      if (!appleId || !appPassword) {
+        return new Response('ICLOUD_APPLE_ID یا ICLOUD_APP_PASSWORD در Variables تنظیم نشده', { status: 400, headers: cors });
+      }
+      const authHeader = 'Basic ' + btoa(appleId + ':' + appPassword);
+      const propfindBody = `<?xml version="1.0" encoding="utf-8" ?>
+<d:propfind xmlns:d="DAV:">
+  <d:prop><d:current-user-principal/></d:prop>
+</d:propfind>`;
+      try {
+        const res = await fetch('https://caldav.icloud.com/', {
+          method: 'PROPFIND',
+          headers: {
+            'Authorization': authHeader,
+            'Content-Type': 'text/xml; charset=utf-8',
+            'Depth': '0',
+          },
+          body: propfindBody,
+        });
+        const text = await res.text();
+        return new Response(JSON.stringify({
+          status: res.status,
+          statusText: res.statusText,
+          bodySnippet: text.slice(0, 500),
+        }, null, 2), { headers: { ...cors, 'Content-Type': 'application/json' } });
+      } catch (e) {
+        return new Response('خطای شبکه: ' + e.message, { status: 500, headers: cors });
+      }
+    }
+
     return new Response('DayQ push worker', { headers: cors });
   },
 
