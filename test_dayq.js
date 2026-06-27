@@ -193,6 +193,24 @@ const seedTask = (over = {}) => Object.assign({
     await page.close();
   }
 
+  // ── فیکس: چند کار پشت‌سرهم با Quick Capture، همه باید تاریخ امروز بگیرند ──
+  {
+    const page = await browser.newPage();
+    await page.goto(FILE);
+    await page.waitForTimeout(300);
+    await page.evaluate(() => localStorage.setItem('dq5_onboarded', '1'));
+    await page.reload();
+    await page.waitForTimeout(500);
+    for (const c of ['کار یک', 'کار دو', 'کار سه']) {
+      await page.fill('#qcapInp', c);
+      await page.click('#qcapGo');
+      await page.waitForTimeout(80);
+    }
+    const todayCount = await page.evaluate(() => tasks.filter(t => t.deadline === mrTodayKey()).length);
+    check('چند کار پشت‌سرهم بدون تاریخ صریح، همه امروز می‌گیرند (نه فقط اولی)', todayCount === 3);
+    await page.close();
+  }
+
   await browser.close();
 
   console.log(`\n${'═'.repeat(40)}`);

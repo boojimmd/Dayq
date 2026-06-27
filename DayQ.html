@@ -2654,6 +2654,7 @@ function boot(){
   const _h=new Date().getHours();
   if(_h>=6&&_h<12) setTimeout(showOverdueModal, 2000);
   setTimeout(_checkEveningTriage, 2500);
+  document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) setTimeout(_checkEveningTriage, 500); });
   if(cfg.mood)highlightMood(cfg.mood);
   applyWidgets();
   // profile listeners
@@ -2986,6 +2987,7 @@ function _renderTriageEveList(){
 function _showTriageEveSummary(){
   const list=document.getElementById('triageEveList');
   if(!list) return;
+  localStorage.setItem('dq5_triage_eve_shown', mrTodayKey()); // فقط همینجا، با اتمام واقعی، روز را «انجام‌شده» علامت بزن
   const doneToday=tasks.filter(t=>t.deadline===mrTodayKey() && t.done).length;
   const parts=[];
   parts.push(num(doneToday)+' کار تمام شد');
@@ -3010,10 +3012,17 @@ function _checkEveningTriage(){
   const eveningMins=eh*60+em, nowMins=now.getHours()*60+now.getMinutes();
   if(nowMins<eveningMins) return;
   const todayKey=mrTodayKey();
-  if(localStorage.getItem('dq5_triage_eve_shown')===todayKey) return;
+  if(localStorage.getItem('dq5_triage_eve_shown')===todayKey) return; // فقط بعد از اتمام واقعی متوقف می‌شود، نه فقط نمایش
   const undone=_getTodayUndoneTasks();
-  if(!undone.length) return;
-  localStorage.setItem('dq5_triage_eve_shown', todayKey);
+  const hadAnyTaskToday=tasks.some(t=>t.deadline===todayKey);
+  if(!undone.length){
+    // روز کامل — اگر واقعاً کاری برای امروز بوده و همه تمام شده، یک تبریک کوچک و آرام
+    if(hadAnyTaskToday){
+      localStorage.setItem('dq5_triage_eve_shown', todayKey);
+      toast_(svgIco('check'),'امروز همه‌چی تمام شد 🎉');
+    }
+    return;
+  }
   _triageMovedCount=0; _triageDroppedCount=0;
   _renderTriageEveList();
   document.getElementById('triageEveModal').classList.add('open');
@@ -4028,8 +4037,8 @@ function _qcCreateOne(rawSeg, qcCatFallback, qcPriFallback){
   const ico = catIconMap[cat]||'check';
 
   if(!deadline){
-    if(curTab==='today')    deadline=mrTodayKey();
-    else if(curTab==='tomorrow') deadline=getTomorrowKey();
+    if(curTab==='tomorrow') deadline=getTomorrowKey();
+    else deadline=mrTodayKey(); // پیش‌فرض همیشه امروز — حتی اگر تب «همه» باشد (مثلاً بعد از چندتسک پشت‌سرهم)
   }
   const newTask={
     id:'t'+Date.now()+Math.random().toString(36).slice(2,6), text, iconId:ico,
