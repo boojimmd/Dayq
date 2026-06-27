@@ -10,6 +10,7 @@ self.addEventListener('push', (event) => {
     self.registration.showNotification(data.title || 'DayQ', {
       body: data.body || '',
       tag: 'dayq-reminder-' + Date.now(),
+      requireInteraction: true,
     })
   );
 });
