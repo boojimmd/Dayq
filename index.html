@@ -50,6 +50,12 @@
   --b1:rgba(0,0,0,.07);--b2:rgba(0,0,0,.04);--b3:rgba(0,0,0,.02);
   --t1:#111827;--t2:#4b5563;--t3:#9ca3af;--t4:#d1d5db;
 }
+[data-theme="pink"]{
+  --bg0:#f0f4f8;--bg1:#fff;--bg2:#edf1f7;--bg3:#e2e8f0;--bg4:#cdd5e0;
+  --b1:rgba(0,0,0,.07);--b2:rgba(0,0,0,.04);--b3:rgba(0,0,0,.02);
+  --t1:#111827;--t2:#4b5563;--t3:#9ca3af;--t4:#d1d5db;
+  --a:#ec4899;--a2:#db2777;--am:rgba(236,72,153,.12);--ag:rgba(236,72,153,.28);
+}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{
   font-size:15px;
@@ -1716,7 +1722,7 @@ select.fi{
     <div class="sg-wrap">
       <span class="sg-lbl">ظاهر</span>
       <div class="s-group">
-        <div class="theme-seg"><button class="th-pill" data-t="light" onclick="setTheme('light',this)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg> روشن</button><button class="th-pill" data-t="auto" onclick="setTheme('auto',this)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg> خودکار</button><button class="th-pill" data-t="dark" onclick="setTheme('dark',this)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> تاریک</button></div>
+        <div class="theme-seg"><button class="th-pill" data-t="light" onclick="setTheme('light',this)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg> روشن</button><button class="th-pill" data-t="auto" onclick="setTheme('auto',this)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg> خودکار</button><button class="th-pill" data-t="dark" onclick="setTheme('dark',this)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> تاریک</button><button class="th-pill" data-t="pink" onclick="setTheme('pink',this)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> صورتی</button></div>
         <div class="srow"><div class="srow-ico" style="background:var(--am);color:var(--a);"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 12h8M12 8v8"/></svg></div><div class="srow-body"><div class="srow-ttl">اعداد فارسی</div></div><div class="tgl on" id="tgl-persian" onclick="toggleS('persian',this)"><div class="tgl-k"></div></div></div>
         <div class="srow"><div class="srow-ico" style="background:var(--ambm);color:var(--amber);"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><div class="srow-body"><div class="srow-ttl">انیمیشن confetti</div></div><div class="tgl" id="tgl-confetti" onclick="toggleS('confetti',this)"><div class="tgl-k"></div></div></div>
       </div>
@@ -3845,38 +3851,33 @@ function qcHideToolbar(){
     }
   }, 150);
 }
-function quickCapture(){
-  let raw=document.getElementById('qcapInp').value.trim();
-  // اگه input خالیه ولی NLP parse شده بود (مثلاً blur زودتر clear کرد)
-  if(!raw && _nlpParsed && _nlpParsed.cleanText) raw=_nlpParsed.cleanText;
-  if(!raw) return;
-
-  let text=raw, cat=qcCat, pri=qcPri;
+function _qcCreateOne(rawSeg, qcCatFallback, qcPriFallback){
+  const parsed = nlpParse(rawSeg);
+  let text=rawSeg, cat=qcCatFallback, pri=qcPriFallback;
   let deadline=null, time='', recur='none', recurBase=null;
 
-  if(_nlpParsed){
-    text     = _nlpParsed.cleanText || raw;
-    cat      = _nlpParsed.cat       || qcCat;
-    pri      = _nlpParsed.priority  || qcPri;
-    deadline = _nlpParsed.deadline  || null;
-    time     = _nlpParsed.time      || '';
-    recur    = _nlpParsed.recur     || 'none';
+  if(parsed){
+    text     = parsed.cleanText || rawSeg;
+    cat      = parsed.cat       || qcCatFallback;
+    pri      = parsed.priority  || qcPriFallback;
+    deadline = parsed.deadline  || null;
+    time     = parsed.time      || '';
+    recur    = parsed.recur     || 'none';
     recurBase= recur!=='none'?(deadline||mrTodayKey()):null;
   }
-  const _nlpStatus = (_nlpParsed&&_nlpParsed.status)||'todo';
-  const _nlpWaitingFor = (_nlpParsed&&_nlpParsed.waitingFor)||'';
-  const _nlpFileLink = (_nlpParsed&&_nlpParsed.fileLink)||'';
+  const _nlpStatus = (parsed&&parsed.status)||'todo';
+  const _nlpWaitingFor = (parsed&&parsed.waitingFor)||'';
+  const _nlpFileLink = (parsed&&parsed.fileLink)||'';
 
   const catIconMap={visit:'steth',meeting:'phone',report:'clip',followup:'bell',email:'pen',call:'phone',prep:'check'};
   const ico = catIconMap[cat]||'check';
 
-  // اگه NLP parse نشد ولی تب امروز/فردا فعاله → deadline اضافه کن
   if(!deadline){
     if(curTab==='today')    deadline=mrTodayKey();
     else if(curTab==='tomorrow') deadline=getTomorrowKey();
   }
   const newTask={
-    id:'t'+Date.now(), text, iconId:ico,
+    id:'t'+Date.now()+Math.random().toString(36).slice(2,6), text, iconId:ico,
     cat, time, priority:pri,
     status:_nlpStatus||'todo', done:_nlpStatus==='done',
     deadline, projectId:null,
@@ -3886,16 +3887,33 @@ function quickCapture(){
     fileLink:_nlpFileLink, location:'', estimateMin:0, phase:'', archived:false, completedAt:null,
   };
   tasks.push(newTask);
-  // یادآور هوشمند — اگه priority high یا فوری بود زودتر
   if(newTask.priority==='high' && newTask.time){
     const baseMins = SMART_REMIND_MINS[newTask.cat]||30;
-    // high priority → ۵ دقیقه زودتر از معمول
     SMART_REMIND_MINS[newTask.cat] = Math.max(5, baseMins-5);
     autoScheduleReminder(newTask);
-    SMART_REMIND_MINS[newTask.cat] = baseMins; // restore
+    SMART_REMIND_MINS[newTask.cat] = baseMins;
   } else {
     autoScheduleReminder(newTask);
   }
+  return newTask;
+}
+
+function quickCapture(){
+  let raw=document.getElementById('qcapInp').value.trim();
+  // اگه input خالیه ولی NLP parse شده بود (مثلاً blur زودتر clear کرد)
+  if(!raw && _nlpParsed && _nlpParsed.cleanText) raw=_nlpParsed.cleanText;
+  if(!raw) return;
+
+  const segments = nlpSplitSegments(raw);
+  let _qcLastTask;
+  let multiMode=false;
+  if(segments.length>1){
+    for(const seg of segments){ _qcLastTask=_qcCreateOne(seg, qcCat, qcPri); }
+    multiMode=true;
+  } else {
+    _qcLastTask=_qcCreateOne(raw, qcCat, qcPri);
+  }
+  const deadline = _qcLastTask.deadline;
   saveAll();
   // اگه تب فردا/امروز بود و deadline match نمی‌کنه، برگرد به همه
   if((curTab==='tomorrow'||curTab==='today')&&deadline){
@@ -3932,15 +3950,17 @@ function quickCapture(){
   try{qcSetPri('high',null);}catch(e){}
 
   // toast با جزئیات
-  const extras=[];
-  if(deadline){const[jy,jm,jd]=deadline.split('-').map(Number);const mnths=['فر','ار','خر','تی','مر','شه','مه','آب','آذ','دی','به','اس'];extras.push(num(jd)+' '+mnths[jm-1]);}
-  if(time)extras.push(time);
-  const shortText=text.length>15?text.slice(0,15)+'...':text;
-  const totalTasks=tasks.length;
-  const lastTask=tasks[tasks.length-1];
-  const hasRemind=lastTask&&reminders[lastTask.id];
-  const remindHint=hasRemind?' 🔔':'';
-  toast_(svgIco('check'),'«'+shortText+'» ثبت شد'+remindHint+(extras.length?' ('+extras.join(' ')+')':''));
+  if(multiMode){
+    toast_(svgIco('check'), num(segments.length)+' کار جدا ثبت شد');
+  } else {
+    const extras=[];
+    if(deadline){const[jy,jm,jd]=deadline.split('-').map(Number);const mnths=['فر','ار','خر','تی','مر','شه','مه','آب','آذ','دی','به','اس'];extras.push(num(jd)+' '+mnths[jm-1]);}
+    if(_qcLastTask.time)extras.push(_qcLastTask.time);
+    const shortText=_qcLastTask.text.length>15?_qcLastTask.text.slice(0,15)+'...':_qcLastTask.text;
+    const hasRemind=reminders[_qcLastTask.id];
+    const remindHint=hasRemind?' 🔔':'';
+    toast_(svgIco('check'),'«'+shortText+'» ثبت شد'+remindHint+(extras.length?' ('+extras.join(' ')+')':''));
+  }
   if(cfg.confetti) spawnConfetti({clientX:window.innerWidth*.5,clientY:160});
 }
 function addTask(){
@@ -7579,6 +7599,80 @@ function _levDist(a,b){
   return dp[m][n];
 }
 const NLP_FUZZY_KEYWORDS=['فردا','امروز','امشب','پسفردا','دیروز','دیشب'];
+
+/* ══ موتور تقسیم چندتسکی — فقط روی ویرگول (پایدارترین حالت) ══ */
+function _nlpDetectCat(text){
+  const n = text.toLowerCase();
+  for(const kw in NLP_CAT){
+    if(n.includes(kw)) return NLP_CAT[kw];
+  }
+  return null;
+}
+function _nlpHasImperative(text){
+  return /(کن|کنم|بزن|بزنم|بدم|بده|بگیر|بگیرم|برم|بریم|بفرست|بفرستم|بپوش|بردار|بخر|بخرم|بشه|باشه|بشن|بسازم|بساز)\b/.test(text.trim());
+}
+function _nlpIsFactOnly(text){
+  const t = text.trim();
+  return /(است|هست|ه|ست)$/.test(t) && !_nlpHasImperative(t);
+}
+function _nlpStartsWithKeh(text){
+  return /^(که|تا)\b/.test(text.trim());
+}
+function _nlpEndsWithAnaphoricSuffix(text){
+  const t = text.trim();
+  return /(شان|مان|تان|مش|ش)\s*$/.test(t.replace(/[.!؟]$/,''));
+}
+function _nlpExtractRaObject(text){
+  const m = text.match(/([آ-ی‌]+(?:\s[آ-ی‌]+)?)\s*(?:را|رو)\b/);
+  return m ? m[1].trim() : null;
+}
+function _nlpHasOwnAnchor(text){
+  return /(تا\s+\S|ساعت\s*[\d۰-۹]|صبح|ظهر|عصر(?!انه)|شب(?!ی\b)|شام|فردا|امروز|پسفردا|پس‌فردا|دیروز|[\d۰-۹]+\s*روز\s*(دیگه|مونده|دیگر)|هفته[یٔ‌]?\s*(دیگه|دیگر|بعد))/.test(text);
+}
+
+function nlpSplitSegments(raw){
+  const rawParts = raw.split(/[،,]/).map(s=>s.trim()).filter(Boolean);
+  if(rawParts.length<=1) return [raw.trim()];
+
+  const segments=[];
+  let buffer='';
+  let lastCat=null;
+  let seenRaObjects=[];
+
+  for(let i=0;i<rawParts.length;i++){
+    const p=rawParts[i];
+    const catHere=_nlpDetectCat(p);
+    const raObj=_nlpExtractRaObject(p);
+
+    const startsWithConnector=_nlpStartsWithKeh(p);
+    const isFact=_nlpIsFactOnly(p);
+    const isAnaphoric=_nlpEndsWithAnaphoricSuffix(p) && !raObj;
+    const raRepeated = raObj && seenRaObjects.some(prev=>prev===raObj || prev.includes(raObj) || raObj.includes(prev));
+    const hasOwnAnchor = _nlpHasOwnAnchor(p);
+    const catChanged = catHere && lastCat && catHere!==lastCat;
+
+    let merge;
+    if(!buffer) merge=false;
+    else if(startsWithConnector) merge=true;
+    else if(isFact) merge=true;
+    else if(isAnaphoric) merge=true;
+    else if(raRepeated) merge=true;
+    else if(hasOwnAnchor) merge=false;
+    else if(catChanged) merge=false;
+    else merge=true;
+
+    if(merge && buffer){
+      buffer += '، '+p;
+    } else {
+      if(buffer) segments.push(buffer);
+      buffer=p;
+    }
+    if(catHere){ lastCat=catHere; }
+    if(raObj) seenRaObjects.push(raObj);
+  }
+  if(buffer) segments.push(buffer);
+  return segments;
+}
 function _fuzzyCorrectDateWords(text){
   return text.split(/(\s+)/).map(tok=>{
     if(!tok.trim()) return tok; // فاصله‌ها رو دست نزن

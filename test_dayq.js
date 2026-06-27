@@ -163,6 +163,36 @@ const seedTask = (over = {}) => Object.assign({
     await page.close();
   }
 
+  // ── موتور تقسیم چندتسکی (nlpSplitSegments) — رگرسیون ضدحذف‌تصادفی ──
+  {
+    const page = await browser.newPage();
+    await page.goto(FILE);
+    await page.waitForTimeout(300);
+
+    const exists = await page.evaluate(() => typeof nlpSplitSegments === 'function');
+    check('تابع nlpSplitSegments وجود دارد (نباید دوباره حذف شود)', exists);
+
+    if (exists) {
+      const r1 = await page.evaluate((txt) => nlpSplitSegments(txt), 'زنگ به رضا فردا، جلسه با علی پسفردا ساعت ۳');
+      check('تقسیم پایهٔ دو تسک با ویرگول کار می‌کند', r1.length === 2);
+
+      const r2 = await page.evaluate((txt) => nlpSplitSegments(txt), 'تماس با رضا فردا');
+      check('یک‌جمله بدون ویرگول، تقسیم نمی‌شود', r2.length === 1);
+
+      // وصل‌بودن به quickCapture
+      await page.evaluate(() => localStorage.setItem('dq5_onboarded', '1'));
+      await page.reload();
+      await page.waitForTimeout(500);
+      await page.fill('#qcapInp', 'زنگ به رضا فردا، جلسه با علی پسفردا ساعت ۳');
+      await page.click('#qcapGo');
+      await page.waitForTimeout(200);
+      const taskCount = await page.evaluate(() => tasks.length);
+      check('quickCapture با ویرگول واقعاً ۲ تسک می‌سازد (نه ۱)', taskCount === 2);
+    }
+
+    await page.close();
+  }
+
   await browser.close();
 
   console.log(`\n${'═'.repeat(40)}`);
