@@ -388,6 +388,15 @@ input,textarea{user-select:text;-webkit-user-select:text;}
 .mirror-undone{margin-bottom:10px;}
 .mirror-undone-lbl{font-size:.6rem;font-weight:700;color:var(--t3);letter-spacing:.08em;text-transform:uppercase;margin-bottom:7px;}
 .mur-item{padding:9px 11px;background:var(--bg2);border-radius:var(--r2);margin-bottom:4px;border:1.5px solid var(--b2);transition:.15s;}
+.triage-item{padding:11px 12px;background:var(--bg2);border-radius:var(--r2);margin-bottom:8px;border:1.5px solid var(--b2);}
+.triage-task{font-size:.84rem;font-weight:600;color:var(--t1);margin-bottom:9px;}
+.triage-meta{font-size:.66rem;color:var(--t3);margin-bottom:9px;}
+.triage-actions{display:flex;gap:6px;}
+.triage-btn{flex:1;font-size:.68rem;font-weight:700;padding:8px 4px;border-radius:9px;border:1px solid var(--b1);background:var(--bg3);color:var(--t2);cursor:pointer;transition:.15s;text-align:center;}
+.triage-btn:active{transform:scale(.96);}
+.triage-btn.tmrw{background:var(--bluem);color:var(--blue);border-color:rgba(37,99,235,.2);}
+.triage-btn.pri{background:var(--ambm);color:var(--amber);border-color:rgba(217,119,6,.2);}
+.triage-btn.drop{background:var(--redm);color:var(--red);border-color:rgba(229,62,90,.2);}
 .mur-task{font-size:.74rem;font-weight:600;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--t1);}
 .mur-reason-pills{display:flex;gap:4px;flex-wrap:wrap;}
 /* reason pills — مثل tc-tag */
@@ -1611,6 +1620,14 @@ select.fi{
     <div class="cap-bar"><div class="cap-bar-fill" id="capBarFill"></div></div>
   </div>
 
+  <!-- Triage Banner — تعیین‌تکلیف کارهای ناتمام امروز -->
+  <div class="cap-banner" id="triageBanner" style="display:none;cursor:pointer;" onclick="openTriage()">
+    <div class="cap-row">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      <span id="triageText"></span>
+    </div>
+  </div>
+
   <!-- Intent Banner — نمایش ۳ کار مهم روز -->
   <div class="intent-banner" id="intentBanner">
     <div class="ib-header">
@@ -2276,6 +2293,17 @@ select.fi{
   </div>
 </div>
 
+<!-- SHEET: TODAY TRIAGE -->
+<div class="sheet" id="shTriage">
+  <div class="sh-handle"></div>
+  <div class="sh-head"><div class="sh-tr"><div class="sh-ttl">تعیین‌تکلیف امروز</div><button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></div>
+  <div class="sh-body">
+    <div style="font-size:.74rem;color:var(--t3);margin-bottom:14px;">کارهای امروزت که هنوز تمام نشده — برای هرکدام تصمیم بگیر.</div>
+    <div id="triageList"></div>
+    <div id="triageEmpty" style="display:none;text-align:center;padding:30px 0;color:var(--t3);font-size:.85rem;">همه‌چی تمیز است ✓</div>
+  </div>
+</div>
+
 <!-- SHEET: DEVICE SYNC -->
 <div class="sheet" id="shDeviceSync">
   <div class="sh-handle"></div>
@@ -2886,6 +2914,70 @@ function goPage(n){
 
 
 /* ══ WIDGETS ══ */
+/* ══ تعیین‌تکلیف امروز — فاز ۱: فقط دستی، سه دکمه برای هر تسک ناتمام ══ */
+function _getTodayUndoneTasks(){
+  const today = mrTodayKey();
+  return tasks.filter(t=>t.deadline===today && !t.done && t.status!=='done' && !t.archived);
+}
+function _refreshTriageBanner(){
+  const banner=document.getElementById('triageBanner');
+  if(!banner) return;
+  const undone=_getTodayUndoneTasks();
+  if(undone.length>0){
+    banner.style.display='block';
+    document.getElementById('triageText').textContent=num(undone.length)+' کار امروز هنوز تمام نشده — تعیین‌تکلیف کن';
+  } else {
+    banner.style.display='none';
+  }
+}
+function openTriage(){
+  _renderTriageList();
+  openSheet('shTriage');
+}
+function _renderTriageList(){
+  const undone=_getTodayUndoneTasks();
+  const list=document.getElementById('triageList');
+  const empty=document.getElementById('triageEmpty');
+  if(!list||!empty) return;
+  if(!undone.length){
+    list.innerHTML=''; empty.style.display='block';
+    _refreshTriageBanner();
+    return;
+  }
+  empty.style.display='none';
+  const priLabels={high:'فوری',med:'متوسط',low:'کم‌اهمیت'};
+  list.innerHTML=undone.map(t=>`
+    <div class="triage-item" data-id="${t.id}">
+      <div class="triage-task">${esc(t.text)}</div>
+      <div class="triage-meta">اولویت فعلی: ${priLabels[t.priority]||'—'}</div>
+      <div class="triage-actions">
+        <button class="triage-btn tmrw" onclick="triageMoveTomorrow('${t.id}')">فردا</button>
+        <button class="triage-btn pri" onclick="triageChangePriority('${t.id}')">تغییر فوریت</button>
+        <button class="triage-btn drop" onclick="triageDrop('${t.id}')">ولش کن</button>
+      </div>
+    </div>
+  `).join('');
+}
+function triageMoveTomorrow(id){
+  const t=tasks.find(x=>x.id===id); if(!t) return;
+  t.deadline=getTomorrowKey();
+  saveAll(); renderTasks(); _renderTriageList();
+  toast_(svgIco('check'),'به فردا منتقل شد');
+}
+function triageChangePriority(id){
+  const t=tasks.find(x=>x.id===id); if(!t) return;
+  const order=['high','med','low'];
+  const cur=order.indexOf(t.priority);
+  t.priority=order[(cur+1)%3];
+  saveAll(); renderTasks(); _renderTriageList();
+}
+function triageDrop(id){
+  const t=tasks.find(x=>x.id===id); if(!t) return;
+  t.archived=true;
+  saveAll(); renderTasks(); _renderTriageList();
+  toast_(svgIco('check'),'کنار گذاشته شد');
+}
+
 function applyWidgets(){
   const h=new Date().getHours();
 
@@ -3427,7 +3519,7 @@ function renderTasks(){
   // این کار صفحهٔ روزانه را همیشه فقط شامل کارهای واقعاً باقی‌مانده نگه می‌دارد
   if(curTab==='done') d.forEach(t=>list.appendChild(mkCardWrap(t)));
 
-  updateMeta(); updateMirrorSummary(); updateCapacityBanner();
+  updateMeta(); updateMirrorSummary(); updateCapacityBanner(); _refreshTriageBanner();
   if(cfg.timeline) renderTimeline();
 
   const projPage=document.getElementById('pageProjects');
