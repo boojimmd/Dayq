@@ -7205,6 +7205,7 @@ const NLP_CAT = {
   'زنگ زدن': 'call',   'call':   'call',   'تلفن':   'call',
   'دیدار':   'visit',  'ملاقات': 'visit',
   'خرید':    'prep',   'تهیه کن':'prep',
+  'تحویل':   'prep',   'تحویل بدم':'prep', 'تحویل بگیرم':'prep',
   'یادم باشه':'prep',  'فراموش نکنم':'prep',
 };
 const NLP_RECUR = {
@@ -7288,6 +7289,15 @@ function nlpResolveDate(txt){
   }
   if(n.includes('آخر ماه')||n.includes('انتهای ماه')){
     return `${jy}-${String(jm).padStart(2,'0')}-${String(CAL_DAYS_IN_MONTH[jm-1]).padStart(2,'0')}`;
+  }
+
+  // ── N روز دیگه/مونده — قبل از حلقهٔ آفست ثابت، چون عدد متغیره نه کلمهٔ ثابت ──
+  const nDaysMatch = n.match(/([۰-۹0-9]+)\s*روز\s*(دیگه|دیگر|مونده|بعد)/);
+  if(nDaysMatch){
+    const nDays = parseInt(faToEn(nDaysMatch[1]),10);
+    if(!isNaN(nDays) && nDays>0 && nDays<366){
+      return daysToJalaliKey(todayDays+nDays);
+    }
   }
   if(n.includes('اواخر ماه')){
     // اواخر یعنی روزهای پایانی ماه، نه دقیقاً آخرین روز — حدوداً ۵ روز به آخر مانده
