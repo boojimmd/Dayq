@@ -400,7 +400,6 @@ input,textarea{user-select:text;-webkit-user-select:text;}
 .triage-btn{flex:1;font-size:.68rem;font-weight:700;padding:8px 4px;border-radius:9px;border:1px solid var(--b1);background:var(--bg3);color:var(--t2);cursor:pointer;transition:.15s;text-align:center;}
 .triage-btn:active{transform:scale(.96);}
 .triage-btn.tmrw{background:var(--bluem);color:var(--blue);border-color:rgba(37,99,235,.2);}
-.triage-btn.pri{background:var(--ambm);color:var(--amber);border-color:rgba(217,119,6,.2);}
 .triage-btn.drop{background:var(--redm);color:var(--red);border-color:rgba(229,62,90,.2);}
 .mur-task{font-size:.74rem;font-weight:600;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--t1);}
 .mur-reason-pills{display:flex;gap:4px;flex-wrap:wrap;}
@@ -2960,7 +2959,6 @@ function _renderTriageList(){
       <div class="triage-meta">اولویت فعلی: ${priLabels[t.priority]||'—'}</div>
       <div class="triage-actions">
         <button class="triage-btn tmrw" onclick="triageMoveTomorrow('${t.id}')">فردا</button>
-        <button class="triage-btn pri" onclick="triageChangePriority('${t.id}')">تغییر فوریت</button>
         <button class="triage-btn drop" onclick="triageDrop('${t.id}')">ولش کن</button>
       </div>
     </div>
@@ -2979,7 +2977,6 @@ function _renderTriageEveList(){
       <div class="triage-meta">اولویت فعلی: ${priLabels[t.priority]||'—'}</div>
       <div class="triage-actions">
         <button class="triage-btn tmrw" onclick="triageMoveTomorrow('${t.id}')">فردا</button>
-        <button class="triage-btn pri" onclick="triageChangePriority('${t.id}')">تغییر فوریت</button>
         <button class="triage-btn drop" onclick="triageDrop('${t.id}')">ولش کن</button>
       </div>
     </div>
@@ -3032,16 +3029,10 @@ function _checkEveningTriage(){
 function triageMoveTomorrow(id){
   const t=tasks.find(x=>x.id===id); if(!t) return;
   t.deadline=getTomorrowKey();
+  t.priority='high'; // یک‌بار از امروز عقب افتاده — فردا باید فوری باشه
   _triageMovedCount++;
   saveAll(); renderTasks(); _renderTriageList(); _renderTriageEveList();
-  toast_(svgIco('check'),'به فردا منتقل شد');
-}
-function triageChangePriority(id){
-  const t=tasks.find(x=>x.id===id); if(!t) return;
-  const order=['high','med','low'];
-  const cur=order.indexOf(t.priority);
-  t.priority=order[(cur+1)%3];
-  saveAll(); renderTasks(); _renderTriageList(); _renderTriageEveList();
+  toast_(svgIco('check'),'به فردا منتقل شد، فوری شد');
 }
 function triageDrop(id){
   const t=tasks.find(x=>x.id===id); if(!t) return;
