@@ -2666,6 +2666,10 @@ function _syncLayoutVars(){
 }
 function boot(){
   loadAll();loadProjects();applyTheme(cfg.theme);applyAppIcon(cfg.appIcon||'green');
+  // ثبت Service Worker بی‌قید — حتی اگر Push را فعال نکرده باشد، چون Chrome برای نشان‌دادن دکمهٔ نصب نیاز دارد یک SW فعال ببیند
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  }
   if(restoreFromAutoBackup()) toast_(svgIco('flag'),'داده از پشتیبان خودکار بازیابی شد');
   // ── Recurring + Alarm Clock ──
   processRecurringTasks();
