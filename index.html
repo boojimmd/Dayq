@@ -1095,6 +1095,18 @@ select.fi{
   box-shadow:0 1px 4px rgba(0,0,0,.08);
 }
 .cvt:active{transform:scale(.94);}
+/* List view — سبک Things 3: لیست عمودی ساده، بدون گرید/کارت سنگین */
+.cal-list-view{padding:4px 0 30px;}
+.cal-list-bucket{margin-bottom:22px;}
+.cal-list-bucket-hdr{font-size:.78rem;font-weight:700;color:var(--t2);margin-bottom:8px;padding-right:10px;border-right:2px solid var(--b1);}
+.cal-list-bucket-hdr.is-today{color:var(--a);border-right-color:var(--a);}
+.cal-list-row{display:flex;align-items:center;gap:10px;padding:10px 10px;border-bottom:1px solid var(--b2);cursor:pointer;transition:.15s;}
+.cal-list-row:active{background:var(--bg2);}
+.cal-list-row:last-child{border-bottom:none;}
+.cal-list-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.cal-list-text{flex:1;font-size:.84rem;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cal-list-time{font-size:.7rem;color:var(--t3);font-weight:600;flex-shrink:0;}
+.cal-list-empty{text-align:center;color:var(--t3);font-size:.82rem;padding:40px 0;}
 /* weekly grid */
 .week-view{background:var(--bg1);border:1px solid var(--b1);
   border-radius:var(--r3);overflow:hidden;margin-bottom:14px;transition:background .25s;}
@@ -1852,7 +1864,10 @@ select.fi{
     <div class="cal-view-toggle">
       <button class="cvt active" data-v="month" onclick="setCalView('month',this)">ماهانه</button>
       <button class="cvt"        data-v="week"  onclick="setCalView('week',this)">هفتگی</button>
+      <button class="cvt"        data-v="list"  onclick="setCalView('list',this)">فهرست</button>
     </div>
+    <!-- List view — سبک Things 3: لیست عمودی، نه گرید -->
+    <div class="cal-list-view" id="calListView" style="display:none;"></div>
     <!-- Weekly view -->
     <div class="week-view" id="weekView" style="display:none;">
       <div class="wv-header" id="wvHeader"></div>
@@ -5836,6 +5851,51 @@ function calNextMonth(){
   calMonth++; if(calMonth>12){calMonth=1;calYear++;}
   renderCal();
 }
+function renderListView(){
+  const list=document.getElementById('calListView');
+  if(!list) return;
+  const todayKey=mrTodayKey();
+  const tomorrowKey=getTomorrowKey();
+  const upcoming=tasks.filter(t=>!t.done&&t.status!=='done'&&t.status!=='waiting'&&!t.archived&&t.deadline);
+
+  upcoming.sort((a,b)=>{
+    if(a.deadline!==b.deadline) return a.deadline.localeCompare(b.deadline);
+    if(a.time&&b.time) return a.time.localeCompare(b.time);
+    if(a.time) return -1; if(b.time) return 1;
+    return 0;
+  });
+
+  const [tjy,tjm,tjd]=todayKey.split('-').map(Number);
+  const todayDaysNum=_jalToDays(tjy,tjm,tjd);
+  const buckets={today:[],tomorrow:[],thisWeek:[],later:[]};
+  upcoming.forEach(t=>{
+    if(t.deadline<=todayKey){ buckets.today.push(t); return; }
+    if(t.deadline===tomorrowKey){ buckets.tomorrow.push(t); return; }
+    const [jy,jm,jd]=t.deadline.split('-').map(Number);
+    const diff=_jalToDays(jy,jm,jd)-todayDaysNum;
+    if(diff>0&&diff<=6) buckets.thisWeek.push(t);
+    else buckets.later.push(t);
+  });
+
+  const labels={today:'امروز',tomorrow:'فردا',thisWeek:'این هفته',later:'بعداً'};
+  const priColor=p=>p==='high'?'var(--red)':p==='med'?'var(--amber)':'var(--t4)';
+  let html='';
+  for(const key of ['today','tomorrow','thisWeek','later']){
+    if(!buckets[key].length) continue;
+    html+=`<div class="cal-list-bucket">
+      <div class="cal-list-bucket-hdr${key==='today'?' is-today':''}">${labels[key]}</div>
+      ${buckets[key].map(t=>`
+        <div class="cal-list-row" onclick="openNote('${t.id}',event)">
+          <span class="cal-list-dot" style="background:${priColor(t.priority)}"></span>
+          <span class="cal-list-text">${esc(t.text)}</span>
+          ${t.time?`<span class="cal-list-time">${t.time}</span>`:''}
+        </div>
+      `).join('')}
+    </div>`;
+  }
+  list.innerHTML=html||'<div class="cal-list-empty">چیزی برای نشان‌دادن نیست</div>';
+}
+
 function renderCal(){
   document.getElementById('calMonthLabel').textContent=`${CAL_MONTHS[calMonth-1]} ${num(calYear)}`;
   const daysEl=document.getElementById('calDays'); if(!daysEl)return;
@@ -6564,19 +6624,26 @@ function setCalView(v, el){
   document.querySelectorAll('.cvt').forEach(b => b.classList.toggle('active', b.dataset.v === v));
   document.getElementById('weekView').style.display      = v === 'week'  ? 'block' : 'none';
   document.getElementById('monthViewWrap').style.display = v === 'month' ? 'block' : 'none';
+  document.getElementById('calListView').style.display   = v === 'list'  ? 'block' : 'none';
+  const calSel=document.getElementById('calSelDay'); if(calSel) calSel.style.display = v==='list' ? 'none' : calSel.style.display;
+  const calNav=document.querySelector('.cal-nav'); if(calNav) calNav.style.visibility = v==='list' ? 'hidden' : 'visible';
   if(v === 'week'){
     if(!calWeekStart) initCalWeek();
     renderWeekView();
+  } else if(v === 'list'){
+    renderListView();
   } else {
     renderCal();
   }
 }
 
 function calPrevPeriod(){
+  if(calViewMode === 'list') return;
   if(calViewMode === 'week') { calWeekStart = weekOffset(calWeekStart,-7); renderWeekView(); }
   else calPrevMonth();
 }
 function calNextPeriod(){
+  if(calViewMode === 'list') return;
   if(calViewMode === 'week') { calWeekStart = weekOffset(calWeekStart,7); renderWeekView(); }
   else calNextMonth();
 }
