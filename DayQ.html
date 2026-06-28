@@ -2556,6 +2556,7 @@ select.fi{
         <button class="pp" id="epLow"  data-p="low"  onclick="selEditPri('low',this)"><svg viewBox="0 0 10 10" fill="var(--t4)"><circle cx="5" cy="5" r="5"/></svg>پایین</button>
       </div>
       <button id="noteWaitBtn" class="sh-sub" style="background:rgba(37,99,235,.1);color:var(--blue);border:1px solid rgba(37,99,235,.25);margin-bottom:8px;" onclick="toggleWaitingStatus()">⏳ منتظرم</button>
+      <button id="noteSomedayBtn" class="sh-sub" style="background:var(--bg3);color:var(--t2);border:1px solid var(--b1);margin-bottom:8px;" onclick="noteToggleSomeday()">یه روزی، نه الان</button>
       <button class="sh-sub" onclick="saveEditTask()">ذخیره تغییرات</button>
       <button class="remind-clear" onclick="confirmDeleteTask()" style="margin-top:6px;">حذف کار</button>
     </div>
@@ -4000,6 +4001,11 @@ function openCardMore(taskId,e){
 }
 function cardMoreNote(){ const id=cardMoreTaskId; closeAll(); openNote(id); }
 function cardMoreRemind(){ const id=cardMoreTaskId; closeAll(); openRemind(id,{stopPropagation:()=>{}}); }
+function noteToggleSomeday(){
+  if(!noteTaskId) return;
+  toggleSomeday(noteTaskId);
+  closeAll();
+}
 function cardMoreSomeday(){
   const id=cardMoreTaskId; closeAll();
   toggleSomeday(id);
@@ -4014,6 +4020,7 @@ function toggleSomeday(id){
     toast_(svgIco('check'),'یه روزی، نه الان ✓');
   }
   saveAll(); renderTasks();
+  if(typeof calViewMode!=='undefined' && calViewMode==='list') renderListView();
 }
 function cardMoreDelete(){
   closeAll();
@@ -6489,6 +6496,8 @@ function openNote(taskId, e){
   // waiting toggle button state
   const wBtn=document.getElementById('noteWaitBtn');
   if(wBtn){wBtn.textContent=t.status==='waiting'?'⏳ در انتظار — لغو':'⏳ علامت بزن: منتظرم';}
+  const sdBtn=document.getElementById('noteSomedayBtn');
+  if(sdBtn){sdBtn.textContent=t.someday?'برگشت به لیست فعال':'یه روزی، نه الان';}
   // reset to edit tab
   _noteTab='edit';
   setNoteTab('edit', document.querySelector('.ntab[data-nt="edit"]'));
