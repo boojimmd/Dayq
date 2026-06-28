@@ -607,6 +607,14 @@ select.fi{
 
 /* TOAST */
 .toast{position:fixed;top:calc(env(safe-area-inset-top,0px) + 14px);left:50%;transform:translateX(-50%) translateY(calc(-100% - 20px));background:var(--bg1);border:1px solid var(--b1);border-radius:11px;padding:9px 14px;font-size:.78rem;font-weight:600;z-index:1000;transition:transform .25s var(--spring);display:flex;align-items:center;gap:7px;box-shadow:0 8px 26px rgba(0,0,0,.13);white-space:nowrap;max-width:88vw;overflow:hidden;text-overflow:ellipsis;}
+
+/* Coach Mark — راهنمای موضعی، فقط بار اول، کنار خودِ عنصر واقعی */
+.coach-mark{position:fixed;z-index:1500;background:var(--a);color:#fff;border-radius:var(--r2);padding:10px 13px;font-size:.74rem;font-weight:600;line-height:1.6;max-width:240px;box-shadow:0 10px 30px rgba(0,0,0,.25);opacity:0;transform:translateY(6px);transition:.25s var(--spring);pointer-events:none;}
+.coach-mark.show{opacity:1;transform:translateY(0);pointer-events:auto;}
+.coach-mark-arrow{position:absolute;width:11px;height:11px;background:var(--a);transform:rotate(45deg);}
+.coach-mark-arrow.up{top:-5px;}
+.coach-mark-arrow.down{bottom:-5px;}
+.coach-mark-x{display:inline-block;margin-top:6px;font-size:.68rem;font-weight:700;opacity:.85;text-decoration:underline;cursor:pointer;}
 .toast.up{transform:translateX(-50%) translateY(0);}
 .t-ico{width:17px;height:17px;flex-shrink:0;}
 .t-ico svg{width:17px;height:17px;}
@@ -1999,16 +2007,16 @@ select.fi{
     <button class="ob-btn" onclick="obNext(1)">بریم ›</button>
   </div>
   <div class="ob-step" id="ob1">
-    <div class="ob-icon" style="background:var(--ambm)"><svg viewBox="0 0 24 24" stroke="var(--amber)"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-    <div class="ob-title">هر روز صبح یه ritual</div>
-    <div class="ob-sub">۳ کار مهم روز رو انتخاب کن — بقیه می‌مونن، ولی این‌ها اول انجام می‌شن.</div>
+    <div class="ob-icon" style="background:var(--ambm)"><svg viewBox="0 0 24 24" stroke="var(--amber)"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg></div>
+    <div class="ob-title">فقط بنویس، بقیه‌ش با DayQ</div>
+    <div class="ob-sub">«جلسه فردا ساعت ۳ فوری» بنویس — تاریخ، ساعت، و اولویتش رو خودش می‌فهمد.</div>
     <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot active"></div><div class="ob-dot"></div></div>
     <button class="ob-btn" onclick="obNext(2)">بریم ›</button>
   </div>
   <div class="ob-step" id="ob2">
     <div class="ob-icon" style="background:var(--purm)"><svg viewBox="0 0 24 24" stroke="var(--purple)"><path d="M12 2a10 10 0 1 0 0 20"/><path d="M12 6v6l4 2"/></svg></div>
-    <div class="ob-title">هر شب آینه‌ات رو ببین</div>
-    <div class="ob-sub">چرا بعضی روزا خوبن و بعضی نه؟ DayQ pattern‌هات رو می‌بینه و بهت می‌گه.</div>
+    <div class="ob-title">هر شب، تعیین‌تکلیف کن</div>
+    <div class="ob-sub">کارهای ناتمام امروز را آخر شب می‌بینی — فردا، تمام، یا کنار. بدون قضاوت.</div>
     <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot"></div><div class="ob-dot active"></div></div>
     <button class="ob-btn" onclick="finishOnboard()">شروع کن ✦</button>
     <div class="ob-skip" onclick="finishOnboard()">رد کردن</div>
@@ -2710,7 +2718,7 @@ function boot(){
   // quick capture
   const qi=document.getElementById('qcapInp');
   qi.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); quickCapture(); } if(e.key==='Escape'){ qi.blur(); document.getElementById('qcapToolbar').classList.remove('show'); const np=document.getElementById('nlpPreview');if(np){np.style.display='none';np.innerHTML='';} } });
-  qi.addEventListener('focus', ()=>qcShowToolbar());
+  qi.addEventListener('focus', ()=>{qcShowToolbar();showCoachMark('qcapInp','فقط بنویس — تاریخ، ساعت، و اولویت را خودش از روی متن می‌فهمد','qcap','below');});
   qi.addEventListener('blur',  ()=>{ 
     qcHideToolbar(); 
     // preview رو پنهان کن ولی _nlpParsed رو نگه دار تا دکمه سبز بتونه استفاده کنه
@@ -2971,7 +2979,7 @@ function goPage(n){
   if(n==='Me')       { updateMeStats(); }
   if(n==='Bag')      { renderBag(); }
   if(n==='Projects'){loadProjects();renderProjects();}
-  if(n==='Calendar'){calInit();}
+  if(n==='Calendar'){calInit();setTimeout(()=>showCoachMark('calMonthLabel','این سه دکمه، سه‌جور نمایش متفاوت‌اند — ماهانه، هفتگی، یا فهرست ساده','calview','below'),400);}
 }
 
 
@@ -2986,8 +2994,10 @@ function _refreshTriageBanner(){
   if(!banner) return;
   const undone=_getTodayUndoneTasks();
   if(undone.length>0){
+    const wasHidden=banner.style.display==='none'||!banner.style.display;
     banner.style.display='block';
     document.getElementById('triageText').textContent=num(undone.length)+' کار امروز هنوز تمام نشده — تعیین‌تکلیف کن';
+    if(wasHidden) setTimeout(()=>showCoachMark('triageBanner','اینجا کارهای ناتمام امروز را می‌بینی — فردا، تمام، یا کنار بگذار','triagebanner','below'),300);
   } else {
     banner.style.display='none';
   }
@@ -4469,6 +4479,45 @@ function checkAllDone(){if(tasks.length>0&&tasks.every(t=>t.done)){setTimeout(()
 
 /* ══ TOAST ══ */
 let _tt=null;
+/* ── Coach Mark — راهنمای موضعی برای اولین‌بار، کنار خودِ عنصر واقعی ── */
+const CM_SK='dq5_coachmarks_seen';
+function _cmSeen(){ try{ return JSON.parse(localStorage.getItem(CM_SK))||{}; }catch(e){ return {}; } }
+function _cmMarkSeen(id){ const s=_cmSeen(); s[id]=1; localStorage.setItem(CM_SK,JSON.stringify(s)); }
+function showCoachMark(targetId, text, markId, pos){
+  if(_cmSeen()[markId]) return;
+  const target=document.getElementById(targetId);
+  if(!target) return;
+  let cm=document.getElementById('coachMark');
+  if(!cm){
+    cm=document.createElement('div');
+    cm.className='coach-mark';
+    cm.id='coachMark';
+    cm.innerHTML=`<div class="coach-mark-arrow"></div><div id="coachMarkTxt"></div><span class="coach-mark-x" onclick="dismissCoachMark()">فهمیدم</span>`;
+    document.body.appendChild(cm);
+  }
+  cm._markId=markId;
+  document.getElementById('coachMarkTxt').textContent=text;
+  const r=target.getBoundingClientRect();
+  const arrow=cm.querySelector('.coach-mark-arrow');
+  requestAnimationFrame(()=>{
+    const cmW=cm.offsetWidth||220, cmH=cm.offsetHeight||60;
+    let left=Math.min(Math.max(r.left+r.width/2-cmW/2,10),window.innerWidth-cmW-10);
+    if(pos==='below'){
+      cm.style.top=(r.bottom+12)+'px'; cm.style.left=left+'px';
+      arrow.className='coach-mark-arrow up'; arrow.style.left=(r.left+r.width/2-left-5)+'px';
+    } else {
+      cm.style.top=(r.top-cmH-12)+'px'; cm.style.left=left+'px';
+      arrow.className='coach-mark-arrow down'; arrow.style.left=(r.left+r.width/2-left-5)+'px';
+    }
+    cm.classList.add('show');
+  });
+}
+function dismissCoachMark(){
+  const cm=document.getElementById('coachMark');
+  if(!cm) return;
+  if(cm._markId) _cmMarkSeen(cm._markId);
+  cm.classList.remove('show');
+}
 function toast_(icoHtml,msg){
   document.getElementById('tIco').innerHTML=icoHtml;
   document.getElementById('tMsg').textContent=msg;
