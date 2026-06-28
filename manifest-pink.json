@@ -1,0 +1,18 @@
+{
+  "name": "DayQ",
+  "short_name": "DayQ",
+  "description": "مدیریت کار روزانه برای مدرپ‌های میدانی",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f0f4f8",
+  "theme_color": "#f0f4f8",
+  "dir": "rtl",
+  "lang": "fa",
+  "icons": [
+    { "src": "icons/icon-pink-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-pink-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-pink-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon-pink-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
