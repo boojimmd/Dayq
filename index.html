@@ -3579,18 +3579,24 @@ function renderTasks(){
     const uDay=showEveningSplit?u.filter(t=>!isEvening(t)):u;
     const uEve=showEveningSplit?u.filter(t=>isEvening(t)):[];
 
+    const frag=document.createDocumentFragment(); // همه‌چی اول بیرون از DOM ساخته شود، بعد یک‌جا اضافه شود — برای روان‌ماندن با تعداد زیاد کار
     if(uDay.length){
-      if(curTab==='all'||curTab==='today') list.appendChild(mkHdr('در انتظار',uDay.length));
-      uDay.forEach(t=>list.appendChild(mkCardWrap(t)));
+      if(curTab==='all'||curTab==='today') frag.appendChild(mkHdr('در انتظار',uDay.length));
+      uDay.forEach(t=>frag.appendChild(mkCardWrap(t)));
     }
     if(uEve.length){
-      list.appendChild(mkHdr('این عصر 🌙',uEve.length));
-      uEve.forEach(t=>list.appendChild(mkCardWrap(t)));
+      frag.appendChild(mkHdr('این عصر 🌙',uEve.length));
+      uEve.forEach(t=>frag.appendChild(mkCardWrap(t)));
     }
+    list.appendChild(frag);
   }
   // کارهای تمام‌شده دیگر داخل تب‌های دیگر دیده نمی‌شوند — فقط در تب «انجام‌شده» (مثل Logbook در Things 3)
   // این کار صفحهٔ روزانه را همیشه فقط شامل کارهای واقعاً باقی‌مانده نگه می‌دارد
-  if(curTab==='done') d.forEach(t=>list.appendChild(mkCardWrap(t)));
+  if(curTab==='done'){
+    const fragDone=document.createDocumentFragment();
+    d.forEach(t=>fragDone.appendChild(mkCardWrap(t)));
+    list.appendChild(fragDone);
+  }
 
   updateMeta(); updateMirrorSummary(); updateCapacityBanner(); _refreshTriageBanner();
   if(cfg.timeline) renderTimeline();

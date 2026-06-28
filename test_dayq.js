@@ -222,6 +222,30 @@ const seedTask = (over = {}) => Object.assign({
     await page.close();
   }
 
+  // ── عملکرد: رندر ۲۰۰ تسک باید زیر ۱۵۰ میلی‌ثانیه بماند (DocumentFragment) ──
+  {
+    const page = await browser.newPage();
+    await page.goto(FILE);
+    await page.waitForLoadState('load');
+    await page.evaluate(() => localStorage.setItem('dq5_onboarded', '1'));
+    await page.reload();
+    await page.waitForLoadState('load');
+    await page.evaluate(() => {
+      tasks = [];
+      for (let i = 0; i < 200; i++) {
+        tasks.push({ id: 'perf' + i, text: 'تسک ' + i, iconId: 'check', cat: 'prep', time: null, priority: 'high', status: 'todo', done: false, deadline: mrTodayKey(), projectId: null, recur: 'none', recurBase: null, note: '', waitingFor: '', contact: '', fileLink: '', location: '', estimateMin: 0, phase: '', archived: false, completedAt: null });
+      }
+      saveAll();
+    });
+    const dur = await page.evaluate(() => {
+      const t0 = performance.now();
+      renderTasks();
+      return performance.now() - t0;
+    });
+    check('رندر ۲۰۰ تسک زیر ۱۵۰ میلی‌ثانیه است (نه ~۳۰۰ مثل قبل از DocumentFragment)', dur < 150);
+    await page.close();
+  }
+
   await browser.close();
 
   console.log(`\n${'═'.repeat(40)}`);
