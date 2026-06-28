@@ -1107,6 +1107,8 @@ select.fi{
 .cal-list-text{flex:1;font-size:.84rem;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .cal-list-time{font-size:.7rem;color:var(--t3);font-weight:600;flex-shrink:0;}
 .cal-list-empty{text-align:center;color:var(--t3);font-size:.82rem;padding:40px 0;}
+.cal-list-bring-back{font-size:.68rem;font-weight:600;color:var(--a);flex-shrink:0;padding:4px 8px;}
+.cal-list-logbook{margin-top:10px;padding-top:14px;border-top:1px dashed var(--b1);}
 /* weekly grid */
 .week-view{background:var(--bg1);border:1px solid var(--b1);
   border-radius:var(--r3);overflow:hidden;margin-bottom:14px;transition:background .25s;}
@@ -2035,6 +2037,7 @@ select.fi{
 <div class="sheet" id="shCardMore">
   <div class="card-more-row" onclick="cardMoreNote()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span>یادداشت / ویرایش</span></div>
   <div class="card-more-row" onclick="cardMoreRemind()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span>یادآوری</span></div>
+  <div class="card-more-row" onclick="cardMoreSomeday()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l3 2"/></svg><span id="cardMoreSomedayLbl">یه روزی، نه الان</span></div>
   <div class="card-more-row danger" onclick="cardMoreDelete()"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg><span>حذف</span></div>
 </div>
 
@@ -3498,7 +3501,7 @@ function renderTasks(){
   const todayKey=mrTodayKey();
   // filter by tab
   let vis;
-  if(curTab==='all')        vis=tasks.filter(t=>t.status!=='waiting'&&!t.archived);
+  if(curTab==='all')        vis=tasks.filter(t=>t.status!=='waiting'&&!t.archived&&!t.someday);
   else if(curTab==='done')  vis=tasks.filter(t=>(t.done||t.status==='done')&&!t.archived);
   else if(curTab==='today') {
     vis=tasks.filter(t=>{
@@ -3990,10 +3993,28 @@ let cardMoreTaskId=null;
 function openCardMore(taskId,e){
   if(e&&e.stopPropagation)e.stopPropagation();
   cardMoreTaskId=taskId;
+  const t=tasks.find(x=>x.id===taskId);
+  const lbl=document.getElementById('cardMoreSomedayLbl');
+  if(lbl) lbl.textContent=(t&&t.someday)?'برگشت به لیست فعال':'یه روزی، نه الان';
   openSheet('shCardMore');
 }
 function cardMoreNote(){ const id=cardMoreTaskId; closeAll(); openNote(id); }
 function cardMoreRemind(){ const id=cardMoreTaskId; closeAll(); openRemind(id,{stopPropagation:()=>{}}); }
+function cardMoreSomeday(){
+  const id=cardMoreTaskId; closeAll();
+  toggleSomeday(id);
+}
+function toggleSomeday(id){
+  const t=tasks.find(x=>x.id===id); if(!t) return;
+  if(t.someday){
+    t.someday=false;
+    toast_(svgIco('check'),'برگشت به لیست فعال');
+  } else {
+    t.someday=true; t.deadline=null; t.time='';
+    toast_(svgIco('check'),'یه روزی، نه الان ✓');
+  }
+  saveAll(); renderTasks();
+}
 function cardMoreDelete(){
   closeAll();
   // یک تیک تأخیر تا closeAll کامل اجرا شه، بعد شیت تأیید رو باز کن
@@ -5856,7 +5877,11 @@ function renderListView(){
   if(!list) return;
   const todayKey=mrTodayKey();
   const tomorrowKey=getTomorrowKey();
-  const upcoming=tasks.filter(t=>!t.done&&t.status!=='done'&&t.status!=='waiting'&&!t.archived&&t.deadline);
+  const baseFilter=t=>!t.done&&t.status!=='done'&&t.status!=='waiting'&&!t.archived&&!t.someday;
+  const upcoming=tasks.filter(t=>baseFilter(t)&&t.deadline);
+  const noDate=tasks.filter(t=>baseFilter(t)&&!t.deadline);
+  const someday=tasks.filter(t=>!t.archived&&t.someday);
+  const recentDone=tasks.filter(t=>t.done||t.status==='done').sort((a,b)=>(b.completedAt||0)-(a.completedAt||0)).slice(0,5);
 
   upcoming.sort((a,b)=>{
     if(a.deadline!==b.deadline) return a.deadline.localeCompare(b.deadline);
@@ -5879,21 +5904,56 @@ function renderListView(){
 
   const labels={today:'امروز',tomorrow:'فردا',thisWeek:'این هفته',later:'بعداً'};
   const priColor=p=>p==='high'?'var(--red)':p==='med'?'var(--amber)':'var(--t4)';
+  const rowHtml=(t,extraBtn)=>`
+    <div class="cal-list-row" onclick="openNote('${t.id}',event)">
+      <span class="cal-list-dot" style="background:${priColor(t.priority)}"></span>
+      <span class="cal-list-text">${esc(t.text)}</span>
+      ${t.time?`<span class="cal-list-time">${t.time}</span>`:''}
+      ${extraBtn||''}
+    </div>`;
+
   let html='';
   for(const key of ['today','tomorrow','thisWeek','later']){
     if(!buckets[key].length) continue;
     html+=`<div class="cal-list-bucket">
       <div class="cal-list-bucket-hdr${key==='today'?' is-today':''}">${labels[key]}</div>
-      ${buckets[key].map(t=>`
-        <div class="cal-list-row" onclick="openNote('${t.id}',event)">
-          <span class="cal-list-dot" style="background:${priColor(t.priority)}"></span>
-          <span class="cal-list-text">${esc(t.text)}</span>
-          ${t.time?`<span class="cal-list-time">${t.time}</span>`:''}
+      ${buckets[key].map(t=>rowHtml(t)).join('')}
+    </div>`;
+  }
+
+  if(noDate.length){
+    html+=`<div class="cal-list-bucket">
+      <div class="cal-list-bucket-hdr">بدون تاریخ</div>
+      ${noDate.map(t=>rowHtml(t)).join('')}
+    </div>`;
+  }
+
+  if(someday.length){
+    html+=`<div class="cal-list-bucket">
+      <div class="cal-list-bucket-hdr">یه روزی، نه الان</div>
+      ${someday.map(t=>`
+        <div class="cal-list-row">
+          <span class="cal-list-dot" style="background:var(--t4)"></span>
+          <span class="cal-list-text" style="color:var(--t3);" onclick="openNote('${t.id}',event)">${esc(t.text)}</span>
+          <span class="cal-list-bring-back" onclick="event.stopPropagation();toggleSomeday('${t.id}');renderListView();">برگردون</span>
         </div>
       `).join('')}
     </div>`;
   }
+
   list.innerHTML=html||'<div class="cal-list-empty">چیزی برای نشان‌دادن نیست</div>';
+
+  if(recentDone.length){
+    list.innerHTML+=`<div class="cal-list-bucket cal-list-logbook">
+      <div class="cal-list-bucket-hdr">اخیراً تمام‌شده</div>
+      ${recentDone.map(t=>`
+        <div class="cal-list-row" onclick="openNote('${t.id}',event)">
+          <span class="cal-list-dot" style="background:var(--a);opacity:.5;"></span>
+          <span class="cal-list-text" style="color:var(--t3);text-decoration:line-through;">${esc(t.text)}</span>
+        </div>
+      `).join('')}
+    </div>`;
+  }
 }
 
 function renderCal(){
