@@ -807,6 +807,7 @@ select.fi{
 .cal-day.selected{background:var(--am);}
 .cal-day.today.selected .cal-day-num{box-shadow:0 0 0 3px rgba(0,184,122,.25);}
 .cal-day-num{font-size:1.05rem;font-weight:800;color:var(--t1);width:30px;height:30px;display:flex;align-items:center;justify-content:center;margin-bottom:4px;}
+.cal-day-holiday{font-size:.52rem;color:var(--red);opacity:.75;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;margin-bottom:2px;}
 .cal-day-evts{display:flex;flex-direction:column;gap:1.5px;width:100%;align-items:stretch;overflow:hidden;}
 .cal-evt-chip{font-size:.56rem;font-weight:600;padding:1.5px 5px;border-radius:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.35;text-align:right;flex-shrink:0;}
 .cal-evt-more{font-size:.55rem;color:var(--t3);font-weight:700;padding:0 4px;}
@@ -1116,6 +1117,7 @@ select.fi{
 .cal-list-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
 .cal-list-text{flex:1;font-size:.84rem;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .cal-list-time{font-size:.7rem;color:var(--t3);font-weight:600;flex-shrink:0;}
+.cal-list-holiday{font-size:.62rem;color:var(--red);opacity:.8;flex-shrink:0;}
 .cal-list-empty{text-align:center;color:var(--t3);font-size:.82rem;padding:40px 0;}
 .cal-list-bring-back{font-size:.68rem;font-weight:600;color:var(--a);flex-shrink:0;padding:4px 8px;}
 .cal-list-logbook{margin-top:10px;padding-top:14px;border-top:1px dashed var(--b1);}
@@ -1127,6 +1129,7 @@ select.fi{
 .wv-day-hdr:last-child{border-left:none;}
 .wv-day-name{font-size:.52rem;font-weight:700;color:var(--t3);line-height:1.25;white-space:normal;word-break:keep-all;}
 .wv-day-num{font-size:.82rem;font-weight:700;font-family:var(--mono);margin-top:2px;}
+.wv-day-holiday{font-size:.5rem;color:var(--red);opacity:.75;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;margin-top:1px;}
 .wv-day-hdr.wv-today .wv-day-num{color:var(--a);background:var(--am);
   border-radius:50%;width:24px;height:24px;display:flex;align-items:center;
   justify-content:center;margin:2px auto 0;}
@@ -5946,6 +5949,73 @@ function selStatus(st,el){
 ══════════════════════════════════════════════════ */
 const CAL_MONTHS=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
 const CAL_DAYS_IN_MONTH=[31,31,31,31,31,31,30,30,30,30,30,29];
+const IR_HOLIDAYS={
+  '1404-01-01':'جشن نوروز/جشن سال نو',
+  '1404-01-02':'عید نوروز، شهادت حضرت علی (ع)',
+  '1404-01-03':'عید نوروز',
+  '1404-01-04':'عید نوروز',
+  '1404-01-11':'عید سعید فطر',
+  '1404-01-12':'روز جمهوری اسلامی، تعطیل به مناسبت عید سعید فطر',
+  '1404-01-13':'جشن سیزده به در',
+  '1404-02-04':'شهادت امام جعفر صادق (ع)',
+  '1404-03-14':'رحلت حضرت امام خمینی',
+  '1404-03-16':'عید سعید قربان',
+  '1404-03-24':'عید سعید غدیر خم',
+  '1404-04-14':'تاسوعای حسینی',
+  '1404-04-15':'عاشورای حسینی',
+  '1404-06-02':'شهادت امام رضا (ع)',
+  '1404-06-10':'شهادت امام حسن عسکری (ع)',
+  '1404-06-19':'میلاد رسول اکرم و امام جعفر صادق (ع)',
+  '1404-09-03':'شهادت حضرت فاطمه زهرا (س)',
+  '1404-10-13':'ولادت امام علی (ع) و روز پدر',
+  '1404-10-27':'مبعث رسول اکرم (ص)',
+  '1404-11-15':'ولادت حضرت قائم عجل الله تعالی فرجه و جشن نیمه شعبان',
+  '1404-11-22':'پیروزی انقلاب اسلامی',
+  '1404-12-20':'شهادت حضرت علی (ع)',
+  '1404-12-29':'روز ملی شدن صنعت نفت ایران',
+  '1405-01-01':'جشن نوروز/جشن سال نو، عید سعید فطر',
+  '1405-01-02':'عید نوروز، تعطیل به مناسبت عید سعید فطر',
+  '1405-01-03':'عید نوروز',
+  '1405-01-04':'عید نوروز',
+  '1405-01-12':'روز جمهوری اسلامی',
+  '1405-01-13':'جشن سیزده به در',
+  '1405-01-25':'شهادت امام جعفر صادق (ع)',
+  '1405-03-06':'عید سعید قربان',
+  '1405-03-14':'رحلت حضرت امام خمینی، عید سعید غدیر خم',
+  '1405-04-03':'تاسوعای حسینی',
+  '1405-04-04':'عاشورای حسینی',
+  '1405-06-08':'میلاد رسول اکرم و امام جعفر صادق (ع)',
+  '1405-08-22':'شهادت حضرت فاطمه زهرا (س)',
+  '1405-10-02':'ولادت امام علی (ع) و روز پدر',
+  '1405-10-16':'مبعث رسول اکرم (ص)',
+  '1405-11-04':'ولادت حضرت قائم عجل الله تعالی فرجه و جشن نیمه شعبان',
+  '1405-11-22':'پیروزی انقلاب اسلامی',
+  '1405-12-09':'شهادت حضرت علی (ع)',
+  '1405-12-19':'عید سعید فطر',
+  '1405-12-20':'تعطیل به مناسبت عید سعید فطر',
+  '1405-12-29':'روز ملی شدن صنعت نفت ایران',
+  '1406-01-01':'جشن نوروز/جشن سال نو',
+  '1406-01-02':'عید نوروز',
+  '1406-01-03':'عید نوروز',
+  '1406-01-04':'عید نوروز',
+  '1406-01-12':'روز جمهوری اسلامی',
+  '1406-01-13':'جشن سیزده به در',
+  '1406-01-14':'شهادت امام جعفر صادق (ع)',
+  '1406-02-27':'عید سعید قربان',
+  '1406-03-04':'عید سعید غدیر خم',
+  '1406-03-14':'رحلت حضرت امام خمینی',
+  '1406-03-25':'تاسوعای حسینی',
+  '1406-03-26':'عاشورای حسینی',
+  '1406-08-12':'شهادت حضرت فاطمه زهرا (س)',
+  '1406-09-21':'ولادت امام علی (ع) و روز پدر',
+  '1406-10-05':'مبعث رسول اکرم (ص)',
+  '1406-10-23':'ولادت حضرت قائم عجل الله تعالی فرجه و جشن نیمه شعبان',
+  '1406-11-22':'پیروزی انقلاب اسلامی',
+  '1406-11-29':'شهادت حضرت علی (ع)',
+  '1406-12-08':'عید سعید فطر',
+  '1406-12-09':'تعطیل به مناسبت عید سعید فطر',
+  '1406-12-29':'روز ملی شدن صنعت نفت ایران'
+};
 let calYear,calMonth,calSelDate=null;
 let icsEvents=[];
 
@@ -6003,6 +6073,7 @@ function renderListView(){
     <div class="cal-list-row" onclick="openNote('${t.id}',event)">
       <span class="cal-list-dot" style="background:${priColor(t.priority)}"></span>
       <span class="cal-list-text">${esc(t.text)}</span>
+      ${IR_HOLIDAYS[t.deadline]?`<span class="cal-list-holiday">🔴 ${esc(IR_HOLIDAYS[t.deadline].split('،')[0])}</span>`:''}
       ${t.time?`<span class="cal-list-time">${t.time}</span>`:''}
       ${extraBtn||''}
     </div>`;
@@ -6089,7 +6160,9 @@ function renderCal(){
     }).join('');
     const moreCount=dayTasks.length-visTasks.length;
     const moreEl=moreCount>0?`<div class="cal-evt-more">+${num(moreCount)} مورد دیگر</div>`:'';
-    dayEl.innerHTML=`<div class="cal-day-num">${num(d)}</div><div class="cal-day-evts">${chips}${moreEl}</div>`;
+    const holiday=IR_HOLIDAYS[dateKey];
+    const holEl=holiday?`<div class="cal-day-holiday">${esc(holiday.split('،')[0])}</div>`:'';
+    dayEl.innerHTML=`<div class="cal-day-num">${num(d)}</div>${holEl}<div class="cal-day-evts">${chips}${moreEl}</div>`;
     dayEl.onclick=()=>calSelectDay(dateKey,d);
     daysEl.appendChild(dayEl);
   }
@@ -6858,7 +6931,9 @@ function renderWeekView(){
     const isToday = dk === todayK;
     const col = document.createElement('div');
     col.className = 'wv-day-hdr' + (isToday?' wv-today':'');
-    col.innerHTML = `<div class="wv-day-name">${WV_DAYS[i]}</div><div class="wv-day-num">${num(jd)}</div>`;
+    const wvHoliday=IR_HOLIDAYS[dk];
+    const wvHolEl=wvHoliday?`<div class="wv-day-holiday">${esc(wvHoliday.split('،')[0])}</div>`:'';
+    col.innerHTML = `<div class="wv-day-name">${WV_DAYS[i]}</div><div class="wv-day-num">${num(jd)}</div>${wvHolEl}`;
     hdr.appendChild(col);
   });
   // render rows
