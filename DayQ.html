@@ -2894,6 +2894,13 @@ function loadAll(){
   try{tasks=JSON.parse(localStorage.getItem(SK))||[];}catch(e){tasks=[];}
   try{const b=JSON.parse(localStorage.getItem(SB));bagItems=b||[];}catch(e){bagItems=[];}
   try{const s=JSON.parse(localStorage.getItem(SS));if(s)cfg={...cfg,...s};}catch(e){}
+  // مهاجرت یک‌باره: آیکون «آماده‌سازی» از چک‌مارک (که با تیک تکمیل قاطی می‌شد) به فلاسک تغییر کرد
+  if(!localStorage.getItem('dq5_mig_prepicon')){
+    let changed=false;
+    tasks.forEach(t=>{ if(t.cat==='prep' && t.iconId==='check'){ t.iconId='flask'; changed=true; } });
+    if(changed) saveAll();
+    localStorage.setItem('dq5_mig_prepicon','1');
+  }
 }
 function saveAll(){
   try{
@@ -4171,7 +4178,7 @@ function _qcCreateOne(rawSeg, qcCatFallback, qcPriFallback){
   const _nlpWaitingFor = (parsed&&parsed.waitingFor)||'';
   const _nlpFileLink = (parsed&&parsed.fileLink)||'';
 
-  const catIconMap={visit:'steth',meeting:'phone',report:'clip',followup:'bell',email:'pen',call:'phone',prep:'check'};
+  const catIconMap={visit:'steth',meeting:'phone',report:'clip',followup:'bell',email:'pen',call:'phone',prep:'flask'};
   const ico = catIconMap[cat]||'check';
 
   if(!deadline){
