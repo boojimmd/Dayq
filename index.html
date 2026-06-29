@@ -609,12 +609,13 @@ select.fi{
 .toast{position:fixed;top:calc(env(safe-area-inset-top,0px) + 14px);left:50%;transform:translateX(-50%) translateY(calc(-100% - 20px));background:var(--bg1);border:1px solid var(--b1);border-radius:11px;padding:9px 14px;font-size:.78rem;font-weight:600;z-index:1000;transition:transform .25s var(--spring);display:flex;align-items:center;gap:7px;box-shadow:0 8px 26px rgba(0,0,0,.13);white-space:nowrap;max-width:88vw;overflow:hidden;text-overflow:ellipsis;}
 
 /* Coach Mark — راهنمای موضعی، فقط بار اول، کنار خودِ عنصر واقعی */
-.coach-mark{position:fixed;z-index:1500;background:var(--a);color:#fff;border-radius:var(--r2);padding:10px 13px;font-size:.74rem;font-weight:600;line-height:1.6;max-width:240px;box-shadow:0 10px 30px rgba(0,0,0,.25);opacity:0;transform:translateY(6px);transition:.25s var(--spring);pointer-events:none;}
+.coach-mark{position:fixed;z-index:1500;background:var(--a);color:#fff;border-radius:var(--r2);padding:10px 13px 10px 30px;font-size:.74rem;font-weight:600;line-height:1.6;max-width:240px;box-shadow:0 10px 30px rgba(0,0,0,.25);opacity:0;transform:translateY(6px);transition:.25s var(--spring);pointer-events:none;}
 .coach-mark.show{opacity:1;transform:translateY(0);pointer-events:auto;}
 .coach-mark-arrow{position:absolute;width:11px;height:11px;background:var(--a);transform:rotate(45deg);}
 .coach-mark-arrow.up{top:-5px;}
 .coach-mark-arrow.down{bottom:-5px;}
-.coach-mark-x{display:inline-block;margin-top:6px;font-size:.68rem;font-weight:700;opacity:.85;text-decoration:underline;cursor:pointer;}
+.coach-mark-close{position:absolute;top:6px;left:6px;width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.2);border:none;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;}
+.coach-mark-close:active{background:rgba(255,255,255,.35);}
 .toast.up{transform:translateX(-50%) translateY(0);}
 .t-ico{width:17px;height:17px;flex-shrink:0;}
 .t-ico svg{width:17px;height:17px;}
@@ -4492,9 +4493,10 @@ function showCoachMark(targetId, text, markId, pos){
     cm=document.createElement('div');
     cm.className='coach-mark';
     cm.id='coachMark';
-    cm.innerHTML=`<div class="coach-mark-arrow"></div><div id="coachMarkTxt"></div><span class="coach-mark-x" onclick="dismissCoachMark()">فهمیدم</span>`;
+    cm.innerHTML=`<div class="coach-mark-arrow"></div><button class="coach-mark-close" onclick="dismissCoachMark()" aria-label="بستن"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button><div id="coachMarkTxt"></div>`;
     document.body.appendChild(cm);
   }
+  if(cm._autoTimer) clearTimeout(cm._autoTimer);
   cm._markId=markId;
   document.getElementById('coachMarkTxt').textContent=text;
   const r=target.getBoundingClientRect();
@@ -4511,10 +4513,12 @@ function showCoachMark(targetId, text, markId, pos){
     }
     cm.classList.add('show');
   });
+  cm._autoTimer=setTimeout(()=>dismissCoachMark(),5000);
 }
 function dismissCoachMark(){
   const cm=document.getElementById('coachMark');
   if(!cm) return;
+  if(cm._autoTimer){ clearTimeout(cm._autoTimer); cm._autoTimer=null; }
   if(cm._markId) _cmMarkSeen(cm._markId);
   cm.classList.remove('show');
 }
