@@ -3167,7 +3167,7 @@ function showOverdueModal(){
   const inner=document.createElement('div');
   inner.className='ov-simple';
   inner.innerHTML=`
-    <div class="ov-simple-q">${'$'}{num(overdue.length)} کار از دیروز موند<br>همه رو به امروز منتقل کنم؟</div>
+    <div class="ov-simple-q">${num(overdue.length)} کار از دیروز موند<br>همه رو به امروز منتقل کنم؟</div>
     <div class="ov-simple-btns">
       <button class="ov-simple-btn yes" onclick="overdueAllToday()">✓ بله، همه رو بیار امروز</button>
       <button class="ov-simple-btn pick" onclick="overduePickMode()">انتخاب کنم</button>
