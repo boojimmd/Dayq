@@ -3810,8 +3810,8 @@ function initListViewSwipe(){
     el.classList.add('swiping');el.style.transform=`translateX(${-dx}px)`;
     const bgR=wrap.querySelector('.cal-list-swipe-bg.right');
     const bgL=wrap.querySelector('.cal-list-swipe-bg.left');
-    if(bgR)bgR.style.opacity=dx>20?Math.min(1,(dx-20)/60):0;
-    if(bgL)bgL.style.opacity=dx<-20?Math.min(1,(-dx-20)/60):0;
+    if(bgR)bgR.style.opacity=dx<-20?Math.min(1,(-dx-20)/60):0;
+    if(bgL)bgL.style.opacity=dx>20?Math.min(1,(dx-20)/60):0;
   },{passive:true});
   container.addEventListener('touchend',e=>{
     if(!el||!isDragging){el=null;isDragging=false;return;}
@@ -3821,8 +3821,8 @@ function initListViewSwipe(){
     const bgL=wrap.querySelector('.cal-list-swipe-bg.left');
     if(bgR)bgR.style.opacity=0;if(bgL)bgL.style.opacity=0;
     const id=wrap.dataset.id;
-    if(dx>threshold){ toggleTask(id,e.changedTouches[0]); }
-    else if(dx<-threshold){ toggleSomeday(id); renderListView(); }
+    if(dx<-threshold){ toggleTask(id,e.changedTouches[0]); }
+    else if(dx>threshold){ toggleSomeday(id); renderListView(); }
     el=null;isDragging=false;
   },{passive:true});
 }
