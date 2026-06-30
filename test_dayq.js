@@ -246,6 +246,24 @@ const seedTask = (over = {}) => Object.assign({
     await page.close();
   }
 
+  // ── فیکس: اگر فقط ساعت گفته شود (بدون تاریخ صریح) و آن ساعت گذشته، باید فردا شود ──
+  {
+    const page = await browser.newPage();
+    await page.goto(FILE);
+    await page.waitForTimeout(300);
+    await page.clock.install({ time: new Date(2026, 5, 30, 22, 0, 0) });
+    await page.clock.pauseAt(new Date(2026, 5, 30, 22, 0, 0));
+    const today = await page.evaluate(() => mrTodayKey());
+    const tomorrow = await page.evaluate(() => getTomorrowKey());
+
+    const pastTimeResult = await page.evaluate(() => nlpParse('ده صبح تماس با رضا').deadline);
+    check('ساعت ۲۲:۰۰ + «ده صبح» (گذشته) → فردا می‌شود', pastTimeResult === tomorrow);
+
+    const futureTimeResult = await page.evaluate(() => nlpParse('۱۱ شب تماس با علی').deadline);
+    check('ساعت ۲۲:۰۰ + «۱۱ شب» (هنوز نگذشته) → امروز می‌ماند', futureTimeResult === today);
+    await page.close();
+  }
+
   await browser.close();
 
   console.log(`\n${'═'.repeat(40)}`);

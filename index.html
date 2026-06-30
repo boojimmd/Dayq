@@ -8356,9 +8356,12 @@ function nlpParse(raw){
     delete result._stripWaiting;
   }
 
-  // اگه time داشت ولی deadline نداشت، deadline=امروز
+  // اگه time داشت ولی deadline نداشت، deadline=امروز — مگر اینکه آن ساعت از همین الان گذشته باشد، که یعنی منظور فرداست
   if(result.time&&!result.deadline){
-    result.deadline=mrTodayKey();
+    const [_hh,_mm]=result.time.split(':').map(Number);
+    const _now=new Date();
+    const _todayAtThatTime=new Date(_now.getFullYear(),_now.getMonth(),_now.getDate(),_hh,_mm);
+    result.deadline = (_todayAtThatTime<=_now) ? getTomorrowKey() : mrTodayKey();
     if(!result.detected.includes('date'))result.detected.push('date');
   }
   // ── #پروژه و @برچسب در متن ──
