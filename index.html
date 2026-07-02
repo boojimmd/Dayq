@@ -1573,231 +1573,117 @@ select.fi{
   }
 }
 .cmd-shortcut-hint{display:none;}
+.cmd-shortcut-hint{display:none;}
+
 /* ═══════════════════════════════════════
    DESKTOP LAYOUT — ≥900px
-   sidebar راست (RTL) + محتوا چپ
+   wrapper-based approach for proper scrolling
 ═══════════════════════════════════════ */
 @media(min-width:900px){
 
-  /* hide mobile-only elements */
-  .cmd-shortcut-hint{display:flex;}
-
-  /* ─── ظرف اصلی ─── */
+  /* Reset #app — فقط جریان عادی */
   #app{
-    max-width:100%;
-    display:block;
-    padding-right:220px; /* فضا برای sidebar راست */
+    max-width:100% !important;
+    height:auto !important;
+    min-height:100svh;
+    overflow:visible !important;
+    display:block !important;
+    position:relative;
   }
 
-  /* ─── Topbar ─── */
+  /* Wrapper: topbar + pages را در یک ستون scroll‌پذیر نگه می‌دارد */
+  #desktopContent{
+    margin-right:220px;
+    min-height:100svh;
+    overflow-y:auto;
+    overflow-x:hidden;
+    position:relative;
+  }
+
+  /* Topbar داخل wrapper — sticky در محدودهٔ wrapper */
+  #desktopContent .topbar,
   .topbar{
     position:sticky;
     top:0;
     left:0;right:0;
     max-width:100%;
     z-index:40;
-    backdrop-filter:blur(16px);
-    -webkit-backdrop-filter:blur(16px);
-  }
-
-  /* ─── Sidebar (راست، RTL) ─── */
-  .nav{
-    position:fixed;
-    top:0;
-    right:0;       /* RTL: سمت راست */
-    left:auto;
-    bottom:0;
-    width:220px;
-    height:100svh;
-    max-width:220px;
-    flex-direction:column;
-    align-items:stretch;
-    justify-content:flex-start;
-    border-top:none;
-    border-bottom:none;
-    border-right:none;
-    border-left:1px solid var(--b1);
-    padding:16px 10px 20px;
-    gap:3px;
-    overflow-y:auto;
-    background:var(--bg1);
-    backdrop-filter:blur(12px);
-    -webkit-backdrop-filter:blur(12px);
-    z-index:50;
-  }
-
-  /* نام اپ بالای sidebar */
-  .nav::before{
-    content:"DayQ";
-    display:block;
-    font-size:1rem;
-    font-weight:900;
-    color:var(--a);
-    padding:4px 12px 16px;
-    letter-spacing:-.02em;
     flex-shrink:0;
   }
 
-  /* آیتم‌های ناوبری — ردیف عمودی */
-  .ni{
-    flex:none;
-    flex-direction:row;
-    justify-content:flex-start;
-    padding:9px 12px;
-    border-radius:var(--r2);
-    margin:0;
-    gap:10px;
-    width:100%;
-    text-align:right;
+  /* صفحه‌ها — relative داخل wrapper، جریان طبیعی */
+  #desktopContent .page,
+  .page{
+    position:static !important;
+    top:auto !important;bottom:auto !important;
+    left:auto !important;right:auto !important;
+    height:auto !important;
+    min-height:calc(100svh - 100px);
+    overflow-y:visible;
+    overflow-x:hidden;
+    max-width:none;
+    background:var(--bg0);
+    padding-bottom:40px;
   }
-  .ni.active{
-    background:var(--am);
-    color:var(--a);
-  }
-  .ni-lbl{
-    max-width:none !important;
-    opacity:1 !important;
-    font-size:.82rem;
-    font-weight:600;
-  }
-  .ni-dot{display:none;}
-  .ni svg{flex-shrink:0;}
+  #desktopContent .page.active,
+  .page.active{display:block !important;}
 
-  /* دکمهٔ «کار جدید» — بالای sidebar */
-  .nav-fab{
-    order:-1;
-    width:100%;
-    margin-bottom:12px;
-    flex-direction:row;
-    flex:none;
+  /* Sidebar */
+  .nav{
+    position:fixed;
+    top:0;right:0;left:auto;bottom:0;
+    width:220px;height:100svh;max-width:220px;
+    flex-direction:column;align-items:stretch;justify-content:flex-start;
+    border-top:none;border-bottom:none;border-right:none;
+    border-left:1px solid var(--b1);
+    padding:16px 10px 20px;gap:3px;overflow-y:auto;
+    background:var(--bg1);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);z-index:50;
   }
-  .nav-fab-btn{
-    width:100%;
-    border-radius:var(--r2);
-    height:40px;
-    gap:7px;
-    font-size:.82rem;
-  }
-  .nav-fab-btn::after{
-    content:"کار جدید";
-    color:#fff;
-    font-size:.82rem;
-    font-weight:700;
-    font-family:var(--f);
-  }
+  .nav::before{content:"DayQ";display:block;font-size:1rem;font-weight:900;color:var(--a);padding:4px 12px 16px;letter-spacing:-.02em;}
+  .ni{flex:none;flex-direction:row;justify-content:flex-start;padding:9px 12px;border-radius:var(--r2);margin:0;gap:10px;width:100%;}
+  .ni.active{background:var(--am);color:var(--a);}
+  .ni-lbl{max-width:none !important;opacity:1 !important;font-size:.82rem;font-weight:600;}
+  .ni-dot{display:none;}
+  .nav-fab{order:-1;width:100%;margin-bottom:12px;flex-direction:row;flex:none;}
+  .nav-fab-btn{width:100%;border-radius:var(--r2);height:40px;gap:7px;}
+  .nav-fab-btn::after{content:"کار جدید";color:#fff;font-size:.82rem;font-weight:700;font-family:var(--f);}
   [data-theme="dark"] .nav-fab-btn::after{color:#080c10;}
   .nav-fab-lbl{display:none;}
 
-  /* ─── محتوا ─── */
-  .page{
-    position:relative;
-    height:auto;
-    min-height:calc(100svh - var(--topbar-h));
-    max-width:none;
-    overflow-y:visible;
-    padding-bottom:32px;
-  }
-
-  /* حداکثر عرض خوانا برای محتوا */
-  .tlist,#bdList,.projects-list,.calendarWrap,
-  .wv-wrap,.cal-list-view,.bag-pg,.bag-page{
-    max-width:720px;
-    margin-left:auto;
-    margin-right:auto;
-  }
-
-  .qcap{
-    max-width:720px;
-    margin-left:auto;
-    margin-right:auto;
-    border-radius:var(--r3);
-    margin-top:6px;
-  }
-
-  .tbrow{
-    max-width:720px;
-    margin:0 auto;
-  }
-
-  .pg-title{font-size:1.4rem;}
-
-  /* ─── شیت‌ها روی دسکتاپ — dialog وسط، نه bottom sheet ─── */
+  /* شیت‌ها: dialog */
   .sheet{
-    /* پنهان‌شده با opacity، نه با translateY(100%) */
-    bottom:auto;
-    top:50%;
-    left:calc(50% - 110px); /* جبران sidebar راست */
-    transform:translate(-50%,-50%) scale(.95);
-    opacity:0;
-    pointer-events:none;
-    border-radius:var(--r4);
-    max-height:85vh;
+    bottom:auto;top:50%;left:calc(50% - 110px);
+    transform:translate(-50%,-50%) scale(.95);opacity:0;pointer-events:none;
+    border-radius:var(--r4);max-height:85vh;
     width:min(500px, calc(100vw - 260px));
-    border:1px solid var(--b1);
-    box-shadow:0 24px 80px rgba(0,0,0,.22);
+    border:1px solid var(--b1);box-shadow:0 24px 80px rgba(0,0,0,.22);
     transition:transform .25s var(--ease), opacity .2s, background .25s;
   }
-  .sheet.open{
-    transform:translate(-50%,-50%) scale(1);
-    opacity:1;
-    pointer-events:auto;
-  }
+  .sheet.open{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:auto;}
 
-  /* ─── Toast ─── */
-  .toast{
-    bottom:24px;
-    top:auto;
-    left:auto;
-    right:calc(220px + 16px);
-    transform:translateY(12px);
-    max-width:320px;
-    border-radius:var(--r3);
-    opacity:0;
-    pointer-events:none;
-    transition:.25s var(--spring);
-  }
-  .toast.show{
-    transform:translateY(0);
-    opacity:1;
-    pointer-events:auto;
-  }
+  /* Toast */
+  .toast{bottom:24px;top:auto;left:auto;right:calc(220px + 16px);
+    transform:translateY(12px);max-width:320px;border-radius:var(--r3);
+    opacity:0;pointer-events:none;transition:.25s var(--spring);}
+  .toast.show{transform:translateY(0);opacity:1;pointer-events:auto;}
 
-  /* ─── Command Palette hint ─── */
-  .cmd-shortcut-hint{
-    display:flex;
-    align-items:center;
-    gap:6px;
-    padding:8px 14px;
-    border-radius:var(--r2);
-    background:var(--bg2);
-    border:1px solid var(--b1);
-    color:var(--t3);
-    font-size:.72rem;
-    margin:0 auto 8px;
-    max-width:720px;
-    cursor:pointer;
-    transition:.15s;
-  }
-  .cmd-shortcut-hint:hover{background:var(--bg3);}
-  .cmd-shortcut-hint kbd{
-    background:var(--bg3);
-    border:1px solid var(--b1);
-    border-radius:4px;
-    padding:1px 6px;
-    font-size:.68rem;
-    font-family:monospace;
-  }
-
-  /* ─── حلقهٔ پیشرفت ─── */
+  /* محتوا */
+  .tlist,#bdList,.projects-list,.calendarWrap,.wv-wrap,.cal-list-view,.bag-pg,.bag-page{max-width:720px;margin-left:auto;margin-right:auto;}
+  .qcap{max-width:720px;margin-left:auto;margin-right:auto;border-radius:var(--r3);margin-top:6px;}
+  .tbrow{max-width:720px;margin:0 auto;}
+  .pg-title{font-size:1.4rem;}
   .hrw svg{width:84px;height:84px;}
 
-  /* ─── hover states ─── */
+  /* Cmd hint */
+  .cmd-shortcut-hint{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--r2);background:var(--bg2);border:1px solid var(--b1);color:var(--t3);font-size:.72rem;margin:0 auto 8px;max-width:720px;cursor:pointer;transition:.15s;}
+  .cmd-shortcut-hint:hover{background:var(--bg3);}
+  .cmd-shortcut-hint kbd{background:var(--bg3);border:1px solid var(--b1);border-radius:4px;padding:1px 6px;font-size:.68rem;font-family:monospace;}
   .ni:hover:not(.active){background:var(--bg2);}
 }
 
 @media(min-width:900px) and (max-width:1200px){
   .nav{width:190px;}
-  #app{padding-right:190px;}
+  #desktopContent{margin-right:190px;}
 }
 
 </style>
@@ -3021,6 +2907,18 @@ function _syncLayoutVars(){
   }
 }
 function boot(){
+  // روی دسکتاپ: topbar و صفحه‌ها را داخل یک wrapper scroll‌پذیر می‌گذاریم
+  if(window.innerWidth>=900){
+    const app=document.getElementById('app');
+    const wrapper=document.createElement('div');
+    wrapper.id='desktopContent';
+    const topbar=document.querySelector('.topbar');
+    const pages=[...document.querySelectorAll('.page')];
+    // اضافه کردن topbar و همهٔ صفحه‌ها به wrapper
+    wrapper.appendChild(topbar);
+    pages.forEach(p=>wrapper.appendChild(p));
+    app.insertBefore(wrapper, app.firstChild);
+  }
   loadAll();loadProjects();applyTheme(cfg.theme);applyAppIcon(cfg.appIcon||'green');
   // ثبت Service Worker بی‌قید — حتی اگر Push را فعال نکرده باشد، چون Chrome برای نشان‌دادن دکمهٔ نصب نیاز دارد یک SW فعال ببیند
   if('serviceWorker' in navigator){
