@@ -1572,39 +1572,41 @@ select.fi{
     border-radius:var(--r3);
   }
 }
+.cmd-shortcut-hint{display:none;}
 /* ═══════════════════════════════════════
    DESKTOP LAYOUT — ≥900px
-   سایدبار چپ + محتوای راست
+   sidebar راست (RTL) + محتوا چپ
 ═══════════════════════════════════════ */
 @media(min-width:900px){
-  body{overflow:hidden;}
 
-  /* آپ کانتینر — کل عرض صفحه */
+  /* hide mobile-only elements */
+  .cmd-shortcut-hint{display:flex;}
+
+  /* ─── ظرف اصلی ─── */
   #app{
     max-width:100%;
-    display:grid;
-    height:100svh;
+    display:block;
+    padding-right:220px; /* فضا برای sidebar راست */
   }
 
-  /* Topbar — داخل محتوا، نه روی کل صفحه */
+  /* ─── Topbar ─── */
   .topbar{
     position:sticky;
     top:0;
-    left:auto;right:auto;
-    width:100%;
+    left:0;right:0;
     max-width:100%;
-    border-bottom:1px solid var(--b1);
-    border-right:none;
+    z-index:40;
     backdrop-filter:blur(16px);
     -webkit-backdrop-filter:blur(16px);
-    z-index:40;
   }
 
-  /* ناوبری پایین — تبدیل به sidebar چپ */
+  /* ─── Sidebar (راست، RTL) ─── */
   .nav{
     position:fixed;
-    top:0;left:0;
-    bottom:auto;right:auto;
+    top:0;
+    right:0;       /* RTL: سمت راست */
+    left:auto;
+    bottom:0;
     width:220px;
     height:100svh;
     max-width:220px;
@@ -1612,42 +1614,41 @@ select.fi{
     align-items:stretch;
     justify-content:flex-start;
     border-top:none;
+    border-bottom:none;
+    border-right:none;
     border-left:1px solid var(--b1);
-    border-right:1px solid var(--b1);
-    padding:20px 10px 20px;
-    gap:4px;
+    padding:16px 10px 20px;
+    gap:3px;
     overflow-y:auto;
     background:var(--bg1);
     backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
     z-index:50;
   }
-  /* محتوا را از زیر sidebar بیاور بیرون */
-  .topbar,.page,.qcap{
-    margin-right:0;
-    margin-left:220px;
-  }
 
-  /* لوگو/نام اپ بالای sidebar */
+  /* نام اپ بالای sidebar */
   .nav::before{
     content:"DayQ";
     display:block;
-    font-size:1.1rem;
+    font-size:1rem;
     font-weight:900;
     color:var(--a);
-    padding:6px 12px 18px;
+    padding:4px 12px 16px;
     letter-spacing:-.02em;
+    flex-shrink:0;
   }
 
-  /* آیتم‌های nav — ردیف‌های عمودی */
+  /* آیتم‌های ناوبری — ردیف عمودی */
   .ni{
     flex:none;
     flex-direction:row;
     justify-content:flex-start;
-    padding:10px 14px;
+    padding:9px 12px;
     border-radius:var(--r2);
     margin:0;
-    gap:11px;
+    gap:10px;
     width:100%;
+    text-align:right;
   }
   .ni.active{
     background:var(--am);
@@ -1660,104 +1661,108 @@ select.fi{
     font-weight:600;
   }
   .ni-dot{display:none;}
+  .ni svg{flex-shrink:0;}
 
-  /* دکمهٔ FAB (افزودن) — در sidebar */
+  /* دکمهٔ «کار جدید» — بالای sidebar */
   .nav-fab{
     order:-1;
     width:100%;
     margin-bottom:12px;
+    flex-direction:row;
+    flex:none;
   }
   .nav-fab-btn{
     width:100%;
     border-radius:var(--r2);
-    height:42px;
-    justify-content:center;
-    gap:8px;
+    height:40px;
+    gap:7px;
+    font-size:.82rem;
   }
   .nav-fab-btn::after{
     content:"کار جدید";
     color:#fff;
     font-size:.82rem;
     font-weight:700;
+    font-family:var(--f);
   }
   [data-theme="dark"] .nav-fab-btn::after{color:#080c10;}
   .nav-fab-lbl{display:none;}
 
-  /* ناحیهٔ محتوا — کل ستون راست */
+  /* ─── محتوا ─── */
   .page{
-    grid-area:content;
     position:relative;
-    height:100svh;
+    height:auto;
+    min-height:calc(100svh - var(--topbar-h));
     max-width:none;
-    overflow-y:auto;
-    padding-bottom:24px;
+    overflow-y:visible;
+    padding-bottom:32px;
   }
 
-  /* padding-top چون topbar sticky است */
-  .page.active{
-    padding-top:0;
-  }
-
-  /* کانتینر محتوا — حداکثر عرض خوانا */
-  .tlist,.bag-pg,.bag-page,#bdList,.projects-list,
-  .calendarWrap,.wv-wrap,.cal-list-view{
-    max-width:760px;
+  /* حداکثر عرض خوانا برای محتوا */
+  .tlist,#bdList,.projects-list,.calendarWrap,
+  .wv-wrap,.cal-list-view,.bag-pg,.bag-page{
+    max-width:720px;
     margin-left:auto;
     margin-right:auto;
   }
 
-  /* Quick capture — عریض‌تر */
   .qcap{
-    max-width:760px;
+    max-width:720px;
     margin-left:auto;
     margin-right:auto;
     border-radius:var(--r3);
-    margin-top:8px;
-    margin-bottom:6px;
+    margin-top:6px;
   }
 
-  /* کارت‌های تسک — کمی بزرگ‌تر */
-  .tc-wrap{
-    padding:12px 14px;
+  .tbrow{
+    max-width:720px;
+    margin:0 auto;
   }
-  .tc-body{font-size:.9rem;}
 
-  /* هدر صفحه */
-  .pg-title{font-size:1.5rem;}
-  .tbrow{max-width:760px;margin:0 auto;}
+  .pg-title{font-size:1.4rem;}
 
-  /* شیت‌ها روی دسکتاپ — centered dialog به‌جای bottom sheet */
+  /* ─── شیت‌ها روی دسکتاپ — dialog وسط، نه bottom sheet ─── */
   .sheet{
+    /* پنهان‌شده با opacity، نه با translateY(100%) */
     bottom:auto;
     top:50%;
-    left:50%;
-    transform:translate(-50%,-50%) scale(.96);
+    left:calc(50% - 110px); /* جبران sidebar راست */
+    transform:translate(-50%,-50%) scale(.95);
+    opacity:0;
+    pointer-events:none;
     border-radius:var(--r4);
     max-height:85vh;
-    width:480px;
+    width:min(500px, calc(100vw - 260px));
     border:1px solid var(--b1);
-    box-shadow:0 24px 80px rgba(0,0,0,.2);
+    box-shadow:0 24px 80px rgba(0,0,0,.22);
+    transition:transform .25s var(--ease), opacity .2s, background .25s;
   }
   .sheet.open{
     transform:translate(-50%,-50%) scale(1);
+    opacity:1;
+    pointer-events:auto;
   }
 
-  /* Toast روی دسکتاپ */
+  /* ─── Toast ─── */
   .toast{
-    bottom:auto;
-    top:24px;
+    bottom:24px;
+    top:auto;
     left:auto;
-    right:24px;
-    transform:translateX(120%);
-    max-width:340px;
+    right:calc(220px + 16px);
+    transform:translateY(12px);
+    max-width:320px;
     border-radius:var(--r3);
+    opacity:0;
+    pointer-events:none;
+    transition:.25s var(--spring);
   }
-  .toast.show{transform:translateX(0);}
+  .toast.show{
+    transform:translateY(0);
+    opacity:1;
+    pointer-events:auto;
+  }
 
-  /* حلقهٔ پیشرفت — بزرگ‌تر */
-  .hrw svg{width:90px;height:90px;}
-
-  /* Command Palette hint */
+  /* ─── Command Palette hint ─── */
   .cmd-shortcut-hint{
     display:flex;
     align-items:center;
@@ -1769,9 +1774,11 @@ select.fi{
     color:var(--t3);
     font-size:.72rem;
     margin:0 auto 8px;
-    max-width:760px;
+    max-width:720px;
     cursor:pointer;
+    transition:.15s;
   }
+  .cmd-shortcut-hint:hover{background:var(--bg3);}
   .cmd-shortcut-hint kbd{
     background:var(--bg3);
     border:1px solid var(--b1);
@@ -1780,11 +1787,17 @@ select.fi{
     font-size:.68rem;
     font-family:monospace;
   }
+
+  /* ─── حلقهٔ پیشرفت ─── */
+  .hrw svg{width:84px;height:84px;}
+
+  /* ─── hover states ─── */
+  .ni:hover:not(.active){background:var(--bg2);}
 }
 
 @media(min-width:900px) and (max-width:1200px){
-  .nav{width:180px;}
-  #app{grid-template-columns:180px 1fr;}
+  .nav{width:190px;}
+  #app{padding-right:190px;}
 }
 
 </style>

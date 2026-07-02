@@ -47,8 +47,8 @@ const seedTask = (over = {}) => Object.assign({
       pg: document.querySelector('.page.active').getBoundingClientRect(),
     }));
     check('عرض ویندوز: #app کل عرض صفحه را می‌گیرد', rects.app.width > 1800);
-    check('عرض ویندوز: sidebar ناوبری در چپ صفحه', rects.nav.left < 10);
-    check('عرض ویندوز: صفحهٔ اصلی بعد از sidebar', rects.pg.left >= 160);
+    check('عرض ویندوز: sidebar ناوبری در راست صفحه (RTL)', rects.nav.right > 1900);
+    check('عرض ویندوز: sidebar عرض مناسب دارد', rects.nav.width >= 180 && rects.nav.width <= 240);
 
     // باز/بسته‌شدن شیت با کلیک واقعی (همان باگ اصلی ویندوز)
     await page.evaluate((t) => { tasks.push(t); saveAll(); renderTasks(); }, seedTask({ id: 'reg1' }));
