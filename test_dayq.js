@@ -264,6 +264,20 @@ const seedTask = (over = {}) => Object.assign({
     await page.close();
   }
 
+  // ── فیکس: ارقام عربی (٠-٩، نه ۰-۹ فارسی) که کیبورد فارسی گوشی واقعاً تولید می‌کند ──
+  {
+    const page = await browser.newPage();
+    await page.goto(FILE);
+    await page.waitForTimeout(300);
+
+    const arabicDigitParse = await page.evaluate(() => nlpNormalize('٩ آذر'));
+    check('ارقام عربی (٩) در nlpNormalize به فارسی (۹) تبدیل می‌شوند', arabicDigitParse.includes('۹'));
+
+    const azarNotAban = await page.evaluate(() => faToEn('١٥'));
+    check('faToEn ارقام عربی را هم می‌شناسد (١٥ → 15)', azarNotAban === '15');
+    await page.close();
+  }
+
   await browser.close();
 
   console.log(`\n${'═'.repeat(40)}`);
