@@ -1922,6 +1922,16 @@ select.fi{
     </div>
     <div class="sh-body">
       <div class="f-f">
+        <div class="f-lbl">بنویس، خودش تشخیص می‌ده</div>
+        <input id="bdQuick" type="text" class="fi" placeholder="مثلاً: تولد رضا ۱۴ تیر" autocomplete="off" oninput="bdQuickParse()" style="border-color:var(--a);">
+        <div id="bdQuickHint" style="font-size:.68rem;color:var(--t3);margin-top:4px;min-height:14px;"></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin:2px 0;">
+        <div style="flex:1;height:1px;background:var(--b2);"></div>
+        <div style="font-size:.66rem;color:var(--t4);">یا دستی پر کن</div>
+        <div style="flex:1;height:1px;background:var(--b2);"></div>
+      </div>
+      <div class="f-f">
         <div class="f-lbl">نام</div>
         <input id="bdName" type="text" class="fi" placeholder="مثلاً: رضا، مامان، آناهیتا..." autocomplete="off">
       </div>
@@ -4528,6 +4538,57 @@ function renderBirthdayPage(){
 }
 
 let _bdEditType='birthday';
+const BD_MONTH_WORDS={'فروردین':1,'اردیبهشت':2,'خرداد':3,'تیر':4,'مرداد':5,'شهریور':6,'مهر':7,'آبان':8,'ابان':8,'آذر':9,'اذر':9,'دی':10,'بهمن':11,'اسفند':12};
+function bdQuickParse(){
+  const raw=document.getElementById('bdQuick').value.trim();
+  const hint=document.getElementById('bdQuickHint');
+  if(!raw){ hint.textContent=''; return; }
+
+  // نوع مناسبت
+  let type='birthday';
+  if(/سالگرد/.test(raw)) type='anniversary';
+  else if(/تولد/.test(raw)) type='birthday';
+
+  // عدد روز + اسم ماه (هرترتیب)
+  const monthPattern=Object.keys(BD_MONTH_WORDS).join('|');
+  const re=new RegExp('([۰-۹0-9]{1,2})\\s*('+monthPattern+')|('+monthPattern+')\\s*([۰-۹0-9]{1,2})');
+  const m=raw.match(re);
+  let day=null, month=null;
+  if(m){
+    if(m[1]&&m[2]){ day=parseInt(faToEn(m[1])); month=BD_MONTH_WORDS[m[2]]; }
+    else if(m[3]&&m[4]){ month=BD_MONTH_WORDS[m[3]]; day=parseInt(faToEn(m[4])); }
+  }
+
+  // سال (عدد ۴رقمی جدا، برای سن)
+  const yearMatch=raw.match(/[۰-۹0-9]{4}/);
+  const year=yearMatch?parseInt(faToEn(yearMatch[0])):null;
+
+  // نام — باقیماندهٔ متن بعد از حذف کلمات کلیدی و تاریخ
+  let name=raw
+    .replace(/تولد|سالگرد|مناسبت/g,'')
+    .replace(re,'')
+    .replace(yearMatch?yearMatch[0]:'','')
+    .replace(/\s+/g,' ')
+    .trim();
+
+  if(day&&month&&name){
+    document.getElementById('bdName').value=name;
+    document.getElementById('bdMonth').value=month;
+    document.getElementById('bdDay').value=day;
+    document.getElementById('bdYear').value=(year&&year>1300&&year<1410)?year:'';
+    _bdEditType=type;
+    document.querySelectorAll('.bd-type-btn').forEach(b=>b.classList.toggle('active',b.dataset.t===type));
+    const monthName=Object.keys(BD_MONTH_WORDS).find(k=>BD_MONTH_WORDS[k]===month&&k.length>3)||Object.keys(BD_MONTH_WORDS)[month-1];
+    hint.innerHTML=`<span style="color:var(--a);">✓ ${esc(name)} — ${num(day)} ${monthName}${year?' — '+num(year):''}</span>`;
+  } else if(day&&month){
+    document.getElementById('bdMonth').value=month;
+    document.getElementById('bdDay').value=day;
+    hint.textContent='تاریخ پیدا شد — نام رو هم بنویس';
+  } else {
+    document.getElementById('bdName').value='';
+    hint.textContent='';
+  }
+}
 function selectBdType(t,el){
   _bdEditType=t;
   document.querySelectorAll('.bd-type-btn').forEach(b=>b.classList.toggle('active',b.dataset.t===t));
@@ -4536,6 +4597,8 @@ function selectBdType(t,el){
 function openBirthdayForm(id){
   _bdEditType='birthday';
   document.querySelectorAll('.bd-type-btn').forEach(b=>b.classList.toggle('active',b.dataset.t==='birthday'));
+  document.getElementById('bdQuick').value='';
+  document.getElementById('bdQuickHint').textContent='';
   if(id){
     const b=birthdays.find(x=>x.id===id);
     if(!b) return;
@@ -4564,7 +4627,7 @@ function openBirthdayForm(id){
     document.getElementById('bdDeleteBtn').style.display='none';
   }
   openSheet('shBirthday');
-  setTimeout(()=>document.getElementById('bdName').focus(),200);
+  setTimeout(()=>document.getElementById(id?'bdName':'bdQuick').focus(),200);
 }
 
 function saveBirthday(){
