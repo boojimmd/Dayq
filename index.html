@@ -1912,8 +1912,7 @@ select.fi{
   </div>
 </div>
 <!-- فرم افزودن/ویرایش تولد -->
-<div class="sheet-overlay" id="shBirthday" onclick="if(event.target===this)closeAll()">
-  <div class="sheet">
+<div class="sheet" id="shBirthday">
     <div class="sh-handle"></div>
     <div class="sh-head">
       <div class="sh-tr">
@@ -1977,7 +1976,6 @@ select.fi{
       <button class="sh-sub" onclick="saveBirthday()">ذخیره</button>
       <button id="bdDeleteBtn" onclick="deleteBirthday()" style="display:none;width:100%;background:transparent;color:var(--red);border:none;padding:8px;font-size:.8rem;cursor:pointer;">حذف این مناسبت</button>
     </div>
-  </div>
 </div>
 <div class="page" id="pageCalendar">
   <div class="cal-page">
