@@ -2908,9 +2908,15 @@ function boot(){
   if(taskList)taskList.classList.remove('bulk-mode');
   // OS theme listener
   (()=>{const mq=window.matchMedia('(prefers-color-scheme:dark)');
-  const fn=()=>{if(cfg.theme==='auto'){applyTheme('auto');if(typeof setGreeting==='function')setGreeting();}};
-  if(mq.addEventListener)mq.addEventListener('change',fn);
-  else if(mq.addListener)mq.addListener(fn);
+  const fn=()=>{
+    // اگر کاربر «خودکار» انتخاب کرده یا data-themeMode=auto، با تغییر سیستم بلافاصله عوض شود
+    if(cfg.theme==='auto'||document.body.dataset.themeMode==='auto'){
+      applyTheme('auto');
+      if(typeof setGreeting==='function') setGreeting();
+    }
+  };
+  if(mq.addEventListener) mq.addEventListener('change',fn);
+  else if(mq.addListener) mq.addListener(fn);
 })();
   // iOS: prevent layout shift on keyboard open
   if(/iPad|iPhone|iPod/.test(navigator.userAgent)){
@@ -3033,11 +3039,14 @@ function saveCfg(){try{localStorage.setItem(SS,JSON.stringify(cfg));}catch(e){}}
 function applyTheme(t){
   const sysDark=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches;
   if(t==='auto'){
-    document.body.removeAttribute('data-theme');
+    // در حالت خودکار، data-theme را با مقدار واقعی سیستم ست می‌کنیم تا هم CSS هم JS به‌درستی کار کنند
+    document.body.setAttribute('data-theme', sysDark?'dark':'light');
     document.body.dataset.effectiveTheme=sysDark?'dark':'light';
+    document.body.dataset.themeMode='auto'; // نشانه‌ای برای اینکه «خودکار» انتخاب شده
   } else {
     document.body.setAttribute('data-theme',t);
     document.body.dataset.effectiveTheme=t;
+    delete document.body.dataset.themeMode;
   }
   const isDark=t==='dark'||(t==='auto'&&sysDark);
   const ico=document.getElementById('themIco');
