@@ -40,16 +40,15 @@ const seedTask = (over = {}) => Object.assign({
     await page.waitForTimeout(600);
     check('بوت بدون خطای JS', errors.length === 0);
 
-    // مرکزسازی روی صفحهٔ عریض
+    // layout روی صفحهٔ عریض — حالا sidebar چپ + محتوا راست (نه ستون وسط‌چین)
     const rects = await page.evaluate(() => ({
       app: document.getElementById('app').getBoundingClientRect(),
-      topbar: document.querySelector('.topbar').getBoundingClientRect(),
+      nav: document.querySelector('.nav').getBoundingClientRect(),
       pg: document.querySelector('.page.active').getBoundingClientRect(),
     }));
-    const expLeft = (1920 - 600) / 2;
-    check('عرض ویندوز: #app وسط‌چین', Math.abs(rects.app.left - expLeft) < 2);
-    check('عرض ویندوز: topbar وسط‌چین', Math.abs(rects.topbar.left - expLeft) < 2);
-    check('عرض ویندوز: صفحهٔ اصلی وسط‌چین', Math.abs(rects.pg.left - expLeft) < 2);
+    check('عرض ویندوز: #app کل عرض صفحه را می‌گیرد', rects.app.width > 1800);
+    check('عرض ویندوز: sidebar ناوبری در چپ صفحه', rects.nav.left < 10);
+    check('عرض ویندوز: صفحهٔ اصلی بعد از sidebar', rects.pg.left >= 160);
 
     // باز/بسته‌شدن شیت با کلیک واقعی (همان باگ اصلی ویندوز)
     await page.evaluate((t) => { tasks.push(t); saveAll(); renderTasks(); }, seedTask({ id: 'reg1' }));

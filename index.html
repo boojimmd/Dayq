@@ -1571,7 +1571,223 @@ select.fi{
     transform:none;
     border-radius:var(--r3);
   }
-}</style>
+}
+/* ═══════════════════════════════════════
+   DESKTOP LAYOUT — ≥900px
+   سایدبار چپ + محتوای راست
+═══════════════════════════════════════ */
+@media(min-width:900px){
+  body{overflow:hidden;}
+
+  /* آپ کانتینر — کل عرض صفحه */
+  #app{
+    max-width:100%;
+    display:grid;
+    height:100svh;
+  }
+
+  /* Topbar — داخل محتوا، نه روی کل صفحه */
+  .topbar{
+    position:sticky;
+    top:0;
+    left:auto;right:auto;
+    width:100%;
+    max-width:100%;
+    border-bottom:1px solid var(--b1);
+    border-right:none;
+    backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
+    z-index:40;
+  }
+
+  /* ناوبری پایین — تبدیل به sidebar چپ */
+  .nav{
+    position:fixed;
+    top:0;left:0;
+    bottom:auto;right:auto;
+    width:220px;
+    height:100svh;
+    max-width:220px;
+    flex-direction:column;
+    align-items:stretch;
+    justify-content:flex-start;
+    border-top:none;
+    border-left:1px solid var(--b1);
+    border-right:1px solid var(--b1);
+    padding:20px 10px 20px;
+    gap:4px;
+    overflow-y:auto;
+    background:var(--bg1);
+    backdrop-filter:blur(12px);
+    z-index:50;
+  }
+  /* محتوا را از زیر sidebar بیاور بیرون */
+  .topbar,.page,.qcap{
+    margin-right:0;
+    margin-left:220px;
+  }
+
+  /* لوگو/نام اپ بالای sidebar */
+  .nav::before{
+    content:"DayQ";
+    display:block;
+    font-size:1.1rem;
+    font-weight:900;
+    color:var(--a);
+    padding:6px 12px 18px;
+    letter-spacing:-.02em;
+  }
+
+  /* آیتم‌های nav — ردیف‌های عمودی */
+  .ni{
+    flex:none;
+    flex-direction:row;
+    justify-content:flex-start;
+    padding:10px 14px;
+    border-radius:var(--r2);
+    margin:0;
+    gap:11px;
+    width:100%;
+  }
+  .ni.active{
+    background:var(--am);
+    color:var(--a);
+  }
+  .ni-lbl{
+    max-width:none !important;
+    opacity:1 !important;
+    font-size:.82rem;
+    font-weight:600;
+  }
+  .ni-dot{display:none;}
+
+  /* دکمهٔ FAB (افزودن) — در sidebar */
+  .nav-fab{
+    order:-1;
+    width:100%;
+    margin-bottom:12px;
+  }
+  .nav-fab-btn{
+    width:100%;
+    border-radius:var(--r2);
+    height:42px;
+    justify-content:center;
+    gap:8px;
+  }
+  .nav-fab-btn::after{
+    content:"کار جدید";
+    color:#fff;
+    font-size:.82rem;
+    font-weight:700;
+  }
+  [data-theme="dark"] .nav-fab-btn::after{color:#080c10;}
+  .nav-fab-lbl{display:none;}
+
+  /* ناحیهٔ محتوا — کل ستون راست */
+  .page{
+    grid-area:content;
+    position:relative;
+    height:100svh;
+    max-width:none;
+    overflow-y:auto;
+    padding-bottom:24px;
+  }
+
+  /* padding-top چون topbar sticky است */
+  .page.active{
+    padding-top:0;
+  }
+
+  /* کانتینر محتوا — حداکثر عرض خوانا */
+  .tlist,.bag-pg,.bag-page,#bdList,.projects-list,
+  .calendarWrap,.wv-wrap,.cal-list-view{
+    max-width:760px;
+    margin-left:auto;
+    margin-right:auto;
+  }
+
+  /* Quick capture — عریض‌تر */
+  .qcap{
+    max-width:760px;
+    margin-left:auto;
+    margin-right:auto;
+    border-radius:var(--r3);
+    margin-top:8px;
+    margin-bottom:6px;
+  }
+
+  /* کارت‌های تسک — کمی بزرگ‌تر */
+  .tc-wrap{
+    padding:12px 14px;
+  }
+  .tc-body{font-size:.9rem;}
+
+  /* هدر صفحه */
+  .pg-title{font-size:1.5rem;}
+  .tbrow{max-width:760px;margin:0 auto;}
+
+  /* شیت‌ها روی دسکتاپ — centered dialog به‌جای bottom sheet */
+  .sheet{
+    bottom:auto;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%) scale(.96);
+    border-radius:var(--r4);
+    max-height:85vh;
+    width:480px;
+    border:1px solid var(--b1);
+    box-shadow:0 24px 80px rgba(0,0,0,.2);
+  }
+  .sheet.open{
+    transform:translate(-50%,-50%) scale(1);
+  }
+
+  /* Toast روی دسکتاپ */
+  .toast{
+    bottom:auto;
+    top:24px;
+    left:auto;
+    right:24px;
+    transform:translateX(120%);
+    max-width:340px;
+    border-radius:var(--r3);
+  }
+  .toast.show{transform:translateX(0);}
+
+  /* حلقهٔ پیشرفت — بزرگ‌تر */
+  .hrw svg{width:90px;height:90px;}
+
+  /* Command Palette hint */
+  .cmd-shortcut-hint{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:8px 14px;
+    border-radius:var(--r2);
+    background:var(--bg2);
+    border:1px solid var(--b1);
+    color:var(--t3);
+    font-size:.72rem;
+    margin:0 auto 8px;
+    max-width:760px;
+    cursor:pointer;
+  }
+  .cmd-shortcut-hint kbd{
+    background:var(--bg3);
+    border:1px solid var(--b1);
+    border-radius:4px;
+    padding:1px 6px;
+    font-size:.68rem;
+    font-family:monospace;
+  }
+}
+
+@media(min-width:900px) and (max-width:1200px){
+  .nav{width:180px;}
+  #app{grid-template-columns:180px 1fr;}
+}
+
+</style>
 </head>
 <body>
 <div id="app">
@@ -1603,6 +1819,12 @@ select.fi{
 
   <!-- Quick Capture -->
   <div style="height:var(--topbar-h);flex-shrink:0;"></div>
+  <div class="cmd-shortcut-hint" onclick="openCmdPalette()" title="Command Palette">
+    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <span>جستجو یا انجام هر کار...</span>
+    <span style="margin-right:auto;"></span>
+    <kbd>Ctrl</kbd><kbd>K</kbd>
+  </div>
   <div class="qcap" id="qcapBox" onclick="document.getElementById('qcapInp').focus()">
     <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     <textarea class="qcap-inp" id="qcapInp" placeholder="کار جدید... مثلاً: جلسه فردا ساعت ۳ فوری" maxlength="400" autocomplete="off" rows="1" enterkeyhint="done" dir="rtl"></textarea>
@@ -4821,6 +5043,101 @@ function openCmd(){
   document.querySelectorAll('.rr').forEach(b=>b.classList.toggle('sel',b.dataset.r==='none'));
   openSheet('shTask');
 }
+
+/* ═══════════════════════════════════════
+   Command Palette — Ctrl+K / ⌘K
+   دسترسی سریع به هر اکشن بدون لمس موس
+═══════════════════════════════════════ */
+const CMD_ITEMS=[
+  {label:'افزودن کار جدید',icon:'➕',action:()=>openCmd(),keys:'Ctrl+N'},
+  {label:'صفحهٔ خانه',icon:'🏠',action:()=>goPage('Home')},
+  {label:'تقویم',icon:'📅',action:()=>goPage('Calendar')},
+  {label:'پروژه‌ها',icon:'📋',action:()=>goPage('Projects')},
+  {label:'کیف من',icon:'🎒',action:()=>goPage('Bag')},
+  {label:'تولد و مناسبت‌ها',icon:'🎂',action:()=>goPage('Birthdays')},
+  {label:'تنظیمات',icon:'⚙️',action:()=>goPage('Me')},
+  {label:'جستجو در کارها',icon:'🔍',action:()=>openSearch()},
+  {label:'حالت فوکوس',icon:'🎯',action:()=>{const t=tasks.find(x=>!x.done&&x.status!=='done');if(t)startFocusMode(t.id,{stopPropagation:()=>{}});}},
+  {label:'تم روشن',icon:'☀️',action:()=>setTheme('light')},
+  {label:'تم تاریک',icon:'🌙',action:()=>setTheme('dark')},
+  {label:'تم خودکار',icon:'🔄',action:()=>setTheme('auto')},
+  {label:'تایمر / زنگ',icon:'⏰',action:()=>openTimer()},
+  {label:'بستن',icon:'✕',action:()=>closeCmdPalette(),keys:'Esc'},
+];
+
+let _cmdIdx=0;
+
+function openCmdPalette(){
+  const el=document.getElementById('cmdPalette');
+  if(!el) return;
+  el.style.display='flex';
+  el.style.alignItems='flex-start';
+  document.getElementById('cmdInput').value='';
+  _cmdIdx=0;
+  cmdFilter();
+  setTimeout(()=>document.getElementById('cmdInput').focus(),50);
+}
+
+function closeCmdPalette(){
+  const el=document.getElementById('cmdPalette');
+  if(el) el.style.display='none';
+}
+
+function cmdFilter(){
+  const q=document.getElementById('cmdInput').value.trim().toLowerCase();
+  const taskResults=q.length>1?tasks.filter(t=>!t.archived&&(t.text||'').includes(q)).slice(0,4).map(t=>({
+    label:t.text,icon:t.done?'✓':'•',action:()=>{closeCmdPalette();openNote(t.id,{stopPropagation:()=>{}});}
+  })):[];
+  const filtered=[...CMD_ITEMS.filter(i=>!q||(i.label||'').includes(q)||(i.keys||'').toLowerCase().includes(q)),...taskResults];
+  _cmdIdx=0;
+  const list=document.getElementById('cmdList');
+  if(!filtered.length){list.innerHTML='<div style="padding:16px;text-align:center;color:var(--t3);font-size:.82rem;">نتیجه‌ای نیست</div>';return;}
+  list.innerHTML=filtered.map((item,i)=>`
+    <div class="cmd-item${i===0?' cmd-sel':''}" data-idx="${i}"
+      style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r2);cursor:pointer;transition:.1s;"
+      onmouseenter="cmdHover(${i})"
+      onclick="cmdRun(${i})">
+      <span style="font-size:.95rem;width:20px;text-align:center;flex-shrink:0;">${item.icon}</span>
+      <span style="flex:1;font-size:.84rem;color:var(--t1);">${esc(item.label)}</span>
+      ${item.keys?`<kbd style="font-size:.62rem;color:var(--t4);background:var(--bg2);border:1px solid var(--b1);border-radius:4px;padding:1px 6px;">${item.keys}</kbd>`:''}
+    </div>`).join('');
+  list._filteredItems=filtered;
+  cmdHighlight(0);
+}
+
+function cmdHover(i){_cmdIdx=i;cmdHighlight(i);}
+
+function cmdHighlight(i){
+  document.querySelectorAll('#cmdList .cmd-item').forEach((el,idx)=>{
+    const active=idx===i;
+    el.style.background=active?'var(--am)':'';
+    el.style.color=active?'var(--a)':'';
+    if(active) el.scrollIntoView({block:'nearest'});
+  });
+}
+
+function cmdRun(i){
+  const list=document.getElementById('cmdList');
+  const item=list._filteredItems?.[i];
+  if(!item) return;
+  closeCmdPalette();
+  setTimeout(()=>item.action(),100);
+}
+
+function cmdKey(e){
+  const items=document.querySelectorAll('#cmdList .cmd-item');
+  if(e.key==='ArrowDown'){e.preventDefault();_cmdIdx=(_cmdIdx+1)%items.length;cmdHighlight(_cmdIdx);}
+  else if(e.key==='ArrowUp'){e.preventDefault();_cmdIdx=(_cmdIdx-1+items.length)%items.length;cmdHighlight(_cmdIdx);}
+  else if(e.key==='Enter'){e.preventDefault();cmdRun(_cmdIdx);}
+  else if(e.key==='Escape'){closeCmdPalette();}
+}
+
+// Keyboard shortcut — Ctrl+K یا Cmd+K
+document.addEventListener('keydown',e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();openCmdPalette();}
+  if((e.ctrlKey||e.metaKey)&&e.key==='n'){e.preventDefault();openCmd();}
+  if(e.key==='Escape'&&document.getElementById('cmdPalette')?.style.display!=='none'){closeCmdPalette();}
+});
 function openSheet(id){
   document.getElementById('ov').classList.add('open');
   document.getElementById(id).classList.add('open');
@@ -8947,5 +9264,20 @@ boot();
     <button onclick="closeOverdueModal()" style="width:100%;margin-top:16px;padding:12px;border-radius:var(--r2);border:none;background:var(--bg2);color:var(--t2);font-weight:700;font-size:.85rem;cursor:pointer;">همه رو نگه دار</button>
   </div>
 </div>
+
+<!-- ═══ Command Palette ═══ -->
+<div id="cmdPalette" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);" onclick="if(event.target===this)closeCmdPalette()">
+  <div style="position:absolute;top:18%;left:50%;transform:translateX(-50%);width:min(540px,90vw);background:var(--bg1);border-radius:var(--r4);border:1px solid var(--b1);box-shadow:0 32px 80px rgba(0,0,0,.3);overflow:hidden;">
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--b2);">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--t3)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="cmdInput" type="text" autocomplete="off" spellcheck="false"
+        style="flex:1;border:none;outline:none;background:transparent;font-size:.9rem;color:var(--t1);font-family:var(--f);"
+        placeholder="جستجو یا دستور..." oninput="cmdFilter()" onkeydown="cmdKey(event)">
+      <kbd style="font-size:.65rem;color:var(--t4);background:var(--bg2);border:1px solid var(--b1);border-radius:4px;padding:2px 6px;">Esc</kbd>
+    </div>
+    <div id="cmdList" style="max-height:340px;overflow-y:auto;padding:6px;"></div>
+  </div>
+</div>
+
 </body>
 </html>
