@@ -1679,6 +1679,54 @@ select.fi{
   .cmd-shortcut-hint:hover{background:var(--bg3);}
   .cmd-shortcut-hint kbd{background:var(--bg3);border:1px solid var(--b1);border-radius:4px;padding:1px 6px;font-size:.68rem;font-family:monospace;}
   .ni:hover:not(.active){background:var(--bg2);}
+
+  /* ─── حذف padding-top اضافی صفحه‌ها (برای موبایل با topbar:fixed بود) ─── */
+  .me-pg,
+  .bag-pg,
+  .bag-page,
+  [style*="padding-top:calc(var(--topbar-h)"],
+  .cal-page-top,
+  .proj-page-top{
+    padding-top:0 !important;
+  }
+
+  /* ─── فاصله‌دهنده height:topbar-h که بعضی صفحه‌ها دارند ─── */
+  #desktopContent [style*="height:var(--topbar-h)"],
+  .page [style*="height:var(--topbar-h)"]{
+    display:none !important;
+  }
+
+  /* ─── تقویم: max-width نباید روی grid اعمال شود ─── */
+  .calendarWrap,.cal-month-grid,.wv-wrap,.wv-grid{
+    max-width:none !important;
+    margin-left:0;margin-right:0;
+  }
+  /* ولی هدر تقویم max-width دارد */
+  .cal-page-top,.cvt-wrap{
+    max-width:800px;
+    margin-left:auto;margin-right:auto;
+  }
+
+  /* ─── Quick Capture عریض‌تر ─── */
+  .qcap{
+    max-width:760px !important;
+  }
+
+  /* ─── صفحهٔ من: فونت و فاصله بزرگ‌تر ─── */
+  .srow{padding:13px 16px;}
+  .srow-ttl{font-size:.9rem;}
+  .srow-sub{font-size:.76rem;}
+
+  /* ─── کارت‌های تسک بهتر ─── */
+  .tc-wrap{
+    border-radius:var(--r3);
+    padding:12px 14px;
+  }
+  .tc-body{font-size:.88rem;}
+  .tc-txt{font-size:.88rem;}
+
+  /* ─── هدر صفحه ─── */
+  .pg-title{font-size:1.45rem;}
 }
 
 @media(min-width:900px) and (max-width:1200px){
