@@ -1966,7 +1966,7 @@ select.fi{
       </div>
       <div class="f-f">
         <div class="f-lbl">سال تولد (اختیاری — برای نمایش سن)</div>
-        <input id="bdYear" type="number" class="fi" placeholder="مثلاً ۱۳۶۵" min="1300" max="1410">
+        <input id="bdYear" type="text" inputmode="numeric" class="fi" placeholder="مثلاً ۱۳۶۵" maxlength="4">
       </div>
       <div class="f-f">
         <div class="f-lbl">یادآوری پیش از مناسبت</div>
@@ -4636,7 +4636,7 @@ function saveBirthday(){
   if(!name){ toast_(svgIco('flag'),'نام را وارد کن'); return; }
   const month=parseInt(document.getElementById('bdMonth').value);
   const day=parseInt(document.getElementById('bdDay').value);
-  const year=parseInt(document.getElementById('bdYear').value)||null;
+  const year=parseInt(faToEn(document.getElementById('bdYear').value))||null;
   const cat=document.getElementById('bdCat').value;
   const remindDays=parseInt(document.getElementById('bdRemindDays').value)||7;
   const note=document.getElementById('bdNote').value.trim();
