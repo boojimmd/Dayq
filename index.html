@@ -1897,59 +1897,86 @@ select.fi{
 <!-- PAGE: CALENDAR -->
 <!-- صفحهٔ تولد و مناسبت‌ها -->
 <div class="page" id="pageBirthdays">
-  <div class="bag-page" style="padding-top:calc(var(--topbar-h)+10px)">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-      <div style="font-size:1rem;font-weight:800;">تولد و مناسبت‌ها</div>
-      <button onclick="openBirthdayForm(null)" style="background:var(--a);color:#fff;border:none;border-radius:var(--r2);padding:6px 14px;font-size:.8rem;font-weight:700;cursor:pointer;">+ افزودن</button>
-    </div>
-    <div id="bdNextBanner" style="display:none;background:var(--redm);border-radius:var(--r3);padding:12px 14px;margin-bottom:14px;font-size:.82rem;color:var(--red);font-weight:600;"></div>
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px 0;padding-top:calc(var(--topbar-h) + 14px);">
+    <div style="font-size:1rem;font-weight:800;">تولد و مناسبت‌ها</div>
+    <button class="hbtn" onclick="openBirthdayForm(null)"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+  </div>
+  <div class="bag-pg" style="padding-top:10px;">
+    <div id="bdNextBanner" style="display:none;background:var(--redm);border-radius:var(--r3);padding:11px 14px;margin-bottom:12px;font-size:.82rem;color:var(--red);font-weight:600;line-height:1.5;"></div>
     <div id="bdList"></div>
+    <div id="bdEmpty" style="display:none;flex-direction:column;align-items:center;padding:40px 0 20px;gap:10px;text-align:center;">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--t4)" stroke-width="1.3" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <div style="font-size:.86rem;font-weight:700;color:var(--t2);">هنوز مناسبتی ثبت نشده</div>
+      <button class="bag-add-btn" style="width:auto;padding:9px 20px;" onclick="openBirthdayForm(null)">+ افزودن اولین مناسبت</button>
+    </div>
   </div>
 </div>
 <!-- فرم افزودن/ویرایش تولد -->
 <div class="sheet-overlay" id="shBirthday" onclick="if(event.target===this)closeAll()">
-  <div class="sheet" style="padding:20px;">
-    <div class="sh-hdr"><span id="bdFormTitle">افزودن مناسبت</span><button class="sh-x" onclick="closeAll()">✕</button></div>
-    <label class="sh-lbl">نام</label>
-    <input id="bdName" type="text" class="sh-inp" placeholder="مثلاً: رضا، مامان، آناهیتا...">
-    <label class="sh-lbl">نوع</label>
-    <div style="display:flex;gap:8px;margin-bottom:10px;">
-      <button class="bd-type-btn active" data-t="birthday" onclick="selectBdType('birthday',this)">🎂 تولد</button>
-      <button class="bd-type-btn" data-t="anniversary" onclick="selectBdType('anniversary',this)">💍 سالگرد</button>
-      <button class="bd-type-btn" data-t="other" onclick="selectBdType('other',this)">📌 دیگر</button>
+  <div class="sheet">
+    <div class="sh-handle"></div>
+    <div class="sh-head">
+      <div class="sh-tr">
+        <div class="sh-ttl" id="bdFormTitle">افزودن مناسبت</div>
+        <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
     </div>
-    <label class="sh-lbl">دسته</label>
-    <select id="bdCat" class="sh-inp">
-      <option value="family">خانواده</option>
-      <option value="friend">دوستان</option>
-      <option value="colleague">همکار</option>
-      <option value="other">دیگر</option>
-    </select>
-    <label class="sh-lbl">ماه و روز شمسی</label>
-    <div style="display:flex;gap:8px;">
-      <select id="bdMonth" class="sh-inp" style="flex:1;">
-        <option value="1">فروردین</option><option value="2">اردیبهشت</option><option value="3">خرداد</option>
-        <option value="4">تیر</option><option value="5">مرداد</option><option value="6">شهریور</option>
-        <option value="7">مهر</option><option value="8">آبان</option><option value="9">آذر</option>
-        <option value="10">دی</option><option value="11">بهمن</option><option value="12">اسفند</option>
-      </select>
-      <select id="bdDay" class="sh-inp" style="flex:1;"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option></select>
+    <div class="sh-body">
+      <div class="f-f">
+        <div class="f-lbl">نام</div>
+        <input id="bdName" type="text" class="fi" placeholder="مثلاً: رضا، مامان، آناهیتا..." autocomplete="off">
+      </div>
+      <div class="f-f">
+        <div class="f-lbl">نوع مناسبت</div>
+        <div style="display:flex;gap:8px;">
+          <button class="bd-type-btn active" data-t="birthday" onclick="selectBdType('birthday',this)">🎂 تولد</button>
+          <button class="bd-type-btn" data-t="anniversary" onclick="selectBdType('anniversary',this)">💍 سالگرد</button>
+          <button class="bd-type-btn" data-t="other" onclick="selectBdType('other',this)">📌 دیگر</button>
+        </div>
+      </div>
+      <div class="f-f">
+        <div class="f-lbl">دسته</div>
+        <select id="bdCat" class="fi">
+          <option value="family">خانواده</option>
+          <option value="friend">دوستان</option>
+          <option value="colleague">همکار</option>
+          <option value="other">دیگر</option>
+        </select>
+      </div>
+      <div class="f-f">
+        <div class="f-lbl">تاریخ شمسی</div>
+        <div style="display:flex;gap:8px;">
+          <select id="bdMonth" class="fi" style="flex:1;">
+            <option value="1">فروردین</option><option value="2">اردیبهشت</option><option value="3">خرداد</option>
+            <option value="4">تیر</option><option value="5">مرداد</option><option value="6">شهریور</option>
+            <option value="7">مهر</option><option value="8">آبان</option><option value="9">آذر</option>
+            <option value="10">دی</option><option value="11">بهمن</option><option value="12">اسفند</option>
+          </select>
+          <select id="bdDay" class="fi" style="flex:1;"><option value="1">۱</option><option value="2">۲</option><option value="3">۳</option><option value="4">۴</option><option value="5">۵</option><option value="6">۶</option><option value="7">۷</option><option value="8">۸</option><option value="9">۹</option><option value="10">۱۰</option><option value="11">۱۱</option><option value="12">۱۲</option><option value="13">۱۳</option><option value="14">۱۴</option><option value="15">۱۵</option><option value="16">۱۶</option><option value="17">۱۷</option><option value="18">۱۸</option><option value="19">۱۹</option><option value="20">۲۰</option><option value="21">۲۱</option><option value="22">۲۲</option><option value="23">۲۳</option><option value="24">۲۴</option><option value="25">۲۵</option><option value="26">۲۶</option><option value="27">۲۷</option><option value="28">۲۸</option><option value="29">۲۹</option><option value="30">۳۰</option><option value="31">۳۱</option></select>
+        </div>
+      </div>
+      <div class="f-f">
+        <div class="f-lbl">سال تولد (اختیاری — برای نمایش سن)</div>
+        <input id="bdYear" type="number" class="fi" placeholder="مثلاً ۱۳۶۵" min="1300" max="1410">
+      </div>
+      <div class="f-f">
+        <div class="f-lbl">یادآوری پیش از مناسبت</div>
+        <select id="bdRemindDays" class="fi">
+          <option value="0">همان روز</option>
+          <option value="1">۱ روز قبل</option>
+          <option value="3">۳ روز قبل</option>
+          <option value="7" selected>۷ روز قبل</option>
+          <option value="14">۱۴ روز قبل</option>
+        </select>
+      </div>
+      <div class="f-f">
+        <div class="f-lbl">یادداشت</div>
+        <textarea id="bdNote" class="fi" rows="2" placeholder="هدیه‌ای که دوست داره..." style="resize:none;"></textarea>
+      </div>
+      <input type="hidden" id="bdEditId">
+      <button class="sh-sub" onclick="saveBirthday()">ذخیره</button>
+      <button id="bdDeleteBtn" onclick="deleteBirthday()" style="display:none;width:100%;background:transparent;color:var(--red);border:none;padding:8px;font-size:.8rem;cursor:pointer;">حذف این مناسبت</button>
     </div>
-    <label class="sh-lbl">سال تولد (اختیاری — برای نمایش سن)</label>
-    <input id="bdYear" type="number" class="sh-inp" placeholder="مثلاً ۱۳۶۵" min="1300" max="1410">
-    <label class="sh-lbl">یادآوری پیش از مناسبت</label>
-    <select id="bdRemindDays" class="sh-inp">
-      <option value="0">همان روز</option>
-      <option value="1">۱ روز قبل</option>
-      <option value="3">۳ روز قبل</option>
-      <option value="7" selected>۷ روز قبل</option>
-      <option value="14">۱۴ روز قبل</option>
-    </select>
-    <label class="sh-lbl">یادداشت</label>
-    <textarea id="bdNote" class="sh-inp" rows="2" placeholder="هدیه‌ای که دوست داره..."></textarea>
-    <input type="hidden" id="bdEditId">
-    <button onclick="saveBirthday()" style="width:100%;background:var(--a);color:#fff;border:none;padding:12px;border-radius:var(--r2);font-weight:700;font-size:.9rem;cursor:pointer;margin-top:12px;">ذخیره</button>
-    <button id="bdDeleteBtn" onclick="deleteBirthday()" style="display:none;width:100%;background:transparent;color:var(--red);border:none;padding:8px;font-size:.8rem;cursor:pointer;margin-top:6px;">حذف این مناسبت</button>
   </div>
 </div>
 <div class="page" id="pageCalendar">
@@ -4461,7 +4488,13 @@ function renderBirthdayPage(){
       } else banner.style.display='none';
     } else banner.style.display='none';
   }
-  if(!sorted.length){ list.innerHTML='<div style="text-align:center;color:var(--t3);padding:40px 0;font-size:.84rem;">هنوز مناسبتی اضافه نکردی<br>دکمهٔ «افزودن» را بزن</div>'; return; }
+  const emptyEl=document.getElementById('bdEmpty');
+  if(!sorted.length){
+    list.innerHTML='';
+    if(emptyEl) emptyEl.style.display='flex';
+    return;
+  }
+  if(emptyEl) emptyEl.style.display='none';
   const groups={soon:[],month:[],later:[]};
   sorted.forEach(b=>{
     const d=_bdDaysUntil(b.month,b.day);
