@@ -447,6 +447,16 @@ input,textarea{user-select:text;-webkit-user-select:text;}
 .bag-pct{font-size:.86rem;font-weight:800;color:var(--amber);font-family:var(--mono);}
 .bag-rdy{font-size:.9rem;font-weight:700;margin-bottom:2px;}
 .bag-sub{font-size:.7rem;color:var(--t2);}
+.bd-item{display:flex;align-items:center;gap:10px;padding:11px 13px;background:var(--bg1);border:1px solid var(--b2);border-radius:var(--r2);margin-bottom:6px;cursor:pointer;transition:.15s;}
+.bd-item:active{background:var(--bg2);}
+.bd-item-emo{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;background:var(--redm);}
+.bd-item-body{flex:1;min-width:0;}
+.bd-item-name{font-size:.86rem;font-weight:700;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bd-item-date{font-size:.72rem;color:var(--t3);margin-top:2px;}
+.bd-item-badge{font-size:.68rem;font-weight:700;padding:3px 8px;border-radius:999px;flex-shrink:0;}
+.bd-type-btn{flex:1;padding:7px 4px;border-radius:var(--r2);border:1px solid var(--b1);background:var(--bg2);color:var(--t2);font-size:.75rem;cursor:pointer;font-family:var(--f);}
+.bd-type-btn.active{background:var(--redm);color:var(--red);border-color:rgba(229,62,90,.25);font-weight:700;}
+.bd-section-hdr{font-size:.72rem;font-weight:700;color:var(--t3);margin:14px 0 6px;}
 .bag-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg1);border:1px solid var(--b2);border-radius:var(--r2);margin-bottom:3px;cursor:pointer;transition:.15s;}
 .bag-item:active{background:var(--bg2);}
 .bag-item.bk{opacity:.44;}
@@ -1825,6 +1835,7 @@ select.fi{
       <div class="s-group">
         <div class="srow" onclick="openArchive()"><div class="srow-ico" style="background:var(--bg3);color:var(--t2);"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div><div class="srow-body"><div class="srow-ttl">آرشیو کارهای قدیمی</div><div class="srow-sub" id="archiveSub">۰ کار آرشیوشده</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
         <div class="srow" onclick="goPage('Bag')"><div class="srow-ico" style="background:var(--ambm);color:var(--amber);"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div><div class="srow-body"><div class="srow-ttl">کیف من</div><div class="srow-sub">چک‌لیست تجهیزات</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+        <div class="srow" onclick="goPage('Birthdays')"><div class="srow-ico" style="background:var(--redm);color:var(--red);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="srow-body"><div class="srow-ttl">تولد و مناسبت‌ها</div><div class="srow-sub" id="birthdayRowSub">یادآوری ۷ روز قبل</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
         <div class="srow" onclick="resetDone()"><div class="srow-ico" style="background:rgba(46,160,67,.1);color:#2ea043;"><svg viewBox="0 0 24 24"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 .49-6H1"/></svg></div><div class="srow-body"><div class="srow-ttl">ری‌ست تیک‌ها</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
         <div class="srow" onclick="sortByPriority()"><div class="srow-ico" style="background:var(--redm);color:var(--red);"><svg viewBox="0 0 24 24"><path d="M3 6h18M6 12h12M9 18h6"/></svg></div><div class="srow-body"><div class="srow-ttl">مرتب‌سازی اولویت</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
         <div class="srow" onclick="exportData()"><div class="srow-ico" style="background:var(--bluem);color:var(--blue);"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div><div class="srow-body"><div class="srow-ttl">خروجی JSON</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
@@ -1884,6 +1895,63 @@ select.fi{
 </div>
 
 <!-- PAGE: CALENDAR -->
+<!-- صفحهٔ تولد و مناسبت‌ها -->
+<div class="page" id="pageBirthdays">
+  <div class="bag-page" style="padding-top:calc(var(--topbar-h)+10px)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div style="font-size:1rem;font-weight:800;">تولد و مناسبت‌ها</div>
+      <button onclick="openBirthdayForm(null)" style="background:var(--a);color:#fff;border:none;border-radius:var(--r2);padding:6px 14px;font-size:.8rem;font-weight:700;cursor:pointer;">+ افزودن</button>
+    </div>
+    <div id="bdNextBanner" style="display:none;background:var(--redm);border-radius:var(--r3);padding:12px 14px;margin-bottom:14px;font-size:.82rem;color:var(--red);font-weight:600;"></div>
+    <div id="bdList"></div>
+  </div>
+</div>
+<!-- فرم افزودن/ویرایش تولد -->
+<div class="sheet-overlay" id="shBirthday" onclick="if(event.target===this)closeAll()">
+  <div class="sheet" style="padding:20px;">
+    <div class="sh-hdr"><span id="bdFormTitle">افزودن مناسبت</span><button class="sh-x" onclick="closeAll()">✕</button></div>
+    <label class="sh-lbl">نام</label>
+    <input id="bdName" type="text" class="sh-inp" placeholder="مثلاً: رضا، مامان، آناهیتا...">
+    <label class="sh-lbl">نوع</label>
+    <div style="display:flex;gap:8px;margin-bottom:10px;">
+      <button class="bd-type-btn active" data-t="birthday" onclick="selectBdType('birthday',this)">🎂 تولد</button>
+      <button class="bd-type-btn" data-t="anniversary" onclick="selectBdType('anniversary',this)">💍 سالگرد</button>
+      <button class="bd-type-btn" data-t="other" onclick="selectBdType('other',this)">📌 دیگر</button>
+    </div>
+    <label class="sh-lbl">دسته</label>
+    <select id="bdCat" class="sh-inp">
+      <option value="family">خانواده</option>
+      <option value="friend">دوستان</option>
+      <option value="colleague">همکار</option>
+      <option value="other">دیگر</option>
+    </select>
+    <label class="sh-lbl">ماه و روز شمسی</label>
+    <div style="display:flex;gap:8px;">
+      <select id="bdMonth" class="sh-inp" style="flex:1;">
+        <option value="1">فروردین</option><option value="2">اردیبهشت</option><option value="3">خرداد</option>
+        <option value="4">تیر</option><option value="5">مرداد</option><option value="6">شهریور</option>
+        <option value="7">مهر</option><option value="8">آبان</option><option value="9">آذر</option>
+        <option value="10">دی</option><option value="11">بهمن</option><option value="12">اسفند</option>
+      </select>
+      <select id="bdDay" class="sh-inp" style="flex:1;"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option><option value="13">13</option><option value="14">14</option><option value="15">15</option><option value="16">16</option><option value="17">17</option><option value="18">18</option><option value="19">19</option><option value="20">20</option><option value="21">21</option><option value="22">22</option><option value="23">23</option><option value="24">24</option><option value="25">25</option><option value="26">26</option><option value="27">27</option><option value="28">28</option><option value="29">29</option><option value="30">30</option><option value="31">31</option></select>
+    </div>
+    <label class="sh-lbl">سال تولد (اختیاری — برای نمایش سن)</label>
+    <input id="bdYear" type="number" class="sh-inp" placeholder="مثلاً ۱۳۶۵" min="1300" max="1410">
+    <label class="sh-lbl">یادآوری پیش از مناسبت</label>
+    <select id="bdRemindDays" class="sh-inp">
+      <option value="0">همان روز</option>
+      <option value="1">۱ روز قبل</option>
+      <option value="3">۳ روز قبل</option>
+      <option value="7" selected>۷ روز قبل</option>
+      <option value="14">۱۴ روز قبل</option>
+    </select>
+    <label class="sh-lbl">یادداشت</label>
+    <textarea id="bdNote" class="sh-inp" rows="2" placeholder="هدیه‌ای که دوست داره..."></textarea>
+    <input type="hidden" id="bdEditId">
+    <button onclick="saveBirthday()" style="width:100%;background:var(--a);color:#fff;border:none;padding:12px;border-radius:var(--r2);font-weight:700;font-size:.9rem;cursor:pointer;margin-top:12px;">ذخیره</button>
+    <button id="bdDeleteBtn" onclick="deleteBirthday()" style="display:none;width:100%;background:transparent;color:var(--red);border:none;padding:8px;font-size:.8rem;cursor:pointer;margin-top:6px;">حذف این مناسبت</button>
+  </div>
+</div>
 <div class="page" id="pageCalendar">
   <div class="cal-page">
     <div class="cal-page-top" style="padding-top:calc(var(--topbar-h) + 2px)">
@@ -2663,7 +2731,8 @@ const iconMap={};ICONS.forEach(i=>iconMap[i.id]=i);
 function svgIco(id,w=16){const ic=iconMap[id]||iconMap.check;return`<svg viewBox="0 0 24 24" width="${w}" height="${w}" fill="none" stroke="${ic.c}" stroke-linecap="round" stroke-linejoin="round">${ic.s}</svg>`;}
 
 /* ══ STATE ══ */
-const SK='dq5_t',SB='dq5_b',SS='dq5_s';
+const SK='dq5_t',SB='dq5_b',SS='dq5_s',SD='dq5_bd';
+let birthdays=[];
 let tasks=[],bagItems=[];
 let cfg={theme:'auto',persian:true,confetti:false,name:'',company:'',city:'',visitTime:'09:00',mood:0,reflect:false,timeline:false,reflection:'',workEndTime:'18:00',eveningStart:'17:00',autoArchiveDays:30,autoArchiveOn:true,pushWorkerUrl:'',syncCode:''};
 let curTab='all',selIco='pill',selPri_='high',selBagIco='brief';
@@ -2692,6 +2761,7 @@ function boot(){
   processRecurringTasks();
   checkMissedReminders();
   checkTimeAlert();
+  _checkBdNotifications();
   // re-check time alerts when user returns to app
   document.addEventListener('visibilitychange', function(){
     if(!document.hidden) checkTimeAlert();
@@ -2894,6 +2964,7 @@ function loadAll(){
   try{tasks=JSON.parse(localStorage.getItem(SK))||[];}catch(e){tasks=[];}
   try{const b=JSON.parse(localStorage.getItem(SB));bagItems=b||[];}catch(e){bagItems=[];}
   try{const s=JSON.parse(localStorage.getItem(SS));if(s)cfg={...cfg,...s};}catch(e){}
+  try{birthdays=JSON.parse(localStorage.getItem(SD))||[];}catch(e){birthdays=[];}
   // مهاجرت یک‌باره: آیکون «آماده‌سازی» از چک‌مارک (که با تیک تکمیل قاطی می‌شد) به فلاسک تغییر کرد
   if(!localStorage.getItem('dq5_mig_prepicon')){
     let changed=false;
@@ -2906,6 +2977,7 @@ function saveAll(){
   try{
     localStorage.setItem(SK,JSON.stringify(tasks));
     localStorage.setItem(SB,JSON.stringify(bagItems));
+    localStorage.setItem(SD,JSON.stringify(birthdays));
     saveCfg();
   }catch(e){
     // localStorage پر شده یا خطای دیگه
@@ -2994,7 +3066,8 @@ function goPage(n){
   const pg=document.getElementById('page'+n);if(pg)pg.classList.add('active');
   const ni=document.getElementById('ni-'+n.toLowerCase());if(ni)ni.classList.add('active');
   if(n==='Me')       { updateMeStats(); }
-  if(n==='Bag')      { renderBag(); }
+  if(n==='Bag')       { renderBag(); }
+  if(n==='Birthdays') { renderBirthdayPage(); }
   if(n==='Projects'){loadProjects();renderProjects();}
   if(n==='Calendar'){calInit();setTimeout(()=>showCoachMark('calMonthLabel','این سه دکمه، سه‌جور نمایش متفاوت‌اند — ماهانه، هفتگی، یا فهرست ساده','calview','below'),400);}
 }
@@ -4325,6 +4398,176 @@ function buildIconGrid(gid,isBag){
 function selPri(p,el){selPri_=p;document.querySelectorAll('.pp').forEach(b=>{b.className='pp'+(b.dataset.p===p?(p==='high'?' ph':p==='med'?' pm':' pl'):'');});}
 
 /* ══ BAG ══ */
+/* ══ تولد و مناسبت‌ها ══ */
+const BD_CAT_LABEL={family:'خانواده',friend:'دوستان',colleague:'همکار',other:'دیگر'};
+const BD_TYPE_EMO={birthday:'🎂',anniversary:'💍',other:'📌'};
+const BD_MONTH_NAMES=['','فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+
+function _bdDaysUntil(month,day){
+  const now=new Date();
+  const today=mrToJalali(now.getFullYear(),now.getMonth()+1,now.getDate());
+  const [jy,jm,jd]=today;
+  const todayDays=_jalToDays(jy,jm,jd);
+  let targetDays=_jalToDays(jy,month,day);
+  if(targetDays<todayDays) targetDays=_jalToDays(jy+1,month,day);
+  return targetDays-todayDays;
+}
+
+function _bdNextAge(yearBorn,month,day){
+  if(!yearBorn) return null;
+  const now=new Date();
+  const [jy]=mrToJalali(now.getFullYear(),now.getMonth()+1,now.getDate());
+  return jy-yearBorn+(_bdDaysUntil(month,day)===0?0:1);
+}
+
+function _checkBdNotifications(){
+  const todayKey=mrTodayKey();
+  if(localStorage.getItem('dq5_bd_lastcheck')===todayKey) return;
+  localStorage.setItem('dq5_bd_lastcheck',todayKey);
+  if(!birthdays.length) return;
+  const sorted=[...birthdays].sort((a,b)=>_bdDaysUntil(a.month,a.day)-_bdDaysUntil(b.month,b.day));
+  const b=sorted[0];
+  const d=_bdDaysUntil(b.month,b.day);
+  if(d<=b.remindDays){
+    let msg=d===0?`🎂 امروز تولد/مناسبت ${b.name} است!`:
+            d===1?`🎂 فردا: ${b.name}`:
+            `🎂 ${num(d)} روز تا ${b.name}`;
+    setTimeout(()=>toast_(svgIco('bell'),msg),2000);
+  }
+}
+
+function renderBirthdayPage(){
+  const list=document.getElementById('bdList');
+  const banner=document.getElementById('bdNextBanner');
+  const rowSub=document.getElementById('birthdayRowSub');
+  if(!list) return;
+  const sorted=[...birthdays].sort((a,b)=>_bdDaysUntil(a.month,a.day)-_bdDaysUntil(b.month,b.day));
+  if(rowSub){
+    if(!sorted.length) rowSub.textContent='هنوز مناسبتی ثبت نشده';
+    else{
+      const d=_bdDaysUntil(sorted[0].month,sorted[0].day);
+      rowSub.textContent=d===0?`🎉 امروز: ${sorted[0].name}`:`${num(birthdays.length)} نفر · ${num(d)} روز تا بعدی`;
+    }
+  }
+  if(banner){
+    const next=sorted[0];
+    if(next){
+      const d=_bdDaysUntil(next.month,next.day);
+      if(d<=7){
+        banner.style.display='block';
+        banner.textContent=d===0?`🎉 امروز تولد/مناسبت ${next.name} است!`:
+                           d===1?`🎂 فردا تولد/مناسبت ${next.name} — آماده باش!`:
+                           `⏳ ${num(d)} روز مانده به تولد/مناسبت ${next.name}`;
+      } else banner.style.display='none';
+    } else banner.style.display='none';
+  }
+  if(!sorted.length){ list.innerHTML='<div style="text-align:center;color:var(--t3);padding:40px 0;font-size:.84rem;">هنوز مناسبتی اضافه نکردی<br>دکمهٔ «افزودن» را بزن</div>'; return; }
+  const groups={soon:[],month:[],later:[]};
+  sorted.forEach(b=>{
+    const d=_bdDaysUntil(b.month,b.day);
+    if(d<=7) groups.soon.push({b,d});
+    else if(d<=30) groups.month.push({b,d});
+    else groups.later.push({b,d});
+  });
+  let html='';
+  const renderGroup=(items,title)=>{
+    if(!items.length) return;
+    html+=`<div class="bd-section-hdr">${title}</div>`;
+    items.forEach(({b,d})=>{
+      const age=_bdNextAge(b.year,b.month,b.day);
+      const ageStr=age?` — ${num(age)} ساله`:'';
+      const badge=d===0?'امروز!':d===1?'فردا':`${num(d)} روز`;
+      const badgeColor=d<=3?'var(--red)':'var(--amber)';
+      const badgeBg=d<=3?'var(--redm)':'var(--ambm)';
+      html+=`<div class="bd-item" onclick="openBirthdayForm('${b.id}')">
+        <div class="bd-item-emo">${BD_TYPE_EMO[b.type]||'🎂'}</div>
+        <div class="bd-item-body">
+          <div class="bd-item-name">${esc(b.name)}</div>
+          <div class="bd-item-date">${num(b.day)} ${BD_MONTH_NAMES[b.month]}${ageStr} · ${BD_CAT_LABEL[b.cat]||b.cat}</div>
+          ${b.note?`<div style="font-size:.7rem;color:var(--t3);margin-top:1px;">${esc(b.note)}</div>`:''}
+        </div>
+        <div class="bd-item-badge" style="background:${badgeBg};color:${badgeColor};">${badge}</div>
+      </div>`;
+    });
+  };
+  renderGroup(groups.soon,'این هفته');
+  renderGroup(groups.month,'این ماه');
+  renderGroup(groups.later,'بعداً');
+  list.innerHTML=html;
+}
+
+let _bdEditType='birthday';
+function selectBdType(t,el){
+  _bdEditType=t;
+  document.querySelectorAll('.bd-type-btn').forEach(b=>b.classList.toggle('active',b.dataset.t===t));
+}
+
+function openBirthdayForm(id){
+  _bdEditType='birthday';
+  document.querySelectorAll('.bd-type-btn').forEach(b=>b.classList.toggle('active',b.dataset.t==='birthday'));
+  if(id){
+    const b=birthdays.find(x=>x.id===id);
+    if(!b) return;
+    document.getElementById('bdName').value=b.name;
+    document.getElementById('bdCat').value=b.cat;
+    document.getElementById('bdMonth').value=b.month;
+    document.getElementById('bdDay').value=b.day;
+    document.getElementById('bdYear').value=b.year||'';
+    document.getElementById('bdRemindDays').value=b.remindDays??7;
+    document.getElementById('bdNote').value=b.note||'';
+    document.getElementById('bdFormTitle').textContent='ویرایش مناسبت';
+    document.getElementById('bdEditId').value=id;
+    document.getElementById('bdDeleteBtn').style.display='block';
+    _bdEditType=b.type||'birthday';
+    document.querySelectorAll('.bd-type-btn').forEach(btn=>btn.classList.toggle('active',btn.dataset.t===_bdEditType));
+  } else {
+    document.getElementById('bdName').value='';
+    document.getElementById('bdCat').value='family';
+    document.getElementById('bdMonth').value=1;
+    document.getElementById('bdDay').value=1;
+    document.getElementById('bdYear').value='';
+    document.getElementById('bdRemindDays').value=7;
+    document.getElementById('bdNote').value='';
+    document.getElementById('bdFormTitle').textContent='افزودن مناسبت';
+    document.getElementById('bdEditId').value='';
+    document.getElementById('bdDeleteBtn').style.display='none';
+  }
+  openSheet('shBirthday');
+  setTimeout(()=>document.getElementById('bdName').focus(),200);
+}
+
+function saveBirthday(){
+  const name=document.getElementById('bdName').value.trim();
+  if(!name){ toast_(svgIco('flag'),'نام را وارد کن'); return; }
+  const month=parseInt(document.getElementById('bdMonth').value);
+  const day=parseInt(document.getElementById('bdDay').value);
+  const year=parseInt(document.getElementById('bdYear').value)||null;
+  const cat=document.getElementById('bdCat').value;
+  const remindDays=parseInt(document.getElementById('bdRemindDays').value)||7;
+  const note=document.getElementById('bdNote').value.trim();
+  const editId=document.getElementById('bdEditId').value;
+  if(editId){
+    const idx=birthdays.findIndex(b=>b.id===editId);
+    if(idx>=0) birthdays[idx]={...birthdays[idx],name,type:_bdEditType,cat,month,day,year,remindDays,note};
+  } else {
+    birthdays.push({id:'bd'+Date.now(),name,type:_bdEditType,cat,month,day,year,remindDays,note});
+  }
+  saveAll();
+  closeAll();
+  renderBirthdayPage();
+  toast_(svgIco('check'),editId?'ویرایش ذخیره شد':'مناسبت اضافه شد');
+}
+
+function deleteBirthday(){
+  const editId=document.getElementById('bdEditId').value;
+  if(!editId) return;
+  birthdays=birthdays.filter(b=>b.id!==editId);
+  saveAll();
+  closeAll();
+  renderBirthdayPage();
+  toast_(svgIco('check'),'مناسبت حذف شد');
+}
+
 function renderBag(){
   const list=document.getElementById('bagList');list.innerHTML='';
   const done=bagItems.filter(b=>b.done).length,total=bagItems.length;
