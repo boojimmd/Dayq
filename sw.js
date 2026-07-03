@@ -27,3 +27,38 @@ self.addEventListener('notificationclick', (event) => {
 
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
+
+/* ── Web Share Target ──
+   وقتی کاربر از اپ دیگری متن یا لینکی share می‌کند،
+   مرورگر یک GET به index.html?share_text=... می‌فرستد.
+   SW مطمئن می‌شود پنجرهٔ DayQ باز و focus شود. */
+self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+  const hasShareParams =
+    url.searchParams.has('share_text') ||
+    url.searchParams.has('share_title') ||
+    url.searchParams.has('share_url');
+
+  if (!hasShareParams) return; // درخواست‌های عادی را رد کن
+
+  event.respondWith(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clients => {
+      // اگر پنجرهٔ DayQ باز است، همان را focus کن
+      for (const client of clients) {
+        if ('focus' in client) {
+          client.focus();
+          // پارامترها را به پنجره بفرست
+          client.postMessage({
+            type: 'SHARE_TARGET',
+            title: url.searchParams.get('share_title') || '',
+            text:  url.searchParams.get('share_text')  || '',
+            url:   url.searchParams.get('share_url')   || '',
+          });
+          return Response.redirect('./index.html', 302);
+        }
+      }
+      // پنجره باز نیست — باز کن با URL کامل تا app خودش بخواند
+      return Response.redirect(url.pathname + url.search, 302);
+    })
+  );
+});

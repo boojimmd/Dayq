@@ -3191,6 +3191,14 @@ function boot(){
   if(_h>=6&&_h<12) setTimeout(showOverdueModal, 2000);
   setTimeout(_checkEveningTriage, 2500);
   document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) setTimeout(_checkEveningTriage, 500); });
+
+  // ── Web Share Target ──
+  // مسیر ۱: URL params (وقتی اپ از share sheet باز می‌شود)
+  _handleShareTarget();
+  // مسیر ۲: postMessage از SW (وقتی پنجره از قبل باز بود)
+  navigator.serviceWorker?.addEventListener('message', e=>{
+    if(e.data?.type==='SHARE_TARGET') _applyShare(e.data.title, e.data.text, e.data.url);
+  });
   if(cfg.mood)highlightMood(cfg.mood);
   applyWidgets();
   // profile listeners
@@ -3576,6 +3584,55 @@ function closeTriageEveModal(){
   const m=document.getElementById('triageEveModal');
   if(m) m.classList.remove('open');
 }
+/* ══════════════════════════════════════════════════
+   Web Share Target
+   متن/لینک share‌شده را به Quick Capture می‌فرستد
+══════════════════════════════════════════════════ */
+function _handleShareTarget(){
+  const p = new URLSearchParams(window.location.search);
+  const title = p.get('share_title') || '';
+  const text  = p.get('share_text')  || '';
+  const url   = p.get('share_url')   || '';
+  if(text || title || url){
+    // URL را پاک کن تا reload اشتباه نشود
+    history.replaceState({}, '', window.location.pathname);
+    // با کمی تأخیر تا اپ کامل لود شود
+    setTimeout(()=>_applyShare(title, text, url), 600);
+  }
+}
+
+function _applyShare(title, text, url){
+  // ساختن متن ترکیبی برای Quick Capture
+  const parts = [];
+  if(title) parts.push(title);
+  if(text && text !== title) parts.push(text);
+  if(url && !text.includes(url)) parts.push(url);
+  const combined = parts.join(' — ').trim();
+  if(!combined) return;
+
+  // رفتن به صفحهٔ خانه
+  if(!document.getElementById('pageHome').classList.contains('active')) goPage('Home');
+
+  // پر کردن Quick Capture
+  const inp = document.getElementById('qcapInp');
+  if(inp){
+    inp.value = combined;
+    inp.dispatchEvent(new Event('input')); // NLP preview
+    inp.focus();
+    // scroll تا Quick Capture دیده شود
+    document.getElementById('qcapBox')?.scrollIntoView({behavior:'smooth', block:'center'});
+    // اگر NLP چیزی تشخیص داد، یک hint نشان بده
+    setTimeout(()=>{
+      const parsed = nlpParse(combined);
+      if(parsed.deadline || parsed.time){
+        toast_(svgIco('check'), 'Share دریافت شد — تأیید و ارسال کن');
+      } else {
+        toast_('📋', 'Share دریافت شد — ویرایش و ارسال کن');
+      }
+    }, 300);
+  }
+}
+
 function _checkEveningTriage(){
   if(!cfg.eveningStart) return;
   const [eh,em]=cfg.eveningStart.split(':').map(Number);
