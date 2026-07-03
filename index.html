@@ -3172,6 +3172,19 @@ function boot(){
   initWeather();
   setInterval(initWeather, 3600000);
   loadReminders();
+  // ── Invisible Intelligence: بازیابی آخرین state کاربر ──
+  try{
+    const lastTab=localStorage.getItem('dq5_lastTab');
+    if(lastTab&&['all','today','tomorrow','done','waiting','projects'].includes(lastTab)){
+      curTab=lastTab;
+      const btn=document.querySelector(`.sg[data-tab="${lastTab}"]`);
+      if(btn){document.querySelectorAll('.sg').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+    }
+    const lastCat=localStorage.getItem('dq5_lastCat');
+    if(lastCat){qcCat=lastCat;qcSetCat(lastCat,null);}
+    const lastPri=localStorage.getItem('dq5_lastPri');
+    if(lastPri){qcPri=lastPri;qcSetPri(lastPri,null);}
+  }catch(e){}
   renderTasks();renderBag();updateMeStats();
   // overdue modal — فقط صبح (۶ تا ۱۲) نشون بده
   const _h=new Date().getHours();
@@ -3641,7 +3654,7 @@ function renderTimeline(){
 function toggleTimeline(){document.getElementById('tlWrap').style.display='none';}
 
 /* ══ TABS ══ */
-function setTab(t,el){curTab=t;document.querySelectorAll('.sg').forEach(b=>b.classList.remove('active'));if(el)el.classList.add('active');renderTasks();}
+function setTab(t,el){curTab=t;document.querySelectorAll('.sg').forEach(b=>b.classList.remove('active'));if(el)el.classList.add('active');renderTasks();try{localStorage.setItem('dq5_lastTab',t);}catch(e){}}
 
 /* ══ RENDER TASKS ══ */
 // ── Auto Backup ──
@@ -4199,9 +4212,11 @@ function renderTasksByProject(){
 }
 
 function mkHdr(l,c){const d=document.createElement('div');d.className='sec-hdr';d.innerHTML=`<span class="sec-ttl">${l}</span><span class="sec-cnt">${num(c)}</span>`;return d;}
+let _newTaskIds=new Set();
 function mkCardWrap(task){
   const wrap=document.createElement('div');
-  wrap.className='tc-wrap'+(bulkMode&&bulkSelect.has(task.id)?' bulk-selected':'');
+  wrap.className='tc-wrap'+(bulkMode&&bulkSelect.has(task.id)?' bulk-selected':'')+(_newTaskIds.has(task.id)?' new-task':'');
+  if(_newTaskIds.has(task.id)) setTimeout(()=>{wrap.classList.remove('new-task');_newTaskIds.delete(task.id);},400);
   // bulk checkbox
   const bchk=document.createElement('div');
   bchk.className='bulk-chk';
@@ -4547,12 +4562,18 @@ function cycleStatus(id,e){
   saveAll();
   if(next==='done'){
     const card=document.querySelector('[data-id="'+id+'"]');
-    if(card){card.classList.add('done-anim');setTimeout(()=>renderTasks(),280);}
-    else renderTasks();
+    if(card){
+      // انیمیشن تیک روی چک‌باکس
+      const chk=card.querySelector('.tc-chk');
+      if(chk) chk.classList.add('done');
+      // انیمیشن حذف کارت
+      const wrap=card.closest('.tc-wrap');
+      if(wrap){ wrap.classList.add('completing'); setTimeout(()=>renderTasks(),320); }
+      else { card.classList.add('done-anim'); setTimeout(()=>renderTasks(),280); }
+    } else renderTasks();
     if(cfg.confetti)spawnConfetti(e);
     toast_(svgIco('check'),'انجام شد ✓');
     checkAllDone();
-    // refresh calendar if open
     const calPage=document.getElementById('pageCalendar');
     if(calPage&&calPage.classList.contains('active')&&calSelDate)refreshCalDayTasks(calSelDate);
   } else {
@@ -4618,12 +4639,14 @@ function qcSetCat(cat, el){
   qcCat=cat;
   document.getElementById('qtPrep').classList.toggle('active-cat', cat==='prep');
   document.getElementById('qtVisit').classList.toggle('active-cat', cat==='visit');
+  try{localStorage.setItem('dq5_lastCat',cat);}catch(e){}
 }
 function qcSetPri(pri, el){
   qcPri=pri;
   document.getElementById('qpHigh').className='qpb'+(pri==='high'?' active-high':'');
   document.getElementById('qpMed').className ='qpb'+(pri==='med'?' active-med':'');
   document.getElementById('qpLow').className ='qpb'+(pri==='low'?' active-low':'');
+  try{localStorage.setItem('dq5_lastPri',pri);}catch(e){}
 }
 function qcShowToolbar(){
   document.getElementById('qcapToolbar').classList.add('show');
@@ -4790,6 +4813,7 @@ function quickCapture(){
   } else {
     _qcLastTask=_qcCreateOne(raw, qcCat, qcPri);
   }
+  _newTaskIds.add(_qcLastTask.id);
   const deadline = _qcLastTask.deadline;
   saveAll();
   // اگه تب فردا/امروز بود و deadline match نمی‌کنه، برگرد به همه
@@ -6862,6 +6886,7 @@ function selTaskProj(pid,el){
   document.querySelectorAll('#cmdProjRow .proj-sel-pill').forEach(b=>b.classList.toggle('sel',b.dataset.pid===pid));
   _refreshCmdPhaseChips(pid);
   qaUpdateProjChip(pid);
+  if(pid) try{localStorage.setItem('dq5_lastProj',pid);}catch(e){}
 }
 function _refreshCmdPhaseChips(pid){
   const wrap=document.getElementById('cmdPhaseWrap');
