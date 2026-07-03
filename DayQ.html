@@ -8780,6 +8780,21 @@ function initBulkLongPress(){
    4. Extractor   — خروجی structured
 ══════════════════════════════════════════════════ */
 
+/* helper: مطابقت دقیق نام روز هفته با مرز کلمه در فارسی */
+function _nlpDayMatch(text, dayName){
+  // مرز کلمه فارسی: مطمئن می‌شویم «شنبه» از «یکشنبه» و «پنجشنبه» جدا می‌ماند
+  // روش: پیدا کردن index و بررسی کاراکتر قبل از آن
+  const idx = text.indexOf(dayName);
+  if(idx === -1) return false;
+  // بررسی کاراکتر قبلی: اگر حرف فارسی باشد، این شنبه بخشی از کلمه دیگری است
+  if(idx > 0){
+    const prevChar = text[idx-1];
+    // اگر قبل از match یک کاراکتر فارسی/حرفی بود، نپذیر
+    if(/[؀-ۿ‌]/.test(prevChar)) return false;
+  }
+  return true;
+}
+
 /* ── دیکشنری‌های جامع ── */
 const NLP_DAYS = {
   'شنبه':6,'یکشنبه':0,'دوشنبه':1,'سه‌شنبه':2,'سه شنبه':2,
@@ -8960,7 +8975,7 @@ function nlpResolveDate(txt){
     const dayKeysSorted=Object.keys(NLP_DAYS).sort((a,b)=>b.length-a.length);
     for(const name of dayKeysSorted){
       const dow=NLP_DAYS[name];
-      if(n.includes(name)){
+      if(_nlpDayMatch(n,name)){
         const today = new Date().getDay();
         const jsDow = dow===6?6:dow;
         let diff = (jsDow - today + 7) % 7;
@@ -8997,7 +9012,7 @@ function nlpResolveDate(txt){
   const dayKeysSorted2=Object.keys(NLP_DAYS).sort((a,b)=>b.length-a.length);
   for(const name of dayKeysSorted2){
     const dow=NLP_DAYS[name];
-    if(n.includes(name)){
+    if(_nlpDayMatch(n,name)){
       const today = new Date().getDay();
       // convert jalali dow (0=sat) to js (0=sun)
       const jsDow = dow===6?6:dow; // sat=6, sun=0..fri=5
