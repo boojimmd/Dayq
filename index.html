@@ -90,6 +90,84 @@
   --t1:#111827;--t2:#4b5563;--t3:#9ca3af;--t4:#d1d5db;
   --a:#ec4899;--a2:#db2777;--am:rgba(236,72,153,.12);--ag:rgba(236,72,153,.28);
 }
+
+/* ═══════════════════════════════════════════
+   تم‌های جدید — الهام از Astryx / Google AI Studio
+═══════════════════════════════════════════ */
+
+/* طبیعت */
+[data-theme="natural"]{
+  --bg0:#EDE8E2;--bg1:#F5F2ED;--bg2:#ECE8E2;--bg3:#DDD8D2;--bg4:#C8C0B8;
+  --b1:rgba(0,0,0,.10);--b2:rgba(0,0,0,.06);--b3:rgba(0,0,0,.03);
+  --t1:#433E37;--t2:#6B6159;--t3:#9A8E83;--t4:#C8C0B8;
+  --a:#8C7E6D;--a2:#7A6D5E;--am:rgba(140,126,109,.14);--ag:rgba(140,126,109,.28);
+}
+
+/* آبی کلاسیک */
+[data-theme="blue"]{
+  --bg0:#E0EDFF;--bg1:#F0F7FF;--bg2:#E5EFFF;--bg3:#D0E4FF;--bg4:#B8D4FF;
+  --b1:rgba(0,90,200,.12);--b2:rgba(0,90,200,.07);--b3:rgba(0,90,200,.04);
+  --t1:#1E3A8A;--t2:#2563EB;--t3:#60A5FA;--t4:#BFDBFE;
+  --a:#007AFF;--a2:#0062CC;--am:rgba(0,122,255,.13);--ag:rgba(0,122,255,.26);
+}
+
+/* جنگل رازآلود (dark) */
+[data-theme="forest"]{
+  --bg0:#022C22;--bg1:#064E3B;--bg2:#065F46;--bg3:#047857;--bg4:#059669;
+  --b1:rgba(255,255,255,.09);--b2:rgba(255,255,255,.05);--b3:rgba(255,255,255,.03);
+  --t1:#ECFDF5;--t2:#A7F3D0;--t3:#6EE7B7;--t4:#34D399;
+  --a:#10B981;--a2:#059669;--am:rgba(16,185,129,.18);--ag:rgba(16,185,129,.35);
+}
+
+/* غروب کهربایی (dark) */
+[data-theme="sunset"]{
+  --bg0:#1A0F00;--bg1:#2D1A00;--bg2:#3D2400;--bg3:#4D2C00;--bg4:#5E3800;
+  --b1:rgba(255,255,255,.09);--b2:rgba(255,255,255,.05);--b3:rgba(255,255,255,.03);
+  --t1:#FFFBEB;--t2:#FDE68A;--t3:#FCD34D;--t4:#F59E0B;
+  --a:#F97316;--a2:#EA580C;--am:rgba(249,115,22,.18);--ag:rgba(249,115,22,.35);
+}
+
+/* سایبرپانک (dark) */
+[data-theme="cyber"]{
+  --bg0:#09090B;--bg1:#18181B;--bg2:#27272A;--bg3:#3F3F46;--bg4:#52525B;
+  --b1:rgba(255,0,127,.20);--b2:rgba(255,0,127,.10);--b3:rgba(255,0,127,.05);
+  --t1:#FAFAFA;--t2:#A1A1AA;--t3:#71717A;--t4:#3F3F46;
+  --a:#EC4899;--a2:#DB2777;--am:rgba(236,72,153,.16);--ag:rgba(236,72,153,.32);
+}
+
+/* یاسی سلطنتی (dark) */
+[data-theme="royal"]{
+  --bg0:#2E1065;--bg1:#3B0764;--bg2:#4A0E7D;--bg3:#581C87;--bg4:#6B21A8;
+  --b1:rgba(255,255,255,.10);--b2:rgba(255,255,255,.06);--b3:rgba(255,255,255,.03);
+  --t1:#FAF5FF;--t2:#E9D5FF;--t3:#C084FC;--t4:#A855F7;
+  --a:#A855F7;--a2:#9333EA;--am:rgba(168,85,247,.18);--ag:rgba(168,85,247,.35);
+}
+
+/* صحرا */
+[data-theme="sand"]{
+  --bg0:#FDF6E3;--bg1:#FFFCF5;--bg2:#F5EDD8;--bg3:#EDE0C4;--bg4:#DDD0B0;
+  --b1:rgba(120,90,30,.12);--b2:rgba(120,90,30,.07);--b3:rgba(120,90,30,.04);
+  --t1:#3D2B1F;--t2:#7C5C3E;--t3:#B08060;--t4:#D4B896;
+  --a:#C0862A;--a2:#A87020;--am:rgba(192,134,42,.14);--ag:rgba(192,134,42,.28);
+}
+
+/* یخ شمالی */
+[data-theme="ice"]{
+  --bg0:#EAF4FA;--bg1:#F2F9FD;--bg2:#E0EEF8;--bg3:#C8E0F0;--bg4:#A8CDE8;
+  --b1:rgba(0,100,160,.10);--b2:rgba(0,100,160,.06);--b3:rgba(0,100,160,.03);
+  --t1:#0C2B3F;--t2:#1A4D70;--t3:#2E7DB4;--t4:#70B8E0;
+  --a:#0891B2;--a2:#0E7490;--am:rgba(8,145,178,.13);--ag:rgba(8,145,178,.26);
+}
+
+/* overrides برای تم‌های تاریک (آیکون‌ها) */
+[data-theme="forest"] .nav-fab-btn svg,
+[data-theme="sunset"] .nav-fab-btn svg,
+[data-theme="cyber"] .nav-fab-btn svg,
+[data-theme="royal"] .nav-fab-btn svg{stroke:#080c10;}
+[data-theme="forest"] .sh-sub,
+[data-theme="sunset"] .sh-sub,
+[data-theme="cyber"] .sh-sub,
+[data-theme="royal"] .sh-sub{color:#080c10;}
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 html{
   font-size:15px;
@@ -2151,6 +2229,16 @@ select.fi{
       <span class="sg-lbl">ظاهر</span>
       <div class="s-group">
         <div class="theme-seg"><button class="th-pill" data-t="light" onclick="setTheme('light',this)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg> روشن</button><button class="th-pill" data-t="auto" onclick="setTheme('auto',this)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg> خودکار</button><button class="th-pill" data-t="dark" onclick="setTheme('dark',this)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> تاریک</button><button class="th-pill" data-t="pink" onclick="setTheme('pink',this)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> صورتی</button></div>
+        <div class="theme-seg" style="margin-top:6px;flex-wrap:wrap;gap:6px;">
+          <button class="th-pill" data-t="natural" onclick="setTheme('natural',this)" style="flex:none;padding:6px 10px;">🌿 طبیعت</button>
+          <button class="th-pill" data-t="blue" onclick="setTheme('blue',this)" style="flex:none;padding:6px 10px;">🔵 آبی</button>
+          <button class="th-pill" data-t="sand" onclick="setTheme('sand',this)" style="flex:none;padding:6px 10px;">🏜 صحرا</button>
+          <button class="th-pill" data-t="ice" onclick="setTheme('ice',this)" style="flex:none;padding:6px 10px;">🧊 یخ</button>
+          <button class="th-pill" data-t="forest" onclick="setTheme('forest',this)" style="flex:none;padding:6px 10px;">🌲 جنگل</button>
+          <button class="th-pill" data-t="sunset" onclick="setTheme('sunset',this)" style="flex:none;padding:6px 10px;">🌅 غروب</button>
+          <button class="th-pill" data-t="cyber" onclick="setTheme('cyber',this)" style="flex:none;padding:6px 10px;">⚡ سایبر</button>
+          <button class="th-pill" data-t="royal" onclick="setTheme('royal',this)" style="flex:none;padding:6px 10px;">👑 یاسی</button>
+        </div>
 
         <div style="font-size:.7rem;color:var(--t3);margin:16px 0 8px;">آیکون اپ روی هوم‌اسکرین</div>
         <div style="display:flex;gap:10px;margin-bottom:6px;">
