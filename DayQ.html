@@ -1575,164 +1575,242 @@ select.fi{
 .cmd-shortcut-hint{display:none;}
 .cmd-shortcut-hint{display:none;}
 
-/* ═══════════════════════════════════════
-   DESKTOP LAYOUT — ≥900px
-   wrapper-based approach for proper scrolling
-═══════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════
+   DESKTOP LAYOUT ≥900px
+   رویکرد: viewport scroll — ساده‌ترین و درست‌ترین
+   ─ html/body خودشان scroll می‌دهند
+   ─ #app: height:auto، در جریان عادی
+   ─ topbar: sticky به viewport
+   ─ pages: static، height:auto
+   ─ nav: fixed راست
+═══════════════════════════════════════════════════ */
 @media(min-width:900px){
 
-  /* Reset #app — فقط جریان عادی */
+  /* ─── ۱. html/body: کامل reset از حالت iOS fixed ─── */
+  html,body{
+    position:static !important;
+    height:auto !important;
+    min-height:100svh;
+    overflow:auto !important;
+    width:100% !important;
+    overscroll-behavior:auto !important;
+  }
+
+  /* ─── ۲. #app — block ساده، padding برای sidebar ─── */
   #app{
+    position:relative !important;
     max-width:100% !important;
     height:auto !important;
     min-height:100svh;
     overflow:visible !important;
-    display:block !important;
-    position:relative;
+    display:block !important;   /* نه flex — تا محتوا رشد کند */
+    padding-right:220px;
+    box-sizing:border-box;
   }
 
-  /* Wrapper: topbar + pages را در یک ستون scroll‌پذیر نگه می‌دارد */
-  #desktopContent{
-    margin-right:220px;
-    min-height:100svh;
-    overflow-y:auto;
-    overflow-x:hidden;
-    position:relative;
-  }
-
-  /* Topbar داخل wrapper — sticky در محدودهٔ wrapper */
-  #desktopContent .topbar,
+  /* ─── ۳. Topbar — fixed (با scroll viewport) ─── */
   .topbar{
-    position:sticky;
+    position:fixed !important;
     top:0;
-    left:0;right:0;
-    max-width:100%;
+    left:0;
+    right:220px; /* فضا برای sidebar */
+    max-width:none;
     z-index:40;
-    flex-shrink:0;
+    backdrop-filter:blur(16px);
+    -webkit-backdrop-filter:blur(16px);
+    box-shadow:0 1px 0 var(--b1);
+  }
+  /* صفحه‌ها باید فضای topbar fixed را جبران کنند */
+  .page.active{
+    padding-top:100px !important; /* ارتفاع topbar */
   }
 
-  /* صفحه‌ها — relative داخل wrapper، جریان طبیعی */
-  #desktopContent .page,
+  /* ─── ۴. صفحه‌ها — static در جریان عادی، بدون هیچ trick ─── */
   .page{
     position:static !important;
+    display:none !important;
+    height:auto !important;
+    min-height:0 !important;
+    overflow:visible !important;
+    flex:1;
+    padding-top:0 !important;
+    padding-bottom:48px;
     top:auto !important;bottom:auto !important;
     left:auto !important;right:auto !important;
-    height:auto !important;
-    min-height:calc(100svh - 100px);
-    overflow-y:visible;
-    overflow-x:hidden;
-    max-width:none;
-    background:var(--bg0);
-    padding-bottom:40px;
   }
-  #desktopContent .page.active,
-  .page.active{display:block !important;}
+  .page.active{
+    display:block !important;
+  }
+  /* حذف spacer که برای topbar:fixed بود */
+  .page>[style*="height:var(--topbar-h)"]{display:none !important;}
 
-  /* Sidebar */
+  /* ─── ۵. Sidebar — fixed سمت راست (RTL) ─── */
   .nav{
-    position:fixed;
+    position:fixed !important;
     top:0;right:0;left:auto;bottom:0;
-    width:220px;height:100svh;max-width:220px;
-    flex-direction:column;align-items:stretch;justify-content:flex-start;
+    width:220px;
+    height:100svh;
+    flex-direction:column;
+    align-items:stretch;
+    justify-content:flex-start;
     border-top:none;border-bottom:none;border-right:none;
     border-left:1px solid var(--b1);
-    padding:16px 10px 20px;gap:3px;overflow-y:auto;
-    background:var(--bg1);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);z-index:50;
+    padding:16px 10px 20px;
+    gap:3px;
+    overflow-y:auto;
+    background:var(--bg1);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    z-index:100;
   }
-  .nav::before{content:"DayQ";display:block;font-size:1rem;font-weight:900;color:var(--a);padding:4px 12px 16px;letter-spacing:-.02em;}
-  .ni{flex:none;flex-direction:row;justify-content:flex-start;padding:9px 12px;border-radius:var(--r2);margin:0;gap:10px;width:100%;}
-  .ni.active{background:var(--am);color:var(--a);}
-  .ni-lbl{max-width:none !important;opacity:1 !important;font-size:.82rem;font-weight:600;}
-  .ni-dot{display:none;}
-  .nav-fab{order:-1;width:100%;margin-bottom:12px;flex-direction:row;flex:none;}
-  .nav-fab-btn{width:100%;border-radius:var(--r2);height:40px;gap:7px;}
-  .nav-fab-btn::after{content:"کار جدید";color:#fff;font-size:.82rem;font-weight:700;font-family:var(--f);}
-  [data-theme="dark"] .nav-fab-btn::after{color:#080c10;}
-  .nav-fab-lbl{display:none;}
-
-  /* شیت‌ها: dialog */
-  .sheet{
-    bottom:auto;top:50%;left:calc(50% - 110px);
-    transform:translate(-50%,-50%) scale(.95);opacity:0;pointer-events:none;
-    border-radius:var(--r4);max-height:85vh;
-    width:min(500px, calc(100vw - 260px));
-    border:1px solid var(--b1);box-shadow:0 24px 80px rgba(0,0,0,.22);
-    transition:transform .25s var(--ease), opacity .2s, background .25s;
+  .nav::before{
+    content:"DayQ";
+    display:block;
+    font-size:1rem;
+    font-weight:900;
+    color:var(--a);
+    padding:4px 12px 16px;
+    letter-spacing:-.02em;
+    flex-shrink:0;
   }
-  .sheet.open{transform:translate(-50%,-50%) scale(1);opacity:1;pointer-events:auto;}
-
-  /* Toast */
-  .toast{bottom:24px;top:auto;left:auto;right:calc(220px + 16px);
-    transform:translateY(12px);max-width:320px;border-radius:var(--r3);
-    opacity:0;pointer-events:none;transition:.25s var(--spring);}
-  .toast.show{transform:translateY(0);opacity:1;pointer-events:auto;}
-
-  /* محتوا */
-  .tlist,#bdList,.projects-list,.calendarWrap,.wv-wrap,.cal-list-view,.bag-pg,.bag-page{max-width:720px;margin-left:auto;margin-right:auto;}
-  .qcap{max-width:720px;margin-left:auto;margin-right:auto;border-radius:var(--r3);margin-top:6px;}
-  .tbrow{max-width:720px;margin:0 auto;}
-  .pg-title{font-size:1.4rem;}
-  .hrw svg{width:84px;height:84px;}
-
-  /* Cmd hint */
-  .cmd-shortcut-hint{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--r2);background:var(--bg2);border:1px solid var(--b1);color:var(--t3);font-size:.72rem;margin:0 auto 8px;max-width:720px;cursor:pointer;transition:.15s;}
-  .cmd-shortcut-hint:hover{background:var(--bg3);}
-  .cmd-shortcut-hint kbd{background:var(--bg3);border:1px solid var(--b1);border-radius:4px;padding:1px 6px;font-size:.68rem;font-family:monospace;}
+  .ni{
+    flex:none !important;
+    flex-direction:row !important;
+    justify-content:flex-start !important;
+    padding:9px 12px !important;
+    border-radius:var(--r2);
+    margin:0 !important;
+    gap:10px !important;
+    width:100%;
+    font-size:.82rem;
+    font-weight:600;
+    color:var(--t2);
+  }
+  .ni.active{background:var(--am) !important;color:var(--a) !important;}
   .ni:hover:not(.active){background:var(--bg2);}
+  .ni-lbl{
+    max-width:none !important;
+    opacity:1 !important;
+    font-size:.82rem;
+    font-weight:600;
+  }
+  .ni-dot{display:none !important;}
+  .nav-fab{
+    order:-1;
+    width:100%;
+    margin-bottom:12px;
+    flex-direction:row !important;
+    flex:none !important;
+  }
+  .nav-fab-btn{
+    width:100% !important;
+    border-radius:var(--r2) !important;
+    height:40px;
+    gap:7px;
+  }
+  .nav-fab-btn::after{
+    content:"کار جدید";
+    color:#fff;
+    font-size:.82rem;
+    font-weight:700;
+    font-family:var(--f);
+  }
+  [data-theme="dark"] .nav-fab-btn::after{color:#080c10;}
+  .nav-fab-lbl{display:none !important;}
 
-  /* ─── حذف padding-top اضافی صفحه‌ها (برای موبایل با topbar:fixed بود) ─── */
-  .me-pg,
-  .bag-pg,
-  .bag-page,
-  [style*="padding-top:calc(var(--topbar-h)"],
-  .cal-page-top,
-  .proj-page-top{
-    padding-top:0 !important;
+  /* ─── ۶. شیت‌ها — dialog وسط صفحه ─── */
+  .sheet{
+    bottom:auto !important;
+    top:50% !important;
+    left:calc(50% - 110px) !important;
+    transform:translate(-50%,-50%) scale(.95) !important;
+    opacity:0;
+    pointer-events:none;
+    border-radius:var(--r4) !important;
+    max-height:85vh !important;
+    width:min(500px, calc(100vw - 260px)) !important;
+    border:1px solid var(--b1) !important;
+    box-shadow:0 24px 80px rgba(0,0,0,.22) !important;
+    transition:transform .25s var(--ease), opacity .2s, background .25s !important;
+  }
+  .sheet.open{
+    transform:translate(-50%,-50%) scale(1) !important;
+    opacity:1;
+    pointer-events:auto;
   }
 
-  /* ─── فاصله‌دهنده height:topbar-h که بعضی صفحه‌ها دارند ─── */
-  #desktopContent [style*="height:var(--topbar-h)"],
-  .page [style*="height:var(--topbar-h)"]{
-    display:none !important;
+  /* ─── ۷. Toast — پایین چپ ─── */
+  .toast{
+    bottom:20px;top:auto !important;
+    left:auto;right:calc(220px + 16px) !important;
+    transform:translateY(8px);
+    max-width:320px;
+    border-radius:var(--r3);
+    opacity:0;
+    transition:.25s var(--spring);
   }
+  .toast.show{transform:translateY(0);opacity:1;}
 
-  /* ─── تقویم: max-width نباید روی grid اعمال شود ─── */
+  /* ─── ۸. Overlay — full screen ─── */
+  .ov{position:fixed !important;inset:0;}
+
+  /* ─── ۹. محتوای هر صفحه — عرض مناسب ─── */
+  /* تقویم: بدون محدودیت عرض */
   .calendarWrap,.cal-month-grid,.wv-wrap,.wv-grid{
     max-width:none !important;
-    margin-left:0;margin-right:0;
+    margin:0 !important;
   }
-  /* ولی هدر تقویم max-width دارد */
-  .cal-page-top,.cvt-wrap{
+  .cal-page-top,.cvt-wrap,.tbrow{
     max-width:800px;
     margin-left:auto;margin-right:auto;
   }
 
-  /* ─── Quick Capture عریض‌تر ─── */
+  /* بقیهٔ صفحه‌ها: محدودیت خوانا */
+  .tlist,#bdList,.projects-list,.bag-pg,.bag-page{
+    max-width:760px;
+    margin-left:auto;margin-right:auto;
+  }
   .qcap{
-    max-width:760px !important;
-  }
-
-  /* ─── صفحهٔ من: فونت و فاصله بزرگ‌تر ─── */
-  .srow{padding:13px 16px;}
-  .srow-ttl{font-size:.9rem;}
-  .srow-sub{font-size:.76rem;}
-
-  /* ─── کارت‌های تسک بهتر ─── */
-  .tc-wrap{
+    max-width:760px;
+    margin-left:auto;margin-right:auto;
     border-radius:var(--r3);
-    padding:12px 14px;
+    margin-top:6px;
   }
-  .tc-body{font-size:.88rem;}
-  .tc-txt{font-size:.88rem;}
 
-  /* ─── هدر صفحه ─── */
-  .pg-title{font-size:1.45rem;}
+  /* صفحهٔ «من» و کیف من */
+  .me-pg,.bag-page{padding-top:20px !important;}
+
+  /* هدر صفحات */
+  .pg-title{font-size:1.4rem;}
+
+  /* کارت‌های تسک */
+  .tc-wrap{border-radius:var(--r3);}
+
+  /* حلقهٔ پیشرفت */
+  .hrw svg{width:84px;height:84px;}
+
+  /* ─── ۱۰. Command Palette hint ─── */
+  .cmd-shortcut-hint{
+    display:flex !important;
+    align-items:center;gap:6px;
+    padding:8px 14px;border-radius:var(--r2);
+    background:var(--bg2);border:1px solid var(--b1);
+    color:var(--t3);font-size:.72rem;
+    margin:0 auto 8px;max-width:760px;
+    cursor:pointer;transition:.15s;
+  }
+  .cmd-shortcut-hint:hover{background:var(--bg3);}
+  .cmd-shortcut-hint kbd{
+    background:var(--bg3);border:1px solid var(--b1);
+    border-radius:4px;padding:1px 6px;font-size:.68rem;font-family:monospace;
+  }
 }
 
 @media(min-width:900px) and (max-width:1200px){
+  #app{padding-right:190px;}
   .nav{width:190px;}
-  #desktopContent{margin-right:190px;}
 }
+
 
 </style>
 </head>
@@ -2955,18 +3033,6 @@ function _syncLayoutVars(){
   }
 }
 function boot(){
-  // روی دسکتاپ: topbar و صفحه‌ها را داخل یک wrapper scroll‌پذیر می‌گذاریم
-  if(window.innerWidth>=900){
-    const app=document.getElementById('app');
-    const wrapper=document.createElement('div');
-    wrapper.id='desktopContent';
-    const topbar=document.querySelector('.topbar');
-    const pages=[...document.querySelectorAll('.page')];
-    // اضافه کردن topbar و همهٔ صفحه‌ها به wrapper
-    wrapper.appendChild(topbar);
-    pages.forEach(p=>wrapper.appendChild(p));
-    app.insertBefore(wrapper, app.firstChild);
-  }
   loadAll();loadProjects();applyTheme(cfg.theme);applyAppIcon(cfg.appIcon||'green');
   // ثبت Service Worker بی‌قید — حتی اگر Push را فعال نکرده باشد، چون Chrome برای نشان‌دادن دکمهٔ نصب نیاز دارد یک SW فعال ببیند
   if('serviceWorker' in navigator){
