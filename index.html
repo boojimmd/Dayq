@@ -100,7 +100,7 @@
   --bg0:#EDE8E2;--bg1:#F5F2ED;--bg2:#ECE8E2;--bg3:#DDD8D2;--bg4:#C8C0B8;
   --b1:rgba(0,0,0,.10);--b2:rgba(0,0,0,.06);--b3:rgba(0,0,0,.03);
   --t1:#433E37;--t2:#6B6159;--t3:#9A8E83;--t4:#C8C0B8;
-  --a:#8C7E6D;--a2:#7A6D5E;--am:rgba(140,126,109,.14);--ag:rgba(140,126,109,.28);
+  --a:#6B5D4E;--a2:#5A4D40;--am:rgba(107,93,78,.14);--ag:rgba(107,93,78,.28);
 }
 
 /* آبی کلاسیک */
@@ -148,7 +148,7 @@
   --bg0:#FDF6E3;--bg1:#FFFCF5;--bg2:#F5EDD8;--bg3:#EDE0C4;--bg4:#DDD0B0;
   --b1:rgba(120,90,30,.12);--b2:rgba(120,90,30,.07);--b3:rgba(120,90,30,.04);
   --t1:#3D2B1F;--t2:#7C5C3E;--t3:#B08060;--t4:#D4B896;
-  --a:#C0862A;--a2:#A87020;--am:rgba(192,134,42,.14);--ag:rgba(192,134,42,.28);
+  --a:#9A6510;--a2:#7A4C00;--am:rgba(154,101,16,.14);--ag:rgba(154,101,16,.28);
 }
 
 /* یخ شمالی */
@@ -1838,7 +1838,7 @@ select.fi{
   .sheet{
     bottom:auto !important;
     top:50% !important;
-    left:calc(50% - 110px) !important;
+    left:calc((100vw - 220px) / 2) !important; /* وسط ناحیهٔ محتوا، نه وسط viewport */
     transform:translate(-50%,-50%) scale(.95) !important;
     opacity:0;
     pointer-events:none;
@@ -2658,7 +2658,7 @@ select.fi{
     </div>
     <div class="sh-iw">
       <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      <input class="sh-inp" id="cmdInput" placeholder="عنوان کار..." maxlength="120" autocomplete="off">
+      <input class="sh-inp" id="taskTitleInput" placeholder="عنوان کار..." maxlength="120" autocomplete="off">
     </div>
   </div>
   <div class="sh-body">
@@ -3320,7 +3320,7 @@ function boot(){
     si.addEventListener('keydown',e=>{ if(e.key==='Escape') closeSearch(); });
   }
   // cmd enter
-  document.getElementById('cmdInput').addEventListener('keydown',e=>{if(e.key==='Enter')addTask();});
+  document.getElementById('taskTitleInput').addEventListener('keydown',e=>{if(e.key==='Enter')addTask();});
   // intent quick add
   const iqi=document.getElementById('intentQuickInp');
   if(iqi){iqi.addEventListener('keydown',e=>{
@@ -5014,7 +5014,7 @@ function quickCapture(){
   if(cfg.confetti) spawnConfetti({clientX:window.innerWidth*.5,clientY:160});
 }
 function addTask(){
-  const txt=document.getElementById('cmdInput').value.trim();if(!txt){document.getElementById('cmdInput').focus();return;}
+  const txt=document.getElementById('taskTitleInput').value.trim();if(!txt){document.getElementById('taskTitleInput').focus();return;}
   const deadline=document.getElementById('cmdDeadline')?.value||null;
   const status=selTaskStatus||'todo';
   const recurVal = selRecur_||'none';
@@ -5044,7 +5044,7 @@ function addTask(){
   const calPage=document.getElementById('pageCalendar');
   if(calPage&&calPage.classList.contains('active')){renderCal();if(calSelDate)refreshCalDayTasks(calSelDate);}
   toast_(svgIco('check'),'کار ثبت شد');
-  document.getElementById('cmdInput').value='';
+  document.getElementById('taskTitleInput').value='';
   document.getElementById('cmdTime').value='';
   resetJDPFields();
   selTaskStatus='todo'; selTaskProjId='';
@@ -7922,7 +7922,7 @@ function buildTplGrid(){
 }
 
 function applyTemplate(tpl){
-  document.getElementById('cmdInput').value = tpl.text;
+  document.getElementById('taskTitleInput').value = tpl.text;
   document.getElementById('cmdCat').value = tpl.cat || 'prep';
   if(tpl.iconId) selIco = tpl.iconId;
   if(tpl.priority) selPri(tpl.priority, document.querySelector(`.pp[data-p="${tpl.priority}"]`));
@@ -7935,7 +7935,7 @@ function applyTemplate(tpl){
 }
 
 function saveAsTemplate(){
-  const txt = document.getElementById('cmdInput')?.value?.trim();
+  const txt = document.getElementById('taskTitleInput')?.value?.trim();
   if(!txt){ toast_(svgIco('flag'),'اول عنوان کار رو بنویس'); return; }
   loadTemplates();
   const tpl = {
@@ -9669,7 +9669,7 @@ boot();
 
 <!-- ═══ Command Palette ═══ -->
 <div id="cmdPalette" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);" onclick="if(event.target===this)closeCmdPalette()">
-  <div style="position:absolute;top:18%;left:50%;transform:translateX(-50%);width:min(540px,90vw);background:var(--bg1);border-radius:var(--r4);border:1px solid var(--b1);box-shadow:0 32px 80px rgba(0,0,0,.3);overflow:hidden;">
+  <div style="position:absolute;top:18%;left:calc((100vw - 220px) / 2);transform:translateX(-50%);width:min(540px,calc(100vw - 260px));background:var(--bg1);border-radius:var(--r4);border:1px solid var(--b1);box-shadow:0 32px 80px rgba(0,0,0,.3);overflow:hidden;">
     <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--b2);">
       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--t3)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input id="cmdInput" type="text" autocomplete="off" spellcheck="false"
