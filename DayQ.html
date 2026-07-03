@@ -3482,6 +3482,7 @@ function loadAll(){
     localStorage.setItem('dq5_mig_prepicon','1');
   }
 }
+let _batchSave=false;
 function saveAll(){
   try{
     localStorage.setItem(SK,JSON.stringify(tasks));
@@ -3489,11 +3490,18 @@ function saveAll(){
     localStorage.setItem(SD,JSON.stringify(birthdays));
     saveCfg();
   }catch(e){
-    // localStorage پر شده یا خطای دیگه
     console.error('saveAll error:',e);
     toast_(svgIco('flag'),'خطا در ذخیره — حافظه پر شده؟');
   }
-  _debouncedSync();
+  if(!_batchSave) _debouncedSync();
+}
+// برای عملیات‌های دسته‌ای (مثل import، recurring): یک sync در آخر
+function batchSave(fn){
+  _batchSave=true;
+  try{ fn(); } finally{
+    _batchSave=false;
+    _debouncedSync();
+  }
 }
 let _debSyncT=null, _syncInProgress=false;
 function _debouncedSync(){
@@ -3973,7 +3981,7 @@ function processRecurringTasks(){
 
   if(toAdd.length){
     toAdd.forEach(t=>tasks.push(t));
-    saveAll();
+    batchSave(()=>saveAll());
   }
 }
 function checkTimeAlert(){
@@ -4894,16 +4902,20 @@ function pqaGetSuggestion(text){
   const hour=now.getHours();
   const q=nlpNormalize(text).toLowerCase();
   const data=pqaLoad();
-  // جستجو در slot فعلی و slot‌های مجاور (±1 ساعت)
-  const slots=[`${dow}_${hour}`,`${dow}_${hour-1}`,`${dow}_${hour+1}`];
+  // slot فعلی (وزن ×۴) + همان ساعت (وزن ×۲) + ساعت مجاور (وزن ×۱)
+  const slotWeights=[
+    [`${dow}_${hour}`, 4],   // دقیقاً همین روز و ساعت — قوی‌ترین سیگنال
+    [`${dow}_${hour-1}`, 2],
+    [`${dow}_${hour+1}`, 2],
+  ];
   let best=null, bestScore=0;
-  for(const slot of slots){
+  for(const [slot, weight] of slotWeights){
     const items=data[slot]||[];
     for(const item of items){
-      if(item.c<3) continue; // حداقل ۳ بار تکرار
+      if(item.c<5) continue; // حداقل ۵ بار تکرار — کمتر از اینکه پیشنهاد اشتباه بدهد
       const t=item.t.toLowerCase();
       if(t.startsWith(q)&&t!==q){
-        const score=item.c*(slot===`${dow}_${hour}`?2:1);
+        const score=item.c*weight;
         if(score>bestScore){ bestScore=score; best=item.t; }
       }
     }
@@ -9599,6 +9611,10 @@ boot();
   <div class="ni" id="ni-calendar" onclick="goPage('Calendar')">
     <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
     <span class="ni-lbl">تقویم</span><div class="ni-dot"></div>
+  </div>
+  <div class="ni" id="ni-birthdays" onclick="goPage('Birthdays')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    <span class="ni-lbl">مناسبت‌ها</span><div class="ni-dot"></div>
   </div>
   <div class="ni" id="ni-me" onclick="goPage('Me')">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
