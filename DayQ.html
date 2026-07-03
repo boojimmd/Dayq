@@ -1596,16 +1596,20 @@ select.fi{
     overscroll-behavior:auto !important;
   }
 
-  /* ─── ۲. #app — block ساده، padding برای sidebar ─── */
+  /* ─── ۲. #app — reset کامل از موبایل ─── */
   #app{
-    position:relative !important;
+    position:static !important;  /* نه relative */
     max-width:100% !important;
-    height:auto !important;
-    min-height:100svh;
-    overflow:visible !important;
-    display:block !important;   /* نه flex — تا محتوا رشد کند */
-    padding-right:220px;
+    width:100% !important;
+    height:auto !important;      /* نه 100svh */
+    min-height:0 !important;
+    overflow:visible !important; /* نه hidden */
+    display:block !important;    /* نه flex */
+    margin:0 !important;         /* نه 0 auto */
+    padding-right:220px !important; /* فضا برای sidebar راست */
+    padding-left:0 !important;
     box-sizing:border-box;
+    left:auto !important;right:auto !important;
   }
 
   /* ─── ۳. Topbar — fixed (با scroll viewport) ─── */
