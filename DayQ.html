@@ -2039,6 +2039,13 @@ select.fi{
   stroke-width:1.8;stroke-linecap:round;
 }
 
+
+/* آیتم‌هایی که فقط در sidebar دسکتاپ نشان داده می‌شوند */
+.ni-desktop-only{display:none !important;}
+@media(min-width:900px){
+  .ni-desktop-only{display:flex !important;}
+}
+
 </style>
 </head>
 <body>
@@ -9760,7 +9767,7 @@ boot();
     <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
     <span class="ni-lbl">تقویم</span><div class="ni-dot"></div>
   </div>
-  <div class="ni" id="ni-birthdays" onclick="goPage('Birthdays')">
+  <div class="ni ni-desktop-only" id="ni-birthdays" onclick="goPage('Birthdays')">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2z"/><path d="M12 12V8"/><path d="M8 12V9"/><path d="M16 12V9"/><path d="M12 8c0-1.1-.9-2-2-2s-2 .9-2 2"/><path d="M12 4v1"/><path d="M2 17h20"/></svg>
     <span class="ni-lbl">مناسبت‌ها</span><div class="ni-dot"></div>
   </div>
