@@ -9195,7 +9195,7 @@ function applyPM(h,suffix){
   if(/^ق[\s.]?ظ/.test(suffix)) return h===12?0:h;
   if(/^ب[\s.]?ظ/.test(suffix)){ if(h===12)return 12; return h<12?h+12:h; }
   if(suffix==='صبح'||suffix==='بامداد')return h===12?0:h; // 12 صبح = 0:00
-  if(suffix==='شب'||suffix==='بعدازظهر'||suffix==='عصر'||suffix==='بعد از ظهر'){
+  if(suffix==='ظهر'||suffix==='نیمه روز'||suffix==='شب'||suffix==='بعدازظهر'||suffix==='عصر'||suffix==='بعد از ظهر'){
     if(h===12)return 12; // 12 ظهر = 12:00
     return h<12?h+12:h;
   }
@@ -9208,9 +9208,16 @@ function nlpResolveTime(txt){
   const en=faToEn(n);
   const SF='(بعدازظهر|بعد از ظهر|عصر|صبح|بامداد|شب|ب[\\s.]?ظ\\.?|ق[\\s.]?ظ\\.?)';
 
-  // 1. ساعت دقیق N:MM
-  let m=en.match(/(\d{1,2}):(\d{2})/);
-  if(m)return mkTime(parseInt(m[1]),parseInt(m[2]));
+  // 1. ساعت دقیق N:MM — با چک suffix بعدی (ظهر/عصر/شب/صبح)
+  m=en.match(/(\d{1,2}):(\d{2})/);
+  if(m){
+    let h=parseInt(m[1]), mm=parseInt(m[2]);
+    // بررسی کلمات PM/AM بلافاصله قبل یا بعد از زمان
+    const sfMatch = n.match(/(ظهر|بعدازظهر|بعد از ظهر|عصر|شب|صبح|بامداد|ب[\s.]?ظ\.?|ق[\s.]?ظ\.?)/);
+    if(sfMatch) h = applyPM(h, sfMatch[1]);
+    else if(h<=6) h=h; // ۱:۳۰ بدون suffix → صبح احتمالاً
+    return mkTime(h, mm);
+  }
 
   // 2. الگوهای «به» — باید اول بیان تا «ساعت N» نخوره
   // یک ربع به N = N-1:45
