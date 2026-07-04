@@ -8932,7 +8932,7 @@ const NLP_REL_DATE = {
 const NLP_TIME_OF_DAY = {
   'صبح زود':6,'سحر':5,'بامداد':6,
   'صبح':9,'ظهر':12,'بعدازظهر':14,'بعد از ظهر':14,
-  'عصر':15,'غروب':17,'شب':20,'امشب':20,'نیمه‌شب':23,'نیمه شب':23,'نصفه شب':23,'نصفه‌شب':23,'نصف شب':23,
+  'عصر':15,'غروب':17,'شب':20,'امشب':20,'نیمه‌شب':0,'نیمه شب':0,'نصفه شب':0,'نصفه‌شب':0,'نصف شب':0,'بامداد':2,'سحر':3,
 };
 const NLP_PRIORITY = {
   'فوری':     'high','خیلی فوری':'high','خیلی مهم':'high',
@@ -9195,9 +9195,15 @@ function applyPM(h,suffix){
   if(/^ق[\s.]?ظ/.test(suffix)) return h===12?0:h;
   if(/^ب[\s.]?ظ/.test(suffix)){ if(h===12)return 12; return h<12?h+12:h; }
   if(suffix==='صبح'||suffix==='بامداد')return h===12?0:h; // 12 صبح = 0:00
-  if(suffix==='ظهر'||suffix==='نیمه روز'||suffix==='شب'||suffix==='بعدازظهر'||suffix==='عصر'||suffix==='بعد از ظهر'){
+  if(suffix==='ظهر'||suffix==='نیمه روز'||suffix==='بعدازظهر'||suffix==='عصر'||suffix==='بعد از ظهر'){
     if(h===12)return 12; // 12 ظهر = 12:00
     return h<12?h+12:h;
+  }
+  if(suffix==='شب'){
+    // ۱-۵ شب = بامداد = AM (01-05) | ۶-۱۱ شب = PM (18-23)
+    if(h>=1&&h<=5) return h;          // ۱ شب = 01:00، ۲ شب = 02:00
+    if(h===12) return 0;              // ۱۲ شب = نیمه‌شب = 00:00
+    return h<12?h+12:h;              // ۶ شب = 18:00، ۱۰ شب = 22:00
   }
   return h;
 }
@@ -9570,12 +9576,15 @@ function nlpParse(raw){
     delete result._stripWaiting;
   }
 
-  // اگه time داشت ولی deadline نداشت، deadline=امروز — مگر اینکه آن ساعت از همین الان گذشته باشد، که یعنی منظور فرداست
+  // اگه time داشت ولی deadline نداشت، deadline=امروز — مگر اینکه:
+  // الف) آن ساعت از همین الان گذشته باشد → فردا
+  // ب) ساعت بامداد (۰۰-۰۵) باشد → همیشه فردا (چون کسی برای همین الان نصفه‌شب کار ثبت نمی‌کند)
   if(result.time&&!result.deadline){
     const [_hh,_mm]=result.time.split(':').map(Number);
     const _now=new Date();
+    const _isPostMidnight = _hh>=0&&_hh<=5; // ۱ شب، ۲ شب، نیمه‌شب
     const _todayAtThatTime=new Date(_now.getFullYear(),_now.getMonth(),_now.getDate(),_hh,_mm);
-    result.deadline = (_todayAtThatTime<=_now) ? getTomorrowKey() : mrTodayKey();
+    result.deadline = (_isPostMidnight||_todayAtThatTime<=_now) ? getTomorrowKey() : mrTodayKey();
     if(!result.detected.includes('date'))result.detected.push('date');
   }
   // ── #پروژه و @برچسب در متن ──
