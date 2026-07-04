@@ -277,6 +277,58 @@ const seedTask = (over = {}) => Object.assign({
     await page.close();
   }
 
+  // ── فیکس: ساعت دقیق H:MM باید به «شب/عصر» کنار خودش توجه کنه (قبلاً نادیده می‌گرفت) ──
+  {
+    const page = await browser.newPage();
+    await page.goto(FILE);
+    await page.waitForTimeout(300);
+
+    const nightExact = await page.evaluate(() => nlpParse('فردا شب ساعت ۹:۳۰ تماس با دکتر احمدی').time);
+    check('«شب ساعت ۹:۳۰» → ۲۱:۳۰ می‌شود (نه ۰۹:۳۰)', nightExact === '21:30');
+
+    const morningExact = await page.evaluate(() => nlpParse('ساعت ۹:۰۰ صبح تحویل نمونه').time);
+    check('«صبح ساعت ۹:۰۰» → ۰۹:۰۰ می‌ماند (بدون تغییر)', morningExact === '09:00');
+    await page.close();
+  }
+
+  // ── فیکس: «N روز مونده» با عدد نوشتاری (نه فقط رقمی) ──
+  {
+    const page = await browser.newPage();
+    await page.goto(FILE);
+    await page.waitForTimeout(300);
+
+    const writtenNum = await page.evaluate(() => {
+      const today = mrTodayKey();
+      const [jy,jm,jd] = today.split('-').map(Number);
+      const expected = daysToJalaliKey(_jalToDays(jy,jm,jd)+3);
+      return { result: nlpParse('سه روز مونده به تحویل گزارش').deadline, expected };
+    });
+    check('«سه روز مونده» (عدد نوشتاری) تاریخ را درست تشخیص می‌دهد', writtenNum.result === writtenNum.expected);
+    await page.close();
+  }
+
+  // ── فیکس: تکرار عمومی «هر N روز/هفته/ماه یک‌بار» با عدد دلخواه ──
+  {
+    const page = await browser.newPage();
+    await page.goto(FILE);
+    await page.waitForTimeout(300);
+
+    const everyN = await page.evaluate(() => nlpParse('هر ۱۰ روز یک‌بار پیگیری کن').recur);
+    check('«هر ۱۰ روز یک‌بار» → recur برابر every:10 می‌شود', everyN === 'every:10');
+
+    const everyNLabel = await page.evaluate(() => recurLabel('every:10'));
+    check('recurLabel(every:10) برچسب «هر ۱۰ روز» را برمی‌گرداند', everyNLabel === 'هر ۱۰ روز');
+
+    const nextDeadline = await page.evaluate(() => {
+      const base = mrTodayKey();
+      const [jy,jm,jd] = base.split('-').map(Number);
+      const fromDays = _jalToDays(jy,jm,jd);
+      return { next: getNextRecurDeadline({recur:'every:10'}, fromDays), expected: daysToJalaliKey(fromDays+10) };
+    });
+    check('getNextRecurDeadline با every:10 دقیقاً ۱۰ روز جلو می‌رود', nextDeadline.next === nextDeadline.expected);
+    await page.close();
+  }
+
   await browser.close();
 
   console.log(`\n${'═'.repeat(40)}`);

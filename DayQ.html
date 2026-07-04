@@ -3930,6 +3930,11 @@ function getNextRecurDeadline(t, fromDays){
     const n=parseInt(recur.split(':')[1])||7;
     return daysToJalaliKey(fromDays+n);
   }
+  if(recur.startsWith('every:')){
+    // بازهٔ ثابت دلخواه (بر حسب روز) — مثل «هر ۱۰ روز یک‌بار»، مستقل از انجام‌شدن تسک
+    const n=parseInt(recur.split(':')[1])||7;
+    return daysToJalaliKey(fromDays+n);
+  }
   return null;
 }
 
@@ -7675,7 +7680,18 @@ function selRecur(r, el){
 }
 
 function recurLabel(r){
-  return {none:'',daily:'روزانه',weekly:'هفتگی',monthly:'ماهانه'}[r]||'';
+  if(!r) return '';
+  if(r.startsWith('every:')){
+    const n=parseInt(r.split(':')[1])||0;
+    if(n%30===0 && n>=30) return `هر ${num(n/30)} ماه`;
+    if(n%7===0) return `هر ${num(n/7)} هفته`;
+    return `هر ${num(n)} روز`;
+  }
+  if(r.startsWith('after:')){
+    const n=parseInt(r.split(':')[1])||0;
+    return `${num(n)} روز پس از انجام`;
+  }
+  return {none:'',daily:'روزانه',weekly:'هفتگی',monthly:'ماهانه',biweekly:'هر ۲ هفته',workday:'روزهای کاری'}[r]||'';
 }
 
 function runAutoArchive(){
@@ -8941,10 +8957,11 @@ function nlpResolveDate(txt){
   }
 
   // ── N روز دیگه/مونده — قبل از حلقهٔ آفست ثابت، چون عدد متغیره نه کلمهٔ ثابت ──
-  const nDaysMatch = n.match(/([۰-۹٠-٩0-9]+)\s*روز\s*(دیگه|دیگر|مونده|بعد)/);
+  const nDaysMatch = n.match(/(?:^|[\s،,])([۰-۹٠-٩0-9]+|یک|دو|سه|چهار|پنج|شش|هفت|هشت|نه|ده)\s*روز\s*(دیگه|دیگر|مونده|بعد)/);
   if(nDaysMatch){
-    const nDays = parseInt(faToEn(nDaysMatch[1]),10);
-    if(!isNaN(nDays) && nDays>0 && nDays<366){
+    const numsWD={'یک':1,'دو':2,'سه':3,'چهار':4,'پنج':5,'شش':6,'هفت':7,'هشت':8,'نه':9,'ده':10};
+    const nDays = parseInt(faToEn(nDaysMatch[1]),10) || numsWD[nDaysMatch[1]];
+    if(nDays && nDays>0 && nDays<366){
       return daysToJalaliKey(todayDays+nDays);
     }
   }
@@ -9097,9 +9114,19 @@ function nlpResolveTime(txt){
   const en=faToEn(n);
   const SF='(بعدازظهر|بعد از ظهر|عصر|صبح|بامداد|شب|ب[\\s.]?ظ\\.?|ق[\\s.]?ظ\\.?)';
 
-  // 1. ساعت دقیق N:MM
+  // 1. ساعت دقیق N:MM — باید به کلمات شب/عصر/صبح جای دیگه‌ی جمله هم توجه کنه
   let m=en.match(/(\d{1,2}):(\d{2})/);
-  if(m)return mkTime(parseInt(m[1]),parseInt(m[2]));
+  if(m){
+    let hh=parseInt(m[1]), mm=parseInt(m[2]);
+    const hasPM=/شب|عصر|بعدازظهر|بعد از ظهر/.test(n);
+    const hasAM=/صبح|بامداد/.test(n);
+    if(hh>=1&&hh<=12){
+      if(hasPM){ hh = hh===12?12:hh+12; }
+      else if(hasAM){ hh = hh===12?0:hh; }
+      else if(hh>=1&&hh<=6){ hh+=12; } // بدون قید صریح: مطابق قاعدهٔ «ساعت N» ساده، ۱-۶ یعنی بعدازظهر
+    }
+    return mkTime(hh,mm);
+  }
 
   // 2. الگوهای «به» — باید اول بیان تا «ساعت N» نخوره
   // یک ربع به N = N-1:45
@@ -9348,10 +9375,26 @@ function nlpParse(raw){
     if(n.includes(kw)){ result.cat=NLP_CAT[kw]; result.detected.push('cat'); foundCat=true; break; }
   }
 
-  // تکرار
-  const recurKeys = Object.keys(NLP_RECUR).sort((a,b)=>b.length-a.length);
-  for(const kw of recurKeys){
-    if(n.includes(kw)){ result.recur=NLP_RECUR[kw]; result.detected.push('recur'); break; }
+  // تکرار — اول الگوی عمومی «هر N روز/هفته/ماه [یک‌بار]» با عدد دلخواه (رقمی یا نوشتاری)
+  // فرمت: 'every:N' یعنی هر N روز یک‌بار — قبل از دیکشنری ثابت چک می‌شود تا عدد واقعی حفظ شود
+  const numsWR={'دو':2,'سه':3,'چهار':4,'پنج':5,'شش':6,'هفت':7,'هشت':8,'نه':9,'ده':10};
+  const everyNMatch = n.match(/هر\s*([۰-۹٠-٩0-9]+|دو|سه|چهار|پنج|شش|هفت|هشت|نه|ده)\s*(روز|هفته|ماه)(?:\s*یک‌?بار)?/);
+  let foundRecur=false;
+  if(everyNMatch){
+    const cnt = parseInt(faToEn(everyNMatch[1]),10) || numsWR[everyNMatch[1]];
+    if(cnt && cnt>1){
+      const unit=everyNMatch[2];
+      const days = unit==='روز'?cnt : unit==='هفته'?cnt*7 : cnt*30;
+      result.recur = 'every:'+days;
+      result.detected.push('recur');
+      foundRecur=true;
+    }
+  }
+  if(!foundRecur){
+    const recurKeys = Object.keys(NLP_RECUR).sort((a,b)=>b.length-a.length);
+    for(const kw of recurKeys){
+      if(n.includes(kw)){ result.recur=NLP_RECUR[kw]; result.detected.push('recur'); break; }
+    }
   }
 
   // ── انتظار: تشخیص جامع حالت‌های فارسی «منتظرم» ──
@@ -9425,7 +9468,8 @@ function nlpParse(raw){
   // باید زودتر از لیست ثابت کلمات اجرا شود، وگرنه عدد جلوش (مثل «دو») تنها می‌ماند
   // چون لیست ثابت فقط «هفته دیگه» را می‌بیند، نه «دو هفته دیگه» را یکپارچه
   clean = faToEn(clean)
-    .replace(/(^|[\s،,])(?:تا\s+)?(\d+|یک|دو|سه|چهار|پنج|شش|هفت|هشت|نه|ده)\s*(روز|هفته|ماه)\s*(دیگه?|آینده|بعد)/g,'$1');
+    .replace(/(^|[\s،,])(?:تا\s+)?(\d+|یک|دو|سه|چهار|پنج|شش|هفت|هشت|نه|ده)\s*(روز|هفته|ماه)\s*(دیگه?|آینده|بعد|مونده)/g,'$1')
+    .replace(/(^|[\s،,])هر\s*(\d+|دو|سه|چهار|پنج|شش|هفت|هشت|نه|ده)\s*(روز|هفته|ماه)(?:\s*یک‌?بار)?/g,'$1');
 
   // تاریخ‌های دقیق «عدد(+ام) + نام ماه» یا «روز ترتیبی نوشتاری + نام ماه» — مثل «۱ تیر»، «۱۵ام خرداد»، «بیستم مرداد»
   // باید همینجا، قبل از لیست ثابت، یکپارچه حذف شود؛ وگرنه فقط بخشی از آن (مثلاً خودِ ماه) باقی می‌ماند
@@ -9529,8 +9573,7 @@ function nlpShowPreview(parsed){
     chips.push(`<span class="nlp-chip cat"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>${NLP_CAT_LABELS[parsed.cat]||parsed.cat}</span>`);
   }
   if(parsed.recur&&parsed.recur!=='none'){
-    const rmap={daily:'هر روز',weekly:'هر هفته',monthly:'هر ماه'};
-    chips.push(`<span class="nlp-chip recur"><svg viewBox="0 0 24 24"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 .49-6H1"/></svg>${rmap[parsed.recur]}</span>`);
+    chips.push(`<span class="nlp-chip recur"><svg viewBox="0 0 24 24"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 .49-6H1"/></svg>${recurLabel(parsed.recur)}</span>`);
   }
 
   // ── #project @label contact chips ──
