@@ -2096,7 +2096,7 @@ select.fi{
   <div class="qcap-toolbar" id="qcapToolbar">
     <!-- chip دسته: NLP تشخیص می‌دهد، tap برای تغییر -->
     <button class="qcat-chip" id="qcatChip" onclick="openCatPicker()">
-      <span id="qcatChipIcon">📋</span>
+      <span id="qcatChipIcon" style="display:flex;align-items:center;"></span>
       <span id="qcatChipLabel">دسته؟</span>
     </button>
     <div class="qt-sep"></div>
@@ -3982,11 +3982,6 @@ function getNextRecurDeadline(t, fromDays){
     const n=parseInt(recur.split(':')[1])||7;
     return daysToJalaliKey(fromDays+n);
   }
-  if(recur.startsWith('every:')){
-    // بازهٔ ثابت دلخواه (بر حسب روز) — مثل «هر ۱۰ روز یک‌بار»، مستقل از انجام‌شدن تسک
-    const n=parseInt(recur.split(':')[1])||7;
-    return daysToJalaliKey(fromDays+n);
-  }
   return null;
 }
 
@@ -4847,16 +4842,22 @@ let qcCat='prep', qcPri='high';
 
 /* ── اطلاعات هر دسته ── */
 const CAT_INFO = {
-  prep:     {label:'آماده‌سازی', icon:'📋', svg:'<path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/>'},
-  visit:    {label:'بازدید',     icon:'👤', svg:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'},
-  meeting:  {label:'جلسه',      icon:'🤝', svg:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
-  report:   {label:'گزارش',     icon:'📊', svg:'<path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/>'},
-  followup: {label:'پیگیری',    icon:'🔄', svg:'<polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>'},
-  email:    {label:'پیام',       icon:'✉️', svg:'<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>'},
-  call:     {label:'تماس',       icon:'📞', svg:'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>'},
+  prep:     {label:'آماده‌سازی', svg:'<path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/>'},
+  visit:    {label:'بازدید',     svg:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'},
+  meeting:  {label:'جلسه',      svg:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
+  report:   {label:'گزارش',     svg:'<path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/>'},
+  followup: {label:'پیگیری',    svg:'<polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>'},
+  email:    {label:'پیام',      svg:'<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>'},
+  call:     {label:'تماس',      svg:'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>'},
 };
 
-let _catNLPDetected = false; // آیا NLP تشخیص داده؟
+function _catSVG(key, size=14){
+  const info = CAT_INFO[key];
+  if(!info) return '';
+  return `<svg viewBox="0 0 24 24" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${info.svg}</svg>`;
+}
+
+let _catNLPDetected = false;
 
 /* chip را آپدیت کن */
 function _updateCatChip(){
@@ -4865,7 +4866,7 @@ function _updateCatChip(){
   const label = document.getElementById('qcatChipLabel');
   if(!chip) return;
   const info = CAT_INFO[qcCat];
-  icon.textContent = info ? info.icon : '📋';
+  icon.innerHTML = info ? _catSVG(qcCat, 13) : '';
   label.textContent = info ? info.label : 'دسته؟';
   chip.classList.toggle('detected', _catNLPDetected);
 }
@@ -4890,8 +4891,8 @@ function openCatPicker(){
   if(!grid) return;
   grid.innerHTML = Object.entries(CAT_INFO).map(([key, info])=>`
     <button class="cat-pick-btn${qcCat===key?' sel':''}" onclick="pickCat('${key}')">
-      <svg viewBox="0 0 24 24">${info.svg}</svg>
-      ${info.icon} ${info.label}
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${info.svg}</svg>
+      ${info.label}
     </button>
   `).join('');
   openSheet('shCatPicker');
@@ -7786,18 +7787,7 @@ function selRecur(r, el){
 }
 
 function recurLabel(r){
-  if(!r) return '';
-  if(r.startsWith('every:')){
-    const n=parseInt(r.split(':')[1])||0;
-    if(n%30===0 && n>=30) return `هر ${num(n/30)} ماه`;
-    if(n%7===0) return `هر ${num(n/7)} هفته`;
-    return `هر ${num(n)} روز`;
-  }
-  if(r.startsWith('after:')){
-    const n=parseInt(r.split(':')[1])||0;
-    return `${num(n)} روز پس از انجام`;
-  }
-  return {none:'',daily:'روزانه',weekly:'هفتگی',monthly:'ماهانه',biweekly:'هر ۲ هفته',workday:'روزهای کاری'}[r]||'';
+  return {none:'',daily:'روزانه',weekly:'هفتگی',monthly:'ماهانه'}[r]||'';
 }
 
 function runAutoArchive(){
@@ -9063,11 +9053,10 @@ function nlpResolveDate(txt){
   }
 
   // ── N روز دیگه/مونده — قبل از حلقهٔ آفست ثابت، چون عدد متغیره نه کلمهٔ ثابت ──
-  const nDaysMatch = n.match(/(?:^|[\s،,])([۰-۹٠-٩0-9]+|یک|دو|سه|چهار|پنج|شش|هفت|هشت|نه|ده)\s*روز\s*(دیگه|دیگر|مونده|بعد)/);
+  const nDaysMatch = n.match(/([۰-۹٠-٩0-9]+)\s*روز\s*(دیگه|دیگر|مونده|بعد)/);
   if(nDaysMatch){
-    const numsWD={'یک':1,'دو':2,'سه':3,'چهار':4,'پنج':5,'شش':6,'هفت':7,'هشت':8,'نه':9,'ده':10};
-    const nDays = parseInt(faToEn(nDaysMatch[1]),10) || numsWD[nDaysMatch[1]];
-    if(nDays && nDays>0 && nDays<366){
+    const nDays = parseInt(faToEn(nDaysMatch[1]),10);
+    if(!isNaN(nDays) && nDays>0 && nDays<366){
       return daysToJalaliKey(todayDays+nDays);
     }
   }
@@ -9108,48 +9097,6 @@ function nlpResolveDate(txt){
         }
         return daysToJalaliKey(todayDays+diff+7); // یک هفتهٔ کامل جلوتر از نزدیک‌ترین وقوع
       }
-    }
-  }
-
-  // ── «N روز بعد از [فردا/پسفردا/امروز]» — لنگر نسبی ──
-  // «دو روز بعد از فردا» = فردا + ۲ روز، نه امروز + ۲ روز
-  const relAnchorMatch = n.match(/([۰-۹٠-٩0-9]+|یک|دو|سه|چهار|پنج|شش|هفت|هشت|نه|ده)\s*روز\s*(?:دیگه?|بعد)\s*از\s*(فردا|پسفردا|پس‌فردا|امروز)/);
-  if(relAnchorMatch){
-    const numsWA={'یک':1,'دو':2,'سه':3,'چهار':4,'پنج':5,'شش':6,'هفت':7,'هشت':8,'نه':9,'ده':10};
-    const n2 = parseInt(faToEn(relAnchorMatch[1]),10)||numsWA[relAnchorMatch[1]]||1;
-    const anchor = relAnchorMatch[2].includes('پس')?2:relAnchorMatch[2]==='فردا'?1:0;
-    return daysToJalaliKey(todayDays+anchor+n2);
-  }
-
-  // ── کسری ماه: «یک ماه و نیم»، «دو ماه و نیم» ──
-  const fracMonthMatch = n.match(/(?:^|[\s،,])(\d+|یک|دو|سه|چهار|پنج|شش|هفت|هشت|نه|ده)\s*ماه\s*و\s*نیم\s*(دیگه?|بعد|آینده)?/);
-  if(fracMonthMatch){
-    const numsWF={'یک':1,'دو':2,'سه':3,'چهار':4,'پنج':5,'شش':6,'هفت':7,'هشت':8,'نه':9,'ده':10};
-    const cnt=(parseInt(faToEn(fracMonthMatch[1]),10)||numsWF[fracMonthMatch[1]]||1);
-    return daysToJalaliKey(todayDays+Math.round(cnt*30+15));
-  }
-
-  // ── اولین/آخرین [روز هفته] این ماه / ماه بعد ──
-  // مثال: «اولین سه‌شنبه این ماه»، «آخرین جمعه ماه بعد»
-  const firstLastMatch = n.match(/(اولین|آخرین)\s+(\S+)\s+(این\s+ماه|ماه\s+(?:بعد|دیگه?|آینده)|ماه\s+جاری)/);
-  if(firstLastMatch){
-    const isFirst = firstLastMatch[1]==='اولین';
-    const dayName = firstLastMatch[2];
-    const isNextMonth = /بعد|دیگه?|آینده/.test(firstLastMatch[3]);
-    const dow = NLP_DAYS[dayName];
-    if(dow!==undefined){
-      const targetMonth = isNextMonth ? (jm===12?1:jm+1) : jm;
-      const targetYear  = isNextMonth && jm===12 ? jy+1 : jy;
-      const daysInMonth = CAL_DAYS_IN_MONTH[targetMonth-1];
-      // iterate days of the month to find first/last matching weekday
-      let found = null;
-      for(let d=1; d<=daysInMonth; d++){
-        const [gy,gm,gd] = jalaliToGregorian(targetYear, targetMonth, d);
-        const jsDow = new Date(gy, gm-1, gd).getDay(); // 0=Sun..6=Sat
-        // NLP_DAYS: 0=Sun,1=Mon,...,5=Fri,6=Sat — matches JS getDay()
-        if(jsDow===dow){ found=d; if(isFirst) break; }
-      }
-      if(found) return `${targetYear}-${String(targetMonth).padStart(2,'0')}-${String(found).padStart(2,'0')}`;
     }
   }
 
@@ -9262,19 +9209,9 @@ function nlpResolveTime(txt){
   const en=faToEn(n);
   const SF='(بعدازظهر|بعد از ظهر|عصر|صبح|بامداد|شب|ب[\\s.]?ظ\\.?|ق[\\s.]?ظ\\.?)';
 
-  // 1. ساعت دقیق N:MM — باید به کلمات شب/عصر/صبح جای دیگه‌ی جمله هم توجه کنه
+  // 1. ساعت دقیق N:MM
   let m=en.match(/(\d{1,2}):(\d{2})/);
-  if(m){
-    let hh=parseInt(m[1]), mm=parseInt(m[2]);
-    const hasPM=/شب|عصر|بعدازظهر|بعد از ظهر/.test(n);
-    const hasAM=/صبح|بامداد/.test(n);
-    if(hh>=1&&hh<=12){
-      if(hasPM){ hh = hh===12?12:hh+12; }
-      else if(hasAM){ hh = hh===12?0:hh; }
-      else if(hh>=1&&hh<=6){ hh+=12; } // بدون قید صریح: مطابق قاعدهٔ «ساعت N» ساده، ۱-۶ یعنی بعدازظهر
-    }
-    return mkTime(hh,mm);
-  }
+  if(m)return mkTime(parseInt(m[1]),parseInt(m[2]));
 
   // 2. الگوهای «به» — باید اول بیان تا «ساعت N» نخوره
   // یک ربع به N = N-1:45
@@ -9523,26 +9460,10 @@ function nlpParse(raw){
     if(n.includes(kw)){ result.cat=NLP_CAT[kw]; result.detected.push('cat'); foundCat=true; break; }
   }
 
-  // تکرار — اول الگوی عمومی «هر N روز/هفته/ماه [یک‌بار]» با عدد دلخواه (رقمی یا نوشتاری)
-  // فرمت: 'every:N' یعنی هر N روز یک‌بار — قبل از دیکشنری ثابت چک می‌شود تا عدد واقعی حفظ شود
-  const numsWR={'دو':2,'سه':3,'چهار':4,'پنج':5,'شش':6,'هفت':7,'هشت':8,'نه':9,'ده':10};
-  const everyNMatch = n.match(/هر\s*([۰-۹٠-٩0-9]+|دو|سه|چهار|پنج|شش|هفت|هشت|نه|ده)\s*(روز|هفته|ماه)(?:\s*یک‌?بار)?/);
-  let foundRecur=false;
-  if(everyNMatch){
-    const cnt = parseInt(faToEn(everyNMatch[1]),10) || numsWR[everyNMatch[1]];
-    if(cnt && cnt>1){
-      const unit=everyNMatch[2];
-      const days = unit==='روز'?cnt : unit==='هفته'?cnt*7 : cnt*30;
-      result.recur = 'every:'+days;
-      result.detected.push('recur');
-      foundRecur=true;
-    }
-  }
-  if(!foundRecur){
-    const recurKeys = Object.keys(NLP_RECUR).sort((a,b)=>b.length-a.length);
-    for(const kw of recurKeys){
-      if(n.includes(kw)){ result.recur=NLP_RECUR[kw]; result.detected.push('recur'); break; }
-    }
+  // تکرار
+  const recurKeys = Object.keys(NLP_RECUR).sort((a,b)=>b.length-a.length);
+  for(const kw of recurKeys){
+    if(n.includes(kw)){ result.recur=NLP_RECUR[kw]; result.detected.push('recur'); break; }
   }
 
   // ── انتظار: تشخیص جامع حالت‌های فارسی «منتظرم» ──
@@ -9616,8 +9537,7 @@ function nlpParse(raw){
   // باید زودتر از لیست ثابت کلمات اجرا شود، وگرنه عدد جلوش (مثل «دو») تنها می‌ماند
   // چون لیست ثابت فقط «هفته دیگه» را می‌بیند، نه «دو هفته دیگه» را یکپارچه
   clean = faToEn(clean)
-    .replace(/(^|[\s،,])(?:تا\s+)?(\d+|یک|دو|سه|چهار|پنج|شش|هفت|هشت|نه|ده)\s*(روز|هفته|ماه)\s*(دیگه?|آینده|بعد|مونده)/g,'$1')
-    .replace(/(^|[\s،,])هر\s*(\d+|دو|سه|چهار|پنج|شش|هفت|هشت|نه|ده)\s*(روز|هفته|ماه)(?:\s*یک‌?بار)?/g,'$1');
+    .replace(/(^|[\s،,])(?:تا\s+)?(\d+|یک|دو|سه|چهار|پنج|شش|هفت|هشت|نه|ده)\s*(روز|هفته|ماه)\s*(دیگه?|آینده|بعد)/g,'$1');
 
   // تاریخ‌های دقیق «عدد(+ام) + نام ماه» یا «روز ترتیبی نوشتاری + نام ماه» — مثل «۱ تیر»، «۱۵ام خرداد»، «بیستم مرداد»
   // باید همینجا، قبل از لیست ثابت، یکپارچه حذف شود؛ وگرنه فقط بخشی از آن (مثلاً خودِ ماه) باقی می‌ماند
@@ -9721,7 +9641,8 @@ function nlpShowPreview(parsed){
     chips.push(`<span class="nlp-chip cat"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/></svg>${NLP_CAT_LABELS[parsed.cat]||parsed.cat}</span>`);
   }
   if(parsed.recur&&parsed.recur!=='none'){
-    chips.push(`<span class="nlp-chip recur"><svg viewBox="0 0 24 24"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 .49-6H1"/></svg>${recurLabel(parsed.recur)}</span>`);
+    const rmap={daily:'هر روز',weekly:'هر هفته',monthly:'هر ماه'};
+    chips.push(`<span class="nlp-chip recur"><svg viewBox="0 0 24 24"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 .49-6H1"/></svg>${rmap[parsed.recur]}</span>`);
   }
 
   // ── #project @label contact chips ──
