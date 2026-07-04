@@ -2115,21 +2115,6 @@ select.fi{
 
   <!-- NLP Preview — مستقیم زیر quick capture -->
   <div class="nlp-preview" id="nlpPreview" style="display:none;margin:4px 18px 6px;background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r2);padding:8px 12px;flex-wrap:wrap;gap:6px;align-items:center;position:relative;z-index:10;"></div>
-
-  <!-- Cat Picker Sheet -->
-  <div class="sheet" id="shCatPicker">
-    <div class="sh-handle"></div>
-    <div class="sh-head">
-      <div class="sh-tr">
-        <div class="sh-ttl">دسته‌بندی</div>
-        <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-      </div>
-    </div>
-    <div class="sh-body" style="gap:8px;">
-      <div id="catPickerGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
-    </div>
-  </div>
-
   <!-- Countdown -->
   
 
@@ -2670,6 +2655,20 @@ select.fi{
 
 <!-- OVERLAY -->
 <div class="ov" id="ov" onclick="closeAll()"></div>
+
+<!-- Cat Picker Sheet — بیرون از qcap تا z-index درست باشد -->
+<div class="sheet" id="shCatPicker">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div class="sh-ttl">دسته‌بندی</div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+  </div>
+  <div class="sh-body" style="gap:8px;">
+    <div id="catPickerGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
+  </div>
+</div>
 
 <!-- SHEET: ADD TASK -->
 <div class="sheet" id="shCardMore">
