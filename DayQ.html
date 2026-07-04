@@ -1996,6 +1996,49 @@ select.fi{
   *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important;}
 }
 
+
+/* ── Category Chip ── */
+.qcat-chip{
+  display:flex;align-items:center;gap:5px;
+  padding:5px 10px;border-radius:var(--r5);
+  border:1.5px solid var(--b1);
+  background:var(--bg2);
+  font-size:var(--fs-sm);color:var(--t2);
+  cursor:pointer;font-family:var(--f);
+  transition:var(--dur-fast) var(--ease-out);
+  flex:none;
+}
+.qcat-chip.detected{
+  background:var(--am);
+  border-color:rgba(0,184,122,.3);
+  color:var(--a);
+}
+.qcat-chip:active{transform:scale(.96);}
+
+/* ── Cat Picker Grid ── */
+.cat-pick-btn{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  padding:14px 8px;
+  border-radius:var(--r3);
+  border:1.5px solid var(--b1);
+  background:var(--bg2);
+  font-size:var(--fs-sm);color:var(--t2);
+  cursor:pointer;font-family:var(--f);
+  transition:var(--dur-fast) var(--ease-out);
+  font-weight:600;
+}
+.cat-pick-btn:active{transform:scale(.96);}
+.cat-pick-btn.sel{
+  background:var(--am);
+  border-color:rgba(0,184,122,.3);
+  color:var(--a);
+}
+.cat-pick-btn svg{
+  width:20px;height:20px;
+  stroke:currentColor;fill:none;
+  stroke-width:1.8;stroke-linecap:round;
+}
+
 </style>
 </head>
 <body>
@@ -2049,18 +2092,13 @@ select.fi{
     <span id="qcapSuggestText"></span>
     <span style="margin-right:auto;font-size:var(--fs-2xs);background:var(--bg3);padding:1px 6px;border-radius:var(--r5);">Tab</span>
   </div>
-  <!-- Micro-toolbar: appears on focus -->
+  <!-- Micro-toolbar: اولویت + chip دسته هوشمند -->
   <div class="qcap-toolbar" id="qcapToolbar">
-    <div class="qt-group">
-      <button class="qtb active-cat" id="qtPrep" onclick="qcSetCat('prep',this)">
-        <svg viewBox="0 0 24 24"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/></svg>
-        آماده‌سازی
-      </button>
-      <button class="qtb" id="qtVisit" onclick="qcSetCat('visit',this)">
-        <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        بازدید
-      </button>
-    </div>
+    <!-- chip دسته: NLP تشخیص می‌دهد، tap برای تغییر -->
+    <button class="qcat-chip" id="qcatChip" onclick="openCatPicker()">
+      <span id="qcatChipIcon">📋</span>
+      <span id="qcatChipLabel">دسته؟</span>
+    </button>
     <div class="qt-sep"></div>
     <div class="qt-group" style="flex:none;gap:4px;">
       <button class="qpb active-high" id="qpHigh" onclick="qcSetPri('high',this)" title="اولویت بالا">
@@ -2077,6 +2115,20 @@ select.fi{
 
   <!-- NLP Preview — مستقیم زیر quick capture -->
   <div class="nlp-preview" id="nlpPreview" style="display:none;margin:4px 18px 6px;background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r2);padding:8px 12px;flex-wrap:wrap;gap:6px;align-items:center;position:relative;z-index:10;"></div>
+
+  <!-- Cat Picker Sheet -->
+  <div class="sheet" id="shCatPicker">
+    <div class="sh-handle"></div>
+    <div class="sh-head">
+      <div class="sh-tr">
+        <div class="sh-ttl">دسته‌بندی</div>
+        <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+    </div>
+    <div class="sh-body" style="gap:8px;">
+      <div id="catPickerGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
+    </div>
+  </div>
 
   <!-- Countdown -->
   
@@ -3269,7 +3321,7 @@ function boot(){
       if(btn){document.querySelectorAll('.sg').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
     }
     const lastCat=localStorage.getItem('dq5_lastCat');
-    if(lastCat){qcCat=lastCat;qcSetCat(lastCat,null);}
+    if(lastCat){qcCat=lastCat;qcSetCat(lastCat,null);_updateCatChip();}
     const lastPri=localStorage.getItem('dq5_lastPri');
     if(lastPri){qcPri=lastPri;qcSetPri(lastPri,null);}
   }catch(e){}
@@ -4793,11 +4845,64 @@ function deleteTask(id,e){
 /* Quick Capture state */
 let qcCat='prep', qcPri='high';
 
+/* ── اطلاعات هر دسته ── */
+const CAT_INFO = {
+  prep:     {label:'آماده‌سازی', icon:'📋', svg:'<path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z"/>'},
+  visit:    {label:'بازدید',     icon:'👤', svg:'<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>'},
+  meeting:  {label:'جلسه',      icon:'🤝', svg:'<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>'},
+  report:   {label:'گزارش',     icon:'📊', svg:'<path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/>'},
+  followup: {label:'پیگیری',    icon:'🔄', svg:'<polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>'},
+  email:    {label:'پیام',       icon:'✉️', svg:'<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>'},
+  call:     {label:'تماس',       icon:'📞', svg:'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.77 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>'},
+};
+
+let _catNLPDetected = false; // آیا NLP تشخیص داده؟
+
+/* chip را آپدیت کن */
+function _updateCatChip(){
+  const chip = document.getElementById('qcatChip');
+  const icon = document.getElementById('qcatChipIcon');
+  const label = document.getElementById('qcatChipLabel');
+  if(!chip) return;
+  const info = CAT_INFO[qcCat];
+  icon.textContent = info ? info.icon : '📋';
+  label.textContent = info ? info.label : 'دسته؟';
+  chip.classList.toggle('detected', _catNLPDetected);
+}
+
 function qcSetCat(cat, el){
-  qcCat=cat;
-  document.getElementById('qtPrep').classList.toggle('active-cat', cat==='prep');
-  document.getElementById('qtVisit').classList.toggle('active-cat', cat==='visit');
-  try{localStorage.setItem('dq5_lastCat',cat);}catch(e){}
+  qcCat = cat;
+  _catNLPDetected = false; // دستی انتخاب شد
+  _updateCatChip();
+  try{localStorage.setItem('dq5_lastCat', cat);}catch(e){}
+}
+
+function _qcSetCatFromNLP(cat){
+  if(!cat) return;
+  qcCat = cat;
+  _catNLPDetected = true;  // NLP تشخیص داد
+  _updateCatChip();
+}
+
+/* پیکر دسته */
+function openCatPicker(){
+  const grid = document.getElementById('catPickerGrid');
+  if(!grid) return;
+  grid.innerHTML = Object.entries(CAT_INFO).map(([key, info])=>`
+    <button class="cat-pick-btn${qcCat===key?' sel':''}" onclick="pickCat('${key}')">
+      <svg viewBox="0 0 24 24">${info.svg}</svg>
+      ${info.icon} ${info.label}
+    </button>
+  `).join('');
+  openSheet('shCatPicker');
+}
+
+function pickCat(cat){
+  qcCat = cat;
+  _catNLPDetected = false;
+  _updateCatChip();
+  try{localStorage.setItem('dq5_lastCat', cat);}catch(e){}
+  closeAll();
 }
 function qcSetPri(pri, el){
   qcPri=pri;
@@ -5014,6 +5119,7 @@ function quickCapture(){
   _nlpParsed=null;
   qcCat='prep'; qcPri='high';
   try{qcSetCat('prep',null);}catch(e){}
+  _updateCatChip();
   try{qcSetPri('high',null);}catch(e){}
 
   // toast با جزئیات
@@ -9648,7 +9754,19 @@ let _nlpParsed = null;
 function nlpOnInput(val){
   _nlpParsed = nlpParse(val);
   nlpShowPreview(_nlpParsed);
-  // visual hint برای #project @label
+  // chip دسته را بلادرنگ آپدیت کن
+  if(_nlpParsed && _nlpParsed.detected.includes('cat')){
+    _qcSetCatFromNLP(_nlpParsed.cat);
+  } else if(!val || val.trim().length < 2){
+    // ورودی خالی → chip به حالت پیش‌فرض
+    _catNLPDetected = false;
+    _updateCatChip();
+  }
+  // اولویت هم بلادرنگ
+  if(_nlpParsed && _nlpParsed.detected.includes('pri')){
+    qcPri = _nlpParsed.priority;
+    qcSetPri(qcPri, null);
+  }
   const inp=document.getElementById('qcapInp');
   if(inp){
     inp.classList.toggle('has-project',!!(  _nlpParsed&&_nlpParsed.projectTag&&_nlpParsed.projectTag.length));
@@ -9657,16 +9775,10 @@ function nlpOnInput(val){
 }
 
 function nlpApplyToCapture(){
+  // اکنون اعمال بلادرنگ در nlpOnInput انجام می‌شود — این تابع برای compat باقی است
   if(!_nlpParsed) return;
-  // override qcCat and qcPri from NLP
-  if(_nlpParsed.detected.includes('cat')){
-    qcCat=_nlpParsed.cat;
-    qcSetCat(qcCat,null);
-  }
-  if(_nlpParsed.detected.includes('pri')){
-    qcPri=_nlpParsed.priority;
-    qcSetPri(qcPri,null);
-  }
+  if(_nlpParsed.detected.includes('cat')) _qcSetCatFromNLP(_nlpParsed.cat);
+  if(_nlpParsed.detected.includes('pri')){ qcPri=_nlpParsed.priority; qcSetPri(qcPri,null); }
 }
 
 boot();
