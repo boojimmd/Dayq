@@ -986,22 +986,27 @@ select.fi{
 .ov-simple-btn.pick{background:var(--bg2);color:var(--t1);}
 .ov-simple-btn.no{background:transparent;color:var(--t3);font-size:var(--fs-sm);padding:var(--sp2);}
 .tc-status.doing svg{stroke:var(--amber);}
-/* done: green */
+/* done: green + draw animation */
+.tc-status svg{width:12px;height:12px;stroke:var(--t3);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;overflow:visible;position:relative;z-index:1;}
+/* done: green + draw animation */
 .tc-status.done-s{background:var(--a);border-color:var(--a);box-shadow:0 0 10px var(--ag);}
 .tc-status.done-s svg{stroke:#fff;}
 [data-theme="dark"] .tc-status.done-s svg{stroke:#080c10;}
-.tc-status svg{width:12px;height:12px;stroke:var(--t3);fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;overflow:visible;}
-/* doing dot — fade in only */
-.tc-status.doing svg circle{opacity:0;transition:opacity .18s var(--ease-out);}
-.tc-status.doing svg{opacity:1;}
-.tc-status.doing svg circle{opacity:1;}
-/* done — stroke-dashoffset draw + box bounce */
-@keyframes statusBounce{0%{transform:scale(1)}40%{transform:scale(1.22)}70%{transform:scale(.92)}100%{transform:scale(1)}}
-.tc-status.done-s{animation:statusBounce .38s var(--spring) both;}
-.tc-status.done-s svg polyline{stroke-dasharray:14;stroke-dashoffset:0;transition:none;}
-.tc-status svg polyline{stroke-dasharray:14;stroke-dashoffset:14;}
-/* waiting icon — show immediately */
-.tc-status.waiting svg{opacity:1;}
+/* doing: amber dot via ::before — SVG polyline hidden */
+.tc-status.doing{background:var(--ambm);border-color:rgba(217,119,6,.4);}
+.tc-status.doing::before{content:'';position:absolute;width:8px;height:8px;border-radius:50%;background:var(--amber);animation:doingPulse 1.4s ease-in-out infinite;}
+@keyframes doingPulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.6;transform:scale(.8);}}
+.tc-status.doing svg{opacity:0;} /* polyline hidden while doing */
+/* waiting */
+.tc-status.waiting{background:rgba(37,99,235,.12);border-color:rgba(37,99,235,.35);}
+.tc-status.waiting svg{stroke:var(--blue);opacity:1;}
+.tc-status.waiting svg polyline{stroke-dashoffset:0;} /* clock hand — always visible */
+/* polyline defaults — hidden (dashoffset=14), draws to 0 when done-s added */
+.tc-status svg polyline{stroke-dasharray:14;stroke-dashoffset:14;transition:stroke-dashoffset .26s var(--ease-out) .04s;}
+.tc-status.done-s svg polyline{stroke-dashoffset:0;}
+/* bounce on done */
+@keyframes statusBounce{0%{transform:scale(1)}35%{transform:scale(1.25)}65%{transform:scale(.9)}100%{transform:scale(1)}}
+.tc-status.done-s{animation:statusBounce .4s var(--spring) both;}
 
 /* done card — green tint */
 .tc.done-c{background:var(--am)!important;border-color:rgba(0,184,122,.18)!important;opacity:1!important;}
@@ -4437,10 +4442,11 @@ function mkCard(task){
   const noteD=task.note?'<span class="tc-note-dot"></span>':'';
   const clP=(task.checklist&&task.checklist.length)?
     `<div class="tc-cl-prog"><div class="tc-cl-fill" style="width:${Math.round(task.checklist.filter(c=>c.done).length/task.checklist.length*100)}%"></div></div>`:'';
-  let stIco='';
-  if(st==='done') stIco='<svg viewBox="0 0 12 12" width="10" height="10"><polyline points="1.5 6 4.5 9 10.5 3" stroke="white" stroke-width="2.8" fill="none" stroke-linecap="round"/></svg>';
-  if(st==='doing') stIco='<svg viewBox="0 0 12 12" width="10" height="10"><circle cx="6" cy="6" r="3" fill="var(--amber)"/></svg>';
-  if(st==='waiting') stIco='<svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="6" r="5"/><polyline points="6 3 6 6 8 7"/></svg>';
+  // tc-status همیشه polyline داره — CSS stroke-dashoffset آن را رسم یا پنهان می‌کند
+  // doing: یه دایره amber از طریق CSS ::before نشون داده میشه
+  const polylineSVG='<svg viewBox="0 0 12 12"><polyline points="1.5 6 4.5 9 10.5 3"/></svg>';
+  let stIco=polylineSVG;
+  if(st==='waiting') stIco='<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="6" r="5"/><polyline points="6 3 6 6 8 7"/></svg>';
 
   d.innerHTML=`
     <div class="tc-status ${st==='done'?'done-s':st==='doing'?'doing':st==='waiting'?'waiting':''}" onclick="bulkMode?toggleBulkSelect('${task.id}',event):cycleStatus('${task.id}',event)">${stIco}</div>
@@ -4792,12 +4798,18 @@ function cycleStatus(id,e){
   if(next==='done'){
     const card=document.querySelector('[data-id="'+id+'"]');
     if(card){
-      // انیمیشن تیک روی چک‌باکس
-      const chk=card.querySelector('.tc-chk');
-      if(chk) chk.classList.add('done');
-      // انیمیشن حذف کارت
+      // انیمیشن draw روی tc-status — polyline کشیده میشه + bounce
+      const statusEl=card.querySelector('.tc-status');
+      if(statusEl){
+        statusEl.classList.add('done-s');
+        // اگه polyline نداره (حالت waiting)، اضافه کن
+        if(!statusEl.querySelector('polyline')){
+          statusEl.innerHTML='<svg viewBox="0 0 12 12"><polyline points="1.5 6 4.5 9 10.5 3"/></svg>';
+        }
+      }
+      // انیمیشن حذف کارت — کمی دیرتر شروع میشه تا draw animation دیده بشه
       const wrap=card.closest('.tc-wrap');
-      if(wrap){ wrap.classList.add('completing'); setTimeout(()=>renderTasks(),320); }
+      if(wrap){ setTimeout(()=>wrap.classList.add('completing'),120); setTimeout(()=>renderTasks(),420); }
       else { card.classList.add('done-anim'); setTimeout(()=>renderTasks(),280); }
     } else renderTasks();
     if(cfg.confetti)spawnConfetti(e);
