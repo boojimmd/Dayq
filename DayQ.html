@@ -1724,11 +1724,11 @@ select.fi{
     left:auto;right:auto;
   }
 
-  /* ─── ۳. Topbar — fixed، از پنل چپ تا sidebar راست ─── */
+  /* ─── ۳. Topbar — default: full width (بدون پنل) ─── */
   .topbar{
     position:fixed;
     top:0;
-    left:360px;
+    left:0;
     right:220px;
     width:auto;
     max-width:none;
@@ -1739,6 +1739,9 @@ select.fi{
     -webkit-backdrop-filter:blur(16px);
     box-shadow:0 1px 0 var(--b1);
   }
+  /* فقط در صفحه خانه با پنل باز، topbar از بعد از پنل شروع میشه */
+  body.on-home .topbar{left:360px;}
+  body.on-home.dp-closed .topbar{left:0;}
 
   /* ─── ۴. Pages — margin-right مستقیم، نه وابسته به parent ─── */
   .page{
@@ -1971,16 +1974,14 @@ select.fi{
 
   /* ─── Three-panel home layout ─── */
   #pageHome{
-    /* margin-left: فضای پنل چپ | margin-right: فضای navbar راست */
     margin-left:360px;
-    margin-right:220px; /* override .page margin-right به همین مقدار */
+    margin-right:220px;
     padding-top:calc(var(--topbar-h) + 12px);
     padding-bottom:48px;
-    padding-left:0;
-    padding-right:0;
     min-height:100svh;
     box-sizing:border-box;
   }
+  body.dp-closed #pageHome{margin-left:0;}
   .dp-list{display:block;width:100%;}
   .dp-list>[style*="height:var(--topbar-h)"]{display:none;}
   .dp-list .tlist,
@@ -2079,7 +2080,8 @@ select.fi{
 /* ─── نمایش ۹۰۰–۱۱۹۹px ─── */
 @media(min-width:900px) and (max-width:1199px){
   .nav{width:190px;}
-  .topbar{left:280px;right:190px;}
+  .topbar{right:190px;}
+  body.on-home .topbar{left:280px;}
   .sheet{left:calc(280px + (100vw - 190px - 280px) / 2);}
   .toast{right:calc(190px + 16px);}
   #dpanel{width:280px;}
@@ -2089,7 +2091,7 @@ select.fi{
 
 @media(min-width:1200px) and (max-width:1399px){
   #dpanel{width:300px;}
-  .topbar{left:300px;}
+  body.on-home .topbar{left:300px;}
   #pageHome{margin-left:300px;}
 }
 
@@ -3857,7 +3859,9 @@ function goPage(n){
   document.querySelectorAll('.ni').forEach(i=>i.classList.remove('active'));
   const pg=document.getElementById('page'+n);if(pg)pg.classList.add('active');
   const ni=document.getElementById('ni-'+n.toLowerCase());if(ni)ni.classList.add('active');
-  // پنل دسکتاپ فقط در صفحه خانه نمایش داده میشه
+  // body class برای تنظیم topbar و margin بر اساس تب فعال
+  document.body.classList.toggle('on-home', n==='Home');
+  // پنل دسکتاپ فقط در صفحه خانه
   if(window.innerWidth>=900){
     const panel=document.getElementById('dpanel');
     if(panel) panel.style.display=(n==='Home'&&!document.body.classList.contains('dp-closed'))?'flex':'none';
@@ -7771,6 +7775,8 @@ const _SB_WD=['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه'
 
 function sbInit(){
   if(window.innerWidth<900) return;
+  // صفحه خانه در boot فعاله
+  document.body.classList.add('on-home');
   dpInitToggle();
   const t=mrToJalali(new Date().getFullYear(),new Date().getMonth()+1,new Date().getDate());
   _sbCal.year=t[0]; _sbCal.month=t[1];
