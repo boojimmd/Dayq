@@ -2245,6 +2245,46 @@ select.fi{
   </div>
 </div>
 
+<!-- DESKTOP DETAIL PANEL — خارج از همه pages، زیر topbar مستقیم -->
+<div id="dpanel">
+  <div class="dp-empty" id="dpEmpty">
+    <svg viewBox="0 0 84 84" width="64" height="64">
+      <circle cx="42" cy="42" r="33" fill="none" stroke="var(--b1)" stroke-width="5"/>
+      <circle cx="42" cy="42" r="33" fill="none" stroke="var(--a)" stroke-width="5"
+        stroke-linecap="round" stroke-dasharray="45 165" stroke-dashoffset="10"/>
+    </svg>
+    <div class="dp-empty-hint">یه کار از لیست انتخاب کن<br>جزئیاتش اینجا می‌آد</div>
+  </div>
+  <div class="dp-content" id="dpContent" style="display:none">
+    <div class="dp-head">
+      <div class="dp-cat-icon" id="dpCatIcon"></div>
+      <button class="dp-close-btn" onclick="dpClose()">✕</button>
+    </div>
+    <div class="dp-title" id="dpTitle" contenteditable="true" dir="rtl"
+      onblur="dpSaveTitleDebounced()" oninput="dpSaveTitleDebounced()"></div>
+    <div class="dp-chips-row" id="dpChips"></div>
+    <div>
+      <div class="dp-section-lbl">یادداشت</div>
+      <textarea class="dp-notes-ta" id="dpNotes" placeholder="یادداشت برای این کار..."
+        dir="rtl" oninput="dpSaveNoteDebounced()"></textarea>
+    </div>
+    <div>
+      <div class="dp-section-lbl">تایمر این کار</div>
+      <div class="dp-timer-box">
+        <span class="dp-timer-num" id="dpTimerNum">۰۰:۰۰</span>
+        <button class="dp-timer-start" id="dpTimerBtn" onclick="dpTimerToggle()">شروع</button>
+      </div>
+    </div>
+    <div class="dp-action-row">
+      <button class="dp-btn dp-btn-done" id="dpBtnDone" onclick="dpToggleDone()">✓ تموم شد</button>
+      <button class="dp-btn dp-btn-edit" onclick="dpEditFull()">ویرایش کامل</button>
+      <button class="dp-btn dp-btn-del" onclick="dpDelete()">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- PAGE: HOME -->
 <div class="page active" id="pageHome">
 <div class="dp-list">
@@ -2384,48 +2424,6 @@ select.fi{
 
   <div style="height:20px;"></div>
 </div><!-- /dp-list -->
-
-<!-- DESKTOP DETAIL PANEL -->
-<div id="dpanel">
-  <!-- Empty state -->
-  <div class="dp-empty" id="dpEmpty">
-    <svg viewBox="0 0 84 84" width="64" height="64">
-      <circle cx="42" cy="42" r="33" fill="none" stroke="var(--b1)" stroke-width="5"/>
-      <circle cx="42" cy="42" r="33" fill="none" stroke="var(--a)" stroke-width="5"
-        stroke-linecap="round" stroke-dasharray="45 165" stroke-dashoffset="10"/>
-    </svg>
-    <div class="dp-empty-hint">یه کار از لیست انتخاب کن<br>جزئیاتش اینجا می‌آد</div>
-  </div>
-  <!-- Content -->
-  <div class="dp-content" id="dpContent" style="display:none">
-    <div class="dp-head">
-      <div class="dp-cat-icon" id="dpCatIcon"></div>
-      <button class="dp-close-btn" onclick="dpClose()">✕</button>
-    </div>
-    <div class="dp-title" id="dpTitle" contenteditable="true" dir="rtl"
-      onblur="dpSaveTitleDebounced()" oninput="dpSaveTitleDebounced()"></div>
-    <div class="dp-chips-row" id="dpChips"></div>
-    <div>
-      <div class="dp-section-lbl">یادداشت</div>
-      <textarea class="dp-notes-ta" id="dpNotes" placeholder="یادداشت برای این کار..."
-        dir="rtl" oninput="dpSaveNoteDebounced()"></textarea>
-    </div>
-    <div>
-      <div class="dp-section-lbl">تایمر این کار</div>
-      <div class="dp-timer-box">
-        <span class="dp-timer-num" id="dpTimerNum">۰۰:۰۰</span>
-        <button class="dp-timer-start" id="dpTimerBtn" onclick="dpTimerToggle()">شروع</button>
-      </div>
-    </div>
-    <div class="dp-action-row">
-      <button class="dp-btn dp-btn-done" id="dpBtnDone" onclick="dpToggleDone()">✓ تموم شد</button>
-      <button class="dp-btn dp-btn-edit" onclick="dpEditFull()">ویرایش کامل</button>
-      <button class="dp-btn dp-btn-del" onclick="dpDelete()">
-        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
-      </button>
-    </div>
-  </div>
-</div>
 
 </div><!-- /pageHome -->
 <div class="page" id="pageBag">
