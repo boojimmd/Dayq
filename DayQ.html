@@ -1914,6 +1914,54 @@ select.fi{
     background:var(--bg3);border:1px solid var(--b1);
     border-radius:4px;padding:1px 6px;font-size:var(--fs-xs);font-family:monospace;
   }
+
+  /* ─── Sidebar widgets ─── */
+  .sb-spacer{display:block;flex:1;min-height:12px;}
+
+  .sb-stats{
+    display:flex;gap:6px;
+    padding:10px 8px;
+    border-top:1px solid var(--b1);
+    margin-top:0;
+  }
+  .sb-stat{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+    background:var(--bg2);border-radius:var(--r2);padding:8px 4px;
+  }
+  .sb-stat-num{font-size:1.15rem;font-weight:800;line-height:1;color:var(--t1);}
+  .sb-stat-lbl{font-size:.58rem;font-weight:600;color:var(--t3);}
+  .sb-stat.s-done .sb-stat-num{color:var(--a);}
+  .sb-stat.s-pending .sb-stat-num{color:var(--amber);}
+
+  .sb-cal-widget{
+    padding:10px 8px 6px;
+    border-top:1px solid var(--b1);
+  }
+  .sb-cal-nav{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:6px;
+  }
+  .sb-cal-title{font-size:var(--fs-xs);font-weight:700;color:var(--t2);}
+  .sb-cal-widget .jci-days{gap:1px;}
+  .sb-cal-widget .jci-day{
+    font-size:.58rem;padding:3px 1px;border-radius:4px;
+    position:relative;
+  }
+  .sb-cal-widget .jci-day.has-tasks::after{
+    content:'';position:absolute;bottom:1px;left:50%;transform:translateX(-50%);
+    width:3px;height:3px;border-radius:50%;background:var(--a);
+  }
+  .sb-cal-widget .jci-day.jci-sel{
+    background:var(--a);color:#fff;font-weight:800;
+  }
+
+  .sb-date-block{
+    padding:10px 12px 8px;
+    border-top:1px solid var(--b1);
+  }
+  .sb-weekday{font-size:var(--fs-2xs);font-weight:700;color:var(--t3);letter-spacing:.06em;margin-bottom:1px;}
+  .sb-day{font-size:2rem;font-weight:900;color:var(--t1);line-height:1;letter-spacing:-.04em;}
+  .sb-month{font-size:var(--fs-xs);font-weight:600;color:var(--t2);margin-top:2px;}
 }
 
 /* ─── نمایش ۹۰۰–۱۱۹۹px ─── */
@@ -3330,6 +3378,7 @@ function boot(){
     if(lastPri){qcPri=lastPri;qcSetPri(lastPri,null);}
   }catch(e){}
   renderTasks();renderBag();updateMeStats();
+  sbInit();
   // overdue modal — فقط صبح (۶ تا ۱۲) نشون بده
   const _h=new Date().getHours();
   if(_h>=6&&_h<12) setTimeout(showOverdueModal, 2000);
@@ -4379,6 +4428,7 @@ function renderTasks(){
 
   updateMeta(); updateMirrorSummary(); updateCapacityBanner(); _refreshTriageBanner();
   if(cfg.timeline) renderTimeline();
+  sbUpdateStats();
 
   const projPage=document.getElementById('pageProjects');
   if(projPage&&projPage.classList.contains('active')) renderProjects();
@@ -7542,6 +7592,88 @@ function parseICS(text){
 const JDP_MONTHS=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
 
 // Per-field state
+/* ══ SIDEBAR DESKTOP WIDGETS ══ */
+const _sbCal={year:0,month:0};
+const _SB_WD=['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه'];
+
+function sbInit(){
+  if(window.innerWidth<900) return;
+  const t=mrToJalali(new Date().getFullYear(),new Date().getMonth()+1,new Date().getDate());
+  _sbCal.year=t[0]; _sbCal.month=t[1];
+  // show widgets
+  ['sbStats','sbCalWidget','sbDateBlock'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.style.display='';
+  });
+  sbUpdateDate();
+  sbCalRender();
+  sbUpdateStats();
+}
+
+function sbUpdateDate(){
+  const now=new Date();
+  const jd=mrToJalali(now.getFullYear(),now.getMonth()+1,now.getDate());
+  const wdEl=document.getElementById('sbWeekday');
+  const dayEl=document.getElementById('sbDay');
+  const moEl=document.getElementById('sbMonthYear');
+  if(wdEl) wdEl.textContent=_SB_WD[now.getDay()];
+  if(dayEl) dayEl.textContent=num(jd[2]);
+  if(moEl)  moEl.textContent=JDP_MONTHS[jd[1]-1]+' '+num(jd[0]);
+}
+
+function sbCalRender(){
+  const jy=_sbCal.year, jm=_sbCal.month;
+  const titleEl=document.getElementById('sbCalTitle');
+  if(titleEl) titleEl.textContent=JDP_MONTHS[jm-1]+' '+num(jy);
+  const daysEl=document.getElementById('sbCalDays');
+  if(!daysEl) return;
+  daysEl.innerHTML='';
+  const todayJ=mrToJalali(new Date().getFullYear(),new Date().getMonth()+1,new Date().getDate());
+  // task dates in this month
+  const prefix=jy+'-'+String(jm).padStart(2,'0');
+  const taskDates=new Set((tasks||[]).filter(t=>t.deadline&&t.deadline.startsWith(prefix)).map(t=>t.deadline));
+  // layout
+  const [gy,gm,gd]=jalaliToGregorian(jy,jm,1);
+  const startCol=[1,2,3,4,5,6,0][new Date(gy,gm-1,gd).getDay()];
+  const dim=CAL_DAYS_IN_MONTH[jm-1]+((isJalaliLeap(jy)&&jm===12)?1:0);
+  for(let i=0;i<startCol;i++){
+    const e=document.createElement('div');
+    e.className='jci-day jci-other';
+    daysEl.appendChild(e);
+  }
+  for(let d=1;d<=dim;d++){
+    const dk=prefix+'-'+String(d).padStart(2,'0');
+    const isToday=jy===todayJ[0]&&jm===todayJ[1]&&d===todayJ[2];
+    const isPast=_jalToDays(jy,jm,d)<_jalToDays(todayJ[0],todayJ[1],todayJ[2]);
+    const hasTasks=taskDates.has(dk);
+    const btn=document.createElement('div');
+    btn.className='jci-day'+(isToday?' jci-today jci-sel':'')+(isPast?' jci-past':'')+(hasTasks?' has-tasks':'');
+    btn.textContent=num(d);
+    daysEl.appendChild(btn);
+  }
+}
+
+function sbCalPrev(){_sbCal.month--;if(_sbCal.month<1){_sbCal.month=12;_sbCal.year--;}sbCalRender();}
+function sbCalNext(){_sbCal.month++;if(_sbCal.month>12){_sbCal.month=1;_sbCal.year++;}sbCalRender();}
+
+function sbUpdateStats(){
+  if(window.innerWidth<900) return;
+  const today=mrToJalali(new Date().getFullYear(),new Date().getMonth()+1,new Date().getDate());
+  const tk=today[0]+'-'+String(today[1]).padStart(2,'0')+'-'+String(today[2]).padStart(2,'0');
+  const todayTasks=(tasks||[]).filter(t=>t.deadline===tk);
+  const done=todayTasks.filter(t=>t.done||t.status==='done').length;
+  const pending=todayTasks.filter(t=>!t.done&&t.status!=='done').length;
+  const total=todayTasks.length;
+  const dEl=document.getElementById('sbDone');
+  const pEl=document.getElementById('sbPending');
+  const tEl=document.getElementById('sbTotal');
+  if(dEl) dEl.textContent=num(done);
+  if(pEl) pEl.textContent=num(pending);
+  if(tEl) tEl.textContent=num(total);
+  // re-render calendar to update task dots
+  sbCalRender();
+}
+
 const _jciState={};
 
 function _jciGetState(fieldId){
@@ -9772,6 +9904,52 @@ boot();
   <div class="ni" id="ni-me" onclick="goPage('Me')">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
     <span class="ni-lbl">من</span><div class="ni-dot"></div>
+  </div>
+
+  <!-- Desktop sidebar additions — hidden on mobile -->
+  <div class="sb-spacer"></div>
+
+  <!-- Stats -->
+  <div class="sb-stats" id="sbStats" style="display:none">
+    <div class="sb-stat s-done">
+      <span class="sb-stat-num" id="sbDone">۰</span>
+      <span class="sb-stat-lbl">تموم شد</span>
+    </div>
+    <div class="sb-stat s-pending">
+      <span class="sb-stat-num" id="sbPending">۰</span>
+      <span class="sb-stat-lbl">باقی مونده</span>
+    </div>
+    <div class="sb-stat">
+      <span class="sb-stat-num" id="sbTotal">۰</span>
+      <span class="sb-stat-lbl">کل امروز</span>
+    </div>
+  </div>
+
+  <!-- Mini calendar -->
+  <div class="sb-cal-widget" id="sbCalWidget" style="display:none">
+    <div class="sb-cal-nav">
+      <button class="jci-btn" onclick="sbCalNext()">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="sb-cal-title" id="sbCalTitle">—</span>
+      <button class="jci-btn" onclick="sbCalPrev()">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+    <div class="jci-wds">
+      <div class="jci-wd">ش</div><div class="jci-wd">ی</div>
+      <div class="jci-wd">د</div><div class="jci-wd">س</div>
+      <div class="jci-wd">چ</div><div class="jci-wd">پ</div>
+      <div class="jci-wd">ج</div>
+    </div>
+    <div class="jci-days" id="sbCalDays"></div>
+  </div>
+
+  <!-- Date block -->
+  <div class="sb-date-block" id="sbDateBlock" style="display:none">
+    <div class="sb-weekday" id="sbWeekday">—</div>
+    <div class="sb-day" id="sbDay">—</div>
+    <div class="sb-month" id="sbMonthYear">—</div>
   </div>
 </nav>
 
