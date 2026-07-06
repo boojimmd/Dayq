@@ -1716,7 +1716,7 @@ select.fi{
     width:100%;
     height:auto;
     min-height:0;
-    overflow:visible;
+    overflow:hidden; /* جلوگیری از رفتن زیر navbar */
     display:block;
     margin:0;
     padding-right:220px;
@@ -1971,8 +1971,11 @@ select.fi{
     display:flex;
     flex-direction:row;
     align-items:flex-start;
+    width:100%; /* محدود به content area پدر */
+    max-width:100%;
     min-height:100svh;
     padding-top:0; /* هر ستون خودش padding-top داره */
+    overflow:hidden; /* هیچ‌چیز از boundary بیرون نمی‌زنه */
   }
   .dp-list{
     flex:1 1 0;
