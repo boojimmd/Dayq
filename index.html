@@ -1966,32 +1966,42 @@ select.fi{
 }
 
   /* ─── Three-panel home layout ─── */
+  /* RTL flex: اولین آیتم راست (لیست)، دومی چپ (پنل) */
   #pageHome{
-    display:grid;
-    grid-template-columns:1fr 360px;
-    align-items:start;
+    display:flex;
+    flex-direction:row;
+    align-items:flex-start;
     min-height:calc(100svh - var(--topbar-h));
   }
-  .dp-list{min-width:0;}
+  .dp-list{
+    flex:1 1 0;
+    min-width:0; /* بدون این، محتوا flex item رو stretch می‌کنه */
+  }
   /* داخل dp-list، max-width ها رو override کن */
   .dp-list .tlist,
   .dp-list #bdList{max-width:none;margin-left:0;margin-right:0;}
   .dp-list .qcap{max-width:none;margin-left:18px;margin-right:18px;}
   .dp-list .cmd-shortcut-hint{max-width:none;margin-left:18px;margin-right:18px;}
 
-  /* ─── Detail panel ─── */
-  #dpanel{display:flex;flex-direction:column;}
+  /* ─── Detail panel — flex item، نه sticky ─── */
   #dpanel{
-    position:sticky;
-    top:calc(var(--topbar-h) + 12px);
-    height:calc(100svh - var(--topbar-h) - 24px);
+    display:flex;
+    flex-direction:column;
+    flex:0 0 360px;
+    width:360px;
+    min-width:0;
+    /* position relative: داخل flow می‌مونه، از nav بیرون نمیزنه */
+    position:relative;
+    align-self:flex-start;
+    max-height:calc(100svh - var(--topbar-h) - 16px);
     overflow-y:auto;
     scrollbar-width:none;
     border-right:1px solid var(--b1);
     background:var(--bg1);
     border-radius:var(--r3) 0 0 var(--r3);
+    /* چسبیدن به topbar با margin-top */
+    margin-top:calc(var(--topbar-h) + 12px - 1px);
   }
-  #dpanel::-webkit-scrollbar{display:none;}
 
   .dp-empty{
     flex:1;display:flex;flex-direction:column;
@@ -2049,7 +2059,7 @@ select.fi{
   .topbar{right:190px;}
   .sheet{left:calc((100vw - 190px) / 2);}
   .toast{right:calc(190px + 16px);}
-  #pageHome{grid-template-columns:1fr 300px;}
+  #dpanel{flex:0 0 300px;width:300px;}
 }
 
 
