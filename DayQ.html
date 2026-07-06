@@ -1971,37 +1971,42 @@ select.fi{
     display:flex;
     flex-direction:row;
     align-items:flex-start;
-    min-height:calc(100svh - var(--topbar-h));
+    min-height:100svh;
+    padding-top:0; /* هر ستون خودش padding-top داره */
   }
   .dp-list{
     flex:1 1 0;
-    min-width:0; /* بدون این، محتوا flex item رو stretch می‌کنه */
+    min-width:0;
+    padding-top:calc(var(--topbar-h) + 12px);
+    padding-bottom:48px;
   }
+  /* spacer داخل dp-list رو مخفی کن — padding-top خودش کافیه */
+  .dp-list>[style*="height:var(--topbar-h)"]{display:none;}
   /* داخل dp-list، max-width ها رو override کن */
   .dp-list .tlist,
   .dp-list #bdList{max-width:none;margin-left:0;margin-right:0;}
   .dp-list .qcap{max-width:none;margin-left:18px;margin-right:18px;}
   .dp-list .cmd-shortcut-hint{max-width:none;margin-left:18px;margin-right:18px;}
 
-  /* ─── Detail panel — flex item، نه sticky ─── */
+  /* ─── Detail panel — flex item، ارتفاع کامل viewport ─── */
   #dpanel{
     display:flex;
     flex-direction:column;
     flex:0 0 360px;
     width:360px;
     min-width:0;
-    /* position relative: داخل flow می‌مونه، از nav بیرون نمیزنه */
     position:relative;
     align-self:flex-start;
-    max-height:calc(100svh - var(--topbar-h) - 16px);
+    height:100svh; /* از بالا تا پایین viewport */
+    padding-top:calc(var(--topbar-h) + 12px); /* محتوا از زیر topbar شروع می‌شه */
+    box-sizing:border-box;
     overflow-y:auto;
     scrollbar-width:none;
     border-right:1px solid var(--b1);
     background:var(--bg1);
     border-radius:var(--r3) 0 0 var(--r3);
-    /* چسبیدن به topbar با margin-top */
-    margin-top:calc(var(--topbar-h) + 12px - 1px);
   }
+  #dpanel::-webkit-scrollbar{display:none;}
 
   .dp-empty{
     flex:1;display:flex;flex-direction:column;
