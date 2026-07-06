@@ -1709,7 +1709,7 @@ select.fi{
     overscroll-behavior:auto;
   }
 
-  /* ─── ۲. #app — document flow، فضا برای sidebar ─── */
+  /* ─── ۲. #app — document flow ─── */
   #app{
     position:static;
     max-width:none;
@@ -1719,8 +1719,7 @@ select.fi{
     overflow:visible;
     display:block;
     margin:0;
-    padding-right:220px;
-    padding-left:0;
+    padding:0;
     box-sizing:border-box;
     left:auto;right:auto;
   }
@@ -1741,14 +1740,16 @@ select.fi{
     box-shadow:0 1px 0 var(--b1);
   }
 
-  /* ─── ۴. Pages — static، scroll طبیعی ─── */
+  /* ─── ۴. Pages — margin-right مستقیم، نه وابسته به parent ─── */
   .page{
     position:static;
     display:none;
     height:auto;
     min-height:0;
     overflow:visible;
-    max-width:calc(100vw - 220px); /* هیچ صفحه‌ای زیر navbar نمیره */
+    max-width:none;
+    margin-right:220px; /* ← مستقیم: ۲۲۰px از راست برای navbar */
+    margin-left:0;
     padding-top:0;
     padding-bottom:48px;
     top:auto;bottom:auto;
@@ -1969,14 +1970,16 @@ select.fi{
 
 
   /* ─── Three-panel home layout ─── */
-  /* پنل fixed سمت چپ، لیست block با padding-left */
   #pageHome{
-    /* display رو به .page/.page.active بسپار — ID selector نباید override کنه */
+    /* margin-left: فضای پنل چپ | margin-right: فضای navbar راست */
+    margin-left:360px;
+    margin-right:220px; /* override .page margin-right به همین مقدار */
     padding-top:calc(var(--topbar-h) + 12px);
-    padding-left:360px;
     padding-bottom:48px;
-    box-sizing:border-box;
+    padding-left:0;
+    padding-right:0;
     min-height:100svh;
+    box-sizing:border-box;
   }
   .dp-list{display:block;width:100%;}
   .dp-list>[style*="height:var(--topbar-h)"]{display:none;}
@@ -2075,20 +2078,19 @@ select.fi{
 
 /* ─── نمایش ۹۰۰–۱۱۹۹px ─── */
 @media(min-width:900px) and (max-width:1199px){
-  #app{padding-right:190px;}
   .nav{width:190px;}
   .topbar{left:280px;right:190px;}
-  .sheet{left:calc((100vw - 190px - 280px) / 2 + 280px);}
+  .sheet{left:calc(280px + (100vw - 190px - 280px) / 2);}
   .toast{right:calc(190px + 16px);}
   #dpanel{width:280px;}
-  #pageHome{padding-left:280px;}
-  .page{max-width:calc(100vw - 190px);}
+  .page{margin-right:190px;}
+  #pageHome{margin-left:280px;margin-right:190px;}
 }
 
 @media(min-width:1200px) and (max-width:1399px){
   #dpanel{width:300px;}
-  #pageHome{padding-left:300px;}
   .topbar{left:300px;}
+  #pageHome{margin-left:300px;}
 }
 
 
