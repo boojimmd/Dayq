@@ -1686,86 +1686,88 @@ select.fi{
 }
 .cmd-shortcut-hint{display:none;}
 .cmd-shortcut-hint{display:none;}
+#dpanel{display:none;}
 
 /* ═══════════════════════════════════════════════════
    DESKTOP LAYOUT ≥900px
-   رویکرد: viewport scroll — ساده‌ترین و درست‌ترین
-   ─ html/body خودشان scroll می‌دهند
-   ─ #app: height:auto، در جریان عادی
-   ─ topbar: sticky به viewport
-   ─ pages: static، height:auto
-   ─ nav: fixed راست
+   رویکرد: cascade طبیعی CSS — بدون !important
+   ─ این block بعد از mobile base CSS میاد → برنده است
+   ─ html/body از iOS-fixed آزاد می‌شوند
+   ─ #app: document flow، padding-right برای sidebar
+   ─ topbar: fixed از چپ تا sidebar
+   ─ pages: static، scroll با document
+   ─ nav: sidebar fixed راست
 ═══════════════════════════════════════════════════ */
 @media(min-width:900px){
 
-  /* ─── ۱. html/body: کامل reset از حالت iOS fixed ─── */
+  /* ─── ۱. html/body — آزادسازی از iOS lock ─── */
   html,body{
-    position:static !important;
-    height:auto !important;
+    position:static;
+    height:auto;
     min-height:100svh;
-    overflow:auto !important;
-    width:100% !important;
-    overscroll-behavior:auto !important;
+    overflow:auto;
+    overscroll-behavior:auto;
   }
 
-  /* ─── ۲. #app — reset کامل از موبایل ─── */
+  /* ─── ۲. #app — document flow، فضا برای sidebar ─── */
   #app{
-    position:static !important;  /* نه relative */
-    max-width:100% !important;
-    width:100% !important;
-    height:auto !important;      /* نه 100svh */
-    min-height:0 !important;
-    overflow:visible !important; /* نه hidden */
-    display:block !important;    /* نه flex */
-    margin:0 !important;         /* نه 0 auto */
-    padding-right:220px !important; /* فضا برای sidebar راست */
-    padding-left:0 !important;
+    position:static;
+    max-width:none;
+    width:100%;
+    height:auto;
+    min-height:0;
+    overflow:visible;
+    display:block;
+    margin:0;
+    padding-right:220px;
+    padding-left:0;
     box-sizing:border-box;
-    left:auto !important;right:auto !important;
+    left:auto;right:auto;
   }
 
-  /* ─── ۳. Topbar — fixed (با scroll viewport) ─── */
+  /* ─── ۳. Topbar — fixed، از چپ تا لبه sidebar ─── */
   .topbar{
-    position:fixed !important;
+    position:fixed;
     top:0;
     left:0;
-    right:220px; /* فضا برای sidebar */
+    right:220px;
+    width:auto;
     max-width:none;
+    margin:0;
+    padding:12px 24px 0;
     z-index:40;
     backdrop-filter:blur(16px);
     -webkit-backdrop-filter:blur(16px);
     box-shadow:0 1px 0 var(--b1);
   }
-  /* صفحه‌ها باید فضای topbar fixed را جبران کنند */
-  .page.active{
-    padding-top:100px !important; /* ارتفاع topbar */
-  }
 
-  /* ─── ۴. صفحه‌ها — static در جریان عادی، بدون هیچ trick ─── */
+  /* ─── ۴. Pages — static، scroll طبیعی ─── */
   .page{
-    position:static !important;
-    display:none !important;
-    height:auto !important;
-    min-height:0 !important;
-    overflow:visible !important;
-    flex:1;
-    padding-top:0 !important;
+    position:static;
+    display:none;
+    height:auto;
+    min-height:0;
+    overflow:visible;
+    max-width:none;
+    padding-top:0;
     padding-bottom:48px;
-    top:auto !important;bottom:auto !important;
-    left:auto !important;right:auto !important;
+    top:auto;bottom:auto;
+    left:auto;right:auto;
   }
   .page.active{
-    display:block !important;
+    display:block;
+    padding-top:calc(var(--topbar-h) + 12px);
   }
-  /* حذف spacer که برای topbar:fixed بود */
-  .page>[style*="height:var(--topbar-h)"]{display:none !important;}
+  .page>[style*="height:var(--topbar-h)"]{display:none;}
 
-  /* ─── ۵. Sidebar — fixed سمت راست (RTL) ─── */
+  /* ─── ۵. Sidebar nav — fixed سمت راست ─── */
   .nav{
-    position:fixed !important;
+    position:fixed;
     top:0;right:0;left:auto;bottom:0;
     width:220px;
+    max-width:none;
     height:100svh;
+    margin:0;
     flex-direction:column;
     align-items:stretch;
     justify-content:flex-start;
@@ -1789,38 +1791,42 @@ select.fi{
     letter-spacing:-.02em;
     flex-shrink:0;
   }
+
+  /* ─── Nav items ─── */
   .ni{
-    flex:none !important;
-    flex-direction:row !important;
-    justify-content:flex-start !important;
-    padding:9px 12px !important;
+    flex:none;
+    flex-direction:row;
+    justify-content:flex-start;
+    padding:9px 12px;
     border-radius:var(--r2);
-    margin:0 !important;
-    gap:10px !important;
+    margin:0;
+    gap:10px;
     width:100%;
     font-size:var(--fs-sm);
     font-weight:600;
     color:var(--t2);
   }
-  .ni.active{background:var(--am) !important;color:var(--a) !important;}
+  .ni.active{background:var(--am);color:var(--a);}
   .ni:hover:not(.active){background:var(--bg2);}
   .ni-lbl{
-    max-width:none !important;
-    opacity:1 !important;
+    max-width:none;
+    opacity:1;
     font-size:var(--fs-sm);
     font-weight:600;
   }
-  .ni-dot{display:none !important;}
+  .ni-dot{display:none;}
+
+  /* ─── FAB ─── */
   .nav-fab{
     order:-1;
     width:100%;
     margin-bottom:12px;
-    flex-direction:row !important;
-    flex:none !important;
+    flex-direction:row;
+    flex:none;
   }
   .nav-fab-btn{
-    width:100% !important;
-    border-radius:var(--r2) !important;
+    width:100%;
+    border-radius:var(--r2);
     height:40px;
     gap:var(--sp2);
   }
@@ -1832,33 +1838,33 @@ select.fi{
     font-family:var(--f);
   }
   [data-theme="dark"] .nav-fab-btn::after{color:#080c10;}
-  .nav-fab-lbl{display:none !important;}
+  .nav-fab-lbl{display:none;}
 
-  /* ─── ۶. شیت‌ها — dialog وسط صفحه ─── */
+  /* ─── Sheet — dialog وسط ناحیه محتوا ─── */
   .sheet{
-    bottom:auto !important;
-    top:50% !important;
-    left:calc((100vw - 220px) / 2) !important; /* وسط ناحیهٔ محتوا، نه وسط viewport */
-    transform:translate(-50%,-50%) scale(.95) !important;
+    bottom:auto;
+    top:50%;
+    left:calc((100vw - 220px) / 2);
+    transform:translate(-50%,-50%) scale(.95);
     opacity:0;
     pointer-events:none;
-    border-radius:var(--r4) !important;
-    max-height:85vh !important;
-    width:min(500px, calc(100vw - 260px)) !important;
-    border:1px solid var(--b1) !important;
-    box-shadow:0 24px 80px rgba(0,0,0,.22) !important;
-    transition:transform .25s var(--ease), opacity .2s, background .25s !important;
+    border-radius:var(--r4);
+    max-height:85vh;
+    width:min(500px,calc(100vw - 260px));
+    border:1px solid var(--b1);
+    box-shadow:0 24px 80px rgba(0,0,0,.22);
+    transition:transform .25s var(--ease),opacity .2s,background .25s;
   }
   .sheet.open{
-    transform:translate(-50%,-50%) scale(1) !important;
+    transform:translate(-50%,-50%) scale(1);
     opacity:1;
     pointer-events:auto;
   }
 
-  /* ─── ۷. Toast — پایین چپ ─── */
+  /* ─── Toast ─── */
   .toast{
-    bottom:20px;top:auto !important;
-    left:auto;right:calc(220px + 16px) !important;
+    bottom:20px;top:auto;
+    left:auto;right:calc(220px + 16px);
     transform:translateY(8px);
     max-width:320px;
     border-radius:var(--r3);
@@ -1867,21 +1873,18 @@ select.fi{
   }
   .toast.show{transform:translateY(0);opacity:1;}
 
-  /* ─── ۸. Overlay — full screen ─── */
-  .ov{position:fixed !important;inset:0;}
+  /* ─── Overlay ─── */
+  .ov{position:fixed;inset:0;}
 
-  /* ─── ۹. محتوای هر صفحه — عرض مناسب ─── */
-  /* تقویم: بدون محدودیت عرض */
+  /* ─── محتوای صفحات ─── */
   .calendarWrap,.cal-month-grid,.wv-wrap,.wv-grid{
-    max-width:none !important;
-    margin:0 !important;
+    max-width:none;
+    margin:0;
   }
   .cal-page-top,.cvt-wrap,.tbrow{
     max-width:800px;
     margin-left:auto;margin-right:auto;
   }
-
-  /* بقیهٔ صفحه‌ها: محدودیت خوانا */
   .tlist,#bdList,.projects-list,.bag-pg,.bag-page{
     max-width:760px;
     margin-left:auto;margin-right:auto;
@@ -1892,22 +1895,14 @@ select.fi{
     border-radius:var(--r3);
     margin-top:6px;
   }
-
-  /* صفحهٔ «من» و کیف من */
-  .me-pg,.bag-page{padding-top:20px !important;}
-
-  /* هدر صفحات */
+  .me-pg,.bag-page{padding-top:20px;}
   .pg-title{font-size:var(--fs-2xl);}
-
-  /* کارت‌های تسک */
   .tc-wrap{border-radius:var(--r3);}
-
-  /* حلقهٔ پیشرفت */
   .hrw svg{width:84px;height:84px;}
 
-  /* ─── ۱۰. Command Palette hint ─── */
+  /* ─── Command Palette hint ─── */
   .cmd-shortcut-hint{
-    display:flex !important;
+    display:flex;
     align-items:center;gap:var(--sp2);
     padding:8px 14px;border-radius:var(--r2);
     background:var(--bg2);border:1px solid var(--b1);
@@ -1920,11 +1915,141 @@ select.fi{
     background:var(--bg3);border:1px solid var(--b1);
     border-radius:4px;padding:1px 6px;font-size:var(--fs-xs);font-family:monospace;
   }
+
+  /* ─── Sidebar widgets ─── */
+  .sb-spacer{display:block;flex:1;min-height:12px;}
+
+  .sb-stats{
+    display:flex;gap:6px;
+    padding:10px 8px;
+    border-top:1px solid var(--b1);
+    margin-top:0;
+  }
+  .sb-stat{
+    flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;
+    background:var(--bg2);border-radius:var(--r2);padding:8px 4px;
+  }
+  .sb-stat-num{font-size:1.15rem;font-weight:800;line-height:1;color:var(--t1);}
+  .sb-stat-lbl{font-size:.58rem;font-weight:600;color:var(--t3);}
+  .sb-stat.s-done .sb-stat-num{color:var(--a);}
+  .sb-stat.s-pending .sb-stat-num{color:var(--amber);}
+
+  .sb-cal-widget{
+    padding:10px 8px 6px;
+    border-top:1px solid var(--b1);
+  }
+  .sb-cal-nav{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-bottom:6px;
+  }
+  .sb-cal-title{font-size:var(--fs-xs);font-weight:700;color:var(--t2);}
+  .sb-cal-widget .jci-days{gap:1px;}
+  .sb-cal-widget .jci-day{
+    font-size:.58rem;padding:3px 1px;border-radius:4px;
+    position:relative;
+  }
+  .sb-cal-widget .jci-day.has-tasks::after{
+    content:'';position:absolute;bottom:1px;left:50%;transform:translateX(-50%);
+    width:3px;height:3px;border-radius:50%;background:var(--a);
+  }
+  .sb-cal-widget .jci-day.jci-sel{
+    background:var(--a);color:#fff;font-weight:800;
+  }
+
+  .sb-date-block{
+    padding:10px 12px 8px;
+    border-top:1px solid var(--b1);
+  }
+  .sb-weekday{font-size:var(--fs-2xs);font-weight:700;color:var(--t3);letter-spacing:.06em;margin-bottom:1px;}
+  .sb-day{font-size:2rem;font-weight:900;color:var(--t1);line-height:1;letter-spacing:-.04em;}
+  .sb-month{font-size:var(--fs-xs);font-weight:600;color:var(--t2);margin-top:2px;}
 }
 
-@media(min-width:900px) and (max-width:1200px){
+  /* ─── Three-panel home layout ─── */
+  #pageHome{
+    display:grid;
+    grid-template-columns:1fr 360px;
+    align-items:start;
+    min-height:calc(100svh - var(--topbar-h));
+  }
+  .dp-list{min-width:0;}
+  /* داخل dp-list، max-width ها رو override کن */
+  .dp-list .tlist,
+  .dp-list #bdList{max-width:none;margin-left:0;margin-right:0;}
+  .dp-list .qcap{max-width:none;margin-left:18px;margin-right:18px;}
+  .dp-list .cmd-shortcut-hint{max-width:none;margin-left:18px;margin-right:18px;}
+
+  /* ─── Detail panel ─── */
+  #dpanel{display:flex;flex-direction:column;}
+  #dpanel{
+    position:sticky;
+    top:calc(var(--topbar-h) + 12px);
+    height:calc(100svh - var(--topbar-h) - 24px);
+    overflow-y:auto;
+    scrollbar-width:none;
+    border-right:1px solid var(--b1);
+    background:var(--bg1);
+    border-radius:var(--r3) 0 0 var(--r3);
+  }
+  #dpanel::-webkit-scrollbar{display:none;}
+
+  .dp-empty{
+    flex:1;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    gap:16px;padding:32px 24px;
+  }
+  .dp-empty-hint{font-size:var(--fs-sm);color:var(--t3);text-align:center;line-height:1.8;}
+  .dp-content{flex:1;display:flex;flex-direction:column;padding:20px 18px;gap:14px;overflow-y:auto;scrollbar-width:none;}
+  .dp-content::-webkit-scrollbar{display:none;}
+
+  .dp-head{display:flex;align-items:center;justify-content:space-between;}
+  .dp-cat-icon{width:32px;height:32px;border-radius:var(--r2);background:var(--bg2);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;}
+  .dp-close-btn{width:26px;height:26px;border-radius:var(--r1);background:var(--bg2);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t3);font-size:.8rem;transition:var(--dur-fast) var(--ease-out);}
+  .dp-close-btn:hover{background:var(--bg3);color:var(--t1);}
+
+  .dp-title{font-size:var(--fs-xl);font-weight:800;color:var(--t1);line-height:1.35;outline:none;border-radius:var(--r1);padding:4px 6px;margin:-4px -6px;transition:background var(--dur-fast) var(--ease-out);word-break:break-word;}
+  .dp-title:focus{background:var(--bg2);}
+  .dp-title[contenteditable]:empty::before{content:'عنوان...';color:var(--t3);}
+
+  .dp-chips-row{display:flex;flex-wrap:wrap;gap:6px;}
+  .dp-chip{background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r5);padding:4px 10px;font-size:var(--fs-xs);font-weight:600;color:var(--t2);display:flex;align-items:center;gap:4px;}
+  .dp-chip.pri-high{border-color:rgba(229,62,90,.3);color:var(--red);background:var(--redm);}
+  .dp-chip.pri-med{border-color:rgba(217,119,6,.3);color:var(--amber);background:var(--ambm);}
+  .dp-chip.ch-done{border-color:rgba(0,184,122,.3);color:var(--a);background:var(--am);}
+
+  .dp-section-lbl{font-size:var(--fs-xs);font-weight:700;color:var(--t3);margin-bottom:4px;}
+  .dp-notes-ta{width:100%;min-height:88px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 12px;font-size:var(--fs-sm);color:var(--t1);font-family:var(--f);resize:none;outline:none;line-height:1.6;transition:border-color var(--dur-fast);}
+  .dp-notes-ta:focus{border-color:var(--a);}
+  .dp-notes-ta::placeholder{color:var(--t3);}
+
+  .dp-timer-box{background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 14px;display:flex;align-items:center;gap:12px;}
+  .dp-timer-num{font-size:1.2rem;font-weight:800;color:var(--t1);letter-spacing:.04em;font-variant-numeric:tabular-nums;flex:1;transition:color var(--dur-fast);}
+  .dp-timer-num.running{color:var(--a);}
+  .dp-timer-start{height:30px;padding:0 14px;border-radius:var(--r2);background:var(--a);color:#fff;font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer;border:none;transition:var(--dur-fast) var(--ease-out);}
+  .dp-timer-start:hover{background:var(--a2);}
+  .dp-timer-start.paused{background:var(--bg3);color:var(--t2);border:1px solid var(--b1);}
+
+  .dp-action-row{display:flex;gap:8px;margin-top:auto;padding-top:12px;border-top:1px solid var(--b1);}
+  .dp-btn{height:36px;border-radius:var(--r2);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer;border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;gap:6px;transition:var(--dur-fast) var(--ease-out);}
+  .dp-btn-done{flex:1;background:var(--am);color:var(--a);border-color:rgba(0,184,122,.25);}
+  .dp-btn-done:hover{background:var(--a);color:#fff;}
+  .dp-btn-done.is-done{background:var(--a);color:#fff;}
+  .dp-btn-edit{flex:none;padding:0 14px;background:var(--bg2);color:var(--t2);}
+  .dp-btn-edit:hover{background:var(--bg3);}
+  .dp-btn-del{flex:none;width:36px;background:var(--redm,rgba(229,62,90,.1));color:var(--red);border-color:rgba(229,62,90,.2);}
+  .dp-btn-del:hover{background:var(--red);color:#fff;}
+
+  /* کارت فعال */
+  .tc-wrap.dp-active{outline:2px solid var(--a);outline-offset:1px;}
+
+/* ─── نمایش ۹۰۰–۱۱۹۹px ─── */
+@media(min-width:900px) and (max-width:1199px){
   #app{padding-right:190px;}
   .nav{width:190px;}
+  .topbar{right:190px;}
+  .sheet{left:calc((100vw - 190px) / 2);}
+  .toast{right:calc(190px + 16px);}
+  #pageHome{grid-template-columns:1fr 300px;}
 }
 
 
@@ -2075,6 +2200,7 @@ select.fi{
 
 <!-- PAGE: HOME -->
 <div class="page active" id="pageHome">
+<div class="dp-list">
 
   <!-- Quick Capture -->
   <div style="height:var(--topbar-h);flex-shrink:0;"></div>
@@ -2210,9 +2336,51 @@ select.fi{
   
 
   <div style="height:20px;"></div>
+</div><!-- /dp-list -->
+
+<!-- DESKTOP DETAIL PANEL -->
+<div id="dpanel">
+  <!-- Empty state -->
+  <div class="dp-empty" id="dpEmpty">
+    <svg viewBox="0 0 84 84" width="64" height="64">
+      <circle cx="42" cy="42" r="33" fill="none" stroke="var(--b1)" stroke-width="5"/>
+      <circle cx="42" cy="42" r="33" fill="none" stroke="var(--a)" stroke-width="5"
+        stroke-linecap="round" stroke-dasharray="45 165" stroke-dashoffset="10"/>
+    </svg>
+    <div class="dp-empty-hint">یه کار از لیست انتخاب کن<br>جزئیاتش اینجا می‌آد</div>
+  </div>
+  <!-- Content -->
+  <div class="dp-content" id="dpContent" style="display:none">
+    <div class="dp-head">
+      <div class="dp-cat-icon" id="dpCatIcon"></div>
+      <button class="dp-close-btn" onclick="dpClose()">✕</button>
+    </div>
+    <div class="dp-title" id="dpTitle" contenteditable="true" dir="rtl"
+      onblur="dpSaveTitleDebounced()" oninput="dpSaveTitleDebounced()"></div>
+    <div class="dp-chips-row" id="dpChips"></div>
+    <div>
+      <div class="dp-section-lbl">یادداشت</div>
+      <textarea class="dp-notes-ta" id="dpNotes" placeholder="یادداشت برای این کار..."
+        dir="rtl" oninput="dpSaveNoteDebounced()"></textarea>
+    </div>
+    <div>
+      <div class="dp-section-lbl">تایمر این کار</div>
+      <div class="dp-timer-box">
+        <span class="dp-timer-num" id="dpTimerNum">۰۰:۰۰</span>
+        <button class="dp-timer-start" id="dpTimerBtn" onclick="dpTimerToggle()">شروع</button>
+      </div>
+    </div>
+    <div class="dp-action-row">
+      <button class="dp-btn dp-btn-done" id="dpBtnDone" onclick="dpToggleDone()">✓ تموم شد</button>
+      <button class="dp-btn dp-btn-edit" onclick="dpEditFull()">ویرایش کامل</button>
+      <button class="dp-btn dp-btn-del" onclick="dpDelete()">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+      </button>
+    </div>
+  </div>
 </div>
 
-<!-- PAGE: BAG -->
+</div><!-- /pageHome -->
 <div class="page" id="pageBag">
   <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px 0;padding-top:calc(var(--topbar-h) + 14px);">
     <div style="font-size:1rem;font-weight:800;">کیف من</div>
@@ -3332,6 +3500,7 @@ function boot(){
     if(lastPri){qcPri=lastPri;qcSetPri(lastPri,null);}
   }catch(e){}
   renderTasks();renderBag();updateMeStats();
+  sbInit();
   // overdue modal — فقط صبح (۶ تا ۱۲) نشون بده
   const _h=new Date().getHours();
   if(_h>=6&&_h<12) setTimeout(showOverdueModal, 2000);
@@ -4381,6 +4550,7 @@ function renderTasks(){
 
   updateMeta(); updateMirrorSummary(); updateCapacityBanner(); _refreshTriageBanner();
   if(cfg.timeline) renderTimeline();
+  sbUpdateStats();
 
   const projPage=document.getElementById('pageProjects');
   if(projPage&&projPage.classList.contains('active')) renderProjects();
@@ -4427,6 +4597,7 @@ let _newTaskIds=new Set();
 function mkCardWrap(task){
   const wrap=document.createElement('div');
   wrap.className='tc-wrap'+(bulkMode&&bulkSelect.has(task.id)?' bulk-selected':'')+(_newTaskIds.has(task.id)?' new-task':'');
+  wrap.dataset.taskId=task.id;
   if(_newTaskIds.has(task.id)) setTimeout(()=>{wrap.classList.remove('new-task');_newTaskIds.delete(task.id);},400);
   // bulk checkbox
   const bchk=document.createElement('div');
@@ -7544,6 +7715,246 @@ function parseICS(text){
 const JDP_MONTHS=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
 
 // Per-field state
+/* ══ SIDEBAR DESKTOP WIDGETS ══ */
+const _sbCal={year:0,month:0};
+const _SB_WD=['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه'];
+
+function sbInit(){
+  if(window.innerWidth<900) return;
+  const t=mrToJalali(new Date().getFullYear(),new Date().getMonth()+1,new Date().getDate());
+  _sbCal.year=t[0]; _sbCal.month=t[1];
+  // show widgets
+  ['sbStats','sbCalWidget','sbDateBlock'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.style.display='';
+  });
+  sbUpdateDate();
+  sbCalRender();
+  sbUpdateStats();
+}
+
+function sbUpdateDate(){
+  const now=new Date();
+  const jd=mrToJalali(now.getFullYear(),now.getMonth()+1,now.getDate());
+  const wdEl=document.getElementById('sbWeekday');
+  const dayEl=document.getElementById('sbDay');
+  const moEl=document.getElementById('sbMonthYear');
+  if(wdEl) wdEl.textContent=_SB_WD[now.getDay()];
+  if(dayEl) dayEl.textContent=num(jd[2]);
+  if(moEl)  moEl.textContent=JDP_MONTHS[jd[1]-1]+' '+num(jd[0]);
+}
+
+function sbCalRender(){
+  const jy=_sbCal.year, jm=_sbCal.month;
+  const titleEl=document.getElementById('sbCalTitle');
+  if(titleEl) titleEl.textContent=JDP_MONTHS[jm-1]+' '+num(jy);
+  const daysEl=document.getElementById('sbCalDays');
+  if(!daysEl) return;
+  daysEl.innerHTML='';
+  const todayJ=mrToJalali(new Date().getFullYear(),new Date().getMonth()+1,new Date().getDate());
+  // task dates in this month
+  const prefix=jy+'-'+String(jm).padStart(2,'0');
+  const taskDates=new Set((tasks||[]).filter(t=>t.deadline&&t.deadline.startsWith(prefix)).map(t=>t.deadline));
+  // layout
+  const [gy,gm,gd]=jalaliToGregorian(jy,jm,1);
+  const startCol=[1,2,3,4,5,6,0][new Date(gy,gm-1,gd).getDay()];
+  const dim=CAL_DAYS_IN_MONTH[jm-1]+((isJalaliLeap(jy)&&jm===12)?1:0);
+  for(let i=0;i<startCol;i++){
+    const e=document.createElement('div');
+    e.className='jci-day jci-other';
+    daysEl.appendChild(e);
+  }
+  for(let d=1;d<=dim;d++){
+    const dk=prefix+'-'+String(d).padStart(2,'0');
+    const isToday=jy===todayJ[0]&&jm===todayJ[1]&&d===todayJ[2];
+    const isPast=_jalToDays(jy,jm,d)<_jalToDays(todayJ[0],todayJ[1],todayJ[2]);
+    const hasTasks=taskDates.has(dk);
+    const btn=document.createElement('div');
+    btn.className='jci-day'+(isToday?' jci-today jci-sel':'')+(isPast?' jci-past':'')+(hasTasks?' has-tasks':'');
+    btn.textContent=num(d);
+    daysEl.appendChild(btn);
+  }
+}
+
+function sbCalPrev(){_sbCal.month--;if(_sbCal.month<1){_sbCal.month=12;_sbCal.year--;}sbCalRender();}
+function sbCalNext(){_sbCal.month++;if(_sbCal.month>12){_sbCal.month=1;_sbCal.year++;}sbCalRender();}
+
+function sbUpdateStats(){
+  if(window.innerWidth<900) return;
+  const today=mrToJalali(new Date().getFullYear(),new Date().getMonth()+1,new Date().getDate());
+  const tk=today[0]+'-'+String(today[1]).padStart(2,'0')+'-'+String(today[2]).padStart(2,'0');
+  const todayTasks=(tasks||[]).filter(t=>t.deadline===tk);
+  const done=todayTasks.filter(t=>t.done||t.status==='done').length;
+  const pending=todayTasks.filter(t=>!t.done&&t.status!=='done').length;
+  const total=todayTasks.length;
+  const dEl=document.getElementById('sbDone');
+  const pEl=document.getElementById('sbPending');
+  const tEl=document.getElementById('sbTotal');
+  if(dEl) dEl.textContent=num(done);
+  if(pEl) pEl.textContent=num(pending);
+  if(tEl) tEl.textContent=num(total);
+  // re-render calendar to update task dots
+  sbCalRender();
+}
+
+/* ══ DESKTOP DETAIL PANEL ══ */
+let _dpTaskId=null;
+let _dpTimerMs=0;
+let _dpTimerInterval=null;
+let _dpTimerRunning=false;
+let _dpSaveNoteT=null;
+let _dpSaveTitleT=null;
+
+const _DP_CAT_LABELS={prep:'آماده‌سازی',visit:'بازدید',meeting:'جلسه',report:'گزارش',followup:'پیگیری',email:'ایمیل',call:'تماس',other:'سایر'};
+const _DP_PRI_LABEL={high:'اولویت بالا',med:'اولویت متوسط',low:'اولویت پایین'};
+const _DP_PRI_CLS={high:'pri-high',med:'pri-med',low:'pri-low'};
+
+function dpOpenPanel(taskId){
+  const t=tasks.find(t=>t.id===taskId);
+  if(!t) return;
+  _dpTaskId=taskId;
+  // highlight card
+  document.querySelectorAll('.tc-wrap.dp-active').forEach(el=>el.classList.remove('dp-active'));
+  document.querySelector(`.tc-wrap[data-task-id="${taskId}"]`)?.classList.add('dp-active');
+  // show content
+  const emptyEl=document.getElementById('dpEmpty');
+  const contentEl=document.getElementById('dpContent');
+  if(emptyEl) emptyEl.style.display='none';
+  if(contentEl) contentEl.style.display='flex';
+  // reset timer
+  _dpTimerStop();
+  _dpTimerMs=t.timerMs||0;
+  _dpUpdateTimerDisplay();
+  // render
+  _dpRender(t);
+  // scroll panel to top
+  const panel=document.getElementById('dpanel');
+  if(panel) panel.scrollTop=0;
+}
+
+function _dpRender(t){
+  // icon
+  const ic=iconMap[t.iconId]||iconMap.check;
+  const iconEl=document.getElementById('dpCatIcon');
+  if(iconEl) iconEl.innerHTML=`<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="${ic.c}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ic.s}</svg>`;
+  // title
+  const titleEl=document.getElementById('dpTitle');
+  if(titleEl) titleEl.textContent=t.text;
+  // chips
+  const chipsEl=document.getElementById('dpChips');
+  if(chipsEl){
+    let h='';
+    if(t.deadline){
+      const[jy,jm,jd]=t.deadline.split('-').map(Number);
+      h+=`<span class="dp-chip">📅 ${num(jd)} ${JDP_MONTHS[jm-1]}</span>`;
+    }
+    if(t.time) h+=`<span class="dp-chip">🕐 ${t.time}</span>`;
+    h+=`<span class="dp-chip">${_DP_CAT_LABELS[t.cat]||t.cat||'—'}</span>`;
+    h+=`<span class="dp-chip ${_DP_PRI_CLS[t.priority||'high']}">${_DP_PRI_LABEL[t.priority||'high']}</span>`;
+    if(t.done||t.status==='done') h+=`<span class="dp-chip ch-done">✓ تموم شد</span>`;
+    chipsEl.innerHTML=h;
+  }
+  // notes
+  const notesEl=document.getElementById('dpNotes');
+  if(notesEl) notesEl.value=t.note||'';
+  // done button
+  const doneBtn=document.getElementById('dpBtnDone');
+  if(doneBtn){
+    const isDone=t.done||t.status==='done';
+    doneBtn.textContent=isDone?'↩ برگشت':'✓ تموم شد';
+    doneBtn.classList.toggle('is-done',isDone);
+  }
+}
+
+function dpClose(){
+  _dpTaskId=null;
+  _dpTimerStop();
+  document.querySelectorAll('.tc-wrap.dp-active').forEach(el=>el.classList.remove('dp-active'));
+  const emptyEl=document.getElementById('dpEmpty');
+  const contentEl=document.getElementById('dpContent');
+  if(emptyEl) emptyEl.style.display='';
+  if(contentEl) contentEl.style.display='none';
+}
+
+function dpToggleDone(){
+  const t=tasks.find(t=>t.id===_dpTaskId); if(!t) return;
+  const nowDone=!(t.done||t.status==='done');
+  t.done=nowDone;
+  t.status=nowDone?'done':'todo';
+  saveAll(); renderTasks();
+  _dpRender(t);
+  toast_(svgIco('check'),nowDone?'تموم شد ✓':'برگشت به لیست');
+}
+
+function dpDelete(){
+  if(!_dpTaskId) return;
+  if(!confirm('این کار حذف بشه؟')) return;
+  tasks=tasks.filter(t=>t.id!==_dpTaskId);
+  saveAll(); renderTasks(); dpClose();
+  toast_(svgIco('flag'),'حذف شد');
+}
+
+function dpSaveNoteDebounced(){
+  clearTimeout(_dpSaveNoteT);
+  _dpSaveNoteT=setTimeout(()=>{
+    const t=tasks.find(t=>t.id===_dpTaskId); if(!t) return;
+    t.note=document.getElementById('dpNotes')?.value||'';
+    saveAll();
+  },800);
+}
+
+function dpSaveTitleDebounced(){
+  clearTimeout(_dpSaveTitleT);
+  _dpSaveTitleT=setTimeout(()=>{
+    const t=tasks.find(t=>t.id===_dpTaskId); if(!t) return;
+    const val=document.getElementById('dpTitle')?.textContent?.trim()||'';
+    if(val&&val!==t.text){t.text=val;saveAll();renderTasks();}
+  },600);
+}
+
+function dpEditFull(){
+  if(!_dpTaskId) return;
+  openNote(_dpTaskId,{stopPropagation:()=>{}},true);
+}
+
+/* ── Panel Timer ── */
+function dpTimerToggle(){
+  if(_dpTimerRunning) _dpTimerStop(); else _dpTimerStart();
+}
+function _dpTimerStart(){
+  _dpTimerRunning=true;
+  const btn=document.getElementById('dpTimerBtn');
+  const numEl=document.getElementById('dpTimerNum');
+  if(btn){btn.textContent='مکث';btn.classList.remove('paused');btn.style.background='';}
+  if(numEl) numEl.classList.add('running');
+  const t0=Date.now()-_dpTimerMs;
+  _dpTimerInterval=setInterval(()=>{
+    _dpTimerMs=Date.now()-t0;
+    _dpUpdateTimerDisplay();
+  },500);
+}
+function _dpTimerStop(){
+  _dpTimerRunning=false;
+  clearInterval(_dpTimerInterval);
+  _dpTimerInterval=null;
+  const btn=document.getElementById('dpTimerBtn');
+  const numEl=document.getElementById('dpTimerNum');
+  if(btn){btn.textContent='شروع';btn.classList.add('paused');}
+  if(numEl) numEl.classList.remove('running');
+  if(_dpTaskId){
+    const t=tasks.find(t=>t.id===_dpTaskId);
+    if(t){t.timerMs=_dpTimerMs;saveAll();}
+  }
+}
+function _dpUpdateTimerDisplay(){
+  const el=document.getElementById('dpTimerNum'); if(!el) return;
+  const s=Math.floor(_dpTimerMs/1000);
+  const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;
+  el.textContent=h>0
+    ?`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`
+    :`${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+
 const _jciState={};
 
 function _jciGetState(fieldId){
@@ -7850,7 +8261,12 @@ function checkRecurringTasks(){
 ══════════════════════════════════════════════════ */
 let noteTaskId = null;
 
-function openNote(taskId, e){
+function openNote(taskId, e, forceSheet=false){
+  if(!forceSheet && window.innerWidth>=900){
+    if(e) e.stopPropagation();
+    dpOpenPanel(taskId);
+    return;
+  }
   if(e) e.stopPropagation();
   const t = tasks.find(t => t.id === taskId);
   if(!t) return;
@@ -9774,6 +10190,52 @@ boot();
   <div class="ni" id="ni-me" onclick="goPage('Me')">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
     <span class="ni-lbl">من</span><div class="ni-dot"></div>
+  </div>
+
+  <!-- Desktop sidebar additions — hidden on mobile -->
+  <div class="sb-spacer"></div>
+
+  <!-- Stats -->
+  <div class="sb-stats" id="sbStats" style="display:none">
+    <div class="sb-stat s-done">
+      <span class="sb-stat-num" id="sbDone">۰</span>
+      <span class="sb-stat-lbl">تموم شد</span>
+    </div>
+    <div class="sb-stat s-pending">
+      <span class="sb-stat-num" id="sbPending">۰</span>
+      <span class="sb-stat-lbl">باقی مونده</span>
+    </div>
+    <div class="sb-stat">
+      <span class="sb-stat-num" id="sbTotal">۰</span>
+      <span class="sb-stat-lbl">کل امروز</span>
+    </div>
+  </div>
+
+  <!-- Mini calendar -->
+  <div class="sb-cal-widget" id="sbCalWidget" style="display:none">
+    <div class="sb-cal-nav">
+      <button class="jci-btn" onclick="sbCalNext()">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="sb-cal-title" id="sbCalTitle">—</span>
+      <button class="jci-btn" onclick="sbCalPrev()">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+    <div class="jci-wds">
+      <div class="jci-wd">ش</div><div class="jci-wd">ی</div>
+      <div class="jci-wd">د</div><div class="jci-wd">س</div>
+      <div class="jci-wd">چ</div><div class="jci-wd">پ</div>
+      <div class="jci-wd">ج</div>
+    </div>
+    <div class="jci-days" id="sbCalDays"></div>
+  </div>
+
+  <!-- Date block -->
+  <div class="sb-date-block" id="sbDateBlock" style="display:none">
+    <div class="sb-weekday" id="sbWeekday">—</div>
+    <div class="sb-day" id="sbDay">—</div>
+    <div class="sb-month" id="sbMonthYear">—</div>
   </div>
 </nav>
 
