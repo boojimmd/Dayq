@@ -2056,17 +2056,39 @@ select.fi{
   /* کارت فعال */
   .tc-wrap.dp-active{outline:2px solid var(--a);outline-offset:1px;}
 
+  /* ─── دکمه toggle پنل ─── */
+  .dp-toggle-btn{
+    display:flex;align-items:center;justify-content:center;
+    width:32px;height:32px;border-radius:var(--r2);
+    background:var(--bg2);border:1px solid var(--b1);
+    cursor:pointer;color:var(--t2);transition:var(--dur-fast) var(--ease-out);
+    flex-shrink:0;
+  }
+  .dp-toggle-btn:hover{background:var(--bg3);}
+  .dp-toggle-btn.panel-open{background:var(--am);border-color:rgba(0,184,122,.25);color:var(--a);}
+
+  /* وقتی پنل بسته ─── */
+  body.dp-closed #dpanel{display:none !important;}
+  body.dp-closed #pageHome{padding-left:0 !important;}
+  body.dp-closed .topbar{left:0 !important;}
+
 }
 
 /* ─── نمایش ۹۰۰–۱۱۹۹px ─── */
 @media(min-width:900px) and (max-width:1199px){
   #app{padding-right:190px;}
   .nav{width:190px;}
-  .topbar{left:300px;right:190px;}
-  .sheet{left:calc((100vw - 190px) / 2);}
+  .topbar{left:280px;right:190px;}
+  .sheet{left:calc((100vw - 190px - 280px) / 2 + 280px);}
   .toast{right:calc(190px + 16px);}
+  #dpanel{width:280px;}
+  #pageHome{padding-left:280px;}
+}
+
+@media(min-width:1200px) and (max-width:1399px){
   #dpanel{width:300px;}
   #pageHome{padding-left:300px;}
+  .topbar{left:300px;}
 }
 
 
@@ -2201,6 +2223,10 @@ select.fi{
       <div class="pg-title" id="pageTitle">امروز چیکار<em> داری؟</em></div>
     </div>
     <div class="hbtns">
+      <!-- دکمه toggle پنل — فقط دسکتاپ -->
+      <button class="hbtn dp-toggle-btn" id="dpToggleBtn" onclick="dpTogglePanel()" title="پنل جزئیات" style="display:none">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+      </button>
       <button class="hbtn" id="searchBtn" onclick="openSearch()" title="جستجو">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       </button>
@@ -7738,6 +7764,7 @@ const _SB_WD=['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه'
 
 function sbInit(){
   if(window.innerWidth<900) return;
+  dpInitToggle();
   const t=mrToJalali(new Date().getFullYear(),new Date().getMonth()+1,new Date().getDate());
   _sbCal.year=t[0]; _sbCal.month=t[1];
   // show widgets
@@ -7970,6 +7997,25 @@ function _dpUpdateTimerDisplay(){
   el.textContent=h>0
     ?`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`
     :`${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+
+/* ── Desktop Panel Toggle ── */
+function dpTogglePanel(){
+  const closed = document.body.classList.toggle('dp-closed');
+  const btn = document.getElementById('dpToggleBtn');
+  if(btn) btn.classList.toggle('panel-open', !closed);
+  localStorage.setItem('dq_dp_closed', closed ? '1' : '0');
+}
+function dpInitToggle(){
+  if(window.innerWidth < 900) return;
+  const btn = document.getElementById('dpToggleBtn');
+  if(btn) btn.style.display = '';
+  const wasClosed = localStorage.getItem('dq_dp_closed') === '1';
+  if(wasClosed){
+    document.body.classList.add('dp-closed');
+  } else {
+    btn?.classList.add('panel-open');
+  }
 }
 
 const _jciState={};
