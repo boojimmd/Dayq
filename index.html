@@ -1748,7 +1748,7 @@ select.fi{
     height:auto;
     min-height:0;
     overflow:visible;
-    max-width:none;
+    max-width:calc(100vw - 220px); /* هیچ صفحه‌ای زیر navbar نمیره */
     padding-top:0;
     padding-bottom:48px;
     top:auto;bottom:auto;
@@ -1971,8 +1971,7 @@ select.fi{
   /* ─── Three-panel home layout ─── */
   /* پنل fixed سمت چپ، لیست block با padding-left */
   #pageHome{
-    display:block;
-    width:100%;
+    /* display رو به .page/.page.active بسپار — ID selector نباید override کنه */
     padding-top:calc(var(--topbar-h) + 12px);
     padding-left:360px;
     padding-bottom:48px;
@@ -2083,6 +2082,7 @@ select.fi{
   .toast{right:calc(190px + 16px);}
   #dpanel{width:280px;}
   #pageHome{padding-left:280px;}
+  .page{max-width:calc(100vw - 190px);}
 }
 
 @media(min-width:1200px) and (max-width:1399px){
@@ -3855,6 +3855,11 @@ function goPage(n){
   document.querySelectorAll('.ni').forEach(i=>i.classList.remove('active'));
   const pg=document.getElementById('page'+n);if(pg)pg.classList.add('active');
   const ni=document.getElementById('ni-'+n.toLowerCase());if(ni)ni.classList.add('active');
+  // پنل دسکتاپ فقط در صفحه خانه نمایش داده میشه
+  if(window.innerWidth>=900){
+    const panel=document.getElementById('dpanel');
+    if(panel) panel.style.display=(n==='Home'&&!document.body.classList.contains('dp-closed'))?'flex':'none';
+  }
   if(n==='Me')       { updateMeStats(); }
   if(n==='Bag')       { renderBag(); }
   if(n==='Birthdays') { renderBirthdayPage(); }
