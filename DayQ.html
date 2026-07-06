@@ -1689,83 +1689,84 @@ select.fi{
 
 /* ═══════════════════════════════════════════════════
    DESKTOP LAYOUT ≥900px
-   رویکرد: viewport scroll — ساده‌ترین و درست‌ترین
-   ─ html/body خودشان scroll می‌دهند
-   ─ #app: height:auto، در جریان عادی
-   ─ topbar: sticky به viewport
-   ─ pages: static، height:auto
-   ─ nav: fixed راست
+   رویکرد: cascade طبیعی CSS — بدون !important
+   ─ این block بعد از mobile base CSS میاد → برنده است
+   ─ html/body از iOS-fixed آزاد می‌شوند
+   ─ #app: document flow، padding-right برای sidebar
+   ─ topbar: fixed از چپ تا sidebar
+   ─ pages: static، scroll با document
+   ─ nav: sidebar fixed راست
 ═══════════════════════════════════════════════════ */
 @media(min-width:900px){
 
-  /* ─── ۱. html/body: کامل reset از حالت iOS fixed ─── */
+  /* ─── ۱. html/body — آزادسازی از iOS lock ─── */
   html,body{
-    position:static !important;
-    height:auto !important;
+    position:static;
+    height:auto;
     min-height:100svh;
-    overflow:auto !important;
-    width:100% !important;
-    overscroll-behavior:auto !important;
+    overflow:auto;
+    overscroll-behavior:auto;
   }
 
-  /* ─── ۲. #app — reset کامل از موبایل ─── */
+  /* ─── ۲. #app — document flow، فضا برای sidebar ─── */
   #app{
-    position:static !important;  /* نه relative */
-    max-width:100% !important;
-    width:100% !important;
-    height:auto !important;      /* نه 100svh */
-    min-height:0 !important;
-    overflow:visible !important; /* نه hidden */
-    display:block !important;    /* نه flex */
-    margin:0 !important;         /* نه 0 auto */
-    padding-right:220px !important; /* فضا برای sidebar راست */
-    padding-left:0 !important;
+    position:static;
+    max-width:none;
+    width:100%;
+    height:auto;
+    min-height:0;
+    overflow:visible;
+    display:block;
+    margin:0;
+    padding-right:220px;
+    padding-left:0;
     box-sizing:border-box;
-    left:auto !important;right:auto !important;
+    left:auto;right:auto;
   }
 
-  /* ─── ۳. Topbar — fixed (با scroll viewport) ─── */
+  /* ─── ۳. Topbar — fixed، از چپ تا لبه sidebar ─── */
   .topbar{
-    position:fixed !important;
+    position:fixed;
     top:0;
     left:0;
-    right:220px; /* فضا برای sidebar */
+    right:220px;
+    width:auto;
     max-width:none;
+    margin:0;
+    padding:12px 24px 0;
     z-index:40;
     backdrop-filter:blur(16px);
     -webkit-backdrop-filter:blur(16px);
     box-shadow:0 1px 0 var(--b1);
   }
-  /* صفحه‌ها باید فضای topbar fixed را جبران کنند */
-  .page.active{
-    padding-top:100px !important; /* ارتفاع topbar */
-  }
 
-  /* ─── ۴. صفحه‌ها — static در جریان عادی، بدون هیچ trick ─── */
+  /* ─── ۴. Pages — static، scroll طبیعی ─── */
   .page{
-    position:static !important;
-    display:none !important;
-    height:auto !important;
-    min-height:0 !important;
-    overflow:visible !important;
-    flex:1;
-    padding-top:0 !important;
+    position:static;
+    display:none;
+    height:auto;
+    min-height:0;
+    overflow:visible;
+    max-width:none;
+    padding-top:0;
     padding-bottom:48px;
-    top:auto !important;bottom:auto !important;
-    left:auto !important;right:auto !important;
+    top:auto;bottom:auto;
+    left:auto;right:auto;
   }
   .page.active{
-    display:block !important;
+    display:block;
+    padding-top:calc(var(--topbar-h) + 12px);
   }
-  /* حذف spacer که برای topbar:fixed بود */
-  .page>[style*="height:var(--topbar-h)"]{display:none !important;}
+  .page>[style*="height:var(--topbar-h)"]{display:none;}
 
-  /* ─── ۵. Sidebar — fixed سمت راست (RTL) ─── */
+  /* ─── ۵. Sidebar nav — fixed سمت راست ─── */
   .nav{
-    position:fixed !important;
+    position:fixed;
     top:0;right:0;left:auto;bottom:0;
     width:220px;
+    max-width:none;
     height:100svh;
+    margin:0;
     flex-direction:column;
     align-items:stretch;
     justify-content:flex-start;
@@ -1789,38 +1790,42 @@ select.fi{
     letter-spacing:-.02em;
     flex-shrink:0;
   }
+
+  /* ─── Nav items ─── */
   .ni{
-    flex:none !important;
-    flex-direction:row !important;
-    justify-content:flex-start !important;
-    padding:9px 12px !important;
+    flex:none;
+    flex-direction:row;
+    justify-content:flex-start;
+    padding:9px 12px;
     border-radius:var(--r2);
-    margin:0 !important;
-    gap:10px !important;
+    margin:0;
+    gap:10px;
     width:100%;
     font-size:var(--fs-sm);
     font-weight:600;
     color:var(--t2);
   }
-  .ni.active{background:var(--am) !important;color:var(--a) !important;}
+  .ni.active{background:var(--am);color:var(--a);}
   .ni:hover:not(.active){background:var(--bg2);}
   .ni-lbl{
-    max-width:none !important;
-    opacity:1 !important;
+    max-width:none;
+    opacity:1;
     font-size:var(--fs-sm);
     font-weight:600;
   }
-  .ni-dot{display:none !important;}
+  .ni-dot{display:none;}
+
+  /* ─── FAB ─── */
   .nav-fab{
     order:-1;
     width:100%;
     margin-bottom:12px;
-    flex-direction:row !important;
-    flex:none !important;
+    flex-direction:row;
+    flex:none;
   }
   .nav-fab-btn{
-    width:100% !important;
-    border-radius:var(--r2) !important;
+    width:100%;
+    border-radius:var(--r2);
     height:40px;
     gap:var(--sp2);
   }
@@ -1832,33 +1837,33 @@ select.fi{
     font-family:var(--f);
   }
   [data-theme="dark"] .nav-fab-btn::after{color:#080c10;}
-  .nav-fab-lbl{display:none !important;}
+  .nav-fab-lbl{display:none;}
 
-  /* ─── ۶. شیت‌ها — dialog وسط صفحه ─── */
+  /* ─── Sheet — dialog وسط ناحیه محتوا ─── */
   .sheet{
-    bottom:auto !important;
-    top:50% !important;
-    left:calc((100vw - 220px) / 2) !important; /* وسط ناحیهٔ محتوا، نه وسط viewport */
-    transform:translate(-50%,-50%) scale(.95) !important;
+    bottom:auto;
+    top:50%;
+    left:calc((100vw - 220px) / 2);
+    transform:translate(-50%,-50%) scale(.95);
     opacity:0;
     pointer-events:none;
-    border-radius:var(--r4) !important;
-    max-height:85vh !important;
-    width:min(500px, calc(100vw - 260px)) !important;
-    border:1px solid var(--b1) !important;
-    box-shadow:0 24px 80px rgba(0,0,0,.22) !important;
-    transition:transform .25s var(--ease), opacity .2s, background .25s !important;
+    border-radius:var(--r4);
+    max-height:85vh;
+    width:min(500px,calc(100vw - 260px));
+    border:1px solid var(--b1);
+    box-shadow:0 24px 80px rgba(0,0,0,.22);
+    transition:transform .25s var(--ease),opacity .2s,background .25s;
   }
   .sheet.open{
-    transform:translate(-50%,-50%) scale(1) !important;
+    transform:translate(-50%,-50%) scale(1);
     opacity:1;
     pointer-events:auto;
   }
 
-  /* ─── ۷. Toast — پایین چپ ─── */
+  /* ─── Toast ─── */
   .toast{
-    bottom:20px;top:auto !important;
-    left:auto;right:calc(220px + 16px) !important;
+    bottom:20px;top:auto;
+    left:auto;right:calc(220px + 16px);
     transform:translateY(8px);
     max-width:320px;
     border-radius:var(--r3);
@@ -1867,21 +1872,18 @@ select.fi{
   }
   .toast.show{transform:translateY(0);opacity:1;}
 
-  /* ─── ۸. Overlay — full screen ─── */
-  .ov{position:fixed !important;inset:0;}
+  /* ─── Overlay ─── */
+  .ov{position:fixed;inset:0;}
 
-  /* ─── ۹. محتوای هر صفحه — عرض مناسب ─── */
-  /* تقویم: بدون محدودیت عرض */
+  /* ─── محتوای صفحات ─── */
   .calendarWrap,.cal-month-grid,.wv-wrap,.wv-grid{
-    max-width:none !important;
-    margin:0 !important;
+    max-width:none;
+    margin:0;
   }
   .cal-page-top,.cvt-wrap,.tbrow{
     max-width:800px;
     margin-left:auto;margin-right:auto;
   }
-
-  /* بقیهٔ صفحه‌ها: محدودیت خوانا */
   .tlist,#bdList,.projects-list,.bag-pg,.bag-page{
     max-width:760px;
     margin-left:auto;margin-right:auto;
@@ -1892,22 +1894,14 @@ select.fi{
     border-radius:var(--r3);
     margin-top:6px;
   }
-
-  /* صفحهٔ «من» و کیف من */
-  .me-pg,.bag-page{padding-top:20px !important;}
-
-  /* هدر صفحات */
+  .me-pg,.bag-page{padding-top:20px;}
   .pg-title{font-size:var(--fs-2xl);}
-
-  /* کارت‌های تسک */
   .tc-wrap{border-radius:var(--r3);}
-
-  /* حلقهٔ پیشرفت */
   .hrw svg{width:84px;height:84px;}
 
-  /* ─── ۱۰. Command Palette hint ─── */
+  /* ─── Command Palette hint ─── */
   .cmd-shortcut-hint{
-    display:flex !important;
+    display:flex;
     align-items:center;gap:var(--sp2);
     padding:8px 14px;border-radius:var(--r2);
     background:var(--bg2);border:1px solid var(--b1);
@@ -1922,9 +1916,13 @@ select.fi{
   }
 }
 
-@media(min-width:900px) and (max-width:1200px){
+/* ─── نمایش ۹۰۰–۱۱۹۹px ─── */
+@media(min-width:900px) and (max-width:1199px){
   #app{padding-right:190px;}
   .nav{width:190px;}
+  .topbar{right:190px;}
+  .sheet{left:calc((100vw - 190px) / 2);}
+  .toast{right:calc(190px + 16px);}
 }
 
 
