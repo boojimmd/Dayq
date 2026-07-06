@@ -1716,7 +1716,7 @@ select.fi{
     width:100%;
     height:auto;
     min-height:0;
-    overflow:hidden; /* جلوگیری از رفتن زیر navbar */
+    overflow:visible;
     display:block;
     margin:0;
     padding-right:220px;
@@ -1725,11 +1725,11 @@ select.fi{
     left:auto;right:auto;
   }
 
-  /* ─── ۳. Topbar — fixed، از چپ تا لبه sidebar ─── */
+  /* ─── ۳. Topbar — fixed، از پنل چپ تا sidebar راست ─── */
   .topbar{
     position:fixed;
     top:0;
-    left:0;
+    left:360px;
     right:220px;
     width:auto;
     max-width:none;
@@ -1966,48 +1966,41 @@ select.fi{
 }
 
   /* ─── Three-panel home layout ─── */
-  /* RTL flex: اولین آیتم راست (لیست)، دومی چپ (پنل) */
+  /* پنل fixed سمت چپ، لیست block با padding-left */
   #pageHome{
-    display:flex;
-    flex-direction:row;
-    align-items:flex-start;
-    width:100%; /* محدود به content area پدر */
-    max-width:100%;
-    min-height:100svh;
-    padding-top:0; /* هر ستون خودش padding-top داره */
-    overflow:hidden; /* هیچ‌چیز از boundary بیرون نمی‌زنه */
-  }
-  .dp-list{
-    flex:1 1 0;
-    min-width:0;
+    display:block;
+    width:100%;
     padding-top:calc(var(--topbar-h) + 12px);
+    padding-left:360px;
     padding-bottom:48px;
+    box-sizing:border-box;
+    min-height:100svh;
   }
-  /* spacer داخل dp-list رو مخفی کن — padding-top خودش کافیه */
+  .dp-list{display:block;width:100%;}
   .dp-list>[style*="height:var(--topbar-h)"]{display:none;}
-  /* داخل dp-list، max-width ها رو override کن */
   .dp-list .tlist,
   .dp-list #bdList{max-width:none;margin-left:0;margin-right:0;}
   .dp-list .qcap{max-width:none;margin-left:18px;margin-right:18px;}
   .dp-list .cmd-shortcut-hint{max-width:none;margin-left:18px;margin-right:18px;}
 
-  /* ─── Detail panel — flex item، ارتفاع کامل viewport ─── */
+  /* ─── Detail panel — fixed سمت چپ، مثل nav sidebar ─── */
   #dpanel{
     display:flex;
     flex-direction:column;
-    flex:0 0 360px;
+    position:fixed;
+    left:0;
+    top:0;
     width:360px;
-    min-width:0;
-    position:relative;
-    align-self:flex-start;
-    height:100svh; /* از بالا تا پایین viewport */
-    padding-top:calc(var(--topbar-h) + 12px); /* محتوا از زیر topbar شروع می‌شه */
+    height:100svh;
+    padding-top:calc(var(--topbar-h) + 12px);
     box-sizing:border-box;
     overflow-y:auto;
     scrollbar-width:none;
     border-right:1px solid var(--b1);
     background:var(--bg1);
-    border-radius:var(--r3) 0 0 var(--r3);
+    backdrop-filter:blur(12px);
+    -webkit-backdrop-filter:blur(12px);
+    z-index:30;
   }
   #dpanel::-webkit-scrollbar{display:none;}
 
@@ -2064,10 +2057,11 @@ select.fi{
 @media(min-width:900px) and (max-width:1199px){
   #app{padding-right:190px;}
   .nav{width:190px;}
-  .topbar{right:190px;}
+  .topbar{left:300px;right:190px;}
   .sheet{left:calc((100vw - 190px) / 2);}
   .toast{right:calc(190px + 16px);}
-  #dpanel{flex:0 0 300px;width:300px;}
+  #dpanel{width:300px;}
+  #pageHome{padding-left:300px;}
 }
 
 
