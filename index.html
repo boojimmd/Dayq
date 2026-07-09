@@ -2111,6 +2111,46 @@ select.fi{
 
   /* ══ PHASE 3: Topbar Desktop + Task Card ══ */
 
+  /* ─── Rich empty state ─── */
+  .dp-es-date{font-size:var(--fs-xs);font-weight:700;color:var(--t3);margin-bottom:12px;text-align:center;}
+  .dp-es-ring-wrap{position:relative;width:80px;height:80px;margin:0 auto 8px;}
+  .dp-es-ring-wrap svg{width:80px;height:80px;}
+  .dp-es-ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .dp-es-pct{font-size:var(--fs-lg);font-weight:900;color:var(--a);line-height:1;}
+  .dp-es-of{font-size:var(--fs-2xs);color:var(--t3);font-weight:600;}
+  .dp-es-status{font-size:var(--fs-xs);font-weight:700;color:var(--t2);margin-bottom:12px;text-align:center;}
+
+  .dp-es-sep{height:1px;background:var(--b1);margin:10px 0;}
+
+  .dp-es-tasks-lbl{font-size:var(--fs-2xs);font-weight:800;color:var(--t3);letter-spacing:.08em;margin-bottom:6px;}
+  .dp-es-task{
+    display:flex;align-items:center;gap:8px;
+    padding:7px 10px;border-radius:var(--r2);
+    background:var(--bg2);border:1px solid var(--b1);
+    margin-bottom:4px;cursor:pointer;
+    transition:var(--dur-fast) var(--ease-out);
+    direction:rtl;
+  }
+  .dp-es-task:hover{background:var(--bg3);border-color:var(--b2);}
+  .dp-es-task-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:var(--t4);}
+  .dp-es-task-dot.ph{background:var(--red);}
+  .dp-es-task-dot.pm{background:var(--amber);}
+  .dp-es-task-txt{font-size:var(--fs-xs);font-weight:600;color:var(--t1);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+  .dp-es-all-done{text-align:center;padding:12px 0;color:var(--a);font-weight:700;font-size:var(--fs-sm);}
+
+  .dp-es-kb{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:10px;}
+  .dp-es-kb span{display:flex;align-items:center;gap:3px;font-size:var(--fs-2xs);color:var(--t3);}
+  .dp-es-kb kbd{background:var(--bg3);border:1px solid var(--b1);border-radius:4px;padding:1px 5px;font-size:var(--fs-2xs);font-family:monospace;}
+  .tb-date-lbl{
+    display:flex;align-items:center;
+    font-size:var(--fs-xs);font-weight:700;
+    color:var(--t2);white-space:nowrap;
+    flex-shrink:0;padding:4px 10px;
+    background:var(--bg2);border:1px solid var(--b1);
+    border-radius:var(--r5);
+  }
+
   /* ─── Topbar desktop layout ─── */
   .tbrow{
     display:flex;align-items:center;gap:12px;
@@ -2147,37 +2187,61 @@ select.fi{
   .tb-prog-bar-mini{width:50px;height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;}
   .tb-prog-fill-mini{height:100%;background:var(--a);border-radius:2px;transition:width .4s var(--ease);}
 
-  /* ─── Task card desktop ─── */
-  /* Note preview */
-  .tc-note-preview{display:none;}
-  .tc-note-preview{
-    font-size:var(--fs-xs);color:var(--t3);margin-top:3px;
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-    max-width:100%;
+  /* ─── Task card desktop redesign ─── */
+  .tc{
+    padding:11px 16px;
+    border-radius:var(--r3);
+    border-color:var(--b1);
   }
-  /* روی دسکتاپ نمایش داده میشه */
-  .tc-note-preview{display:block;}
-
-  /* Hover quick actions */
-  .tc-hover-actions{
-    display:none;
-    align-items:center;gap:4px;
-    flex-shrink:0;margin-right:4px;
+  .tc:hover{
+    background:var(--bg2);
+    border-color:var(--b2);
+    box-shadow:0 1px 6px rgba(0,0,0,.06);
   }
+  /* Body: title + meta در یه ردیف */
+  .tc-body{
+    display:flex;
+    flex-direction:row;
+    align-items:center;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .tc-txt{
+    flex:1;
+    min-width:160px;
+    font-size:var(--fs-md);
+    font-weight:600;
+  }
+  .tc-meta{
+    margin-top:0;
+    flex-shrink:0;
+    gap:4px;
+  }
+  /* note preview — ردیف دوم */
+  .tc-note-preview{flex:0 0 100%;margin-top:2px;}
+  /* اندازه tag‌ها کمی بزرگتر */
+  .tc-tag{font-size:var(--fs-xs);}
+  /* priority bar بیشتر مشخص */
+  .tc::after{width:3.5px;top:14%;bottom:14%;}
+  /* icon کمی بزرگتر */
+  .tc-ico{width:30px;height:30px;}
+  .tc-ico svg{width:16px;height:16px;}
+  /* status circle کمی بزرگتر */
+  .tc-chk{width:20px;height:20px;}
+  /* hover actions */
+  .tc-hover-actions{display:none;align-items:center;gap:4px;flex-shrink:0;margin-right:4px;}
   .tc-wrap:hover .tc-hover-actions{display:flex;}
-  .tc-hbtn{
-    width:26px;height:26px;border-radius:var(--r1);
-    display:flex;align-items:center;justify-content:center;
-    background:var(--bg2);border:1px solid var(--b1);
-    color:var(--t3);cursor:pointer;
-    transition:var(--dur-fast) var(--ease-out);
-  }
+  .tc-hbtn{width:26px;height:26px;border-radius:var(--r1);display:flex;align-items:center;justify-content:center;background:var(--bg2);border:1px solid var(--b1);color:var(--t3);cursor:pointer;transition:var(--dur-fast) var(--ease-out);}
   .tc-hbtn:hover{background:var(--bg3);color:var(--t1);}
   .tc-hbtn.done-hbtn:hover{background:var(--am);color:var(--a);border-color:rgba(0,196,140,.3);}
   .tc-hbtn.open-hbtn:hover{background:var(--am);color:var(--a);border-color:rgba(0,196,140,.3);}
-
-  /* کارت فعال رو از hover actions جدا کن */
   .tc-wrap.dp-active .tc-hover-actions{display:none;}
+  /* کارت selected — border رنگی کامل */
+  .tc-wrap.dp-active .tc{
+    border-color:var(--a);
+    background:var(--am);
+    box-shadow:0 0 0 1px var(--a);
+  }
 
   /* ─── انیمیشن switch بین taskها ─── */
   @keyframes dpSwitch{from{opacity:0;transform:translateX(6px)}to{opacity:1;transform:translateX(0)}}
@@ -2406,6 +2470,8 @@ select.fi{
       <div class="greeting-row"><div class="greeting" id="greeting">سلام!</div><span id="wxChip" class="wx-chip"></span></div>
       <div class="pg-title" id="pageTitle">امروز چیکار<em> داری؟</em></div>
     </div>
+    <!-- Desktop: تاریخ -->
+    <div class="tb-date-lbl" id="tbDateLbl" style="display:none"></div>
     <!-- Desktop: inline search -->
     <div class="tb-center">
       <div class="tb-search-bar" onclick="openCmdPalette()" title="Ctrl+K">
@@ -2461,17 +2527,15 @@ select.fi{
     <span class="dp-prog-txt" id="dpProgTxt">۰/۰</span>
   </div>
 
-  <!-- Empty state -->
+  <!-- Empty state — dynamic content via JS -->
   <div class="dp-empty" id="dpEmpty">
-    <svg viewBox="0 0 84 84" width="56" height="56">
-      <circle cx="42" cy="42" r="33" fill="none" stroke="var(--b1)" stroke-width="5"/>
-      <circle cx="42" cy="42" r="33" fill="none" stroke="var(--a)" stroke-width="5"
-        stroke-linecap="round" stroke-dasharray="45 165" stroke-dashoffset="10"/>
-    </svg>
-    <div class="dp-empty-hint">یه کار انتخاب کن<br><span style="font-size:var(--fs-xs);color:var(--t3)">جزئیاتش اینجا میاد</span></div>
-    <div class="dp-kb-hint" style="justify-content:center">
-      <span class="dp-kb"><kbd>j</kbd><kbd>k</kbd> ناوبری</span>
-      <span class="dp-kb"><kbd>Space</kbd> تموم شد</span>
+    <div id="dpEmptyContent">
+      <svg viewBox="0 0 84 84" width="56" height="56">
+        <circle cx="42" cy="42" r="33" fill="none" stroke="var(--b1)" stroke-width="5"/>
+        <circle cx="42" cy="42" r="33" fill="none" stroke="var(--a)" stroke-width="5"
+          stroke-linecap="round" stroke-dasharray="45 165" stroke-dashoffset="10"/>
+      </svg>
+      <div class="dp-empty-hint">یه کار انتخاب کن</div>
     </div>
   </div>
 
@@ -8039,6 +8103,8 @@ function sbInit(){
   sbUpdateDate();
   sbCalRender();
   sbUpdateStats();
+  tbUpdateDate();
+  _dpRenderEmpty();
 }
 
 function sbUpdateDate(){
@@ -8192,6 +8258,80 @@ function _dpRender(t){
   }
 }
 
+function tbUpdateDate(){
+  const el=document.getElementById('tbDateLbl');
+  if(!el||window.innerWidth<900) return;
+  el.style.display='';
+  const today=new Date();
+  const jd=mrToJalali(today.getFullYear(),today.getMonth()+1,today.getDate());
+  const days=['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه'];
+  el.textContent=`${days[today.getDay()]} ${num(jd[2])} ${JDP_MONTHS[jd[1]-1]}`;
+}
+
+function _dpRenderEmpty(){
+  if(window.innerWidth<900) return;
+  const cont=document.getElementById('dpEmptyContent');
+  if(!cont) return;
+  const today=mrTodayKey();
+  const jd=today.split('-').map(Number);
+  const days=['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه'];
+  const weekday=days[new Date().getDay()];
+  const todayTasks=(tasks||[]).filter(t=>t.deadline===today&&t.status!=='someday');
+  const done=todayTasks.filter(t=>t.done||t.status==='done').length;
+  const total=todayTasks.length;
+  const pct=total>0?Math.round(done/total*100):0;
+  const pending=todayTasks.filter(t=>!t.done&&t.status!=='done').sort((a,b)=>{
+    const p={high:0,med:1,low:2};
+    return (p[a.priority||'low']||2)-(p[b.priority||'low']||2);
+  }).slice(0,4);
+
+  // ring dasharray
+  const C=2*Math.PI*33;
+  const fill=C*(pct/100);
+  const gap=C-fill;
+
+  const statusMsg=pct===100?'🎉 همه تموم شد!':pct>50?'نیمه راهی':'بزن بریم';
+
+  let tasksHtml='';
+  if(pending.length===0&&total>0){
+    tasksHtml=`<div class="dp-es-all-done">✓ همه کارهای امروز تمومه</div>`;
+  } else if(pending.length>0){
+    tasksHtml=`<div class="dp-es-tasks-lbl">مهم‌ترین امروز</div>`
+    +pending.map(t=>{
+      const p=(t.priority||'low').charAt(0);
+      return `<div class="dp-es-task" onclick="dpOpenPanel('${t.id}')">
+        <div class="dp-es-task-dot p${p}"></div>
+        <span class="dp-es-task-txt">${esc(t.text)}</span>
+      </div>`;
+    }).join('');
+  }
+
+  cont.innerHTML=`
+    <div class="dp-es-date">${weekday}، ${num(jd[2])} ${JDP_MONTHS[jd[1]-1]} ${num(jd[0])}</div>
+    <div class="dp-es-ring-wrap">
+      <svg viewBox="0 0 84 84">
+        <circle cx="42" cy="42" r="33" fill="none" stroke="var(--b1)" stroke-width="5"/>
+        <circle cx="42" cy="42" r="33" fill="none" stroke="var(--a)" stroke-width="5"
+          stroke-linecap="round"
+          stroke-dasharray="${fill.toFixed(1)} ${gap.toFixed(1)}"
+          stroke-dashoffset="${C/4}"
+          transform="rotate(-90 42 42)"/>
+      </svg>
+      <div class="dp-es-ring-center">
+        <span class="dp-es-pct">${pct}٪</span>
+        <span class="dp-es-of">${num(done)}/${num(total)}</span>
+      </div>
+    </div>
+    <div class="dp-es-status">${statusMsg}</div>
+    <div class="dp-es-sep"></div>
+    ${tasksHtml}
+    <div class="dp-es-kb">
+      <span><kbd>j</kbd><kbd>k</kbd> ناوبری</span>
+      <span><kbd>Space</kbd> تموم شد</span>
+      <span><kbd>e</kbd> ویرایش</span>
+    </div>`;
+}
+
 function dpUpdateProgress(){
   const fill=document.getElementById('dpProgFill');
   const txt=document.getElementById('dpProgTxt');
@@ -8203,6 +8343,8 @@ function dpUpdateProgress(){
   const pct=total>0?Math.round(done/total*100):0;
   fill.style.width=pct+'%';
   txt.textContent=num(done)+'/'+num(total);
+  // update empty state
+  if(!_dpTaskId) _dpRenderEmpty();
 }
 
 /* ── Priority cycling ── */
@@ -8243,6 +8385,7 @@ function dpClose(){
   document.querySelectorAll('.tc-wrap.dp-active').forEach(el=>el.classList.remove('dp-active'));
   document.getElementById('dpEmpty').style.display='';
   document.getElementById('dpContent').style.display='none';
+  _dpRenderEmpty();
 }
 
 function dpToggleDone(){
