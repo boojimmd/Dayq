@@ -2060,6 +2060,55 @@ select.fi{
   /* کارت فعال */
   .tc-wrap.dp-active{outline:2px solid var(--a);outline-offset:1px;}
 
+  /* ══ PHASE 5: Day Timeline View ══ */
+  .dtl-view{display:none;margin:0 0 24px;}
+  .dtl-view.dtl-active{display:block;}
+  .dtl-hdr{display:flex;align-items:center;gap:10px;padding:0 18px 10px;}
+  .dtl-today-lbl{font-size:var(--fs-sm);font-weight:700;color:var(--t2);}
+  .dtl-timed-count{font-size:var(--fs-xs);color:var(--t3);background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r5);padding:2px 8px;}
+  .dtl-scroll{
+    overflow-y:auto;max-height:calc(100svh - 380px);
+    margin:0 18px;border-radius:var(--r3);
+    border:1px solid var(--b1);background:var(--bg1);
+    scrollbar-width:thin;scrollbar-color:var(--b2) transparent;
+    direction:ltr;
+  }
+  .dtl-grid{position:relative;}
+  .dtl-hline{position:absolute;left:48px;right:0;height:1px;background:var(--b1);pointer-events:none;}
+  .dtl-hline.major{background:var(--b2);}
+  .dtl-hlbl{position:absolute;left:0;width:44px;font-size:.58rem;font-weight:700;color:var(--t3);text-align:center;direction:ltr;pointer-events:none;transform:translateY(-7px);}
+  .dtl-half{position:absolute;left:52px;right:0;height:1px;background:var(--b1);opacity:.3;pointer-events:none;}
+  .dtl-slot{position:absolute;left:48px;right:0;cursor:pointer;transition:background var(--dur-fast);}
+  .dtl-slot:hover{background:rgba(0,196,140,.06);}
+  .dtl-task{
+    position:absolute;left:52px;right:6px;
+    border-radius:var(--r2);padding:4px 8px;
+    cursor:pointer;border-right:3px solid var(--t4);
+    background:var(--bg2);
+    transition:var(--dur-fast) var(--ease-out);
+    overflow:hidden;z-index:5;
+  }
+  .dtl-task:hover{z-index:10;filter:brightness(1.06);box-shadow:0 2px 12px rgba(0,0,0,.12);}
+  .dtl-task.ph{border-right-color:var(--red);background:var(--redm);}
+  .dtl-task.pm{border-right-color:var(--amber);}
+  .dtl-task.done-dt{opacity:.35;}
+  .dtl-task.dp-active-dt{outline:2px solid var(--a);outline-offset:1px;}
+  .dtl-tb-row{display:flex;align-items:baseline;gap:6px;}
+  .dtl-tb-time{font-size:.58rem;font-weight:800;color:var(--t3);direction:ltr;flex-shrink:0;}
+  .dtl-tb-txt{font-size:var(--fs-xs);font-weight:600;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:rtl;}
+  .dtl-now{position:absolute;left:46px;right:0;height:2px;background:var(--red);z-index:20;pointer-events:none;}
+  .dtl-now::before{content:'';position:absolute;left:-6px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--red);box-shadow:0 0 6px rgba(229,62,90,.5);}
+  .dtl-anytime{margin:10px 18px 0;border-top:1px solid var(--b1);padding-top:10px;}
+  .dtl-anytime-lbl{font-size:var(--fs-xs);font-weight:800;color:var(--t3);letter-spacing:.06em;margin-bottom:6px;}
+  .dtl-nt-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--r2);background:var(--bg1);border:1px solid var(--b1);margin-bottom:4px;cursor:pointer;transition:var(--dur-fast);direction:rtl;}
+  .dtl-nt-item:hover{background:var(--bg2);}
+  .dtl-nt-dot{width:6px;height:6px;border-radius:50%;background:var(--t4);flex-shrink:0;}
+  .dtl-nt-dot.ph{background:var(--red);}
+  .dtl-nt-dot.pm{background:var(--amber);}
+  .dtl-nt-txt{font-size:var(--fs-xs);font-weight:600;color:var(--t2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  /* view toggle button */
+  .dtl-view-btn{display:flex;position:relative;}
+
   /* ══ PHASE 3: Topbar Desktop + Task Card ══ */
 
   /* ─── Topbar desktop layout ─── */
@@ -2369,7 +2418,21 @@ select.fi{
       <span id="tbProgTxt">۰/۰</span>
     </div>
     <div class="hbtns">
-      <!-- دکمه toggle پنل — فقط دسکتاپ -->
+      <button class="hbtn dtl-view-btn list-mode" id="dtlViewBtn" onclick="dtlToggleView()" title="نمایش Timeline" style="display:none">
+        <!-- icon for list view (current mode shows timeline icon) -->
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/>
+          <line x1="7" y1="14" x2="7" y2="14.01"/><line x1="11" y1="14" x2="17" y2="14"/>
+          <line x1="7" y1="18" x2="7" y2="18.01"/><line x1="11" y1="18" x2="17" y2="18"/>
+        </svg>
+        <!-- icon for timeline mode (current mode shows list icon) -->
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="display:none">
+          <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
+          <line x1="8" y1="18" x2="21" y2="18"/>
+          <line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/>
+          <line x1="3" y1="18" x2="3.01" y2="18"/>
+        </svg>
+      </button>
       <button class="hbtn dp-toggle-btn" id="dpToggleBtn" onclick="dpTogglePanel()" title="پنل جزئیات" style="display:none">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
       </button>
@@ -2576,6 +2639,18 @@ select.fi{
     <span id="timeBannerText"></span>
     <span class="tb-close">× بستن</span>
   </div>
+  <!-- Day Timeline View — فاز ۵ دسکتاپ -->
+  <div class="dtl-view" id="dtlView">
+    <div class="dtl-hdr">
+      <span class="dtl-today-lbl" id="dtlDateLbl">امروز</span>
+      <span class="dtl-timed-count" id="dtlTimedCount">۰ کار با زمان</span>
+    </div>
+    <div class="dtl-scroll" id="dtlScroll">
+      <div class="dtl-grid" id="dtlGrid"></div>
+    </div>
+    <div class="dtl-anytime" id="dtlAnytime"></div>
+  </div>
+
   <div class="tlist" id="taskList"></div>
   <div class="empty" id="emptyState" style="display:none;">
     <svg viewBox="0 0 52 52" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="8" y="14" width="36" height="30" rx="4"/><path d="M18 14v-3a4 4 0 0 1 8 0v3M18 26h16M18 32h10"/></svg>
@@ -7949,6 +8024,9 @@ const _SB_WD=['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه'
 function sbInit(){
   if(window.innerWidth<900) return;
   dpInitToggle();
+  // دکمه timeline view
+  const dtlBtn=document.getElementById('dtlViewBtn');
+  if(dtlBtn) dtlBtn.style.display='';
   const t=mrToJalali(new Date().getFullYear(),new Date().getMonth()+1,new Date().getDate());
   _sbCal.year=t[0]; _sbCal.month=t[1];
   // show widgets
@@ -8412,6 +8490,190 @@ function tbUpdateProgress(){
   const pct=total>0?Math.round(done/total*100):0;
   fill.style.width=pct+'%';
   txt.textContent=num(done)+'/'+num(total);
+}
+
+/* ══ PHASE 5: DAY TIMELINE VIEW ══ */
+const DTL_HOUR_H = 60;   // px per hour
+const DTL_START  = 7;    // 7:00 AM
+const DTL_END    = 22;   // 10:00 PM
+let _dtlActive   = false;
+let _dtlTimer    = null;
+
+function dtlToggleView(){
+  _dtlActive = !_dtlActive;
+  _dtlApply();
+}
+
+function _dtlApply(){
+  const view = document.getElementById('dtlView');
+  const list = document.getElementById('taskList');
+  const empty = document.getElementById('emptyState');
+  const btn = document.getElementById('dtlViewBtn');
+  if(!view) return;
+
+  if(_dtlActive){
+    view.classList.add('dtl-active');
+    if(list) list.style.display='none';
+    if(empty) empty.style.display='none';
+    if(btn){ btn.classList.remove('list-mode'); btn.classList.add('timeline-mode'); }
+    renderDayTimeline();
+    // update every minute
+    clearInterval(_dtlTimer);
+    _dtlTimer = setInterval(()=>dtlUpdateNowLine(), 60000);
+  } else {
+    view.classList.remove('dtl-active');
+    if(list) list.style.display='';
+    if(btn){ btn.classList.add('list-mode'); btn.classList.remove('timeline-mode'); }
+    clearInterval(_dtlTimer);
+    renderTasks();
+  }
+}
+
+function renderDayTimeline(){
+  const grid = document.getElementById('dtlGrid');
+  if(!grid) return;
+
+  const today = mrTodayKey();
+  const todayJ = today.split('-').map(Number);
+  const months = JDP_MONTHS || ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+  const days   = ['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه'];
+  const weekday= days[new Date().getDay()];
+
+  // Header labels
+  const dateLbl = document.getElementById('dtlDateLbl');
+  if(dateLbl) dateLbl.textContent = `${weekday}، ${num(todayJ[2])} ${months[todayJ[1]-1]} ${num(todayJ[0])}`;
+
+  // Today's timed tasks
+  const timedTasks = tasks.filter(t=>t.deadline===today&&t.time).sort((a,b)=>a.time.localeCompare(b.time));
+  const noTimeTasks= tasks.filter(t=>t.deadline===today&&!t.time&&t.status!=='someday');
+
+  const cntEl = document.getElementById('dtlTimedCount');
+  if(cntEl) cntEl.textContent = num(timedTasks.length) + ' کار با زمان';
+
+  // Build grid
+  const totalH  = DTL_END - DTL_START;
+  const totalPx = totalH * DTL_HOUR_H;
+  grid.innerHTML = '';
+  grid.style.height = totalPx + 'px';
+  grid.style.minWidth = '200px';
+
+  // Hour lines, labels, click slots
+  for(let h=DTL_START; h<=DTL_END; h++){
+    const top = (h - DTL_START) * DTL_HOUR_H;
+
+    // label
+    const lbl = document.createElement('div');
+    lbl.className = 'dtl-hlbl';
+    lbl.style.top = top + 'px';
+    lbl.textContent = String(h).padStart(2,'0')+':۰۰';
+    grid.appendChild(lbl);
+
+    // hour line
+    const line = document.createElement('div');
+    line.className = 'dtl-hline' + (h%3===0?' major':'');
+    line.style.top = top + 'px';
+    grid.appendChild(line);
+
+    // half-hour dashed line
+    if(h < DTL_END){
+      const half = document.createElement('div');
+      half.className = 'dtl-half';
+      half.style.top = (top + DTL_HOUR_H/2) + 'px';
+      grid.appendChild(half);
+
+      // Click slot for this hour
+      const slot = document.createElement('div');
+      slot.className = 'dtl-slot';
+      slot.style.top = top + 'px';
+      slot.style.height = DTL_HOUR_H + 'px';
+      const slotH = h;
+      slot.onclick = (e)=>{
+        if(e.target !== slot) return;
+        const rect = slot.getBoundingClientRect();
+        const relY = e.clientY - rect.top;
+        const mins = Math.round((relY / DTL_HOUR_H) * 60 / 15) * 15;
+        const timeStr = String(slotH).padStart(2,'0')+':'+String(Math.min(mins,59)).padStart(2,'0');
+        // open quick capture with time pre-filled
+        const inp = document.getElementById('qcapInp');
+        if(inp){
+          inp.value = timeStr + ' ';
+          inp.focus();
+          pqaUpdate();
+        }
+      };
+      grid.appendChild(slot);
+    }
+  }
+
+  // Task blocks
+  timedTasks.forEach(t=>{
+    const [h,m] = t.time.split(':').map(Number);
+    if(h < DTL_START || h >= DTL_END) return;
+    const top = (h - DTL_START) * DTL_HOUR_H + (m/60)*DTL_HOUR_H;
+    const pri  = (t.priority||'low').charAt(0);
+    const isDone = t.done||t.status==='done';
+    const ic   = iconMap[t.iconId]||iconMap.check;
+
+    const block = document.createElement('div');
+    block.className = `dtl-task p${pri}${isDone?' done-dt':''}`;
+    block.dataset.taskId = t.id;
+    block.style.top = top + 'px';
+    block.style.minHeight = '28px';
+    block.innerHTML = `
+      <div class="dtl-tb-row">
+        <span class="dtl-tb-time">${t.time}</span>
+        <span class="dtl-tb-txt">${esc(t.text)}</span>
+      </div>`;
+    block.onclick = ()=>{ dpOpenPanel(t.id); dtlHighlight(t.id); };
+    grid.appendChild(block);
+  });
+
+  // Current time line
+  dtlUpdateNowLine();
+
+  // Anytime section
+  dtlRenderAnytime(noTimeTasks);
+
+  // Scroll to current time
+  const now = new Date();
+  const nowTop = (now.getHours() - DTL_START) * DTL_HOUR_H + (now.getMinutes()/60)*DTL_HOUR_H;
+  const scroll = document.getElementById('dtlScroll');
+  if(scroll) setTimeout(()=>{ scroll.scrollTop = Math.max(0, nowTop - scroll.clientHeight/2); }, 50);
+}
+
+function dtlUpdateNowLine(){
+  const grid = document.getElementById('dtlGrid');
+  if(!grid) return;
+  document.querySelectorAll('.dtl-now').forEach(el=>el.remove());
+  const now   = new Date();
+  const nowH  = now.getHours();
+  const nowM  = now.getMinutes();
+  if(nowH < DTL_START || nowH >= DTL_END) return;
+  const top   = (nowH - DTL_START)*DTL_HOUR_H + (nowM/60)*DTL_HOUR_H;
+  const line  = document.createElement('div');
+  line.className='dtl-now';
+  line.id='dtlNowLine';
+  line.style.top = top+'px';
+  grid.appendChild(line);
+}
+
+function dtlHighlight(taskId){
+  document.querySelectorAll('.dtl-task.dp-active-dt').forEach(el=>el.classList.remove('dp-active-dt'));
+  document.querySelector(`.dtl-task[data-task-id="${taskId}"]`)?.classList.add('dp-active-dt');
+}
+
+function dtlRenderAnytime(noTimeTasks){
+  const el = document.getElementById('dtlAnytime');
+  if(!el) return;
+  if(!noTimeTasks.length){ el.innerHTML=''; return; }
+  el.innerHTML = `<div class="dtl-anytime-lbl">بدون زمان — ${num(noTimeTasks.length)} کار</div>`
+    + noTimeTasks.map(t=>{
+        const pri=(t.priority||'low').charAt(0);
+        return `<div class="dtl-nt-item" onclick="dpOpenPanel('${t.id}')">
+          <div class="dtl-nt-dot p${pri}"></div>
+          <span class="dtl-nt-txt">${esc(t.text)}</span>
+        </div>`;
+      }).join('');
 }
 
 /* ── Desktop Panel Toggle ── */
