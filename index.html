@@ -1935,7 +1935,7 @@ select.fi{
     background:var(--bg2);border-radius:var(--r2);padding:8px 4px;
   }
   .sb-stat-num{font-size:1.15rem;font-weight:800;line-height:1;color:var(--t1);}
-  .sb-stat-lbl{font-size:.58rem;font-weight:600;color:var(--t3);}
+  .sb-stat-lbl{font-size:var(--fs-2xs);font-weight:600;color:var(--t3);}
   .sb-stat.s-done .sb-stat-num{color:var(--a);}
   .sb-stat.s-pending .sb-stat-num{color:var(--amber);}
 
@@ -1950,7 +1950,7 @@ select.fi{
   .sb-cal-title{font-size:var(--fs-xs);font-weight:700;color:var(--t2);}
   .sb-cal-widget .jci-days{gap:1px;}
   .sb-cal-widget .jci-day{
-    font-size:.58rem;padding:3px 1px;border-radius:4px;
+    font-size:var(--fs-2xs);padding:3px 1px;border-radius:4px;
     position:relative;
   }
   .sb-cal-widget .jci-day.has-tasks::after{
@@ -2076,7 +2076,7 @@ select.fi{
   .dtl-grid{position:relative;}
   .dtl-hline{position:absolute;left:48px;right:0;height:1px;background:var(--b1);pointer-events:none;}
   .dtl-hline.major{background:var(--b2);}
-  .dtl-hlbl{position:absolute;left:0;width:44px;font-size:.58rem;font-weight:700;color:var(--t3);text-align:center;direction:ltr;pointer-events:none;transform:translateY(-7px);}
+  .dtl-hlbl{position:absolute;left:0;width:44px;font-size:var(--fs-2xs);font-weight:700;color:var(--t3);text-align:center;direction:ltr;pointer-events:none;transform:translateY(-7px);}
   .dtl-half{position:absolute;left:52px;right:0;height:1px;background:var(--b1);opacity:.3;pointer-events:none;}
   .dtl-slot{position:absolute;left:48px;right:0;cursor:pointer;transition:background var(--dur-fast);}
   .dtl-slot:hover{background:rgba(0,196,140,.06);}
@@ -2094,7 +2094,7 @@ select.fi{
   .dtl-task.done-dt{opacity:.35;}
   .dtl-task.dp-active-dt{outline:2px solid var(--a);outline-offset:1px;}
   .dtl-tb-row{display:flex;align-items:baseline;gap:6px;}
-  .dtl-tb-time{font-size:.58rem;font-weight:800;color:var(--t3);direction:ltr;flex-shrink:0;}
+  .dtl-tb-time{font-size:var(--fs-2xs);font-weight:800;color:var(--t3);direction:ltr;flex-shrink:0;}
   .dtl-tb-txt{font-size:var(--fs-xs);font-weight:600;color:var(--t1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:rtl;}
   .dtl-now{position:absolute;left:46px;right:0;height:2px;background:var(--red);z-index:20;pointer-events:none;}
   .dtl-now::before{content:'';position:absolute;left:-6px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--red);box-shadow:0 0 6px rgba(229,62,90,.5);}
@@ -2238,8 +2238,10 @@ select.fi{
   .tc-note-preview{display:block;}
   /* hover actions نیاز به display:none ندارن — .tc-wrap:hover کنترلشون میکنه */
 
-  /* search button رو روی دسکتاپ مخفی کن چون inline داریم */
-  #searchBtn{display:none;}
+  /* hero section روی دسکتاپ پنهانه — اطلاعاتش در panel و topbar هست */
+  .hero{display:none;}
+  /* cmd-shortcut-hint هم نیازی نیست — inline search جاشو گرفته */
+  .cmd-shortcut-hint{display:none;}
   .dp-toggle-btn{
     display:flex;align-items:center;justify-content:center;
     width:32px;height:32px;border-radius:var(--r2);
