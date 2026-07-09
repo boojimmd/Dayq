@@ -2058,7 +2058,108 @@ select.fi{
   /* کارت فعال */
   .tc-wrap.dp-active{outline:2px solid var(--a);outline-offset:1px;}
 
-  /* ══ MinimalReport patterns ══
+  /* ══ STATUS BAR + SIDEBAR COUNTS + CONTEXT MENU ══ */
+
+  /* ─── Status bar پایین ─── */
+  #dtStatusBar{
+    position:fixed;
+    bottom:0;
+    left:360px;
+    right:220px;
+    height:28px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 18px;
+    background:var(--bg1);
+    border-top:1px solid var(--b1);
+    z-index:35;
+    font-size:var(--fs-2xs);
+    color:var(--t3);
+    gap:12px;
+  }
+  body.dp-closed #dtStatusBar{left:0;}
+  .dsb-left{display:flex;align-items:center;gap:10px;}
+  .dsb-count{font-family:var(--mono);font-weight:700;color:var(--t2);}
+  .dsb-sep{color:var(--b2);}
+  .dsb-filter{
+    display:flex;align-items:center;gap:4px;
+    background:var(--bg2);border:1px solid var(--b1);
+    border-radius:var(--r5);padding:1px 8px;
+    color:var(--t3);cursor:pointer;transition:var(--dur-fast);
+  }
+  .dsb-filter:hover{background:var(--bg3);}
+  .dsb-right{display:flex;align-items:center;gap:8px;}
+  .dsb-kb{display:flex;align-items:center;gap:3px;}
+  .dsb-kb kbd{
+    background:var(--bg2);border:1px solid var(--b1);
+    border-radius:3px;padding:1px 4px;
+    font-size:.55rem;font-family:monospace;color:var(--t3);
+    line-height:1.4;
+  }
+  /* page content bottom padding برای status bar */
+  .page.active{padding-bottom:calc(48px + 28px);}
+  #pageHome{padding-bottom:calc(48px + 28px);}
+
+  /* ─── Sidebar nav counts ─── */
+  .ni-count{
+    font-size:.58rem;font-weight:800;
+    font-family:var(--mono);
+    color:var(--t3);
+    background:var(--bg3);
+    border-radius:var(--r5);
+    padding:1px 5px;
+    min-width:16px;
+    text-align:center;
+    line-height:1.5;
+    margin-right:auto;
+    display:none; /* موبایل: پنهان */
+  }
+  /* دسکتاپ: نمایش */
+  .ni-count{display:inline-block;}
+  .ni.active .ni-count{background:rgba(0,184,122,.15);color:var(--a);}
+  .ni-count:empty{display:none;}
+
+  /* ─── Right-click context menu ─── */
+  #dtContextMenu{
+    position:fixed;
+    z-index:9000;
+    background:var(--bg1);
+    border:1px solid var(--b1);
+    border-radius:var(--r3);
+    padding:4px;
+    min-width:180px;
+    box-shadow:0 8px 32px rgba(0,0,0,.18);
+    display:none;
+    animation:ctxIn .12s var(--ease-out) both;
+  }
+  @keyframes ctxIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+  #dtContextMenu.open{display:block;}
+  .ctx-item{
+    display:flex;align-items:center;gap:8px;
+    padding:7px 10px;border-radius:var(--r2);
+    font-size:var(--fs-xs);font-weight:600;
+    color:var(--t1);cursor:pointer;
+    transition:var(--dur-fast) var(--ease-out);
+    direction:rtl;
+  }
+  .ctx-item:hover{background:var(--bg2);}
+  .ctx-item.danger{color:var(--red);}
+  .ctx-item.danger:hover{background:var(--redm);}
+  .ctx-sep{height:1px;background:var(--b1);margin:3px 6px;}
+  .ctx-item svg{flex-shrink:0;opacity:.7;}
+  .ctx-item .ctx-kbd{margin-right:auto;font-family:monospace;font-size:.58rem;color:var(--t3);}
+
+  /* ─── Collapsible done section ─── */
+  .sec-hdr.done-hdr{cursor:pointer;user-select:none;}
+  .sec-hdr.done-hdr:hover{background:var(--bg2);border-radius:var(--r1);}
+  .done-hdr .sec-collapse{
+    font-size:var(--fs-xs);color:var(--t3);margin-right:auto;
+    transition:transform var(--dur-fast);
+  }
+  .done-hdr.collapsed .done-tasks{display:none;}
+  .done-hdr.collapsed .sec-collapse{transform:rotate(-90deg);}
+  #doneTasks.collapsed{display:none;}
      ۱. Monospaced برای data values
      ۲. Button opacity hierarchy
   ══════════════════════════════ */
@@ -2619,6 +2720,57 @@ select.fi{
       <span class="dp-kb"><kbd>e</kbd> ویرایش</span>
       <span class="dp-kb"><kbd>Esc</kbd> بستن</span>
     </div>
+  </div>
+</div>
+
+<!-- STATUS BAR — desktop only -->
+<div id="dtStatusBar" style="display:none">
+  <div class="dsb-left">
+    <span class="dsb-count" id="dsbPending">۰ باقی‌مانده</span>
+    <span class="dsb-sep">•</span>
+    <span class="dsb-count" id="dsbDone">۰ تموم شد</span>
+    <span class="dsb-sep">•</span>
+    <span class="dsb-filter" id="dsbFilter">همه</span>
+  </div>
+  <div class="dsb-right">
+    <span class="dsb-kb"><kbd>j</kbd><kbd>k</kbd> ناوبری</span>
+    <span class="dsb-sep">·</span>
+    <span class="dsb-kb"><kbd>Space</kbd> تموم</span>
+    <span class="dsb-sep">·</span>
+    <span class="dsb-kb"><kbd>e</kbd> ویرایش</span>
+    <span class="dsb-sep">·</span>
+    <span class="dsb-kb"><kbd>Ctrl</kbd><kbd>K</kbd> جستجو</span>
+  </div>
+</div>
+
+<!-- RIGHT-CLICK CONTEXT MENU — desktop only -->
+<div id="dtContextMenu">
+  <div class="ctx-item" id="ctxDone" onclick="ctxToggleDone()">
+    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+    <span id="ctxDoneLabel">تموم شد</span>
+    <span class="ctx-kbd">Space</span>
+  </div>
+  <div class="ctx-item" onclick="ctxOpenPanel()">
+    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+    جزئیات
+    <span class="ctx-kbd">Enter</span>
+  </div>
+  <div class="ctx-item" onclick="ctxEditFull()">
+    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+    ویرایش کامل
+    <span class="ctx-kbd">e</span>
+  </div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" onclick="ctxCyclePriority()">
+    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    <span id="ctxPriLabel">اولویت بالا</span>
+    <span class="ctx-kbd">p</span>
+  </div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item danger" onclick="ctxDelete()">
+    <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+    حذف
+    <span class="ctx-kbd">Del</span>
   </div>
 </div>
 
@@ -4433,7 +4585,7 @@ function renderTimeline(){
 function toggleTimeline(){document.getElementById('tlWrap').style.display='none';}
 
 /* ══ TABS ══ */
-function setTab(t,el){curTab=t;document.querySelectorAll('.sg').forEach(b=>b.classList.remove('active'));if(el)el.classList.add('active');renderTasks();try{localStorage.setItem('dq5_lastTab',t);}catch(e){}}
+function setTab(t,el){curTab=t;window._curTab=t;document.querySelectorAll('.sg').forEach(b=>b.classList.remove('active'));if(el)el.classList.add('active');renderTasks();try{localStorage.setItem('dq5_lastTab',t);}catch(e){}}
 
 /* ══ RENDER TASKS ══ */
 // ── Auto Backup ──
@@ -4952,6 +5104,7 @@ function renderTasks(){
   sbUpdateStats();
   if(window.innerWidth>=900) dpUpdateProgress();
   if(window.innerWidth>=900) tbUpdateProgress();
+  if(window.innerWidth>=900){ dsbUpdate(); navCountsUpdate(); }
 
   const projPage=document.getElementById('pageProjects');
   if(projPage&&projPage.classList.contains('active')) renderProjects();
@@ -8159,6 +8312,9 @@ function sbInit(){
   sbUpdateStats();
   tbUpdateDate();
   _dpRenderEmpty();
+  dsbUpdate();
+  navCountsUpdate();
+  initContextMenu();
 }
 
 function sbUpdateDate(){
@@ -8315,6 +8471,126 @@ function _dpRender(t){
     doneBtn.textContent=isDone?'↩ برگشت':'✓ تموم شد';
     doneBtn.classList.toggle('is-done',isDone);
   }
+}
+
+/* ══ STATUS BAR ══ */
+function dsbUpdate(){
+  if(window.innerWidth<900) return;
+  const sb=document.getElementById('dtStatusBar');
+  if(sb) sb.style.display='';
+  const today=mrTodayKey();
+  const todayTasks=(tasks||[]).filter(t=>t.deadline===today&&t.status!=='someday');
+  const done=todayTasks.filter(t=>t.done||t.status==='done').length;
+  const pending=todayTasks.filter(t=>!t.done&&t.status!=='done').length;
+  const pEl=document.getElementById('dsbPending');
+  const dEl=document.getElementById('dsbDone');
+  const fEl=document.getElementById('dsbFilter');
+  if(pEl) pEl.textContent=num(pending)+' باقی‌مانده';
+  if(dEl) dEl.textContent=num(done)+' تموم شد';
+  if(fEl){
+    const tabLabels={all:'همه',today:'امروز',tomorrow:'فردا',prep:'آماده',visit:'بازدید',waiting:'منتظرم',done:'انجام شده',projects:'پروژه‌ها'};
+    const cur=window._curTab||'all';
+    fEl.textContent=tabLabels[cur]||'همه';
+  }
+}
+
+/* ══ NAV COUNTS ══ */
+function navCountsUpdate(){
+  if(window.innerWidth<900) return;
+  const today=mrTodayKey();
+  // خانه: task های pending امروز
+  const homeCount=(tasks||[]).filter(t=>t.deadline===today&&!t.done&&t.status!=='done'&&t.status!=='someday').length;
+  const hEl=document.getElementById('nic-home');
+  if(hEl) hEl.textContent=homeCount>0?num(homeCount):'';
+  // پروژه‌ها: کل task های active در همه projects
+  const projCount=(tasks||[]).filter(t=>t.projectId&&!t.done&&t.status!=='done').length;
+  const pEl=document.getElementById('nic-projects');
+  if(pEl) pEl.textContent=projCount>0?num(projCount):'';
+}
+
+/* ══ RIGHT-CLICK CONTEXT MENU ══ */
+let _ctxTaskId=null;
+
+function initContextMenu(){
+  if(window.innerWidth<900) return;
+  document.addEventListener('contextmenu',function(e){
+    const card=e.target.closest('.tc-wrap');
+    if(!card||!card.dataset.taskId) return;
+    e.preventDefault();
+    _ctxTaskId=card.dataset.taskId;
+    _ctxShow(e.clientX, e.clientY);
+  });
+  document.addEventListener('click',function(e){
+    if(!e.target.closest('#dtContextMenu')) _ctxHide();
+  });
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape') _ctxHide();
+    if(!_ctxTaskId) return;
+    const menu=document.getElementById('dtContextMenu');
+    if(!menu||menu.style.display==='none') return;
+    if(e.key===' '){e.preventDefault();ctxToggleDone();}
+    if(e.key==='e'){ctxEditFull();}
+    if(e.key==='p'||e.key==='P'){ctxCyclePriority();}
+    if(e.key==='Delete'||e.key==='Backspace'){ctxDelete();}
+  });
+}
+
+function _ctxShow(x,y){
+  const menu=document.getElementById('dtContextMenu');
+  if(!menu) return;
+  const t=tasks.find(t=>t.id===_ctxTaskId);
+  if(!t) return;
+  // update labels
+  const doneLabel=document.getElementById('ctxDoneLabel');
+  const priLabel=document.getElementById('ctxPriLabel');
+  if(doneLabel) doneLabel.textContent=(t.done||t.status==='done')?'برگشت به لیست':'تموم شد';
+  const priMap={high:'اولویت بالا ←متوسط',med:'اولویت متوسط ←پایین',low:'اولویت پایین ←بالا'};
+  if(priLabel) priLabel.textContent=priMap[t.priority||'high'];
+  // position
+  menu.style.display='block';
+  menu.classList.add('open');
+  const mw=menu.offsetWidth||180, mh=menu.offsetHeight||180;
+  let left=x, top=y;
+  if(left+mw>window.innerWidth-230) left=x-mw;
+  if(top+mh>window.innerHeight-40) top=y-mh;
+  menu.style.left=Math.max(0,left)+'px';
+  menu.style.top=Math.max(0,top)+'px';
+}
+
+function _ctxHide(){
+  const menu=document.getElementById('dtContextMenu');
+  if(menu){menu.classList.remove('open');menu.style.display='none';}
+  _ctxTaskId=null;
+}
+
+function ctxToggleDone(){
+  const t=tasks.find(t=>t.id===_ctxTaskId);if(!t)return;
+  const nowDone=!(t.done||t.status==='done');
+  t.done=nowDone;t.status=nowDone?'done':'todo';
+  saveAll();renderTasks();_ctxHide();
+  toast_(svgIco('check'),nowDone?'تموم شد ✓':'برگشت');
+}
+function ctxOpenPanel(){dpOpenPanel(_ctxTaskId);_ctxHide();}
+function ctxEditFull(){
+  const id=_ctxTaskId;_ctxHide();
+  openNote(id,{stopPropagation:()=>{}},true);
+}
+function ctxCyclePriority(){
+  const t=tasks.find(t=>t.id===_ctxTaskId);if(!t)return;
+  const c={high:'med',med:'low',low:'high'};
+  t.priority=c[t.priority||'high'];
+  saveAll();renderTasks();
+  if(_dpTaskId===_ctxTaskId) _dpRender(t);
+  _ctxHide();
+}
+function ctxDelete(){
+  if(!_ctxTaskId)return;
+  const id=_ctxTaskId;_ctxHide();
+  if(!confirm('این کار حذف بشه؟'))return;
+  tasks=tasks.filter(t=>t.id!==id);
+  saveAll();renderTasks();
+  if(_dpTaskId===id) dpClose();
+  toast_(svgIco('flag'),'حذف شد');
 }
 
 function tbUpdateDate(){
@@ -11113,11 +11389,11 @@ boot();
 <nav class="nav">
   <div class="ni active" id="ni-home" onclick="goPage('Home')">
     <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-    <span class="ni-lbl">خانه</span><div class="ni-dot"></div>
+    <span class="ni-lbl">خانه</span><span class="ni-count" id="nic-home"></span><div class="ni-dot"></div>
   </div>
   <div class="ni" id="ni-projects" onclick="goPage('Projects')">
     <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-    <span class="ni-lbl">پروژه‌ها</span><div class="ni-dot"></div>
+    <span class="ni-lbl">پروژه‌ها</span><span class="ni-count" id="nic-projects"></span><div class="ni-dot"></div>
   </div>
   <div class="nav-fab" onclick="openCmd()">
     <div class="nav-fab-btn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
