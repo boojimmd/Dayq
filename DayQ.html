@@ -2060,7 +2060,54 @@ select.fi{
   /* کارت فعال */
   .tc-wrap.dp-active{outline:2px solid var(--a);outline-offset:1px;}
 
-  /* ══ PHASE 5: Day Timeline View ══ */
+  /* ══ MinimalReport patterns ══
+     ۱. Monospaced برای data values
+     ۲. Button opacity hierarchy
+  ══════════════════════════════ */
+
+  /* ── Monospaced data ── */
+  /* timer در panel */
+  .dp-timer-num{font-family:var(--mono);letter-spacing:.06em;}
+  /* progress X/Y در panel */
+  .dp-prog-txt{font-family:var(--mono);}
+  /* progress X/Y در topbar */
+  .tb-prog-txt{font-family:var(--mono);}
+  /* sidebar stats */
+  .sb-stat-num{font-family:var(--mono);}
+  /* عدد روز در sidebar */
+  .sb-day{font-family:var(--mono);}
+  /* timeline: ساعت‌ها و زمان task‌ها */
+  .dtl-hlbl{font-family:var(--mono);}
+  .dtl-tb-time{font-family:var(--mono);}
+
+  /* ── Button opacity hierarchy ──
+     مهم‌ترین = پررنگ‌ترین
+  ── */
+  /* ۱. تموم شد — بالاترین اولویت، پررنگ‌ترین */
+  .dp-btn-done{
+    background:rgba(0,184,122,.16);
+    color:var(--a);
+    border-color:rgba(0,184,122,.35);
+    font-weight:700;
+  }
+  .dp-btn-done:hover,.dp-btn-done.is-done{
+    background:var(--a);color:#fff;
+    border-color:var(--a);
+  }
+  /* ۲. ویرایش کامل — ثانویه */
+  .dp-btn-edit{
+    background:var(--bg2);
+    color:var(--t2);
+    border-color:var(--b1);
+  }
+  .dp-btn-edit:hover{background:var(--bg3);color:var(--t1);}
+  /* ۳. حذف — کمترین وزن بصری */
+  .dp-btn-del{
+    background:transparent;
+    color:var(--t3);
+    border-color:var(--b1);
+  }
+  .dp-btn-del:hover{background:var(--redm);color:var(--red);border-color:rgba(229,62,90,.25);}
   .dtl-view{display:none;margin:0 0 24px;}
   .dtl-view.dtl-active{display:block;}
   .dtl-hdr{display:flex;align-items:center;gap:10px;padding:0 18px 10px;}
