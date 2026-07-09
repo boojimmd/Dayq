@@ -6258,10 +6258,12 @@ document.addEventListener('keydown',e=>{
 function openSheet(id){
   document.getElementById('ov').classList.add('open');
   document.getElementById(id).classList.add('open');
-  // iOS: prevent background scroll when sheet open
-  document.body.style.overflow='hidden';
-  document.body.style.position='fixed';
-  document.body.style.width='100%';
+  // iOS: prevent background scroll — فقط موبایل
+  if(window.innerWidth<900){
+    document.body.style.overflow='hidden';
+    document.body.style.position='fixed';
+    document.body.style.width='100%';
+  }
   setTimeout(()=>{
     const i=document.getElementById(id).querySelector('input:not([type=time]):not([type=hidden])');
     if(i) i.focus();
@@ -6271,10 +6273,17 @@ function closeAll(){
   document.getElementById('ov').classList.remove('open');
   document.querySelectorAll('.sheet').forEach(s=>s.classList.remove('open'));
   closeJDP();
-  // iOS: restore scroll
-  document.body.style.overflow='';
-  document.body.style.position='fixed';
-  document.body.style.width='';
+  // iOS: restore scroll — فقط موبایل
+  if(window.innerWidth<900){
+    document.body.style.overflow='';
+    document.body.style.position='';
+    document.body.style.width='';
+  } else {
+    // دسکتاپ: فقط inline style رو پاک کن
+    document.body.style.overflow='';
+    document.body.style.position='';
+    document.body.style.width='';
+  }
 }
 
 /* ══ SETTINGS ══ */
@@ -8214,9 +8223,14 @@ function sbUpdateStats(){
   if(dEl) dEl.textContent=num(done);
   if(pEl) pEl.textContent=num(pending);
   if(tEl) tEl.textContent=num(total);
-  // re-render calendar to update task dots
-  sbCalRender();
+  // sbCalRender فقط هر ۱۰ ثانیه یه بار — نه با هر renderTasks
+  const now=Date.now();
+  if(!_sbLastCalRender||now-_sbLastCalRender>10000){
+    _sbLastCalRender=now;
+    sbCalRender();
+  }
 }
+let _sbLastCalRender=0;
 
 /* ══ DESKTOP DETAIL PANEL ══ */
 let _dpTaskId=null;
