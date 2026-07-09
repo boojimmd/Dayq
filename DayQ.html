@@ -2056,6 +2056,61 @@ select.fi{
   /* کارت فعال */
   .tc-wrap.dp-active{outline:2px solid var(--a);outline-offset:1px;}
 
+  /* ══ PHASE 2: Rich Panel CSS ══ */
+
+  /* ─── انیمیشن switch بین taskها ─── */
+  @keyframes dpSwitch{from{opacity:0;transform:translateX(6px)}to{opacity:1;transform:translateX(0)}}
+  .dp-switching{animation:dpSwitch .18s var(--ease-out) both !important;}
+
+  /* ─── chips interactive ─── */
+  .dp-chip.interactive{cursor:pointer;}
+  .dp-chip.interactive:hover{border-color:var(--a);color:var(--a);background:var(--am);}
+  .dp-chip.interactive:active{transform:scale(.96);}
+
+  /* ─── Progress bar روزانه ─── */
+  .dp-prog-wrap{
+    padding:12px 18px 10px;
+    border-bottom:1px solid var(--b1);
+    display:flex;align-items:center;gap:10px;
+  }
+  .dp-prog-bar{flex:1;height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;}
+  .dp-prog-fill{height:100%;background:var(--a);border-radius:2px;transition:width .4s var(--ease);}
+  .dp-prog-txt{font-size:var(--fs-xs);font-weight:700;color:var(--t3);white-space:nowrap;}
+  .dp-prog-lbl{font-size:var(--fs-xs);color:var(--t3);}
+
+  /* ─── Category menu ─── */
+  .dp-cat-menu{
+    display:flex;flex-wrap:wrap;gap:5px;
+    padding:10px 0 2px;
+    animation:dpSwitch .15s var(--ease-out) both;
+  }
+  .dp-cat-opt{
+    display:flex;align-items:center;gap:5px;
+    padding:5px 10px;border-radius:var(--r5);
+    background:var(--bg2);border:1px solid var(--b1);
+    font-size:var(--fs-xs);font-weight:600;color:var(--t2);
+    cursor:pointer;font-family:var(--f);
+    transition:var(--dur-fast) var(--ease-out);
+  }
+  .dp-cat-opt:hover{background:var(--bg3);color:var(--t1);}
+  .dp-cat-opt.active{background:var(--am);color:var(--a);border-color:rgba(0,196,140,.25);}
+
+  /* ─── Keyboard hint ─── */
+  .dp-kb-hint{
+    padding:8px 18px 0;
+    display:flex;gap:12px;flex-wrap:wrap;
+  }
+  .dp-kb{
+    display:flex;align-items:center;gap:4px;
+    font-size:var(--fs-2xs);color:var(--t3);
+  }
+  .dp-kb kbd{
+    background:var(--bg3);border:1px solid var(--b1);
+    border-radius:4px;padding:1px 5px;
+    font-size:var(--fs-2xs);font-family:monospace;
+    color:var(--t3);
+  }
+
   /* ─── دکمه toggle پنل ─── */
   .dp-toggle-btn{
     display:flex;align-items:center;justify-content:center;
@@ -2242,14 +2297,28 @@ select.fi{
 
 <!-- DESKTOP DETAIL PANEL — خارج از همه pages، زیر topbar مستقیم -->
 <div id="dpanel">
+  <!-- Progress bar روزانه — همیشه visible -->
+  <div class="dp-prog-wrap" id="dpProgWrap">
+    <span class="dp-prog-lbl">امروز</span>
+    <div class="dp-prog-bar"><div class="dp-prog-fill" id="dpProgFill" style="width:0%"></div></div>
+    <span class="dp-prog-txt" id="dpProgTxt">۰/۰</span>
+  </div>
+
+  <!-- Empty state -->
   <div class="dp-empty" id="dpEmpty">
-    <svg viewBox="0 0 84 84" width="64" height="64">
+    <svg viewBox="0 0 84 84" width="56" height="56">
       <circle cx="42" cy="42" r="33" fill="none" stroke="var(--b1)" stroke-width="5"/>
       <circle cx="42" cy="42" r="33" fill="none" stroke="var(--a)" stroke-width="5"
         stroke-linecap="round" stroke-dasharray="45 165" stroke-dashoffset="10"/>
     </svg>
-    <div class="dp-empty-hint">یه کار از لیست انتخاب کن<br>جزئیاتش اینجا می‌آد</div>
+    <div class="dp-empty-hint">یه کار انتخاب کن<br><span style="font-size:var(--fs-xs);color:var(--t3)">جزئیاتش اینجا میاد</span></div>
+    <div class="dp-kb-hint" style="justify-content:center">
+      <span class="dp-kb"><kbd>j</kbd><kbd>k</kbd> ناوبری</span>
+      <span class="dp-kb"><kbd>Space</kbd> تموم شد</span>
+    </div>
   </div>
+
+  <!-- Content -->
   <div class="dp-content" id="dpContent" style="display:none">
     <div class="dp-head">
       <div class="dp-cat-icon" id="dpCatIcon"></div>
@@ -2258,6 +2327,7 @@ select.fi{
     <div class="dp-title" id="dpTitle" contenteditable="true" dir="rtl"
       onblur="dpSaveTitleDebounced()" oninput="dpSaveTitleDebounced()"></div>
     <div class="dp-chips-row" id="dpChips"></div>
+    <div id="dpCatMenuWrap"></div>
     <div>
       <div class="dp-section-lbl">یادداشت</div>
       <textarea class="dp-notes-ta" id="dpNotes" placeholder="یادداشت برای این کار..."
@@ -2276,6 +2346,12 @@ select.fi{
       <button class="dp-btn dp-btn-del" onclick="dpDelete()">
         <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
       </button>
+    </div>
+    <div class="dp-kb-hint" style="padding-bottom:8px">
+      <span class="dp-kb"><kbd>j</kbd><kbd>k</kbd> بعدی/قبلی</span>
+      <span class="dp-kb"><kbd>Space</kbd> تموم شد</span>
+      <span class="dp-kb"><kbd>e</kbd> ویرایش</span>
+      <span class="dp-kb"><kbd>Esc</kbd> بستن</span>
     </div>
   </div>
 </div>
@@ -4596,6 +4672,7 @@ function renderTasks(){
   updateMeta(); updateMirrorSummary(); updateCapacityBanner(); _refreshTriageBanner();
   if(cfg.timeline) renderTimeline();
   sbUpdateStats();
+  if(window.innerWidth>=900) dpUpdateProgress();
 
   const projPage=document.getElementById('pageProjects');
   if(projPage&&projPage.classList.contains('active')) renderProjects();
@@ -7851,9 +7928,227 @@ let _dpTimerRunning=false;
 let _dpSaveNoteT=null;
 let _dpSaveTitleT=null;
 
-const _DP_CAT_LABELS={prep:'آماده‌سازی',visit:'بازدید',meeting:'جلسه',report:'گزارش',followup:'پیگیری',email:'ایمیل',call:'تماس',other:'سایر'};
+const _DP_CAT_LABELS={prep:'آماده‌سازی',visit:'ویزیت',meeting:'جلسه',report:'گزارش',followup:'پیگیری',email:'ایمیل',call:'تماس',other:'سایر'};
 const _DP_PRI_LABEL={high:'اولویت بالا',med:'اولویت متوسط',low:'اولویت پایین'};
 const _DP_PRI_CLS={high:'pri-high',med:'pri-med',low:'pri-low'};
+const _DP_CATS=[
+  {id:'visit',lbl:'ویزیت',icon:'steth'},
+  {id:'meeting',lbl:'جلسه',icon:'handshk'},
+  {id:'report',lbl:'گزارش',icon:'chart'},
+  {id:'followup',lbl:'پیگیری',icon:'bell'},
+  {id:'call',lbl:'تماس',icon:'phone'},
+  {id:'email',lbl:'ایمیل',icon:'pen'},
+  {id:'prep',lbl:'آماده‌سازی',icon:'brief'},
+  {id:'other',lbl:'سایر',icon:'check'},
+];
+const _DP_ICON_BY_CAT={visit:'steth',meeting:'handshk',report:'chart',followup:'bell',call:'phone',email:'pen',prep:'brief',other:'check'};
+
+function dpOpenPanel(taskId){
+  const t=tasks.find(t=>t.id===taskId);
+  if(!t) return;
+  const switching=_dpTaskId&&_dpTaskId!==taskId;
+  _dpTaskId=taskId;
+  // highlight card
+  document.querySelectorAll('.tc-wrap.dp-active').forEach(el=>el.classList.remove('dp-active'));
+  document.querySelector(`.tc-wrap[data-task-id="${taskId}"]`)?.classList.add('dp-active');
+  // show content
+  const emptyEl=document.getElementById('dpEmpty');
+  const contentEl=document.getElementById('dpContent');
+  if(emptyEl) emptyEl.style.display='none';
+  if(contentEl){
+    contentEl.style.display='flex';
+    if(switching){contentEl.classList.add('dp-switching');setTimeout(()=>contentEl.classList.remove('dp-switching'),250);}
+  }
+  // reset timer
+  _dpTimerStop();
+  _dpTimerMs=t.timerMs||0;
+  _dpUpdateTimerDisplay();
+  // render
+  _dpRender(t);
+  // progress
+  dpUpdateProgress();
+  // scroll panel to top
+  document.getElementById('dpanel')?.scrollTo(0,0);
+}
+
+function _dpRender(t){
+  // icon
+  const ic=iconMap[t.iconId]||iconMap.check;
+  const iconEl=document.getElementById('dpCatIcon');
+  if(iconEl) iconEl.innerHTML=`<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="${ic.c}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${ic.s}</svg>`;
+  // title
+  const titleEl=document.getElementById('dpTitle');
+  if(titleEl) titleEl.textContent=t.text;
+  // chips — با interactive handlers
+  const chipsEl=document.getElementById('dpChips');
+  if(chipsEl){
+    let h='';
+    if(t.deadline){
+      const[jy,jm,jd]=t.deadline.split('-').map(Number);
+      h+=`<span class="dp-chip interactive" onclick="dpEditFull()" title="تغییر تاریخ">📅 ${num(jd)} ${JDP_MONTHS[jm-1]}</span>`;
+    }
+    if(t.time) h+=`<span class="dp-chip interactive" onclick="dpEditFull()" title="تغییر ساعت">🕐 ${t.time}</span>`;
+    h+=`<span class="dp-chip dp-chip-cat interactive" onclick="dpShowCatMenu()" title="تغییر دسته">${_DP_CAT_LABELS[t.cat]||t.cat||'—'}</span>`;
+    h+=`<span class="dp-chip ${_DP_PRI_CLS[t.priority||'high']} interactive" onclick="dpCyclePriority()" title="کلیک = تغییر اولویت">${_DP_PRI_LABEL[t.priority||'high']}</span>`;
+    if(t.done||t.status==='done') h+=`<span class="dp-chip ch-done">✓ انجام شد</span>`;
+    chipsEl.innerHTML=h;
+  }
+  // close cat menu if open
+  document.getElementById('dpCatMenuWrap').innerHTML='';
+  // notes
+  const notesEl=document.getElementById('dpNotes');
+  if(notesEl) notesEl.value=t.note||'';
+  // done button
+  const doneBtn=document.getElementById('dpBtnDone');
+  if(doneBtn){
+    const isDone=t.done||t.status==='done';
+    doneBtn.textContent=isDone?'↩ برگشت':'✓ تموم شد';
+    doneBtn.classList.toggle('is-done',isDone);
+  }
+}
+
+function dpUpdateProgress(){
+  const fill=document.getElementById('dpProgFill');
+  const txt=document.getElementById('dpProgTxt');
+  if(!fill||!txt) return;
+  const today=mrTodayKey();
+  const todayTasks=(tasks||[]).filter(t=>t.deadline===today&&t.status!=='someday');
+  const done=todayTasks.filter(t=>t.done||t.status==='done').length;
+  const total=todayTasks.length;
+  const pct=total>0?Math.round(done/total*100):0;
+  fill.style.width=pct+'%';
+  txt.textContent=num(done)+'/'+num(total);
+}
+
+/* ── Priority cycling ── */
+function dpCyclePriority(){
+  const t=tasks.find(t=>t.id===_dpTaskId); if(!t) return;
+  const cycle={high:'med',med:'low',low:'high'};
+  t.priority=cycle[t.priority||'high'];
+  saveAll(); renderTasks(); _dpRender(t);
+}
+
+/* ── Category picker ── */
+function dpShowCatMenu(){
+  const wrap=document.getElementById('dpCatMenuWrap');
+  if(wrap.innerHTML){wrap.innerHTML='';return;}
+  const t=tasks.find(t=>t.id===_dpTaskId);
+  const menu=document.createElement('div');
+  menu.className='dp-cat-menu';
+  _DP_CATS.forEach(c=>{
+    const btn=document.createElement('button');
+    btn.className='dp-cat-opt'+(t&&t.cat===c.id?' active':'');
+    btn.innerHTML=svgIco(c.icon,13)+'<span>'+c.lbl+'</span>';
+    btn.onclick=()=>{dpSetCategory(c.id);wrap.innerHTML='';};
+    menu.appendChild(btn);
+  });
+  wrap.appendChild(menu);
+}
+
+function dpSetCategory(catId){
+  const t=tasks.find(t=>t.id===_dpTaskId); if(!t) return;
+  t.cat=catId;
+  if(_DP_ICON_BY_CAT[catId]) t.iconId=_DP_ICON_BY_CAT[catId];
+  saveAll(); renderTasks(); _dpRender(t);
+}
+
+function dpClose(){
+  _dpTaskId=null;
+  _dpTimerStop();
+  document.querySelectorAll('.tc-wrap.dp-active').forEach(el=>el.classList.remove('dp-active'));
+  document.getElementById('dpEmpty').style.display='';
+  document.getElementById('dpContent').style.display='none';
+}
+
+function dpToggleDone(){
+  const t=tasks.find(t=>t.id===_dpTaskId); if(!t) return;
+  const nowDone=!(t.done||t.status==='done');
+  t.done=nowDone;
+  t.status=nowDone?'done':'todo';
+  saveAll(); renderTasks();
+  _dpRender(t); dpUpdateProgress();
+  toast_(svgIco('check'),nowDone?'تموم شد ✓':'برگشت به لیست');
+}
+
+function dpDelete(){
+  if(!_dpTaskId) return;
+  if(!confirm('این کار حذف بشه؟')) return;
+  tasks=tasks.filter(t=>t.id!==_dpTaskId);
+  saveAll(); renderTasks(); dpClose();
+  toast_(svgIco('flag'),'حذف شد');
+}
+
+function dpSaveNoteDebounced(){
+  clearTimeout(_dpSaveNoteT);
+  _dpSaveNoteT=setTimeout(()=>{
+    const t=tasks.find(t=>t.id===_dpTaskId); if(!t) return;
+    t.note=document.getElementById('dpNotes')?.value||'';
+    saveAll();
+  },800);
+}
+
+function dpSaveTitleDebounced(){
+  clearTimeout(_dpSaveTitleT);
+  _dpSaveTitleT=setTimeout(()=>{
+    const t=tasks.find(t=>t.id===_dpTaskId); if(!t) return;
+    const val=document.getElementById('dpTitle')?.textContent?.trim()||'';
+    if(val&&val!==t.text){t.text=val;saveAll();renderTasks();}
+  },600);
+}
+
+function dpEditFull(){
+  if(!_dpTaskId) return;
+  openNote(_dpTaskId,{stopPropagation:()=>{}},true);
+}
+
+/* ── Timer ── */
+function dpTimerToggle(){if(_dpTimerRunning)_dpTimerStop();else _dpTimerStart();}
+function _dpTimerStart(){
+  _dpTimerRunning=true;
+  const btn=document.getElementById('dpTimerBtn');
+  const numEl=document.getElementById('dpTimerNum');
+  if(btn){btn.textContent='مکث';btn.classList.remove('paused');}
+  if(numEl) numEl.classList.add('running');
+  const t0=Date.now()-_dpTimerMs;
+  _dpTimerInterval=setInterval(()=>{_dpTimerMs=Date.now()-t0;_dpUpdateTimerDisplay();},500);
+}
+function _dpTimerStop(){
+  _dpTimerRunning=false;
+  clearInterval(_dpTimerInterval);_dpTimerInterval=null;
+  const btn=document.getElementById('dpTimerBtn');
+  const numEl=document.getElementById('dpTimerNum');
+  if(btn){btn.textContent='شروع';btn.classList.add('paused');}
+  if(numEl) numEl.classList.remove('running');
+  if(_dpTaskId){const t=tasks.find(t=>t.id===_dpTaskId);if(t){t.timerMs=_dpTimerMs;saveAll();}}
+}
+function _dpUpdateTimerDisplay(){
+  const el=document.getElementById('dpTimerNum'); if(!el) return;
+  const s=Math.floor(_dpTimerMs/1000);
+  const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;
+  el.textContent=h>0
+    ?`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`
+    :`${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+
+/* ── Keyboard navigation (Phase 2) ── */
+document.addEventListener('keydown',function(e){
+  if(window.innerWidth<900) return;
+  const tag=e.target.tagName;
+  if(tag==='INPUT'||tag==='TEXTAREA'||e.target.isContentEditable) return;
+  if(e.key==='Escape'){dpClose();return;}
+  if(e.key===' '&&_dpTaskId){e.preventDefault();dpToggleDone();return;}
+  if(e.key==='e'&&_dpTaskId){dpEditFull();return;}
+  // j/k navigation
+  if((e.key==='j'||e.key==='k')&&_dpTaskId){
+    const cards=Array.from(document.querySelectorAll('.tc-wrap[data-task-id]'));
+    const idx=cards.findIndex(c=>c.dataset.taskId===_dpTaskId);
+    const next=e.key==='j'?idx+1:idx-1;
+    if(next>=0&&next<cards.length){
+      const id=cards[next].dataset.taskId;
+      if(id) dpOpenPanel(id);
+    }
+  }
+});
 
 function dpOpenPanel(taskId){
   const t=tasks.find(t=>t.id===taskId);
