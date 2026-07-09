@@ -1739,8 +1739,8 @@ select.fi{
     margin:0;
     padding:12px 24px 0;
     z-index:40;
-    backdrop-filter:blur(16px);
-    -webkit-backdrop-filter:blur(16px);
+    /* backdrop-filter حذف شد — روی دسکتاپ hover card رو slow می‌کنه */
+    background:var(--bg1);
     box-shadow:0 1px 0 var(--b1);
   }
 
@@ -1782,8 +1782,6 @@ select.fi{
     gap:var(--sp1);
     overflow-y:auto;
     background:var(--bg1);
-    backdrop-filter:blur(12px);
-    -webkit-backdrop-filter:blur(12px);
     z-index:100;
   }
   .nav::before{
@@ -2004,10 +2002,10 @@ select.fi{
     overflow-y:auto;
     scrollbar-width:none;
     border-right:1px solid var(--b1);
-    background:var(--bg1);
-    backdrop-filter:blur(12px);
-    -webkit-backdrop-filter:blur(12px);
+    background:var(--bg1); /* solid — بدون blur */
     z-index:30;
+    /* will-change: contents برای GPU layer */
+    contain:layout style;
   }
   #dpanel::-webkit-scrollbar{display:none;}
 
@@ -2291,8 +2289,8 @@ select.fi{
   }
 
   /* ─── انیمیشن switch بین taskها ─── */
-  @keyframes dpSwitch{from{opacity:0;transform:translateX(6px)}to{opacity:1;transform:translateX(0)}}
-  .dp-switching{animation:dpSwitch .18s var(--ease-out) both !important;}
+  @keyframes dpSwitch{from{opacity:0}to{opacity:1}}
+  .dp-switching{animation:dpSwitch .15s var(--ease-out) both;}
 
   /* ─── chips interactive ─── */
   .dp-chip.interactive{cursor:pointer;}
