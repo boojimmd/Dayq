@@ -1687,6 +1687,10 @@ select.fi{
 .cmd-shortcut-hint{display:none;}
 .cmd-shortcut-hint{display:none;}
 #dpanel{display:none;}
+.tb-center{display:none;}
+.tb-prog-mini{display:none;}
+.tc-note-preview{display:none;}
+.tc-hover-actions{display:none;}
 
 /* ═══════════════════════════════════════════════════
    DESKTOP LAYOUT ≥900px
@@ -2056,7 +2060,75 @@ select.fi{
   /* کارت فعال */
   .tc-wrap.dp-active{outline:2px solid var(--a);outline-offset:1px;}
 
-  /* ══ PHASE 2: Rich Panel CSS ══ */
+  /* ══ PHASE 3: Topbar Desktop + Task Card ══ */
+
+  /* ─── Topbar desktop layout ─── */
+  .tbrow{
+    display:flex;align-items:center;gap:12px;
+    padding-bottom:8px;
+  }
+  .tbrow > div:first-child{
+    flex-shrink:0;
+  }
+  /* greeting فشرده‌تر */
+  .greeting{font-size:var(--fs-xs);color:var(--t3);font-weight:500;}
+  .pg-title{font-size:var(--fs-md);font-weight:800;letter-spacing:-.02em;margin-top:0;}
+  .greeting-row{margin-bottom:0;}
+
+  /* ─── Inline search ─── */
+  .tb-center{flex:1;display:flex;align-items:center;justify-content:center;}
+  .tb-search-bar{
+    display:flex;align-items:center;gap:8px;
+    width:100%;max-width:400px;
+    background:var(--bg2);border:1px solid var(--b1);
+    border-radius:var(--r5);padding:7px 14px;
+    cursor:pointer;transition:var(--dur-fast) var(--ease-out);
+    color:var(--t3);font-size:var(--fs-sm);
+  }
+  .tb-search-bar:hover{border-color:var(--b2);background:var(--bg3);}
+  .tb-search-bar span{flex:1;}
+  .tb-search-bar .tb-kb{margin-right:auto;display:flex;gap:3px;}
+  .tb-search-bar kbd{background:var(--bg3);border:1px solid var(--b1);border-radius:4px;padding:1px 5px;font-size:var(--fs-2xs);font-family:monospace;}
+
+  /* ─── Mini progress در topbar ─── */
+  .tb-prog-mini{
+    display:flex;align-items:center;gap:6px;
+    flex-shrink:0;font-size:var(--fs-xs);color:var(--t3);font-weight:700;
+  }
+  .tb-prog-bar-mini{width:50px;height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;}
+  .tb-prog-fill-mini{height:100%;background:var(--a);border-radius:2px;transition:width .4s var(--ease);}
+
+  /* ─── Task card desktop ─── */
+  /* Note preview */
+  .tc-note-preview{display:none;}
+  .tc-note-preview{
+    font-size:var(--fs-xs);color:var(--t3);margin-top:3px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    max-width:100%;
+  }
+  /* روی دسکتاپ نمایش داده میشه */
+  .tc-note-preview{display:block;}
+
+  /* Hover quick actions */
+  .tc-hover-actions{
+    display:none;
+    align-items:center;gap:4px;
+    flex-shrink:0;margin-right:4px;
+  }
+  .tc-wrap:hover .tc-hover-actions{display:flex;}
+  .tc-hbtn{
+    width:26px;height:26px;border-radius:var(--r1);
+    display:flex;align-items:center;justify-content:center;
+    background:var(--bg2);border:1px solid var(--b1);
+    color:var(--t3);cursor:pointer;
+    transition:var(--dur-fast) var(--ease-out);
+  }
+  .tc-hbtn:hover{background:var(--bg3);color:var(--t1);}
+  .tc-hbtn.done-hbtn:hover{background:var(--am);color:var(--a);border-color:rgba(0,196,140,.3);}
+  .tc-hbtn.open-hbtn:hover{background:var(--am);color:var(--a);border-color:rgba(0,196,140,.3);}
+
+  /* کارت فعال رو از hover actions جدا کن */
+  .tc-wrap.dp-active .tc-hover-actions{display:none;}
 
   /* ─── انیمیشن switch بین taskها ─── */
   @keyframes dpSwitch{from{opacity:0;transform:translateX(6px)}to{opacity:1;transform:translateX(0)}}
@@ -2111,7 +2183,14 @@ select.fi{
     color:var(--t3);
   }
 
-  /* ─── دکمه toggle پنل ─── */
+  /* ─── ۶. Desktop-only elements ─── */
+  .tb-center{display:flex;}
+  .tb-prog-mini{display:flex;}
+  .tc-note-preview{display:block;}
+  /* hover actions نیاز به display:none ندارن — .tc-wrap:hover کنترلشون میکنه */
+
+  /* search button رو روی دسکتاپ مخفی کن چون inline داریم */
+  #searchBtn{display:none;}
   .dp-toggle-btn{
     display:flex;align-items:center;justify-content:center;
     width:32px;height:32px;border-radius:var(--r2);
@@ -2275,6 +2354,19 @@ select.fi{
     <div>
       <div class="greeting-row"><div class="greeting" id="greeting">سلام!</div><span id="wxChip" class="wx-chip"></span></div>
       <div class="pg-title" id="pageTitle">امروز چیکار<em> داری؟</em></div>
+    </div>
+    <!-- Desktop: inline search -->
+    <div class="tb-center">
+      <div class="tb-search-bar" onclick="openCmdPalette()" title="Ctrl+K">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span>جستجو یا دستور...</span>
+        <span class="tb-kb"><kbd>Ctrl</kbd><kbd>K</kbd></span>
+      </div>
+    </div>
+    <!-- Desktop: mini progress -->
+    <div class="tb-prog-mini">
+      <div class="tb-prog-bar-mini"><div class="tb-prog-fill-mini" id="tbProgFill" style="width:0%"></div></div>
+      <span id="tbProgTxt">۰/۰</span>
     </div>
     <div class="hbtns">
       <!-- دکمه toggle پنل — فقط دسکتاپ -->
@@ -4673,6 +4765,7 @@ function renderTasks(){
   if(cfg.timeline) renderTimeline();
   sbUpdateStats();
   if(window.innerWidth>=900) dpUpdateProgress();
+  if(window.innerWidth>=900) tbUpdateProgress();
 
   const projPage=document.getElementById('pageProjects');
   if(projPage&&projPage.classList.contains('active')) renderProjects();
@@ -4763,14 +4856,26 @@ function mkCard(task){
   if(st==='doing') stIco='<svg viewBox="0 0 12 12" width="10" height="10"><circle cx="6" cy="6" r="3" fill="var(--amber)"/></svg>';
   if(st==='waiting') stIco='<svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"><circle cx="6" cy="6" r="5"/><polyline points="6 3 6 6 8 7"/></svg>';
 
+  const notePreviewH=task.note?`<div class="tc-note-preview">${esc(task.note.slice(0,70))}${task.note.length>70?'…':''}</div>`:'';
+  const hoverActH=`<div class="tc-hover-actions">
+    <button class="tc-hbtn done-hbtn" onclick="cycleStatus('${task.id}',event)" title="تموم شد">
+      <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+    </button>
+    <button class="tc-hbtn open-hbtn" onclick="openNote('${task.id}',event)" title="جزئیات">
+      <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>`;
+
   d.innerHTML=`
     <div class="tc-status ${st==='done'?'done-s':st==='doing'?'doing':st==='waiting'?'waiting':''}" onclick="bulkMode?toggleBulkSelect('${task.id}',event):cycleStatus('${task.id}',event)">${stIco}</div>
     <div class="tc-ico"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="${ic.c}" stroke-linecap="round" stroke-linejoin="round">${ic.s}</svg></div>
     <div class="tc-body" onclick="bulkMode?toggleBulkSelect('${task.id}',event):openNote('${task.id}',event)">
       <div class="tc-txt">${esc(task.text)}${recurB}</div>
       <div class="tc-meta">${tH}${dlH}${projH}${cH}${waitH}${noteD}</div>
+      ${notePreviewH}
       ${clP}
     </div>
+    ${hoverActH}
     ${callH}${fileH}${locH}${remindH}
     ${(st!=='done')?`<button class="tc-focus" onclick="startFocusMode('${task.id}',event)" title="فوکوس"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></button>`:''}
     <button class="tc-more" onclick="openCardMore('${task.id}',event)" title="بیشتر"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></button>`;
@@ -8294,6 +8399,19 @@ function _dpUpdateTimerDisplay(){
   el.textContent=h>0
     ?`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`
     :`${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+
+function tbUpdateProgress(){
+  const fill=document.getElementById('tbProgFill');
+  const txt=document.getElementById('tbProgTxt');
+  if(!fill||!txt) return;
+  const today=mrTodayKey();
+  const todayTasks=(tasks||[]).filter(t=>t.deadline===today&&t.status!=='someday');
+  const done=todayTasks.filter(t=>t.done||t.status==='done').length;
+  const total=todayTasks.length;
+  const pct=total>0?Math.round(done/total*100):0;
+  fill.style.width=pct+'%';
+  txt.textContent=num(done)+'/'+num(total);
 }
 
 /* ── Desktop Panel Toggle ── */
