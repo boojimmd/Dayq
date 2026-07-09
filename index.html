@@ -2733,6 +2733,8 @@ select.fi{
     <span class="dsb-filter" id="dsbFilter">همه</span>
   </div>
   <div class="dsb-right">
+    <span class="dsb-kb"><kbd>Ctrl</kbd><kbd>N</kbd> کار جدید</span>
+    <span class="dsb-sep">·</span>
     <span class="dsb-kb"><kbd>j</kbd><kbd>k</kbd> ناوبری</span>
     <span class="dsb-sep">·</span>
     <span class="dsb-kb"><kbd>Space</kbd> تموم</span>
@@ -8797,6 +8799,25 @@ function _dpUpdateTimerDisplay(){
 document.addEventListener('keydown',function(e){
   if(window.innerWidth<900) return;
   const tag=e.target.tagName;
+
+  // Ctrl+N — quick add از هر جای صفحه
+  if((e.ctrlKey||e.metaKey)&&e.key==='n'){
+    e.preventDefault();
+    const activePage=document.querySelector('.page.active');
+    // اگه صفحه Home نیست، برو Home
+    if(activePage&&activePage.id!=='pageHome') goPage('Home');
+    setTimeout(()=>{
+      const inp=document.getElementById('qcapInp');
+      const box=document.getElementById('qcapBox');
+      if(!inp) return;
+      // scroll به qcap
+      box?.scrollIntoView({behavior:'smooth',block:'start'});
+      inp.focus();
+      inp.select();
+    }, activePage&&activePage.id!=='pageHome' ? 150 : 0);
+    return;
+  }
+
   if(tag==='INPUT'||tag==='TEXTAREA'||e.target.isContentEditable) return;
   if(e.key==='Escape'){dpClose();return;}
   if(e.key===' '&&_dpTaskId){e.preventDefault();dpToggleDone();return;}
