@@ -2381,6 +2381,16 @@ select.fi{
     direction:rtl;
   }
   .bd-page-title{font-size:var(--fs-xl);font-weight:900;color:var(--t1);}
+  .bd-add-btn-desktop{
+    display:flex;align-items:center;gap:7px;
+    padding:8px 16px;border-radius:var(--r5);
+    background:var(--a);color:#fff;
+    font-size:var(--fs-xs);font-weight:700;font-family:var(--f);
+    border:none;cursor:pointer;
+    transition:var(--dur-fast) var(--ease-out);
+    flex-shrink:0;
+  }
+  .bd-add-btn-desktop:hover{background:var(--a2);}
 
   /* content area */
   .bd-content{
@@ -3445,10 +3455,11 @@ select.fi{
 <div class="page" id="pageBirthdays">
   <div class="bd-page-hdr">
     <div class="bd-page-title">تولد و مناسبت‌ها</div>
-    <button class="hbtn" onclick="openBirthdayForm(null)" title="افزودن مناسبت">
-      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+    <button class="bd-add-btn-desktop" onclick="openBirthdayForm(null)">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
         <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
       </svg>
+      افزودن مناسبت
     </button>
   </div>
   <div class="bag-pg bd-content">
