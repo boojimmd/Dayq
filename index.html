@@ -2257,7 +2257,35 @@ select.fi{
 
   /* ══ PHASE 3: Topbar Desktop + Task Card ══ */
 
-  /* ─── Panel resize handle ─── */
+  .dsb-timer-wrap{
+    display:flex;align-items:center;gap:5px;
+    color:var(--a);font-weight:700;cursor:pointer;
+    padding:2px 8px;border-radius:var(--r5);
+    background:var(--am);border:1px solid rgba(0,184,122,.2);
+    transition:var(--dur-fast);
+  }
+  .dsb-timer-wrap:hover{background:rgba(0,184,122,.2);}
+  .dsb-timer-name{font-size:var(--fs-2xs);color:var(--a);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .dsb-timer-val{font-family:var(--mono);font-size:var(--fs-xs);font-weight:800;color:var(--a);}
+
+  .dsb-bulk-wrap{display:flex;align-items:center;gap:6px;}
+  .dsb-bulk-count{font-weight:700;color:var(--t2);}
+  .dsb-bulk-btn{
+    padding:1px 8px;border-radius:var(--r5);
+    font-size:var(--fs-2xs);font-weight:700;font-family:var(--f);
+    border:1px solid var(--b1);background:var(--bg2);
+    color:var(--t1);cursor:pointer;transition:var(--dur-fast);
+  }
+  .dsb-bulk-btn:hover{background:var(--bg3);}
+  .dsb-bulk-btn.danger{color:var(--red);border-color:rgba(229,62,90,.3);}
+  .dsb-bulk-btn.danger:hover{background:var(--redm);}
+  .dsb-bulk-btn.cancel{color:var(--t3);}
+
+  /* Bulk selected card روی دسکتاپ */
+  .tc-wrap.bulk-selected .tc{
+    outline:2px solid var(--blue);outline-offset:1px;
+    background:rgba(59,130,246,.06);
+  }
   #dpResizeHandle{
     position:fixed;top:0;bottom:0;width:6px;
     left:360px;cursor:col-resize;z-index:36;
@@ -2741,6 +2769,21 @@ select.fi{
     <span class="dsb-count" id="dsbDone">۰ تموم شد</span>
     <span class="dsb-sep">•</span>
     <span class="dsb-filter" id="dsbFilter">همه</span>
+    <!-- timer section - hidden by default -->
+    <span class="dsb-sep dsb-timer-sep" id="dsbTimerSep" style="display:none">|</span>
+    <span class="dsb-timer-wrap" id="dsbTimerWrap" style="display:none" onclick="ctxOpenPanel&&_dpTaskId?null:dpOpenPanel(dsbTimerTaskId)" title="کلیک برای باز کردن">
+      <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="var(--a)" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      <span class="dsb-timer-name" id="dsbTimerName"></span>
+      <span class="dsb-timer-val" id="dsbTimerVal">۰۰:۰۰</span>
+    </span>
+    <!-- bulk section - hidden by default -->
+    <span class="dsb-sep dsb-bulk-sep" id="dsbBulkSep" style="display:none">|</span>
+    <span class="dsb-bulk-wrap" id="dsbBulkWrap" style="display:none">
+      <span class="dsb-bulk-count" id="dsbBulkCount">۰ انتخاب شد</span>
+      <button class="dsb-bulk-btn" onclick="bulkDone()">✓ تموم</button>
+      <button class="dsb-bulk-btn danger" onclick="bulkDelete()">حذف</button>
+      <button class="dsb-bulk-btn cancel" onclick="exitBulkMode();dsbBulkHide()">✕</button>
+    </span>
   </div>
   <div class="dsb-right">
     <span class="dsb-kb"><kbd>n</kbd> کار جدید</span>
@@ -5223,7 +5266,7 @@ function mkCard(task){
   d.innerHTML=`
     <div class="tc-status ${st==='done'?'done-s':st==='doing'?'doing':st==='waiting'?'waiting':''}" onclick="bulkMode?toggleBulkSelect('${task.id}',event):cycleStatus('${task.id}',event)">${stIco}</div>
     <div class="tc-ico"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="${ic.c}" stroke-linecap="round" stroke-linejoin="round">${ic.s}</svg></div>
-    <div class="tc-body" onclick="bulkMode?toggleBulkSelect('${task.id}',event):openNote('${task.id}',event)">
+    <div class="tc-body" onclick="if(window.innerWidth>=900&&event.shiftKey){event.preventDefault();event.stopPropagation();if(!bulkMode){bulkMode=true;document.getElementById('taskList')?.classList.add('bulk-mode');}toggleBulkSelect('${task.id}',event);dsbBulkRefresh&&dsbBulkRefresh();}else{bulkMode?toggleBulkSelect('${task.id}',event):openNote('${task.id}',event);}">
       <div class="tc-txt">${esc(task.text)}${recurB}</div>
       <div class="tc-meta">${tH}${dlH}${projH}${cH}${waitH}${noteD}</div>
       ${notePreviewH}
@@ -8548,6 +8591,45 @@ function _dpResizeApply(w){
     statusBar.style.left=w+'px';
 }
 
+/* ── Status Bar timer + bulk ── */
+let dsbTimerTaskId=null;
+let _dsbTimerInterval=null;
+
+function dsbTimerStart(taskId){
+  dsbTimerTaskId=taskId;
+  const t=tasks.find(t=>t.id===taskId);
+  const nameEl=document.getElementById('dsbTimerName');
+  if(nameEl&&t) nameEl.textContent=t.text.slice(0,18)+(t.text.length>18?'…':'');
+  ['dsbTimerSep','dsbTimerWrap'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='';});
+  clearInterval(_dsbTimerInterval);
+  _dsbTimerInterval=setInterval(dsbTimerTick,500);
+  dsbTimerTick();
+}
+function dsbTimerStop(){
+  dsbTimerTaskId=null;
+  clearInterval(_dsbTimerInterval);
+  ['dsbTimerSep','dsbTimerWrap'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+}
+function dsbTimerTick(){
+  const el=document.getElementById('dsbTimerVal');if(!el)return;
+  const s=Math.floor(_dpTimerMs/1000);
+  const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;
+  el.textContent=h>0
+    ?`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`
+    :`${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+function dsbBulkShow(){
+  ['dsbBulkSep','dsbBulkWrap'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='';});
+  const el=document.getElementById('dsbBulkCount');
+  if(el) el.textContent=num(bulkSelect.size)+' انتخاب شد';
+}
+function dsbBulkHide(){
+  ['dsbBulkSep','dsbBulkWrap'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+}
+function dsbBulkRefresh(){
+  if(bulkSelect.size>0) dsbBulkShow(); else dsbBulkHide();
+}
+
 /* ── Status Bar ══ */
 function dsbUpdate(){
   if(window.innerWidth<900) return;
@@ -9029,6 +9111,8 @@ function _dpTimerStart(){
     _dpTimerMs=Date.now()-t0;
     _dpUpdateTimerDisplay();
   },500);
+  // نمایش در status bar
+  if(window.innerWidth>=900) dsbTimerStart(_dpTaskId);
 }
 function _dpTimerStop(){
   _dpTimerRunning=false;
@@ -9042,6 +9126,8 @@ function _dpTimerStop(){
     const t=tasks.find(t=>t.id===_dpTaskId);
     if(t){t.timerMs=_dpTimerMs;saveAll();}
   }
+  // پنهان کردن از status bar
+  if(window.innerWidth>=900) dsbTimerStop();
 }
 function _dpUpdateTimerDisplay(){
   const el=document.getElementById('dpTimerNum'); if(!el) return;
@@ -10499,6 +10585,7 @@ function exitBulkMode(){
   document.getElementById('taskList').classList.remove('bulk-mode');
   document.getElementById('bulkBar').classList.remove('open');
   document.getElementById('bulkProjPicker').classList.remove('open');
+  if(window.innerWidth>=900) dsbBulkHide();
   renderTasks();
 }
 
