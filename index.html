@@ -2285,30 +2285,93 @@ select.fi{
     align-items:start;min-height:100svh;
     padding-top:calc(var(--topbar-h)+12px);padding-bottom:0;
   }
+
+  /* ─── Sidebar ─── */
   .proj-sidebar{
     position:sticky;top:calc(var(--topbar-h)+12px);
     height:calc(100svh - var(--topbar-h) - 24px);
     overflow-y:auto;scrollbar-width:none;
-    border-left:1px solid var(--b1);padding:12px 10px;
+    border-left:1px solid var(--b1);
     background:var(--bg1);
+    display:flex;flex-direction:column;
   }
   .proj-sidebar::-webkit-scrollbar{display:none;}
-  .proj-main{min-width:0;padding:0 18px 48px;}
+
+  /* sidebar header */
+  .proj-sb-header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:14px 14px 10px;
+    border-bottom:1px solid var(--b1);
+    direction:rtl;
+    flex-shrink:0;
+  }
+  .proj-sb-title{font-size:var(--fs-xs);font-weight:800;color:var(--t3);letter-spacing:.08em;}
+  .proj-sb-add{
+    width:24px;height:24px;border-radius:var(--r1);
+    display:flex;align-items:center;justify-content:center;
+    background:var(--bg2);border:1px solid var(--b1);
+    cursor:pointer;color:var(--t3);transition:var(--dur-fast);
+    flex-shrink:0;
+  }
+  .proj-sb-add:hover{background:var(--am);color:var(--a);border-color:rgba(0,184,122,.3);}
+
+  /* project list */
+  .proj-sb-list{flex:1;padding:8px 8px;overflow-y:auto;}
+
+  /* project item */
   .proj-si{
     display:flex;align-items:center;gap:8px;
-    padding:8px 12px;border-radius:var(--r2);
-    cursor:pointer;transition:var(--dur-fast);direction:rtl;
+    padding:9px 10px;border-radius:var(--r2);
+    cursor:pointer;transition:var(--dur-fast);
+    direction:rtl;margin-bottom:2px;
   }
   .proj-si:hover{background:var(--bg2);}
   .proj-si.active{background:var(--am);}
-  .proj-si-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-  .proj-si-name{font-size:var(--fs-sm);font-weight:600;color:var(--t1);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .proj-si-cnt{font-family:var(--mono);font-size:var(--fs-2xs);font-weight:700;color:var(--t3);}
-  .proj-si.active .proj-si-name{color:var(--a);}
-  .proj-main-hdr{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--b1);}
+  .proj-si-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .proj-si-name{
+    font-size:var(--fs-xs);font-weight:600;color:var(--t1);
+    flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .proj-si.active .proj-si-name{color:var(--a);font-weight:700;}
+  .proj-si-cnt{
+    font-family:var(--mono);font-size:var(--fs-2xs);font-weight:700;
+    color:var(--t3);background:var(--bg2);
+    border-radius:var(--r5);padding:1px 6px;
+    flex-shrink:0;
+  }
+  .proj-si.active .proj-si-cnt{background:rgba(0,184,122,.15);color:var(--a);}
+  .proj-si-cnt:empty{display:none;}
+
+  /* sidebar empty state */
+  .proj-sb-empty{
+    flex:1;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    gap:8px;color:var(--t3);text-align:center;
+    padding:20px;
+  }
+  .proj-sb-empty svg{opacity:.3;}
+  .proj-sb-empty span{font-size:var(--fs-xs);}
+
+  /* ─── Main content area ─── */
+  .proj-main{min-width:0;padding:0 20px 48px;}
+  .proj-main-hdr{
+    display:flex;align-items:center;gap:10px;
+    margin-bottom:16px;padding-bottom:12px;
+    border-bottom:1px solid var(--b1);direction:rtl;
+  }
   .proj-main-hdr-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
   .proj-main-hdr-name{font-size:var(--fs-xl);font-weight:900;color:var(--t1);}
-  .proj-main-hdr-cnt{font-family:var(--mono);font-size:var(--fs-sm);color:var(--t3);margin-right:auto;}
+  .proj-main-hdr-cnt{
+    font-family:var(--mono);font-size:var(--fs-sm);color:var(--t3);
+    margin-right:auto;
+  }
+  /* desktop empty state for main area */
+  .proj-main-empty{
+    display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:10px;
+    min-height:300px;color:var(--t3);text-align:center;
+  }
+  .proj-main-empty svg{opacity:.3;}
 
      ۱. Monospaced برای data values
      ۲. Button opacity hierarchy
@@ -3300,14 +3363,17 @@ select.fi{
 <div class="page" id="pageProjects">
   <!-- Desktop: sidebar -->
   <div class="proj-sidebar" id="projSidebar" style="display:none">
-    <div style="font-size:var(--fs-xs);font-weight:800;color:var(--t3);padding:4px 12px 10px;letter-spacing:.06em;">پروژه‌ها</div>
-    <div id="projSidebarList"></div>
-    <div class="proj-si" onclick="openAddProject()" style="color:var(--t3);margin-top:8px;border:1px dashed var(--b1);">
-      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      <span class="proj-si-name" style="font-size:var(--fs-xs)">پروژه جدید</span>
+    <div class="proj-sb-header">
+      <span class="proj-sb-title">پروژه‌ها</span>
+      <div class="proj-sb-add" onclick="openAddProject()" title="پروژه جدید">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </div>
     </div>
+    <div class="proj-sb-list" id="projSidebarList"></div>
   </div>
-  <!-- Main content (both mobile & desktop) -->
+  <!-- Main content -->
   <div class="proj-main" id="projMainArea">
   <div class="proj-page">
     <div class="proj-page-top" style="padding-top:calc(var(--topbar-h) + 2px)">
@@ -9122,7 +9188,13 @@ function projDesktopInit(){
 function projRenderSidebar(){
   const el=document.getElementById('projSidebarList'); if(!el) return;
   const projs=(window.projects||[]);
-  if(!projs.length){el.innerHTML='';return;}
+  if(!projs.length){
+    el.innerHTML=`<div class="proj-sb-empty">
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      <span>هنوز پروژه‌ای نداری</span>
+    </div>`;
+    return;
+  }
   el.innerHTML=projs.map(p=>{
     const cnt=(tasks||[]).filter(t=>t.projectId===p.id&&!t.done&&t.status!=='done').length;
     const isActive=p.id===_projSelectedId;
