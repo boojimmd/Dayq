@@ -5042,6 +5042,7 @@ function renderTasks(){
   const todayKey=mrTodayKey();
   // filter by tab
   let vis;
+  window._visTasks = []; // برای status bar
   if(curTab==='all')        vis=tasks.filter(t=>t.status!=='waiting'&&!t.archived&&!t.someday);
   else if(curTab==='done')  vis=tasks.filter(t=>(t.done||t.status==='done')&&!t.archived);
   else if(curTab==='today') {
@@ -5087,6 +5088,7 @@ function renderTasks(){
   });
 
   // iOS-safe DOM clear
+  window._visTasks = vis; // ذخیره برای status bar
   while(list.firstChild) list.removeChild(list.firstChild);
   if(!vis.length){
     // برای تب‌هایی مثل «امروز»/«فردا» که خودشان تسک تمام‌شده را زودتر فیلتر می‌کنند،
@@ -8635,10 +8637,12 @@ function dsbUpdate(){
   if(window.innerWidth<900) return;
   const sb=document.getElementById('dtStatusBar');
   if(sb) sb.style.display='';
-  const today=mrTodayKey();
-  const todayTasks=(tasks||[]).filter(t=>t.deadline===today&&t.status!=='someday');
-  const done=todayTasks.filter(t=>t.done||t.status==='done').length;
-  const pending=todayTasks.filter(t=>!t.done&&t.status!=='done').length;
+
+  // استفاده از taskهای فعلاً visible در لیست
+  const vis=window._visTasks||[];
+  const done=vis.filter(t=>t.done||t.status==='done').length;
+  const pending=vis.filter(t=>!t.done&&t.status!=='done').length;
+
   const pEl=document.getElementById('dsbPending');
   const dEl=document.getElementById('dsbDone');
   const fEl=document.getElementById('dsbFilter');
@@ -8646,8 +8650,7 @@ function dsbUpdate(){
   if(dEl) dEl.textContent=num(done)+' تموم شد';
   if(fEl){
     const tabLabels={all:'همه',today:'امروز',tomorrow:'فردا',prep:'آماده',visit:'بازدید',waiting:'منتظرم',done:'انجام شده',projects:'پروژه‌ها'};
-    const cur=window._curTab||'all';
-    fEl.textContent=tabLabels[cur]||'همه';
+    fEl.textContent=tabLabels[window._curTab||curTab]||'همه';
   }
 }
 
@@ -8828,14 +8831,15 @@ function dpUpdateProgress(){
   const fill=document.getElementById('dpProgFill');
   const txt=document.getElementById('dpProgTxt');
   if(!fill||!txt) return;
-  const today=mrTodayKey();
-  const todayTasks=(tasks||[]).filter(t=>t.deadline===today&&t.status!=='someday');
-  const done=todayTasks.filter(t=>t.done||t.status==='done').length;
-  const total=todayTasks.length;
+  const vis=window._visTasks||(()=>{
+    const today=mrTodayKey();
+    return (tasks||[]).filter(t=>t.deadline===today&&t.status!=='someday');
+  })();
+  const done=vis.filter(t=>t.done||t.status==='done').length;
+  const total=vis.length;
   const pct=total>0?Math.round(done/total*100):0;
   fill.style.width=pct+'%';
   txt.textContent=num(done)+'/'+num(total);
-  // update empty state
   if(!_dpTaskId) _dpRenderEmpty();
 }
 
@@ -9142,10 +9146,12 @@ function tbUpdateProgress(){
   const fill=document.getElementById('tbProgFill');
   const txt=document.getElementById('tbProgTxt');
   if(!fill||!txt) return;
-  const today=mrTodayKey();
-  const todayTasks=(tasks||[]).filter(t=>t.deadline===today&&t.status!=='someday');
-  const done=todayTasks.filter(t=>t.done||t.status==='done').length;
-  const total=todayTasks.length;
+  const vis=window._visTasks||(()=>{
+    const today=mrTodayKey();
+    return (tasks||[]).filter(t=>t.deadline===today&&t.status!=='someday');
+  })();
+  const done=vis.filter(t=>t.done||t.status==='done').length;
+  const total=vis.length;
   const pct=total>0?Math.round(done/total*100):0;
   fill.style.width=pct+'%';
   txt.textContent=num(done)+'/'+num(total);
