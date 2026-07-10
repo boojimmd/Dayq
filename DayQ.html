@@ -2189,7 +2189,7 @@ select.fi{
 
   /* ══ CALENDAR DAY PANEL ══ */
   #pageCalendar.page.active{
-    display:grid;grid-template-columns:1fr 300px;
+    display:grid;grid-template-columns:1fr 280px;
     align-items:start;min-height:100svh;
     padding-top:calc(var(--topbar-h)+12px);padding-bottom:0;
   }
@@ -2198,25 +2198,86 @@ select.fi{
     position:sticky;top:calc(var(--topbar-h)+12px);
     height:calc(100svh - var(--topbar-h) - 24px);
     overflow-y:auto;scrollbar-width:none;
-    border-right:1px solid var(--b1);background:var(--bg1);
-    padding:20px 14px;display:flex;flex-direction:column;gap:10px;
+    border-right:1px solid var(--b1);
+    background:var(--bg1);
+    display:flex;flex-direction:column;
   }
   #calDayPanelDesktop::-webkit-scrollbar{display:none;}
-  .cdp-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--t3);text-align:center;}
-  .cdp-date{font-size:var(--fs-xl);font-weight:900;color:var(--t1);}
-  .cdp-day-lbl{font-size:var(--fs-xs);color:var(--t3);font-weight:600;}
-  .cdp-add-btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:8px;border-radius:var(--r2);border:1px dashed var(--b2);font-size:var(--fs-xs);font-weight:600;color:var(--t3);cursor:pointer;transition:var(--dur-fast);}
-  .cdp-add-btn:hover{border-color:var(--a);color:var(--a);background:var(--am);}
-  .cdp-task{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--r2);border:1px solid var(--b1);cursor:pointer;transition:var(--dur-fast);direction:rtl;}
-  .cdp-task:hover{background:var(--bg2);}
-  .cdp-task-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:var(--t4);}
+
+  /* empty state */
+  .cdp-empty{
+    flex:1;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    gap:8px;color:var(--t3);text-align:center;
+    padding:24px;
+  }
+  .cdp-empty svg{opacity:.3;}
+  .cdp-empty span{font-size:var(--fs-xs);font-weight:600;}
+
+  /* content panel */
+  #cdpContent{
+    display:flex;flex-direction:column;
+    flex:1;
+  }
+
+  /* header: date + day */
+  .cdp-header{
+    padding:16px 16px 12px;
+    border-bottom:1px solid var(--b1);
+    direction:rtl;
+  }
+  .cdp-date{font-size:var(--fs-2xl);font-weight:900;color:var(--t1);line-height:1.1;}
+  .cdp-day-lbl{font-size:var(--fs-xs);color:var(--t3);font-weight:600;margin-top:2px;}
+
+  /* sections */
+  .cdp-section{padding:12px 14px;}
+  .cdp-section-lbl{
+    font-size:var(--fs-2xs);font-weight:800;color:var(--t3);
+    letter-spacing:.08em;text-transform:uppercase;
+    margin-bottom:8px;direction:rtl;display:block;
+  }
+
+  /* task items */
+  .cdp-task{
+    display:flex;align-items:center;gap:8px;
+    padding:8px 10px;border-radius:var(--r2);
+    border:1px solid var(--b1);background:var(--bg1);
+    cursor:pointer;transition:var(--dur-fast);
+    direction:rtl;margin-bottom:5px;
+  }
+  .cdp-task:last-child{margin-bottom:0;}
+  .cdp-task:hover{background:var(--bg2);border-color:var(--b2);}
+  .cdp-task-dot{
+    width:7px;height:7px;border-radius:50%;
+    flex-shrink:0;background:var(--t4);
+  }
   .cdp-task-dot.ph{background:var(--red);}
   .cdp-task-dot.pm{background:var(--amber);}
-  .cdp-task-txt{font-size:var(--fs-xs);font-weight:600;color:var(--t1);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .cdp-task-time{font-family:var(--mono);font-size:var(--fs-2xs);color:var(--t3);}
+  .cdp-task-txt{
+    font-size:var(--fs-xs);font-weight:600;color:var(--t1);
+    flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .cdp-task-time{
+    font-family:var(--mono);font-size:var(--fs-2xs);
+    color:var(--t3);flex-shrink:0;
+  }
   .cdp-task.done-cdp .cdp-task-txt{color:var(--t3);text-decoration:line-through;}
-  .cdp-sep{height:1px;background:var(--b1);margin:4px 0;}
-  .cdp-section-lbl{font-size:var(--fs-2xs);font-weight:800;color:var(--t3);letter-spacing:.06em;}
+
+  /* add button */
+  .cdp-add-btn{
+    display:flex;align-items:center;justify-content:center;gap:6px;
+    padding:9px;border-radius:var(--r2);
+    border:1px dashed var(--b2);margin-top:8px;
+    font-size:var(--fs-xs);font-weight:600;color:var(--t3);
+    cursor:pointer;transition:var(--dur-fast);direction:rtl;
+  }
+  .cdp-add-btn:hover{border-color:var(--a);color:var(--a);background:var(--am);}
+
+  .cdp-sep{height:1px;background:var(--b1);}
+  .cdp-no-tasks{
+    font-size:var(--fs-xs);color:var(--t3);
+    text-align:center;padding:16px 0;direction:rtl;
+  }
 
   /* ══ PROJECTS MASTER-DETAIL ══ */
   #pageProjects.page.active{
@@ -3415,23 +3476,40 @@ select.fi{
 
   <!-- Desktop day panel -->
   <div id="calDayPanelDesktop" style="display:none">
+    <!-- Empty state -->
     <div class="cdp-empty" id="cdpEmpty">
-      <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="var(--b2)" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-      <span style="font-size:var(--fs-xs)">یه روز انتخاب کن</span>
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <rect x="3" y="4" width="18" height="18" rx="2"/>
+        <line x1="16" y1="2" x2="16" y2="6"/>
+        <line x1="8" y1="2" x2="8" y2="6"/>
+        <line x1="3" y1="10" x2="21" y2="10"/>
+      </svg>
+      <span>یه روز از تقویم انتخاب کن</span>
     </div>
+    <!-- Content -->
     <div id="cdpContent" style="display:none">
-      <div class="cdp-date" id="cdpDate">—</div>
-      <div class="cdp-day-lbl" id="cdpDayLbl">—</div>
-      <div class="cdp-sep"></div>
-      <div class="cdp-section-lbl" id="cdpTasksLbl">کارها</div>
-      <div id="cdpTasks"></div>
-      <div class="cdp-add-btn" onclick="cdpAddTask()">
-        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        افزودن کار برای این روز
+      <!-- Header -->
+      <div class="cdp-header">
+        <div class="cdp-date" id="cdpDate">—</div>
+        <div class="cdp-day-lbl" id="cdpDayLbl">—</div>
       </div>
+      <!-- Tasks section -->
+      <div class="cdp-section">
+        <span class="cdp-section-lbl" id="cdpTasksLbl">کارها</span>
+        <div id="cdpTasks"></div>
+        <div class="cdp-add-btn" onclick="cdpAddTask()">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          افزودن کار برای این روز
+        </div>
+      </div>
+      <!-- Events section -->
       <div class="cdp-sep" id="cdpEventSep" style="display:none"></div>
-      <div class="cdp-section-lbl" id="cdpEventsLbl" style="display:none">رویدادها</div>
-      <div id="cdpEvents"></div>
+      <div class="cdp-section" id="cdpEventsSection" style="display:none">
+        <span class="cdp-section-lbl">رویدادها</span>
+        <div id="cdpEvents"></div>
+      </div>
     </div>
   </div>
 </div><!-- /pageCalendar -->
@@ -9004,10 +9082,10 @@ function cdpShowDay(jy,jm,jd){
 
   const tasksEl=document.getElementById('cdpTasks');
   const lblEl=document.getElementById('cdpTasksLbl');
-  if(lblEl) lblEl.textContent=`کارها (${num(dayTasks.length)})`;
+  if(lblEl) lblEl.textContent=`کارها${dayTasks.length?` — ${num(dayTasks.length)}`:''}`;
   if(tasksEl){
     if(!dayTasks.length){
-      tasksEl.innerHTML=`<div style="font-size:var(--fs-xs);color:var(--t3);padding:8px 0">کاری برای این روز نیست</div>`;
+      tasksEl.innerHTML=`<div class="cdp-no-tasks">کاری برای این روز نیست</div>`;
     } else {
       const pri=t=>(t.priority||'low').charAt(0);
       tasksEl.innerHTML=dayTasks.map(t=>`
