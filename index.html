@@ -2743,7 +2743,7 @@ select.fi{
     <span class="dsb-filter" id="dsbFilter">همه</span>
   </div>
   <div class="dsb-right">
-    <span class="dsb-kb"><kbd>Ctrl</kbd><kbd>N</kbd> کار جدید</span>
+    <span class="dsb-kb"><kbd>n</kbd> کار جدید</span>
     <span class="dsb-sep">·</span>
     <span class="dsb-kb"><kbd>j</kbd><kbd>k</kbd> ناوبری</span>
     <span class="dsb-sep">·</span>
@@ -8873,17 +8873,17 @@ document.addEventListener('keydown',function(e){
   if(window.innerWidth<900) return;
   const tag=e.target.tagName;
 
-  // Ctrl+N — quick add از هر جای صفحه
-  if((e.ctrlKey||e.metaKey)&&e.key==='n'){
+  // 'n' — quick add (وقتی هیچ input فعال نیست)
+  // Ctrl+N رو browser می‌دزده، پس از 'n' ساده استفاده می‌کنیم
+  if(e.key==='n'&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&
+     tag!=='INPUT'&&tag!=='TEXTAREA'&&!e.target.isContentEditable){
     e.preventDefault();
     const activePage=document.querySelector('.page.active');
-    // اگه صفحه Home نیست، برو Home
     if(activePage&&activePage.id!=='pageHome') goPage('Home');
     setTimeout(()=>{
       const inp=document.getElementById('qcapInp');
       const box=document.getElementById('qcapBox');
       if(!inp) return;
-      // scroll به qcap
       box?.scrollIntoView({behavior:'smooth',block:'start'});
       inp.focus();
       inp.select();
@@ -8895,7 +8895,6 @@ document.addEventListener('keydown',function(e){
   if(e.key==='Escape'){dpClose();return;}
   if(e.key===' '&&_dpTaskId){e.preventDefault();dpToggleDone();return;}
   if(e.key==='e'&&_dpTaskId){dpEditFull();return;}
-  // j/k navigation
   if((e.key==='j'||e.key==='k')&&_dpTaskId){
     const cards=Array.from(document.querySelectorAll('.tc-wrap[data-task-id]'));
     const idx=cards.findIndex(c=>c.dataset.taskId===_dpTaskId);
