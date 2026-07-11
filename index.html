@@ -2392,11 +2392,18 @@ select.fi{
   .proj-main-empty svg{opacity:.3;}
 
   /* ══ BIRTHDAYS PAGE ══ */
-  /* header */
+  #pageBirthdays.page.active{
+    display:grid;
+    grid-template-columns:1fr 280px;
+    grid-template-rows:auto 1fr;
+    align-items:start;min-height:100svh;
+    padding-top:calc(var(--topbar-h)+20px);padding-bottom:48px;
+  }
   .bd-page-hdr{
+    grid-column:1/-1;
     display:flex;align-items:center;justify-content:space-between;
-    padding:0 24px 14px;
-    direction:rtl;
+    padding:0 24px 16px;direction:rtl;
+    border-bottom:1px solid var(--b1);
   }
   .bd-page-title{font-size:var(--fs-xl);font-weight:900;color:var(--t1);}
   .bd-add-btn-desktop,.proj-add-btn{
@@ -2404,48 +2411,75 @@ select.fi{
     padding:8px 16px;border-radius:var(--r5);
     background:var(--a);color:#fff;
     font-size:var(--fs-xs);font-weight:700;font-family:var(--f);
-    border:none;cursor:pointer;
-    transition:var(--dur-fast) var(--ease-out);
-    flex-shrink:0;
+    border:none;cursor:pointer;transition:var(--dur-fast);flex-shrink:0;
   }
-  .bd-add-btn-desktop:hover{background:var(--a2);}
-
-  /* content area */
-  .bd-content{
-    padding:0 24px;
-    max-width:820px;
+  .bd-add-btn-desktop:hover,.proj-add-btn:hover{filter:brightness(1.08);}
+  /* main list: right */
+  .bd-main-area{padding:16px 24px 0;min-width:0;direction:rtl;}
+  /* side panel: left */
+  #bdSidePanel{
+    position:sticky;top:calc(var(--topbar-h)+20px);
+    height:calc(100svh - var(--topbar-h) - 80px);
+    overflow-y:auto;scrollbar-width:none;
+    border-right:1px solid var(--b1);
+    padding:16px 14px 0;direction:rtl;
   }
-
-  /* banner */
-  #bdNextBanner{
-    border-right:3px solid var(--red);
-    font-size:var(--fs-sm);
-    direction:rtl;
+  #bdSidePanel::-webkit-scrollbar{display:none;}
+  .bdsp-title{font-size:var(--fs-2xs);font-weight:800;color:var(--t3);letter-spacing:.08em;margin-bottom:10px;}
+  /* featured next card */
+  .bd-next-card{
+    background:var(--redm);border:1px solid rgba(229,62,90,.2);
+    border-radius:var(--r3);padding:14px;margin-bottom:14px;
   }
-
-  /* two-column grid for birthday items */
-  #bdList{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:10px;
+  .bd-next-lbl{font-size:var(--fs-2xs);font-weight:800;color:var(--red);letter-spacing:.06em;margin-bottom:6px;}
+  .bd-next-name{font-size:var(--fs-md);font-weight:800;color:var(--t1);}
+  .bd-next-date{font-size:var(--fs-xs);color:var(--t3);margin-top:2px;}
+  .bd-next-cnt{font-size:1.8rem;font-weight:900;font-family:var(--mono);color:var(--red);line-height:1;margin-top:8px;}
+  .bd-next-cnt span{font-size:var(--fs-xs);font-weight:700;color:var(--t3);}
+  /* side mini items */
+  .bd-side-item{
+    display:flex;align-items:center;gap:8px;
+    padding:8px 10px;border-radius:var(--r2);
+    border:1px solid var(--b1);background:var(--bg1);
+    margin-bottom:5px;cursor:pointer;transition:var(--dur-fast);
   }
-  #bdList .bd-section-hdr{
-    grid-column:1/-1; /* full width headers */
-    padding:10px 0 4px;
-    font-size:var(--fs-xs);font-weight:800;color:var(--t3);
-    letter-spacing:.08em;direction:rtl;
+  .bd-side-item:hover{background:var(--bg2);}
+  .bd-side-days{font-family:var(--mono);font-size:var(--fs-2xs);font-weight:800;color:var(--t3);width:26px;text-align:center;flex-shrink:0;}
+  .bd-side-name{font-size:var(--fs-xs);font-weight:600;color:var(--t1);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  /* main list cards */
+  .bd-section-hdr{
+    font-size:var(--fs-xs);font-weight:800;color:var(--t3);letter-spacing:.08em;
+    padding:14px 0 8px;border-bottom:1px solid var(--b1);margin-bottom:10px;
+    display:flex;align-items:center;justify-content:space-between;
   }
-  #bdList .bd-item{
-    border-radius:var(--r3);
-    border:1px solid var(--b1);
-    background:var(--bg1);
-    transition:var(--dur-fast) var(--ease-out);
+  .bd-section-count{
+    font-family:var(--mono);background:var(--bg2);border:1px solid var(--b1);
+    border-radius:var(--r5);padding:1px 8px;
+    font-size:var(--fs-2xs);font-weight:700;color:var(--t3);
   }
-  #bdList .bd-item:hover{
-    background:var(--bg2);
-    border-color:var(--b2);
-    box-shadow:0 2px 8px rgba(0,0,0,.06);
+  .bd-item{
+    display:flex;align-items:center;gap:12px;
+    padding:12px 14px;border-radius:var(--r3);
+    border:1px solid var(--b1);background:var(--bg1);
+    margin-bottom:8px;cursor:pointer;
+    transition:var(--dur-fast) var(--ease-out);direction:rtl;
   }
+  .bd-item:hover{background:var(--bg2);border-color:var(--b2);box-shadow:0 2px 8px rgba(0,0,0,.06);}
+  .bd-avatar{
+    width:42px;height:42px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:var(--fs-lg);font-weight:900;color:#fff;flex-shrink:0;
+  }
+  .bd-item-body{flex:1;min-width:0;}
+  .bd-item-name{font-size:var(--fs-sm);font-weight:700;color:var(--t1);}
+  .bd-item-meta{font-size:var(--fs-xs);color:var(--t3);margin-top:2px;}
+  .bd-badge{
+    font-size:var(--fs-2xs);font-weight:800;font-family:var(--mono);
+    padding:3px 10px;border-radius:var(--r5);flex-shrink:0;
+  }
+  .bd-badge.bd-today{background:var(--redm);color:var(--red);}
+  .bd-badge.bd-soon{background:var(--ambm);color:var(--amber);}
+  .bd-badge.bd-later{background:var(--bg2);color:var(--t3);}
      ۲. Button opacity hierarchy
   ══════════════════════════════ */
 
@@ -3476,24 +3510,30 @@ select.fi{
 <!-- PAGE: CALENDAR -->
 <!-- صفحهٔ تولد و مناسبت‌ها -->
 <div class="page" id="pageBirthdays">
+  <!-- Header: full width -->
   <div class="bd-page-hdr">
     <div class="bd-page-title">تولد و مناسبت‌ها</div>
     <button class="bd-add-btn-desktop" onclick="openBirthdayForm(null)">
-      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
         <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
       </svg>
       افزودن مناسبت
     </button>
   </div>
-  <div class="bag-pg bd-content">
-    <div id="bdNextBanner" style="display:none;background:var(--redm);border-radius:var(--r3);padding:11px 14px;margin-bottom:16px;font-size:.82rem;color:var(--red);font-weight:600;line-height:1.5;"></div>
+  <!-- Main list: right column -->
+  <div class="bd-main-area">
+    <div id="bdNextBanner" style="display:none"></div>
     <div id="bdList"></div>
     <div id="bdEmpty" style="display:none;flex-direction:column;align-items:center;padding:60px 0 20px;gap:12px;text-align:center;">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--t4)" stroke-width="1.3" stroke-linecap="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--t4)" stroke-width="1.3" stroke-linecap="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+      </svg>
       <div style="font-size:.86rem;font-weight:700;color:var(--t2);">هنوز مناسبتی ثبت نشده</div>
       <button class="bag-add-btn" style="width:auto;padding:9px 20px;" onclick="openBirthdayForm(null)">+ افزودن اولین مناسبت</button>
     </div>
   </div>
+  <!-- Side panel: left column -->
+  <div id="bdSidePanel"></div>
 </div>
 <!-- فرم افزودن/ویرایش تولد -->
 <div class="sheet" id="shBirthday">
@@ -6411,6 +6451,132 @@ function renderBirthdayPage(){
   const banner=document.getElementById('bdNextBanner');
   const rowSub=document.getElementById('birthdayRowSub');
   if(!list) return;
+  const sorted=[...birthdays].sort((a,b)=>_bdDaysUntil(a.month,a.day)-_bdDaysUntil(b.month,b.day));
+  if(rowSub){
+    if(!sorted.length) rowSub.textContent='هنوز مناسبتی ثبت نشده';
+    else{
+      const d=_bdDaysUntil(sorted[0].month,sorted[0].day);
+      rowSub.textContent=d===0?`🎉 امروز: ${sorted[0].name}`:`${num(birthdays.length)} نفر · ${num(d)} روز تا بعدی`;
+    }
+  }
+
+  const emptyEl=document.getElementById('bdEmpty');
+  if(!sorted.length){
+    list.innerHTML='';
+    if(emptyEl) emptyEl.style.display='flex';
+    if(banner) banner.style.display='none';
+    _bdRenderSidePanel([]);
+    return;
+  }
+  if(emptyEl) emptyEl.style.display='none';
+
+  // Avatar color
+  const BD_COLORS=['#e53e5a','#d97706','#00b87a','#2563eb','#7c3aed','#0891b2','#be185d'];
+  const _avatarColor=(name)=>{
+    let h=0; for(const c of name) h=(h<<5)-h+c.charCodeAt(0);
+    return BD_COLORS[Math.abs(h)%BD_COLORS.length];
+  };
+  const _initial=(name)=>[...name].find(c=>/[\u0600-\u06FF]/.test(c)||/[a-zA-Z]/.test(c))||name[0]||'؟';
+
+  const groups={soon:[],month:[],later:[]};
+  sorted.forEach(b=>{
+    const d=_bdDaysUntil(b.month,b.day);
+    if(d<=7) groups.soon.push({b,d});
+    else if(d<=30) groups.month.push({b,d});
+    else groups.later.push({b,d});
+  });
+
+  // Side panel
+  if(window.innerWidth>=900) _bdRenderSidePanel(sorted);
+
+  // Banner (mobile only)
+  if(banner){
+    const next=sorted[0];
+    if(next){
+      const d=_bdDaysUntil(next.month,next.day);
+      if(d<=7&&window.innerWidth<900){
+        banner.style.display='block';
+        banner.textContent=d===0?`🎉 امروز تولد/مناسبت ${next.name} است!`:
+                           d===1?`🎂 فردا تولد/مناسبت ${next.name} — آماده باش!`:
+                           `⏳ ${num(d)} روز مانده به تولد/مناسبت ${next.name}`;
+      } else banner.style.display='none';
+    } else banner.style.display='none';
+  }
+
+  const _renderCard=(b,d)=>{
+    const age=_bdNextAge(b.year,b.month,b.day);
+    const ageStr=age?` — ${num(age)} ساله`:'';
+    const badgeCls=d===0?'bd-today':d<=7?'bd-soon':'bd-later';
+    const badgeTxt=d===0?'🎉 امروز':d===1?'فردا':`${num(d)} روز`;
+    const color=_avatarColor(b.name);
+    const initial=_initial(b.name);
+    return `<div class="bd-item" onclick="openBirthdayForm('${b.id}')">
+      <div class="bd-avatar" style="background:${color}">${initial}</div>
+      <div class="bd-item-body">
+        <div class="bd-item-name">${esc(b.name)}</div>
+        <div class="bd-item-meta">${num(b.day)} ${BD_MONTH_NAMES[b.month]}${ageStr} · ${BD_CAT_LABEL[b.cat]||b.cat}${b.note?` · ${esc(b.note.slice(0,30))}`:''}
+        </div>
+      </div>
+      <div class="bd-badge ${badgeCls}">${badgeTxt}</div>
+    </div>`;
+  };
+
+  const _renderGroup=(items,title)=>{
+    if(!items.length) return '';
+    return `<div class="bd-section-hdr">
+      ${title}
+      <span class="bd-section-count">${num(items.length)}</span>
+    </div>`+items.map(({b,d})=>_renderCard(b,d)).join('');
+  };
+
+  list.innerHTML=
+    _renderGroup(groups.soon,'این هفته')+
+    _renderGroup(groups.month,'این ماه')+
+    _renderGroup(groups.later,'بعداً');
+}
+
+function _bdRenderSidePanel(sorted){
+  const el=document.getElementById('bdSidePanel');
+  if(!el||window.innerWidth<900) return;
+  if(!sorted.length){
+    el.innerHTML=`<div style="color:var(--t3);font-size:var(--fs-xs);text-align:center;padding:24px 0">مناسبتی ثبت نشده</div>`;
+    return;
+  }
+  const next=sorted[0];
+  const d=_bdDaysUntil(next.month,next.day);
+  let html=`<div class="bdsp-title">نزدیک‌ترین</div>`;
+
+  // Featured card
+  html+=`<div class="bd-next-card" onclick="openBirthdayForm('${next.id}')">
+    <div class="bd-next-lbl">بعدی</div>
+    <div class="bd-next-name">${esc(next.name)}</div>
+    <div class="bd-next-date">${num(next.day)} ${BD_MONTH_NAMES[next.month]}</div>
+    <div class="bd-next-cnt">${d===0?'🎉':num(d)}<span>${d===0?' امروز!':' روز مانده'}</span></div>
+  </div>`;
+
+  // Mini list of upcoming (next 7, excluding first)
+  const upcoming=sorted.slice(1).filter(b=>_bdDaysUntil(b.month,b.day)<=30).slice(0,6);
+  if(upcoming.length){
+    html+=`<div class="bdsp-title" style="margin-top:12px">این ماه</div>`;
+    html+=upcoming.map(b=>{
+      const days=_bdDaysUntil(b.month,b.day);
+      return `<div class="bd-side-item" onclick="openBirthdayForm('${b.id}')">
+        <span class="bd-side-emo">${BD_TYPE_EMO[b.type]||'🎂'}</span>
+        <span class="bd-side-name">${esc(b.name)}</span>
+        <span class="bd-side-days">${days===0?'امروز':num(days)+'د'}</span>
+      </div>`;
+    }).join('');
+  }
+
+  html+=`<div style="margin-top:16px">
+    <button class="bd-add-btn-desktop" onclick="openBirthdayForm(null)" style="width:100%;justify-content:center">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      افزودن مناسبت
+    </button>
+  </div>`;
+
+  el.innerHTML=html;
+}
   const sorted=[...birthdays].sort((a,b)=>_bdDaysUntil(a.month,a.day)-_bdDaysUntil(b.month,b.day));
   if(rowSub){
     if(!sorted.length) rowSub.textContent='هنوز مناسبتی ثبت نشده';
