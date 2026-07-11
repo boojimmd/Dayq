@@ -6577,26 +6577,6 @@ function _bdRenderSidePanel(sorted){
 
   el.innerHTML=html;
 }
-  const sorted=[...birthdays].sort((a,b)=>_bdDaysUntil(a.month,a.day)-_bdDaysUntil(b.month,b.day));
-  if(rowSub){
-    if(!sorted.length) rowSub.textContent='هنوز مناسبتی ثبت نشده';
-    else{
-      const d=_bdDaysUntil(sorted[0].month,sorted[0].day);
-      rowSub.textContent=d===0?`🎉 امروز: ${sorted[0].name}`:`${num(birthdays.length)} نفر · ${num(d)} روز تا بعدی`;
-    }
-  }
-  if(banner){
-    const next=sorted[0];
-    if(next){
-      const d=_bdDaysUntil(next.month,next.day);
-      if(d<=7){
-        banner.style.display='block';
-        banner.textContent=d===0?`🎉 امروز تولد/مناسبت ${next.name} است!`:
-                           d===1?`🎂 فردا تولد/مناسبت ${next.name} — آماده باش!`:
-                           `⏳ ${num(d)} روز مانده به تولد/مناسبت ${next.name}`;
-      } else banner.style.display='none';
-    } else banner.style.display='none';
-  }
 
 let _bdEditType='birthday';
 const BD_MONTH_WORDS={'فروردین':1,'اردیبهشت':2,'خرداد':3,'تیر':4,'مرداد':5,'شهریور':6,'مهر':7,'آبان':8,'ابان':8,'آذر':9,'اذر':9,'دی':10,'بهمن':11,'اسفند':12};
