@@ -2191,12 +2191,15 @@ select.fi{
   #pageCalendar.page.active{
     display:grid;grid-template-columns:1fr 280px;
     align-items:start;min-height:100svh;
-    padding-top:calc(var(--topbar-h)+12px);padding-bottom:0;
+    padding-top:0;padding-bottom:0;
   }
-  .cal-page{min-width:0;padding-bottom:48px;}
+  .cal-page{
+    min-width:0;padding-bottom:48px;
+    padding-top:calc(var(--topbar-h)+12px);
+  }
   #calDayPanelDesktop{
-    position:sticky;top:calc(var(--topbar-h)+12px);
-    height:calc(100svh - var(--topbar-h) - 24px);
+    position:sticky;top:0;
+    height:100svh;
     overflow-y:auto;scrollbar-width:none;
     border-right:1px solid var(--b1);
     background:var(--bg1);
@@ -2390,7 +2393,7 @@ select.fi{
     direction:rtl;
   }
   .bd-page-title{font-size:var(--fs-xl);font-weight:900;color:var(--t1);}
-  .bd-add-btn-desktop{
+  .bd-add-btn-desktop,.proj-add-btn{
     display:flex;align-items:center;gap:7px;
     padding:8px 16px;border-radius:var(--r5);
     background:var(--a);color:#fff;
@@ -3290,6 +3293,18 @@ select.fi{
 
 <!-- PAGE: ME -->
 <div class="page" id="pageMe">
+  <div id="meDashboard" style="display:none">
+    <div class="me-stat-grid" id="meDashStats"></div>
+    <div class="me-dash-section">
+      <div class="me-dash-lbl">فعالیت ۹۰ روز اخیر</div>
+      <div class="me-heatmap" id="meHeatmap"></div>
+    </div>
+    <div class="me-dash-section">
+      <div class="me-dash-lbl">براساس دسته</div>
+      <div id="meCatBars"></div>
+    </div>
+  </div>
+
   <div class="me-pg">
     <div class="me-hdr">
       <div class="me-av"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
@@ -3408,20 +3423,7 @@ select.fi{
     </div>
   </div>
   </div><!-- /me-pg -->
-
-  <div id="meDashboard" style="display:none">
-    <div class="me-stat-grid" id="meDashStats"></div>
-    <div class="me-dash-section">
-      <div class="me-dash-lbl">فعالیت ۹۰ روز اخیر</div>
-      <div class="me-heatmap" id="meHeatmap"></div>
-    </div>
-    <div class="me-dash-section">
-      <div class="me-dash-lbl">براساس دسته</div>
-      <div id="meCatBars"></div>
-    </div>
-  </div>
 </div>
-
 <!-- PAGE: PROJECTS -->
 <div class="page" id="pageProjects">
   <!-- Main content (column 1 = RIGHT in RTL) -->
@@ -3449,7 +3451,7 @@ select.fi{
   <div class="proj-sidebar" id="projSidebar" style="display:none">
     <div class="proj-sb-header">
       <span class="proj-sb-title">پروژه‌ها</span>
-      <button class="bd-add-btn-desktop" onclick="openAddProject()">
+      <button class="proj-add-btn" onclick="openAddProject()">
         <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
           <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
@@ -3611,6 +3613,8 @@ select.fi{
 
   <!-- Desktop day panel -->
   <div id="calDayPanelDesktop" style="display:none">
+    <!-- spacer — محتوا رو زیر topbar می‌بره -->
+    <div style="height:calc(var(--topbar-h) + 12px);flex-shrink:0"></div>
     <!-- Empty state -->
     <div class="cdp-empty" id="cdpEmpty">
       <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
