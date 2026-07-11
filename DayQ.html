@@ -2283,7 +2283,12 @@ select.fi{
   #pageProjects.page.active{
     display:grid;grid-template-columns:1fr 240px;
     align-items:start;min-height:100svh;
-    padding-top:calc(var(--topbar-h)+28px);padding-bottom:0;
+    padding-top:0;padding-bottom:0;
+  }
+  /* padding-top مستقیم روی content — نه grid container */
+  .proj-main{
+    min-width:0;
+    padding:calc(var(--topbar-h) + 24px) 20px 48px;
   }
 
   /* ─── Sidebar ─── */
@@ -2355,7 +2360,7 @@ select.fi{
   .proj-sb-empty span{font-size:var(--fs-xs);}
 
   /* ─── Main content area ─── */
-  .proj-main{min-width:0;padding:0 20px 48px;}
+  /* proj-main padding در #pageProjects.page.active تعریف شد */
   .proj-main-hdr{
     display:flex;align-items:center;gap:10px;
     margin-bottom:16px;padding-bottom:12px;
