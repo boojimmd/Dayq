@@ -219,19 +219,17 @@ input,textarea{user-select:text;-webkit-user-select:text;}
 /* TOPBAR — fixed at top, never scrolls */
 .page{
   position:absolute;
-  /* top offset = topbar height, handled by padding inside page */
   top:0;
   left:0;
   right:0;
   margin:0 auto;
-  bottom:var(--nav-h);
+  bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px));
   overflow-y:auto;
   overflow-x:hidden;
   -webkit-overflow-scrolling:touch;
   overscroll-behavior:contain;
   overscroll-behavior-y:contain;
-  /* iOS keyboard fix: dvh shrinks when keyboard opens */
-  height:calc(100dvh - var(--nav-h));
+  height:calc(100dvh - var(--nav-h) - env(safe-area-inset-bottom,0px));
   scrollbar-width:none;
   display:none;
   background:var(--bg0);
@@ -634,13 +632,13 @@ input,textarea{user-select:text;-webkit-user-select:text;}
   bottom:0;left:0;right:0;
   margin:0 auto;
   width:100%;max-width:430px;
-  height:calc(var(--nav-h) + env(safe-area-inset-bottom,0px));
+  height:var(--nav-h);
+  box-sizing:content-box;
+  padding-bottom:env(safe-area-inset-bottom,0px);
   background:var(--bg2);
   border-top:1px solid var(--b1);
-  display:flex;align-items:flex-start;
-  padding:0 8px;
-  padding-top:4px;
-  padding-bottom:env(safe-area-inset-bottom,0px);
+  display:flex;align-items:center;
+  padding-left:8px;padding-right:8px;
   z-index:50;
   transition:background var(--dur-base) var(--ease-std);
   backdrop-filter:blur(12px);
