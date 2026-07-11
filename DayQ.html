@@ -2281,7 +2281,7 @@ select.fi{
 
   /* ══ PROJECTS MASTER-DETAIL ══ */
   #pageProjects.page.active{
-    display:grid;grid-template-columns:240px 1fr;
+    display:grid;grid-template-columns:1fr 240px;
     align-items:start;min-height:100svh;
     padding-top:calc(var(--topbar-h)+12px);padding-bottom:0;
   }
@@ -2291,9 +2291,10 @@ select.fi{
     position:sticky;top:calc(var(--topbar-h)+12px);
     height:calc(100svh - var(--topbar-h) - 24px);
     overflow-y:auto;scrollbar-width:none;
-    border-left:1px solid var(--b1);
+    border-right:1px solid var(--b1);
     background:var(--bg1);
     display:flex;flex-direction:column;
+    grid-column:2; /* همیشه ستون دوم = سمت چپ در RTL */
   }
   .proj-sidebar::-webkit-scrollbar{display:none;}
 
@@ -2353,7 +2354,7 @@ select.fi{
   .proj-sb-empty span{font-size:var(--fs-xs);}
 
   /* ─── Main content area ─── */
-  .proj-main{min-width:0;padding:0 20px 48px;}
+  .proj-main{min-width:0;padding:0 20px 48px;grid-column:1;}
   .proj-main-hdr{
     display:flex;align-items:center;gap:10px;
     margin-bottom:16px;padding-bottom:12px;
