@@ -857,7 +857,7 @@ select.fi{
 
 
 /* ══════════ PROJECTS PAGE ══════════ */
-.proj-page{padding:0 18px 120px;-webkit-overflow-scrolling:touch;min-height:100%;}
+.proj-page{padding:0 18px 120px;padding-top:calc(var(--topbar-h) + 14px);-webkit-overflow-scrolling:touch;min-height:100%;}
 .proj-page-top{display:flex;align-items:center;justify-content:space-between;padding-top:2px;margin-bottom:14px;}
 .proj-page-title{font-size:1.3rem;font-weight:800;letter-spacing:-.03em;}
 
@@ -2361,6 +2361,8 @@ select.fi{
 
   /* ─── Main content area ─── */
   /* proj-main padding در #pageProjects.page.active تعریف شد */
+  /* proj-page روی دسکتاپ: padding-top از proj-main میاد */
+  .proj-page{padding-top:8px;}
   .proj-main-hdr{
     display:flex;align-items:center;gap:10px;
     margin-bottom:16px;padding-bottom:12px;
