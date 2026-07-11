@@ -2283,7 +2283,7 @@ select.fi{
   #pageProjects.page.active{
     display:grid;grid-template-columns:1fr 240px;
     align-items:start;min-height:100svh;
-    padding-top:calc(var(--topbar-h)+12px);padding-bottom:0;
+    padding-top:calc(var(--topbar-h)+28px);padding-bottom:0;
   }
 
   /* ─── Sidebar ─── */
@@ -4779,6 +4779,7 @@ function goPage(n){
     }
     setTimeout(()=>showCoachMark('calMonthLabel','این سه دکمه، سه‌جور نمایش متفاوت‌اند — ماهانه، هفتگی، یا فهرست ساده','calview','below'),400);
   }
+  if(window.innerWidth>=900) dsbUpdate();
 }
 
 
@@ -9478,32 +9479,6 @@ function dpEditFull(){
 
 /* ── Timer ── */
 function dpTimerToggle(){if(_dpTimerRunning)_dpTimerStop();else _dpTimerStart();}
-function _dpTimerStart(){
-  _dpTimerRunning=true;
-  const btn=document.getElementById('dpTimerBtn');
-  const numEl=document.getElementById('dpTimerNum');
-  if(btn){btn.textContent='مکث';btn.classList.remove('paused');}
-  if(numEl) numEl.classList.add('running');
-  const t0=Date.now()-_dpTimerMs;
-  _dpTimerInterval=setInterval(()=>{_dpTimerMs=Date.now()-t0;_dpUpdateTimerDisplay();},500);
-}
-function _dpTimerStop(){
-  _dpTimerRunning=false;
-  clearInterval(_dpTimerInterval);_dpTimerInterval=null;
-  const btn=document.getElementById('dpTimerBtn');
-  const numEl=document.getElementById('dpTimerNum');
-  if(btn){btn.textContent='شروع';btn.classList.add('paused');}
-  if(numEl) numEl.classList.remove('running');
-  if(_dpTaskId){const t=tasks.find(t=>t.id===_dpTaskId);if(t){t.timerMs=_dpTimerMs;saveAll();}}
-}
-function _dpUpdateTimerDisplay(){
-  const el=document.getElementById('dpTimerNum'); if(!el) return;
-  const s=Math.floor(_dpTimerMs/1000);
-  const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;
-  el.textContent=h>0
-    ?`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`
-    :`${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
-}
 
 /* ── Keyboard navigation (Phase 2) ── */
 document.addEventListener('keydown',function(e){
@@ -9633,9 +9608,6 @@ function dpEditFull(){
 }
 
 /* ── Panel Timer ── */
-function dpTimerToggle(){
-  if(_dpTimerRunning) _dpTimerStop(); else _dpTimerStart();
-}
 function _dpTimerStart(){
   _dpTimerRunning=true;
   const btn=document.getElementById('dpTimerBtn');
