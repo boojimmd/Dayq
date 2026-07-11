@@ -6597,46 +6597,6 @@ function _bdRenderSidePanel(sorted){
       } else banner.style.display='none';
     } else banner.style.display='none';
   }
-  const emptyEl=document.getElementById('bdEmpty');
-  if(!sorted.length){
-    list.innerHTML='';
-    if(emptyEl) emptyEl.style.display='flex';
-    return;
-  }
-  if(emptyEl) emptyEl.style.display='none';
-  const groups={soon:[],month:[],later:[]};
-  sorted.forEach(b=>{
-    const d=_bdDaysUntil(b.month,b.day);
-    if(d<=7) groups.soon.push({b,d});
-    else if(d<=30) groups.month.push({b,d});
-    else groups.later.push({b,d});
-  });
-  let html='';
-  const renderGroup=(items,title)=>{
-    if(!items.length) return;
-    html+=`<div class="bd-section-hdr">${title}</div>`;
-    items.forEach(({b,d})=>{
-      const age=_bdNextAge(b.year,b.month,b.day);
-      const ageStr=age?` — ${num(age)} ساله`:'';
-      const badge=d===0?'امروز!':d===1?'فردا':`${num(d)} روز`;
-      const badgeColor=d<=3?'var(--red)':'var(--amber)';
-      const badgeBg=d<=3?'var(--redm)':'var(--ambm)';
-      html+=`<div class="bd-item" onclick="openBirthdayForm('${b.id}')">
-        <div class="bd-item-emo">${BD_TYPE_EMO[b.type]||'🎂'}</div>
-        <div class="bd-item-body">
-          <div class="bd-item-name">${esc(b.name)}</div>
-          <div class="bd-item-date">${num(b.day)} ${BD_MONTH_NAMES[b.month]}${ageStr} · ${BD_CAT_LABEL[b.cat]||b.cat}</div>
-          ${b.note?`<div style="font-size:.7rem;color:var(--t3);margin-top:1px;">${esc(b.note)}</div>`:''}
-        </div>
-        <div class="bd-item-badge" style="background:${badgeBg};color:${badgeColor};">${badge}</div>
-      </div>`;
-    });
-  };
-  renderGroup(groups.soon,'این هفته');
-  renderGroup(groups.month,'این ماه');
-  renderGroup(groups.later,'بعداً');
-  list.innerHTML=html;
-}
 
 let _bdEditType='birthday';
 const BD_MONTH_WORDS={'فروردین':1,'اردیبهشت':2,'خرداد':3,'تیر':4,'مرداد':5,'شهریور':6,'مهر':7,'آبان':8,'ابان':8,'آذر':9,'اذر':9,'دی':10,'بهمن':11,'اسفند':12};
