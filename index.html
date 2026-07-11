@@ -2294,8 +2294,9 @@ select.fi{
     border-right:1px solid var(--b1);
     background:var(--bg1);
     display:flex;flex-direction:column;
-    grid-column:2; /* همیشه ستون دوم = سمت چپ در RTL */
   }
+  .proj-sidebar::-webkit-scrollbar{display:none;}
+
   .proj-sidebar::-webkit-scrollbar{display:none;}
 
   /* sidebar header */
@@ -2354,7 +2355,7 @@ select.fi{
   .proj-sb-empty span{font-size:var(--fs-xs);}
 
   /* ─── Main content area ─── */
-  .proj-main{min-width:0;padding:0 20px 48px;grid-column:1;}
+  .proj-main{min-width:0;padding:0 20px 48px;}
   .proj-main-hdr{
     display:flex;align-items:center;gap:10px;
     margin-bottom:16px;padding-bottom:12px;
@@ -3416,20 +3417,7 @@ select.fi{
 
 <!-- PAGE: PROJECTS -->
 <div class="page" id="pageProjects">
-  <!-- Desktop: sidebar -->
-  <div class="proj-sidebar" id="projSidebar" style="display:none">
-    <div class="proj-sb-header">
-      <span class="proj-sb-title">پروژه‌ها</span>
-      <button class="bd-add-btn-desktop" onclick="openAddProject()">
-        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
-        پروژه جدید
-      </button>
-    </div>
-    <div class="proj-sb-list" id="projSidebarList"></div>
-  </div>
-  <!-- Main content -->
+  <!-- Main content (column 1 = RIGHT in RTL) -->
   <div class="proj-main" id="projMainArea">
   <div class="proj-page">
     <div class="proj-page-top" style="padding-top:8px">
@@ -3450,6 +3438,19 @@ select.fi{
     </button>
   </div>
   </div><!-- /proj-main -->
+  <!-- Desktop: sidebar (column 2 = LEFT in RTL) -->
+  <div class="proj-sidebar" id="projSidebar" style="display:none">
+    <div class="proj-sb-header">
+      <span class="proj-sb-title">پروژه‌ها</span>
+      <button class="bd-add-btn-desktop" onclick="openAddProject()">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        پروژه جدید
+      </button>
+    </div>
+    <div class="proj-sb-list" id="projSidebarList"></div>
+  </div>
 </div>
 
 <!-- PAGE: CALENDAR -->
@@ -9250,7 +9251,7 @@ let _projSelectedId=null;
 function projDesktopInit(){
   if(window.innerWidth<900) return;
   const sidebar=document.getElementById('projSidebar');
-  if(sidebar) sidebar.style.display='block';
+  if(sidebar) sidebar.style.display='flex';
   projRenderSidebar();
 }
 
