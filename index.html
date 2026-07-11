@@ -29,7 +29,7 @@
   --mono:'SF Mono','Fira Code',monospace;
   --ease:cubic-bezier(.4,0,.2,1);
   --spring:cubic-bezier(.34,1.56,.64,1);
-  --nav-h:62px;
+  --nav-h:calc(54px + env(safe-area-inset-bottom,0px));
   --topbar-h:88px; /* approx fixed topbar height */
 
   /* ── Spacing Scale (4px base) ── */
@@ -219,17 +219,14 @@ input,textarea{user-select:text;-webkit-user-select:text;}
 /* TOPBAR — fixed at top, never scrolls */
 .page{
   position:absolute;
-  top:0;
-  left:0;
-  right:0;
+  top:0;left:0;right:0;
   margin:0 auto;
-  bottom:calc(var(--nav-h) + env(safe-area-inset-bottom,0px));
-  overflow-y:auto;
-  overflow-x:hidden;
+  bottom:var(--nav-h);
+  overflow-y:auto;overflow-x:hidden;
   -webkit-overflow-scrolling:touch;
   overscroll-behavior:contain;
   overscroll-behavior-y:contain;
-  height:calc(100dvh - var(--nav-h) - env(safe-area-inset-bottom,0px));
+  height:calc(100dvh - var(--nav-h));
   scrollbar-width:none;
   display:none;
   background:var(--bg0);
@@ -633,7 +630,7 @@ input,textarea{user-select:text;-webkit-user-select:text;}
   margin:0 auto;
   width:100%;max-width:430px;
   height:var(--nav-h);
-  box-sizing:content-box;
+  box-sizing:border-box;
   padding-bottom:env(safe-area-inset-bottom,0px);
   background:var(--bg2);
   border-top:1px solid var(--b1);
