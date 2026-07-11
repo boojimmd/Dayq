@@ -4575,11 +4575,19 @@ function boot(){
     // فقط وقتی input/textarea focus نیست
     const tag=(document.activeElement||{}).tagName||'';
     if(tag==='INPUT'||tag==='TEXTAREA') return;
-    // N → quick capture focus
+    // N → quick capture focus (+ navigate to Home if needed)
     if(e.key==='n'||e.key==='ن'){
       e.preventDefault();
-      const qi=document.getElementById('qcapInp');
-      if(qi){qi.focus();qi.select();}
+      const activePage=document.querySelector('.page.active');
+      if(activePage&&activePage.id!=='pageHome') goPage('Home');
+      setTimeout(()=>{
+        const qi=document.getElementById('qcapInp');
+        const box=document.getElementById('qcapBox');
+        if(qi){
+          box?.scrollIntoView({behavior:'smooth',block:'start'});
+          qi.focus();qi.select();
+        }
+      }, activePage&&activePage.id!=='pageHome'?180:0);
     }
     // 1-5 → تب‌ها
     if(e.key==='1') switchTab('all');
@@ -9498,25 +9506,6 @@ function _dpUpdateTimerDisplay(){
 document.addEventListener('keydown',function(e){
   if(window.innerWidth<900) return;
   const tag=e.target.tagName;
-
-  // 'n' — quick add (وقتی هیچ input فعال نیست)
-  // Ctrl+N رو browser می‌دزده، پس از 'n' ساده استفاده می‌کنیم
-  if(e.key==='n'&&!e.ctrlKey&&!e.metaKey&&!e.altKey&&
-     tag!=='INPUT'&&tag!=='TEXTAREA'&&!e.target.isContentEditable){
-    e.preventDefault();
-    const activePage=document.querySelector('.page.active');
-    if(activePage&&activePage.id!=='pageHome') goPage('Home');
-    setTimeout(()=>{
-      const inp=document.getElementById('qcapInp');
-      const box=document.getElementById('qcapBox');
-      if(!inp) return;
-      box?.scrollIntoView({behavior:'smooth',block:'start'});
-      inp.focus();
-      inp.select();
-    }, activePage&&activePage.id!=='pageHome' ? 150 : 0);
-    return;
-  }
-
   if(tag==='INPUT'||tag==='TEXTAREA'||e.target.isContentEditable) return;
   if(e.key==='Escape'){dpClose();return;}
   if(e.key===' '&&_dpTaskId){e.preventDefault();dpToggleDone();return;}
