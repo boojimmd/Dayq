@@ -7693,27 +7693,46 @@ async function syncNow(){
   _syncInProgress=true;
   try{
     const snap=_loadSyncSnap();
-    const tasksDiff=_buildSyncDiff(tasks, snap.tasks);
-    const projectsDiff=_buildSyncDiff(projects||[], snap.projects);
+    const tasksDiff=_buildSyncDiff(tasks, snap.tasks||{});
+    const projectsDiff=_buildSyncDiff(projects||[], snap.projects||{});
+    // تولدها — diff مثل tasks
+    const birthdaysDiff=_buildSyncDiff(birthdays||[], snap.birthdays||{});
+    // تنظیمات — بدون کلیدهای device-specific
+    const syncCfg={...cfg, updatedAt:Date.now()};
+    delete syncCfg.pushWorkerUrl; delete syncCfg.syncCode;
 
     const res=await fetch(cfg.pushWorkerUrl.replace(/\/$/,'')+'/sync/push',{
       method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({code:cfg.syncCode, tasks:tasksDiff, projects:projectsDiff})
+      body:JSON.stringify({code:cfg.syncCode, tasks:tasksDiff, projects:projectsDiff, birthdays:birthdaysDiff, cfg:syncCfg})
     });
     if(!res.ok) return;
     const merged=await res.json();
 
     tasks=merged.tasks.filter(t=>!t.deleted);
     projects=merged.projects.filter(p=>!p.deleted);
+    // تولدها
+    if(merged.birthdays){
+      birthdays=(merged.birthdays||[]).filter(b=>!b.deleted);
+      try{localStorage.setItem(SD,JSON.stringify(birthdays));}catch(e){}
+    }
+    // تنظیمات — حفظ کلیدهای device-specific
+    if(merged.cfg){
+      const keep={pushWorkerUrl:cfg.pushWorkerUrl,syncCode:cfg.syncCode};
+      Object.assign(cfg, merged.cfg, keep);
+      saveCfg(); applyTheme(cfg.theme);
+    }
     saveAll(); saveProjects();
 
     const newSnapTasks={}; merged.tasks.forEach(t=>newSnapTasks[t.id]=t);
     const newSnapProjects={}; merged.projects.forEach(p=>newSnapProjects[p.id]=p);
-    localStorage.setItem(SYNC_SNAP_KEY, JSON.stringify({tasks:newSnapTasks, projects:newSnapProjects}));
+    const newSnapBirthdays={}; (merged.birthdays||[]).forEach(b=>newSnapBirthdays[b.id]=b);
+    localStorage.setItem(SYNC_SNAP_KEY, JSON.stringify({tasks:newSnapTasks, projects:newSnapProjects, birthdays:newSnapBirthdays}));
     localStorage.setItem('dq5_sync_lasttime', String(Date.now()));
 
-    renderTasks(); if(typeof renderProjects==='function') renderProjects();
-  }catch(e){ /* اگر اینترنت نبود، بی‌صدا رد شو — دفعهٔ بعد دوباره تلاش می‌شود */ }
+    renderTasks();
+    if(typeof renderProjects==='function') renderProjects();
+    if(typeof renderBirthdayPage==='function' && document.getElementById('pageBirthdays')?.classList.contains('active')) renderBirthdayPage();
+  }catch(e){}
   finally{ _syncInProgress=false; }
 }
 
