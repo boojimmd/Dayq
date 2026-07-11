@@ -2163,11 +2163,17 @@ select.fi{
 
   /* ══ ME DASHBOARD ══ */
   #pageMe.page.active{
-    display:grid;grid-template-columns:1fr 300px;
-    align-items:start;min-height:100svh;
+    display:flex;
+    flex-direction:row; /* در RTL: از راست به چپ */
+    align-items:flex-start;
+    min-height:100svh;
     margin-right:220px;margin-left:0;
     padding-top:calc(var(--topbar-h) + 28px);padding-bottom:48px;
   }
+  /* settings: راست، flex:1 */
+  #pageMe .me-pg{flex:1;min-width:0;}
+  /* dashboard: چپ، ثابت ۳۰۰px */
+  #meDashboard{width:300px;flex-shrink:0;}
   /* settings ستون راست — عرض ثابت */
   .me-pg{max-width:none;padding:0 16px;}
   /* dashboard ستون چپ — 1fr */
@@ -3411,18 +3417,21 @@ select.fi{
     </div>
   </div>
 
-  <div id="meDashboard" style="display:none">
-    <div class="me-stat-grid" id="meDashStats"></div>
-    <div class="me-dash-section">
-      <div class="me-dash-lbl">فعالیت ۹۰ روز اخیر</div>
-      <div class="me-heatmap" id="meHeatmap"></div>
-    </div>
-    <div class="me-dash-section">
-      <div class="me-dash-lbl">براساس دسته</div>
-      <div id="meCatBars"></div>
+</div>
+
+  <div id="meDashboard">
+    <div id="meDashContent" style="display:none">
+      <div class="me-stat-grid" id="meDashStats"></div>
+      <div class="me-dash-section">
+        <div class="me-dash-lbl">فعالیت ۹۰ روز اخیر</div>
+        <div class="me-heatmap" id="meHeatmap"></div>
+      </div>
+      <div class="me-dash-section">
+        <div class="me-dash-lbl">براساس دسته</div>
+        <div id="meCatBars"></div>
+      </div>
     </div>
   </div>
-</div>
 
 </div>
 
@@ -9128,8 +9137,8 @@ function ctxDelete(){
 /* ══ ME DASHBOARD ══ */
 function renderMeDashboard(){
   if(window.innerWidth<900) return;
-  const dash=document.getElementById('meDashboard');
-  if(dash) dash.style.display='block';
+  const cont=document.getElementById('meDashContent');
+  if(cont) cont.style.display='block';
 
   const allTasks=tasks||[];
   const done=allTasks.filter(t=>t.done||t.status==='done').length;
