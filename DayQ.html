@@ -942,8 +942,8 @@ select.fi{
 .cal-day-evts{display:flex;flex-direction:column;gap:1.5px;width:100%;align-items:stretch;overflow:hidden;}
 .cal-evt-chip{font-size:.56rem;font-weight:600;padding:1.5px 5px;border-radius:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.35;text-align:right;flex-shrink:0;}
 .cal-evt-more{font-size:.55rem;color:var(--t3);font-weight:700;padding:0 4px;}
-.cal-dots{display:flex;gap:2px;justify-content:center;flex-wrap:wrap;margin-top:2px;}
-.cal-dot{width:4px;height:4px;border-radius:50%;flex-shrink:0;opacity:.85;}
+.cal-dots{display:flex;gap:3px;justify-content:flex-start;padding-right:4px;margin-bottom:2px;}
+.cal-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;opacity:.9;}
 
 /* Selected day tasks */
 .cal-selected-day{background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r4);padding:var(--sp4);transition:background var(--dur-base) var(--ease-std);margin-bottom:10px;box-shadow:0 1px 6px rgba(0,0,0,.04);}
@@ -8735,9 +8735,16 @@ function renderCal(){
     }).join('');
     const moreCount=dayTasks.length-visTasks.length;
     const moreEl=moreCount>0?`<div class="cal-evt-more">+${num(moreCount)} مورد دیگر</div>`:'';
+    // dots برای موبایل — همیشه نشون بده
+    const dots=dayTasks.slice(0,3).map(t=>{
+      const proj=projects.find(p=>p.id===t.projectId);
+      const c=proj?proj.color:(t.priority==='high'?'#e53e5a':t.priority==='med'?'#d97706':'#00b87a');
+      return `<div class="cal-dot" style="background:${c}"></div>`;
+    }).join('');
+    const dotsEl=dayTasks.length?`<div class="cal-dots">${dots}</div>`:'';
     const holiday=IR_HOLIDAYS[dateKey];
     const holEl=holiday?`<div class="cal-day-holiday">${esc(holiday.split('،')[0])}</div>`:'';
-    dayEl.innerHTML=`<div class="cal-day-num">${num(d)}</div>${holEl}<div class="cal-day-evts">${chips}${moreEl}</div>`;
+    dayEl.innerHTML=`<div class="cal-day-num">${num(d)}</div>${holEl}${dotsEl}<div class="cal-day-evts">${chips}${moreEl}</div>`;
     dayEl.onclick=()=>calSelectDay(dateKey,d);
     daysEl.appendChild(dayEl);
   }
