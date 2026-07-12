@@ -8266,7 +8266,7 @@ function renderProjects(){
     // progress bar
     const prog=document.createElement('div');
     prog.className='proj-prog';
-    prog.innerHTML='<div class="proj-prog-fill" style="transform:scaleX('\+(pct/100).toFixed(3)+');background:'+proj.color+'"></div>';
+    const _scl=(pct/100).toFixed(3);prog.innerHTML='<div class="proj-prog-fill" style="transform:scaleX('+_scl+');background:'+proj.color+'"></div>';
     card.appendChild(prog);
 
     // tasks container — build BEFORE appending card to DOM
