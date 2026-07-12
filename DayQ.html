@@ -6187,13 +6187,27 @@ function qcHideToolbar(){
     }
   }, 150);
 }
+/* ── Persian text normalization (الهام از پاک‌نویس) ── */
+function normalizePersian(t){
+  if(!t) return t;
+  return t
+    .replace(/ك/g,'ک')          // ك عربی → ک فارسی
+    .replace(/ي/g,'ی')          // ي عربی → ی فارسی
+    .replace(/[٠١٢٣٤٥٦٧٨٩]/g,d=>String.fromCharCode(d.charCodeAt(0)-1584+1776)) // ٠-٩ عربی → ۰-۹ فارسی
+    .replace(/\?/g,'؟')         // ? → ؟
+    .replace(/;/g,'؛')          // ; → ؛
+    .replace(/,(?=\S)/g,'، ')   // , بدون فاصله → ،
+    .replace(/  +/g,' ')        // فاصله اضافه
+    .trim();
+}
+
 function _qcCreateOne(rawSeg, qcCatFallback, qcPriFallback){
   const parsed = nlpParse(rawSeg);
   let text=rawSeg, cat=qcCatFallback, pri=qcPriFallback;
   let deadline=null, time='', recur='none', recurBase=null;
 
   if(parsed){
-    text     = parsed.cleanText || rawSeg;
+    text     = normalizePersian(parsed.cleanText || rawSeg);
     cat      = parsed.cat       || qcCatFallback;
     pri      = parsed.priority  || qcPriFallback;
     deadline = parsed.deadline  || null;
@@ -9671,7 +9685,7 @@ function dpSaveTitleDebounced(){
   _dpSaveTitleT=setTimeout(()=>{
     const t=tasks.find(t=>t.id===_dpTaskId); if(!t) return;
     const val=document.getElementById('dpTitle')?.textContent?.trim()||'';
-    if(val&&val!==t.text){t.text=val;saveAll();renderTasks();}
+    if(val&&val!==t.text){t.text=normalizePersian(val);saveAll();renderTasks();}
   },600);
 }
 
@@ -9801,7 +9815,7 @@ function dpSaveTitleDebounced(){
   _dpSaveTitleT=setTimeout(()=>{
     const t=tasks.find(t=>t.id===_dpTaskId); if(!t) return;
     const val=document.getElementById('dpTitle')?.textContent?.trim()||'';
-    if(val&&val!==t.text){t.text=val;saveAll();renderTasks();}
+    if(val&&val!==t.text){t.text=normalizePersian(val);saveAll();renderTasks();}
   },600);
 }
 
