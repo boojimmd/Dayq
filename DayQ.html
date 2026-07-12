@@ -314,7 +314,7 @@ input,textarea{user-select:text;-webkit-user-select:text;}
   cursor:pointer;transition:var(--dur-fast) var(--ease-out);flex-shrink:0;
 }
 .qpb svg{width:9px;height:9px;border-radius:50%;}
-.qpb:active{transform:scale(.88);}
+.qpb:active{transform:scale(.94);}
 .qpb.active-high{background:var(--redm);border-color:rgba(229,62,90,.3);}
 .qpb.active-med{background:var(--ambm);border-color:rgba(217,119,6,.3);}
 .qpb.active-low{background:var(--bg3);border-color:var(--b1);}
@@ -408,6 +408,16 @@ input,textarea{user-select:text;-webkit-user-select:text;}
 .sec-cnt{font-size:var(--fs-2xs);font-weight:700;color:var(--t3);font-family:var(--mono);}
 
 /* TASK CARD — swipe to complete (Things 3 style) */
+/* stagger — Emil: 30-80ms بین هر item */
+@keyframes tcFadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.tc-list-anim .tc-wrap{animation:tcFadeIn 200ms var(--ease-out) both;}
+.tc-list-anim .tc-wrap:nth-child(1){animation-delay:0ms}
+.tc-list-anim .tc-wrap:nth-child(2){animation-delay:40ms}
+.tc-list-anim .tc-wrap:nth-child(3){animation-delay:80ms}
+.tc-list-anim .tc-wrap:nth-child(4){animation-delay:120ms}
+.tc-list-anim .tc-wrap:nth-child(5){animation-delay:160ms}
+.tc-list-anim .tc-wrap:nth-child(6){animation-delay:200ms}
+.tc-list-anim .tc-wrap:nth-child(n+7){animation-delay:230ms}
 .tc-wrap{position:relative;margin-bottom:3px;border-radius:var(--r2);overflow:hidden;}
 .tc-swipe-bg{position:absolute;inset:0;display:flex;align-items:center;justify-content:flex-start;padding-right:20px;border-radius:var(--r2);transition:var(--dur-base) var(--ease-std);}
 .tc-swipe-bg.left{background:var(--am);justify-content:flex-end;padding-right:0;padding-left:20px;}
@@ -661,7 +671,7 @@ input,textarea{user-select:text;-webkit-user-select:text;}
 .ni-dot{display:none;}
 .nav-fab{flex:none;width:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;}
 .nav-fab-btn{width:46px;height:46px;border-radius:var(--r3);background:var(--a);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 18px var(--ag),0 2px 8px rgba(0,0,0,.12);transition:var(--dur-base) var(--spring-sm);}
-.nav-fab-btn:active{transform:scale(.86);}
+.nav-fab-btn:active{transform:scale(.95);}
 .nav-fab-btn svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;}
 [data-theme="dark"] .nav-fab-btn svg{stroke:#080c10;}
 .nav-fab-lbl{font-size:.55rem;font-weight:600;color:var(--t3);margin-top:2px;}
@@ -716,7 +726,7 @@ select.fi{
 .ico-cell{aspect-ratio:1;border-radius:var(--r1);background:var(--bg2);border:1.5px solid transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:var(--dur-fast) var(--ease-out);}
 .ico-cell svg{width:19px;height:19px;}
 .ico-cell.sel{background:var(--am);border-color:rgba(0,184,122,.35);}
-.ico-cell:active{transform:scale(.78);}
+.ico-cell:active{transform:scale(.94);}
 .pri-row{display:flex;gap:var(--sp2);}
 .pp{flex:1;padding:9px 0;border-radius:var(--r1);font-size:.7rem;font-weight:600;text-align:center;background:var(--bg2);border:1.5px solid var(--b1);color:var(--t2);cursor:pointer;transition:var(--dur-fast) var(--ease-out);display:flex;align-items:center;justify-content:center;gap:var(--sp1);}
 .est-pp{flex:1;padding:8px 0;border-radius:var(--r1);font-size:var(--fs-xs);font-weight:700;text-align:center;background:var(--bg2);border:1.5px solid var(--b1);color:var(--t2);cursor:pointer;}
@@ -783,7 +793,7 @@ select.fi{
 .tc-remind{width:20px;height:20px;flex-shrink:0;border-radius:var(--r1);display:flex;align-items:center;justify-content:center;background:var(--ambm);color:var(--amber);cursor:pointer;transition:var(--dur-fast) var(--ease-out);}
 .tc-focus{width:20px;height:20px;flex-shrink:0;border-radius:var(--r1);border:none;display:flex;align-items:center;justify-content:center;background:var(--bluem);color:var(--blue);cursor:pointer;transition:var(--dur-fast) var(--ease-out);}
 .tc-focus svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;}
-.tc-focus:active{transform:scale(.88);}
+.tc-focus:active{transform:scale(.94);}
 
 /* ══ FOCUS MODE ══ */
 .focus-overlay{position:fixed;inset:0;background:#0f1420;z-index:980;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
@@ -815,7 +825,7 @@ select.fi{
 .focus-done-q .no{background:transparent;color:rgba(255,255,255,.5);}
 
 .tc-remind svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;}
-.tc-remind:active{transform:scale(.88);}
+.tc-remind:active{transform:scale(.94);}
 .tc-remind.set{background:var(--ambm);color:var(--amber);}
 
 /* ── SYNC SHEET special elements ── */
@@ -1030,7 +1040,7 @@ select.fi{
 .color-picker{display:flex;gap:var(--sp2);flex-wrap:wrap;}
 .cp-dot{width:28px;height:28px;border-radius:50%;cursor:pointer;transition:var(--dur-base) var(--spring);border:2px solid transparent;}
 .cp-dot.sel{transform:scale(1.2);border-color:#fff;box-shadow:0 0 0 2px var(--b1);}
-.cp-dot:active{transform:scale(.88);}
+.cp-dot:active{transform:scale(.94);}
 
 /* ══════════ ADD TASK — deadline field ══════════ */
 .date-inp{width:100%;background:var(--bg2);border:1.5px solid var(--b1);border-radius:var(--r1);padding:var(--sp3) var(--sp4);font-size:var(--fs-md);color:var(--t1);transition:var(--dur-fast) var(--ease-out);direction:ltr;font-family:var(--mono);}
@@ -1088,8 +1098,8 @@ select.fi{
   display:flex;align-items:center;justify-content:center;
   font-family:var(--mono);
 }
-.jdp-day:hover{background:var(--bg3);}
-.jdp-day:active{transform:scale(.88);}
+@media(hover:hover){.jdp-day:hover{background:var(--bg3);}}
+.jdp-day:active{transform:scale(.94);}
 .jdp-day.today{color:var(--a);font-weight:800;}
 .jdp-day.selected{background:var(--a);color:#fff;font-weight:800;}
 [data-theme="dark"] .jdp-day.selected{color:#080c10;}
@@ -1175,8 +1185,8 @@ select.fi{
   color:var(--t2);cursor:pointer;transition:.13s;background:transparent;
   display:flex;align-items:center;justify-content:center;font-family:var(--mono);
 }
-.jci-day:hover{background:var(--bg3);}
-.jci-day:active{transform:scale(.84);}
+@media(hover:hover){.jci-day:hover{background:var(--bg3);}}
+.jci-day:active{transform:scale(.94);}
 .jci-day.jci-today{color:var(--a);font-weight:800;}
 .jci-day.jci-sel{background:var(--a)!important;color:#fff;font-weight:800;box-shadow:0 0 6px var(--ag);}
 [data-theme="dark"] .jci-day.jci-sel{color:#080c10;}
@@ -1582,7 +1592,7 @@ select.fi{
   font-size:var(--fs-2xs);font-weight:600;color:var(--t2);
 }
 .ba svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
-.ba:active{transform:scale(.88);}
+.ba:active{transform:scale(.95);}
 .ba.done-a  {color:var(--a);}
 .ba.done-a:active{background:var(--am);}
 .ba.tmrw-a  {color:var(--amber);}
@@ -2871,16 +2881,19 @@ select.fi{
 .page.active{animation:pIn var(--dur-base) var(--ease-out) both;}
 
 /* ── Toast ── */
-@keyframes toastIn{
-  from{opacity:0;transform:translateY(8px) scale(.95);}
-  to{opacity:1;transform:translateY(0) scale(1);}
+/* toast — transition به جای keyframe (Emil: keyframe روی rapidly-triggered reset می‌شه) */
+.toast{
+  opacity:0;
+  transform:translateY(8px) scale(.96);
+  transition:opacity var(--dur-base) var(--ease-out),
+             transform var(--dur-base) var(--ease-out);
 }
-@keyframes toastOut{
-  from{opacity:1;transform:translateY(0) scale(1);}
-  to{opacity:0;transform:translateY(8px) scale(.95);}
+.toast.show{
+  opacity:1;
+  transform:translateY(0) scale(1);
+  transition:opacity var(--dur-base) var(--ease-out),
+             transform var(--dur-base) var(--ease-out);
 }
-.toast.show{animation:toastIn var(--dur-base) var(--ease-out) both;}
-.toast:not(.show){animation:toastOut var(--dur-fast) var(--ease-out) both;}
 
 /* ── کارت تسک tap ── */
 .tc:active{transform:scale(.97);}
@@ -5528,6 +5541,7 @@ function renderTasks(){
   // iOS-safe DOM clear
   window._visTasks = vis; // ذخیره برای status bar
   while(list.firstChild) list.removeChild(list.firstChild);
+  list.classList.add('tc-list-anim'); // stagger animation
   if(!vis.length){
     // برای تب‌هایی مثل «امروز»/«فردا» که خودشان تسک تمام‌شده را زودتر فیلتر می‌کنند،
     // اگر کاری برای آن روز انجام شده باشد، باید پیام «همه‌چی تمومه» را بدهیم نه پیام عمومی خالی
