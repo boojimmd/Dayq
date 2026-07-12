@@ -686,7 +686,7 @@ input,textarea{user-select:text;-webkit-user-select:text;}
 .cap-row{display:flex;align-items:center;gap:var(--sp2);font-size:var(--fs-sm);font-weight:700;color:var(--t2);margin-bottom:8px;}
 .cap-banner.warn .cap-row{color:var(--amber);}
 .cap-bar{height:6px;border-radius:var(--r1);background:var(--bg3);overflow:hidden;}
-.cap-bar-fill{height:100%;border-radius:var(--r1);background:var(--a);transition:width .3s var(--ease),background .3s;}
+.cap-bar-fill{height:100%;border-radius:var(--r1);background:var(--a);width:100%;transform:scaleX(0);transform-origin:right;transition:transform .3s var(--ease),background .3s;}
 .cap-banner.warn .cap-bar-fill{background:var(--amber);}
 .card-more-row:last-child{border-bottom:none;}
 .card-more-row:active{background:var(--bg2);}
@@ -905,7 +905,7 @@ select.fi{
 
 /* project progress bar */
 .proj-prog{height:3px;background:var(--bg3);margin:0 14px 12px;border-radius:var(--r5);overflow:hidden;}
-.proj-prog-fill{height:100%;border-radius:var(--r5);transition:width .5s var(--ease);}
+.proj-prog-fill{height:100%;border-radius:var(--r5);width:100%;transform:scaleX(0);transform-origin:right;transition:transform .5s var(--ease);}
 
 /* add project button */
 .add-proj-btn{width:100%;padding:13px;border-radius:var(--r2);border:1.5px dashed var(--b1);color:var(--t2);font-size:var(--fs-md);font-weight:600;display:flex;align-items:center;justify-content:center;gap:var(--sp2);transition:var(--dur-fast) var(--ease-out);margin-top:4px;}
@@ -1482,7 +1482,7 @@ select.fi{
 .cl-add-inp::placeholder{color:var(--t3);}
 /* progress on card */
 .tc-cl-prog{height:3px;border-radius:var(--r5);background:var(--bg3);overflow:hidden;margin-top:4px;}
-.tc-cl-fill{height:100%;border-radius:var(--r5);background:var(--a);transition:width .4s var(--ease);}
+.tc-cl-fill{height:100%;border-radius:var(--r5);background:var(--a);width:100%;transform:scaleX(0);transform-origin:right;transition:transform .4s var(--ease);}
 
 /* ── TOMORROW TAB ── */
 .sg[data-tab="tomorrow"].active .bdg{background:var(--ambm);color:var(--amber);}
@@ -2158,8 +2158,10 @@ select.fi{
     box-shadow:0 8px 32px rgba(0,0,0,.18);
     display:none;
     animation:ctxIn .12s var(--ease-out) both;
+    /* Emil: scale از trigger point، نه center */
+    transform-origin:var(--ctx-origin,top right);
   }
-  @keyframes ctxIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+  @keyframes ctxIn{from{opacity:0;transform:scale(.94)}to{opacity:1;transform:scale(1)}}
   #dtContextMenu.open{display:block;}
   .ctx-item{
     display:flex;align-items:center;gap:8px;
@@ -2211,7 +2213,7 @@ select.fi{
   .me-cat-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;direction:rtl;}
   .me-cat-name{font-size:var(--fs-xs);font-weight:600;color:var(--t2);width:64px;flex-shrink:0;text-align:right;}
   .me-cat-bar-wrap{flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;}
-  .me-cat-bar{height:100%;background:var(--a);border-radius:3px;transition:width .6s var(--ease);}
+  .me-cat-bar{height:100%;background:var(--a);border-radius:3px;width:100%;transform:scaleX(0);transform-origin:right;transition:transform .6s var(--ease);}
   .me-cat-count{font-size:var(--fs-2xs);font-weight:700;font-family:var(--mono);color:var(--t3);width:24px;text-align:left;flex-shrink:0;}
   .me-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;}
   .me-stat-card{background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:12px 10px;}
@@ -2708,7 +2710,7 @@ select.fi{
     flex-shrink:0;font-size:var(--fs-xs);color:var(--t3);font-weight:700;
   }
   .tb-prog-bar-mini{width:50px;height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;}
-  .tb-prog-fill-mini{height:100%;background:var(--a);border-radius:2px;transition:width .4s var(--ease);}
+  .tb-prog-fill-mini{height:100%;background:var(--a);border-radius:2px;width:100%;transform:scaleX(0);transform-origin:right;transition:transform .4s var(--ease);}
 
   /* ─── Task card desktop redesign ─── */
   .tc{
@@ -2782,7 +2784,7 @@ select.fi{
     display:flex;align-items:center;gap:10px;
   }
   .dp-prog-bar{flex:1;height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;}
-  .dp-prog-fill{height:100%;background:var(--a);border-radius:2px;transition:width .4s var(--ease);}
+  .dp-prog-fill{height:100%;background:var(--a);border-radius:2px;width:100%;transform:scaleX(0);transform-origin:right;transition:transform .4s var(--ease);}
   .dp-prog-txt{font-size:var(--fs-xs);font-weight:700;color:var(--t3);white-space:nowrap;}
   .dp-prog-lbl{font-size:var(--fs-xs);color:var(--t3);}
 
@@ -2931,7 +2933,14 @@ select.fi{
 
 /* ── Reduced motion ── */
 @media(prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important;}
+  /* Emil: reduced motion = کمتر، نه صفر. opacity/color بمونه، motion حذف بشه */
+  *,*::before,*::after{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+  }
+  .page.active,.page.leaving{animation:none;}
+  .tc-wrap{animation:none !important;}
+  .toast{transition:opacity .15s ease !important;}
 }
 
 
@@ -3008,7 +3017,7 @@ select.fi{
     </div>
     <!-- Desktop: mini progress -->
     <div class="tb-prog-mini">
-      <div class="tb-prog-bar-mini"><div class="tb-prog-fill-mini" id="tbProgFill" style="width:0%"></div></div>
+      <div class="tb-prog-bar-mini"><div class="tb-prog-fill-mini" id="tbProgFill" style="transform:scaleX(0)"></div></div>
       <span id="tbProgTxt">۰/۰</span>
     </div>
     <div class="hbtns">
@@ -3048,7 +3057,7 @@ select.fi{
   <!-- Progress bar روزانه — همیشه visible -->
   <div class="dp-prog-wrap" id="dpProgWrap">
     <span class="dp-prog-lbl">امروز</span>
-    <div class="dp-prog-bar"><div class="dp-prog-fill" id="dpProgFill" style="width:0%"></div></div>
+    <div class="dp-prog-bar"><div class="dp-prog-fill" id="dpProgFill" style="transform:scaleX(0)"></div></div>
     <span class="dp-prog-txt" id="dpProgTxt">۰/۰</span>
   </div>
 
@@ -5701,7 +5710,7 @@ function mkCard(task){
   const recurB=(task.recur&&task.recur!=='none')?'<span class="recur-badge">↺</span>':'';
   const noteD=task.note?'<span class="tc-note-dot"></span>':'';
   const clP=(task.checklist&&task.checklist.length)?
-    `<div class="tc-cl-prog"><div class="tc-cl-fill" style="width:${Math.round(task.checklist.filter(c=>c.done).length/task.checklist.length*100)}%"></div></div>`:'';
+    `<div class="tc-cl-prog"><div class="tc-cl-fill" style="transform:scaleX(${(task.checklist.filter(c=>c.done).length/task.checklist.length).toFixed(3)})"></div></div>`:'';
   let stIco='';
   if(st==='done') stIco='<svg viewBox="0 0 12 12" width="10" height="10"><polyline points="1.5 6 4.5 9 10.5 3" stroke="white" stroke-width="2.8" fill="none" stroke-linecap="round"/></svg>';
   if(st==='doing') stIco='<svg viewBox="0 0 12 12" width="10" height="10"><circle cx="6" cy="6" r="3" fill="var(--amber)"/></svg>';
@@ -5844,7 +5853,7 @@ function updateCapacityBanner(){
     ? `امروز ${fmtMin(totalEstMin)} کار گذاشتی، فقط ${fmtMin(availableMin)} تا پایان روز داری`
     : `${fmtMin(totalEstMin)} از ${fmtMin(availableMin)} باقی‌مانده، برنامه‌ریزی شده`;
   const fill=document.getElementById('capBarFill');
-  if(fill)fill.style.width=pct+'%';
+  if(fill)fill.style.transform='scaleX('+Math.min(pct,100)/100+')';
 }
 function _updateAppBadge(count){
   if(!('setAppBadge' in navigator)) return;
@@ -8257,7 +8266,7 @@ function renderProjects(){
     // progress bar
     const prog=document.createElement('div');
     prog.className='proj-prog';
-    prog.innerHTML='<div class="proj-prog-fill" style="width:'+pct+'%;background:'+proj.color+'"></div>';
+    prog.innerHTML='<div class="proj-prog-fill" style="transform:scaleX('\+(pct/100).toFixed(3)+');background:'+proj.color+'"></div>';
     card.appendChild(prog);
 
     // tasks container — build BEFORE appending card to DOM
@@ -9264,6 +9273,10 @@ function _ctxShow(x,y){
   if(top+mh>window.innerHeight-40) top=y-mh;
   menu.style.left=Math.max(0,left)+'px';
   menu.style.top=Math.max(0,top)+'px';
+  // Emil: transform-origin از trigger point
+  const originX=left<x?'right':'left';
+  const originY=top<y?'bottom':'top';
+  menu.style.setProperty('--ctx-origin',`${originY} ${originX}`);
 }
 
 function _ctxHide(){
@@ -9580,7 +9593,7 @@ function dpUpdateProgress(){
   const done=vis.filter(t=>t.done||t.status==='done').length;
   const total=vis.length;
   const pct=total>0?Math.round(done/total*100):0;
-  fill.style.width=pct+'%';
+  fill.style.transform='scaleX('+Math.min(pct,100)/100+')';
   txt.textContent=num(done)+'/'+num(total);
   if(!_dpTaskId) _dpRenderEmpty();
 }
@@ -9847,7 +9860,7 @@ function tbUpdateProgress(){
   const done=vis.filter(t=>t.done||t.status==='done').length;
   const total=vis.length;
   const pct=total>0?Math.round(done/total*100):0;
-  fill.style.width=pct+'%';
+  fill.style.transform='scaleX('+Math.min(pct,100)/100+')';
   txt.textContent=num(done)+'/'+num(total);
 }
 
