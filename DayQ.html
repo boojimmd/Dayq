@@ -4924,8 +4924,12 @@ function goPage(n){
       titleEl.innerHTML=pageTitles[n];
       if(greetEl) greetEl.style.display='none';
     } else {
-      setGreeting();
+      // خانه: برگردون به greeting
       if(greetEl) greetEl.style.display='';
+      setGreeting();
+      // pg-title رو هم reset کن
+      const pgTitle=document.getElementById('pageTitle');
+      if(pgTitle) pgTitle.innerHTML='امروز چیکار<em> داری؟</em>';
     }
   }
   if(window.innerWidth>=900){
