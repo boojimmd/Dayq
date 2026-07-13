@@ -575,6 +575,10 @@ input,textarea{user-select:text;-webkit-user-select:text;}
 }
 .bd-add-btn-desktop:active{transform:scale(.96);}
 .bd-main-area{padding:0 18px;}
+/* remind pills */
+.bd-remind-pill{display:flex;align-items:center;gap:5px;padding:5px 10px;background:var(--bg2);border:1.5px solid var(--b1);border-radius:var(--r5);font-size:.72rem;font-weight:600;color:var(--t2);cursor:pointer;transition:all var(--dur-fast) var(--ease-out);}
+.bd-remind-pill:has(input:checked){background:var(--am);border-color:rgba(0,184,122,.35);color:var(--a);}
+.bd-remind-pill input{display:none;}
 .bag-sum{background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r4);padding:15px;margin-bottom:13px;display:flex;align-items:center;gap:var(--sp3);transition:background var(--dur-base) var(--ease-std);}
 .bag-ring-w{position:relative;flex-shrink:0;}
 .bag-ring-w svg{display:block;transform:rotate(-90deg);}
@@ -3466,6 +3470,7 @@ select.fi{
         </div>
         <div class="srow"><div class="srow-ico" style="background:var(--am);color:var(--a);"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 12h8M12 8v8"/></svg></div><div class="srow-body"><div class="srow-ttl">اعداد فارسی</div></div><div class="tgl on" id="tgl-persian" onclick="toggleS('persian',this)"><div class="tgl-k"></div></div></div>
         <div class="srow"><div class="srow-ico" style="background:var(--ambm);color:var(--amber);"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><div class="srow-body"><div class="srow-ttl">انیمیشن confetti</div></div><div class="tgl" id="tgl-confetti" onclick="toggleS('confetti',this)"><div class="tgl-k"></div></div></div>
+        <div class="srow"><div class="srow-ico" style="background:var(--redm);color:var(--red);"><svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div><div class="srow-body"><div class="srow-ttl">روزهای آگاهی پزشکی</div><div class="srow-sub">دیابت، قلب، چاقی، سرطان — یادآوری ۷ روز قبل</div></div><div class="tgl" id="tgl-medicalDays" onclick="toggleS('medicalDays',this);_loadMedicalDays()"><div class="tgl-k"></div></div></div>
       </div>
     </div>
 
@@ -3633,6 +3638,8 @@ select.fi{
           <option value="family">خانواده</option>
           <option value="friend">دوستان</option>
           <option value="colleague">همکار</option>
+          <option value="doctor">پزشک</option>
+          <option value="pharmacist">داروساز</option>
           <option value="other">دیگر</option>
         </select>
       </div>
@@ -3654,17 +3661,28 @@ select.fi{
       </div>
       <div class="f-f">
         <div class="f-lbl">یادآوری پیش از مناسبت</div>
-        <select id="bdRemindDays" class="fi">
-          <option value="0">همان روز</option>
-          <option value="1">۱ روز قبل</option>
-          <option value="3">۳ روز قبل</option>
-          <option value="7" selected>۷ روز قبل</option>
-          <option value="14">۱۴ روز قبل</option>
-        </select>
+        <div class="f-lbl">یادآوری — چند بازه انتخاب کن</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;" id="bdRemindChecks">
+          <label class="bd-remind-pill"><input type="checkbox" value="0" onchange="bdSyncRemind()"> همان روز</label>
+          <label class="bd-remind-pill"><input type="checkbox" value="1" onchange="bdSyncRemind()"> ۱ روز قبل</label>
+          <label class="bd-remind-pill"><input type="checkbox" value="3" onchange="bdSyncRemind()"> ۳ روز قبل</label>
+          <label class="bd-remind-pill"><input type="checkbox" value="7" onchange="bdSyncRemind()"> ۷ روز قبل</label>
+          <label class="bd-remind-pill"><input type="checkbox" value="14" onchange="bdSyncRemind()"> ۱۴ روز قبل</label>
+          <label class="bd-remind-pill"><input type="checkbox" value="30" onchange="bdSyncRemind()"> ۳۰ روز قبل</label>
+        </div>
+        <input type="hidden" id="bdRemindDays" value="7">
       </div>
       <div class="f-f">
-        <div class="f-lbl">یادداشت</div>
-        <textarea id="bdNote" class="fi" rows="2" placeholder="هدیه‌ای که دوست داره..." style="resize:none;"></textarea>
+        <div class="f-lbl">یادداشت (مثلاً: هدیه‌ای که دوست داره)</div>
+        <textarea id="bdNote" class="fi" rows="2" placeholder="سال پیش گل فرستادم..." style="resize:none;"></textarea>
+      </div>
+      <div class="f-f">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+          <div class="tgl" id="tgl-bdAutoTask" onclick="this.classList.toggle('on');this.nextElementSibling.value=this.classList.contains('on')?'1':'0'"><div class="tgl-k"></div></div>
+          <input type="hidden" id="bdAutoTask" value="0">
+          <span style="font-size:.82rem;font-weight:600;color:var(--t1);">ساخت task خودکار</span>
+          <span style="font-size:.72rem;color:var(--t3);">چند روز قبل یه task می‌سازه</span>
+        </label>
       </div>
       <input type="hidden" id="bdEditId">
       <button class="sh-sub" onclick="saveBirthday()">ذخیره</button>
@@ -6522,15 +6540,31 @@ function _checkBdNotifications(){
   if(localStorage.getItem('dq5_bd_lastcheck')===todayKey) return;
   localStorage.setItem('dq5_bd_lastcheck',todayKey);
   if(!birthdays.length) return;
-  const sorted=[...birthdays].sort((a,b)=>_bdDaysUntil(a.month,a.day)-_bdDaysUntil(b.month,b.day));
-  const b=sorted[0];
-  const d=_bdDaysUntil(b.month,b.day);
-  if(d<=b.remindDays){
-    let msg=d===0?`🎂 امروز تولد/مناسبت ${b.name} است!`:
-            d===1?`🎂 فردا: ${b.name}`:
-            `🎂 ${num(d)} روز تا ${b.name}`;
-    setTimeout(()=>toast_(svgIco('bell'),msg),2000);
-  }
+  birthdays.forEach(b=>{
+    const d=_bdDaysUntil(b.month,b.day);
+    // remindDays می‌تونه عدد یا آرایه باشه (backward compat)
+    const remindArr=Array.isArray(b.remindDays)?b.remindDays:[b.remindDays??7];
+    if(remindArr.includes(d)){
+      let msg=d===0?`🎂 امروز تولد/مناسبت ${b.name} است!`:
+              d===1?`🎂 فردا: ${b.name}`:
+              `🎂 ${num(d)} روز تا مناسبت ${b.name}`;
+      setTimeout(()=>toast_(svgIco('bell'),msg),1500);
+    }
+    // auto-task: اگه ۷ روز مونده و هنوز task وجود نداره
+    if(b.autoTask&&d>0&&d<=7){
+      const taskText=`ارسال پیام تبریک به ${b.name}`;
+      const alreadyExists=tasks.some(t=>t.text===taskText&&!t.done);
+      if(!alreadyExists){
+        const deadline=mrTodayKey();
+        tasks.push({id:'bt'+Date.now()+'_'+b.id,text:taskText,deadline,
+          status:'todo',done:false,priority:'high',cat:'work',completedAt:null,
+          autoGenerated:true});
+        saveAll();
+        renderTasks();
+        toast_(svgIco('bell'),`Task برای ${b.name} ساخته شد`);
+      }
+    }
+  });
 }
 
 function renderBirthdayPage(){
@@ -6723,6 +6757,26 @@ function selectBdType(t,el){
   document.querySelectorAll('.bd-type-btn').forEach(b=>b.classList.toggle('active',b.dataset.t===t));
 }
 
+function bdSyncRemind(){
+  // multi-checkbox → hidden input as JSON array
+  const vals=[...document.querySelectorAll('#bdRemindChecks input:checked')].map(i=>parseInt(i.value));
+  document.getElementById('bdRemindDays').value=JSON.stringify(vals.length?vals:[7]);
+}
+function _bdSetRemindUI(remindDays){
+  // remindDays می‌تونه عدد (قدیمی) یا آرایه (جدید) باشه
+  let vals=Array.isArray(remindDays)?remindDays:[remindDays??7];
+  document.querySelectorAll('#bdRemindChecks input').forEach(inp=>{
+    inp.checked=vals.includes(parseInt(inp.value));
+  });
+  document.getElementById('bdRemindDays').value=JSON.stringify(vals);
+}
+function _bdSetAutoTask(val){
+  const tgl=document.getElementById('tgl-bdAutoTask');
+  const inp=document.getElementById('bdAutoTask');
+  if(val){tgl.classList.add('on');}else{tgl.classList.remove('on');}
+  inp.value=val?'1':'0';
+}
+
 function openBirthdayForm(id){
   _bdEditType='birthday';
   document.querySelectorAll('.bd-type-btn').forEach(b=>b.classList.toggle('active',b.dataset.t==='birthday'));
@@ -6732,12 +6786,13 @@ function openBirthdayForm(id){
     const b=birthdays.find(x=>x.id===id);
     if(!b) return;
     document.getElementById('bdName').value=b.name;
-    document.getElementById('bdCat').value=b.cat;
+    document.getElementById('bdCat').value=b.cat||'family';
     document.getElementById('bdMonth').value=b.month;
     document.getElementById('bdDay').value=b.day;
     document.getElementById('bdYear').value=b.year||'';
-    document.getElementById('bdRemindDays').value=b.remindDays??7;
+    _bdSetRemindUI(b.remindDays);
     document.getElementById('bdNote').value=b.note||'';
+    _bdSetAutoTask(b.autoTask);
     document.getElementById('bdFormTitle').textContent='ویرایش مناسبت';
     document.getElementById('bdEditId').value=id;
     document.getElementById('bdDeleteBtn').style.display='block';
@@ -6749,8 +6804,9 @@ function openBirthdayForm(id){
     document.getElementById('bdMonth').value=1;
     document.getElementById('bdDay').value=1;
     document.getElementById('bdYear').value='';
-    document.getElementById('bdRemindDays').value=7;
+    _bdSetRemindUI([7]);
     document.getElementById('bdNote').value='';
+    _bdSetAutoTask(false);
     document.getElementById('bdFormTitle').textContent='افزودن مناسبت';
     document.getElementById('bdEditId').value='';
     document.getElementById('bdDeleteBtn').style.display='none';
@@ -6766,14 +6822,18 @@ function saveBirthday(){
   const day=parseInt(document.getElementById('bdDay').value);
   const year=parseInt(faToEn(document.getElementById('bdYear').value))||null;
   const cat=document.getElementById('bdCat').value;
-  const remindDays=parseInt(document.getElementById('bdRemindDays').value)||7;
+  // multi-remind: آرایه یا عدد
+  let remindRaw=document.getElementById('bdRemindDays').value;
+  let remindDays=7;
+  try{ remindDays=JSON.parse(remindRaw); }catch(e){ remindDays=parseInt(remindRaw)||7; }
   const note=document.getElementById('bdNote').value.trim();
+  const autoTask=document.getElementById('bdAutoTask').value==='1';
   const editId=document.getElementById('bdEditId').value;
   if(editId){
     const idx=birthdays.findIndex(b=>b.id===editId);
-    if(idx>=0) birthdays[idx]={...birthdays[idx],name,type:_bdEditType,cat,month,day,year,remindDays,note};
+    if(idx>=0) birthdays[idx]={...birthdays[idx],name,type:_bdEditType,cat,month,day,year,remindDays,note,autoTask};
   } else {
-    birthdays.push({id:'bd'+Date.now(),name,type:_bdEditType,cat,month,day,year,remindDays,note});
+    birthdays.push({id:'bd'+Date.now(),name,type:_bdEditType,cat,month,day,year,remindDays,note,autoTask});
   }
   saveAll();
   closeAll();
@@ -8675,6 +8735,31 @@ function selStatus(st,el){
 ══════════════════════════════════════════════════ */
 const CAL_MONTHS=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
 const CAL_DAYS_IN_MONTH=[31,31,31,31,31,31,30,30,30,30,30,29];
+// روزهای آگاهی پزشکی جهانی (تبدیل از میلادی به شمسی نزدیک)
+// برای مدرپ: ابزار detailing و آگاهی‌بخشی
+function _loadMedicalDays(){
+  if(!cfg.medicalDays) return; // فقط اگه toggle فعال باشه
+  const medDays=[
+    {month:8, day:13, name:'روز جهانی دیابت (۱۴ نوامبر)'},     // ۸/۱۳ شمسی ≈ ۱۴ نوامبر
+    {month:7, day:7,  name:'روز جهانی قلب (۲۹ سپتامبر)'},       // ۷/۷ شمسی ≈ ۲۹ سپتامبر
+    {month:6, day:29, name:'روز جهانی چاقی (۲۱ سپتامبر)'},      // ۶/۲۹ ≈ ۲۱ سپتامبر
+    {month:1, day:29, name:'روز جهانی سرطان (۴ فوریه)'},         // ۱/۲۹ ≈ ۴ فوریه
+    {month:9, day:9,  name:'روز جهانی دیابت نوع ۱ (۳۰ نوامبر)'}, // ۹/۹ ≈ ۳۰ نوامبر
+    {month:12,day:10, name:'روز جهانی سلامت کلیه (۱۴ مارس)'},   // ۱۲/۱۰ ≈ ۱۴ مارس
+    {month:1, day:21, name:'هفته سلامت'},                         // ۱/۲۱-۲۷ هر سال
+    {month:7, day:15, name:'روز جهانی آلزایمر (۲۱ سپتامبر)'},
+    {month:10,day:22, name:'روز جهانی دیابت نوع ۲'},
+  ];
+  const todayJ=mrToJalali(new Date().getFullYear(),new Date().getMonth()+1,new Date().getDate());
+  const jy=todayJ[0];
+  medDays.forEach(({month,day,name})=>{
+    const already=birthdays.some(b=>b.autoMedical&&b.name===name&&b.month===month&&b.day===day);
+    if(!already){
+      birthdays.push({id:'med'+Date.now()+Math.random(),name,type:'occasion',
+        cat:'medical',month,day,year:null,remindDays:[7],note:'',autoMedical:true,autoTask:false});
+    }
+  });
+}
 const IR_HOLIDAYS={
   '1404-01-01':'جشن نوروز/جشن سال نو',
   '1404-01-02':'عید نوروز، شهادت حضرت علی (ع)',
