@@ -557,11 +557,10 @@ input,textarea{user-select:text;-webkit-user-select:text;}
 /* BAG PAGE */
 .bag-pg{padding:14px 18px 20px;}
 .bd-page-hdr{
-  padding-top:calc(var(--topbar-h) + 10px);
-  display:flex;align-items:center;justify-content:space-between;
-  padding-right:18px;padding-left:18px;padding-bottom:10px;
+  padding-top:calc(var(--topbar-h) + 8px);
+  padding-right:18px;padding-left:18px;padding-bottom:8px;
+  display:flex;align-items:center;justify-content:flex-start;
 }
-.bd-page-title{font-size:var(--fs-xl);font-weight:900;color:var(--t1);}
 /* دکمه افزودن مناسبت — compact روی موبایل */
 .bd-add-btn-desktop{
   display:flex;align-items:center;gap:5px;
@@ -4916,7 +4915,19 @@ function goPage(n){
   document.querySelectorAll('.ni').forEach(i=>i.classList.remove('active'));
   const pg=document.getElementById('page'+n);if(pg)pg.classList.add('active');
   const ni=document.getElementById('ni-'+n.toLowerCase());if(ni)ni.classList.add('active');
-  // پنل فقط در صفحه خانه نمایش داده میشه
+  // عنوان topbar بر اساس صفحه
+  const titleEl=document.getElementById('pageTitle');
+  const greetEl=document.getElementById('greeting');
+  const pageTitles={Birthdays:'تولد و مناسبت‌ها',Calendar:'تقویم',Projects:'پروژه‌ها',Me:'من'};
+  if(titleEl){
+    if(pageTitles[n]){
+      titleEl.innerHTML=pageTitles[n];
+      if(greetEl) greetEl.style.display='none';
+    } else {
+      setGreeting();
+      if(greetEl) greetEl.style.display='';
+    }
+  }
   if(window.innerWidth>=900){
     const panel=document.getElementById('dpanel');
     if(panel) panel.style.display=(n==='Home'&&!document.body.classList.contains('dp-closed'))?'flex':'none';
