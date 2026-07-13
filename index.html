@@ -609,18 +609,36 @@ input,textarea{user-select:text;-webkit-user-select:text;}
 
 /* ME PAGE */
 .me-pg{padding:14px 18px 24px;padding-top:calc(var(--topbar-h) + 14px);}
-.me-hdr{background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r4);padding:20px;margin-bottom:13px;text-align:center;position:relative;overflow:hidden;transition:background var(--dur-base) var(--ease-std);}
-.me-hdr::before{content:'';position:absolute;bottom:-28px;left:50%;transform:translateX(-50%);width:150px;height:70px;background:var(--ag);border-radius:50%;filter:blur(38px);pointer-events:none;}
-.me-av{width:62px;height:62px;border-radius:19px;background:var(--am);border:2px solid rgba(0,184,122,.2);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;}
-.me-av svg{width:32px;height:32px;stroke:var(--a);fill:none;stroke-width:1.6;stroke-linecap:round;}
-.me-name{font-size:var(--fs-xl);font-weight:800;margin-bottom:2px;}
-.me-company{font-size:.74rem;color:var(--t2);margin-bottom:11px;}
-.me-sts{display:flex;gap:var(--sp2);justify-content:center;}
-.me-st{text-align:center;background:var(--bg2);border-radius:var(--r2);padding:8px 14px;border:1px solid var(--b1);}
-.me-stv{font-size:var(--fs-xl);font-weight:800;color:var(--a);font-family:var(--mono);}
-.me-stl{font-size:.56rem;color:var(--t3);font-weight:600;margin-top:1px;}
-.sg-wrap{margin-bottom:11px;}
-.sg-lbl{font-size:var(--fs-2xs);font-weight:700;color:var(--t3);letter-spacing:.09em;text-transform:uppercase;padding:0 4px 6px;display:block;}
+/* ── Me Page — Concept C ── */
+.me-pg{padding:12px 14px 24px;padding-top:calc(var(--topbar-h) + 10px);}
+/* profile card */
+.me-profile-card{display:flex;align-items:center;gap:11px;background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r3);padding:12px 14px;margin-bottom:10px;}
+.me-av-c{width:44px;height:44px;border-radius:13px;background:linear-gradient(135deg,var(--a),#00e5a0);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:900;color:#0f0f13;flex-shrink:0;font-family:var(--ff);}
+.me-info{flex:1;min-width:0;}
+.me-name{font-size:.95rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.me-company{font-size:.72rem;color:var(--t2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.me-streak-badge{flex-shrink:0;background:var(--am);border:1px solid rgba(0,184,122,.2);border-radius:11px;padding:6px 10px;text-align:center;cursor:pointer;}
+.me-streak-fire{font-size:15px;line-height:1;display:block;}
+.me-streak-num{font-size:15px;font-weight:900;color:var(--a);line-height:1.2;font-family:var(--mono);}
+.me-streak-lbl{font-size:7px;color:var(--t3);font-weight:700;letter-spacing:.03em;}
+/* week chart */
+.me-week-card{background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r3);padding:12px 14px;margin-bottom:10px;}
+.me-week-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.me-week-lbl{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--t3);font-weight:700;}
+.me-week-count{font-size:9px;font-weight:700;color:var(--a);}
+.me-week-bars{display:flex;align-items:flex-end;gap:4px;height:28px;margin-bottom:5px;}
+.me-week-bar{flex:1;border-radius:3px 3px 0 0;background:var(--bg3);transition:transform .3s var(--ease-out);}
+.me-week-bar.today{background:var(--a);}
+.me-week-bar.done{background:rgba(0,184,122,.3);}
+.me-week-days{display:flex;gap:4px;}
+.me-week-day{flex:1;text-align:center;font-size:7px;color:var(--t3);font-weight:600;}
+.me-week-day.today{color:var(--a);}
+.me-week-stats{display:flex;gap:10px;margin-top:8px;padding-top:8px;border-top:1px solid var(--b2);}
+.me-week-stat{font-size:9px;color:var(--t2);font-weight:600;display:flex;align-items:center;gap:3px;}
+.me-week-stat b{color:var(--t1);font-weight:800;}
+/* settings groups */
+.sg-wrap{margin-bottom:6px;}
+.sg-lbl{font-size:9px;font-weight:700;color:var(--t3);letter-spacing:.13em;text-transform:uppercase;padding:8px 4px 5px;display:block;}
 .s-group{background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r3);overflow:hidden;transition:background var(--dur-base) var(--ease-std);}
 .srow{display:flex;align-items:center;gap:var(--sp3);padding:var(--sp3) var(--sp4);border-bottom:1px solid var(--b2);transition:var(--dur-fast) var(--ease-out);cursor:pointer;}
 .srow:last-child{border-bottom:none;}
@@ -3366,24 +3384,53 @@ select.fi{
 <!-- PAGE: ME -->
 <div class="page" id="pageMe">
   <div class="me-pg">
-    <div class="me-hdr">
-      <div class="me-av"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
-      <div class="me-name" id="meName">نام شما</div>
-      <div class="me-company" id="meCompany">شرکت / سمت</div>
-      <div class="me-sts" onclick="showQuickStats()" style="cursor:pointer;">
-        <div class="me-st"><div class="me-stv" id="meDone">0</div><div class="me-stl">انجام شده</div></div>
-        <div class="me-st"><div class="me-stv" id="meTotal">0</div><div class="me-stl">کل کارها</div></div>
-        <div class="me-st"><div class="me-stv" id="mePct">0%</div><div class="me-stl">تکمیل</div></div>
+
+    <!-- ① Profile + Streak -->
+    <div class="me-profile-card">
+      <div class="me-av-c" id="meAvatarLetter">؟</div>
+      <div class="me-info">
+        <div class="me-name" id="meName">نام شما</div>
+        <div class="me-company" id="meCompany">شرکت / سمت</div>
       </div>
-    
-    <!-- Weekly Stats injected above --></div>
-    <!-- Weekly Stats -->
-    <div class="stats-card" id="weeklyStatsCard">
-      <div class="stats-title">آمار ۷ روز اخیر</div>
-      <div class="stats-bars" id="statsBars" style="height:60px;display:flex;align-items:flex-end;gap:6px;"></div>
-      <div class="stats-summary" id="statsSummary" style="display:flex;gap:8px;margin-top:10px;"></div>
+      <div class="me-streak-badge" onclick="showQuickStats()" title="streak روزانه">
+        <span class="me-streak-fire">🔥</span>
+        <div class="me-streak-num" id="meStreakNum">۰</div>
+        <div class="me-streak-lbl">روز</div>
+      </div>
     </div>
 
+    <!-- ② Week chart -->
+    <div class="me-week-card">
+      <div class="me-week-top">
+        <span class="me-week-lbl">این هفته</span>
+        <span class="me-week-count" id="meWeekCount">۰ کار</span>
+      </div>
+      <div class="me-week-bars" id="meWeekBars">
+        <div class="me-week-bar" style="height:8%"></div>
+        <div class="me-week-bar" style="height:8%"></div>
+        <div class="me-week-bar" style="height:8%"></div>
+        <div class="me-week-bar" style="height:8%"></div>
+        <div class="me-week-bar" style="height:8%"></div>
+        <div class="me-week-bar today" style="height:8%"></div>
+        <div class="me-week-bar" style="height:8%;opacity:.25"></div>
+      </div>
+      <div class="me-week-days">
+        <div class="me-week-day">ش</div>
+        <div class="me-week-day">۱ش</div>
+        <div class="me-week-day">۲ش</div>
+        <div class="me-week-day">۳ش</div>
+        <div class="me-week-day">۴ش</div>
+        <div class="me-week-day today">۵ش</div>
+        <div class="me-week-day">ج</div>
+      </div>
+      <div class="me-week-stats">
+        <div class="me-week-stat">تکمیل <b id="mePct">۰٪</b></div>
+        <div class="me-week-stat">انجام‌شده <b id="meDone">۰</b></div>
+        <div class="me-week-stat">کل <b id="meTotal">۰</b></div>
+      </div>
+    </div>
+
+    <!-- ③ پروفایل -->
     <div class="sg-wrap">
       <span class="sg-lbl">پروفایل</span>
       <div class="s-group">
@@ -3392,98 +3439,71 @@ select.fi{
         <div class="srow" style="cursor:default;"><div class="srow-ico" style="background:var(--purm);color:var(--purple);"><svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div class="srow-body"><input class="p-inp" id="profileCity" placeholder="شهر / منطقه..." maxlength="40"></div></div>
       </div>
     </div>
+
+    <!-- ④ ظاهر -->
     <div class="sg-wrap">
       <span class="sg-lbl">ظاهر</span>
       <div class="s-group">
-        <div class="theme-seg"><button class="th-pill" data-t="light" onclick="setTheme('light',this)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg> روشن</button><button class="th-pill" data-t="auto" onclick="setTheme('auto',this)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg> خودکار</button><button class="th-pill" data-t="dark" onclick="setTheme('dark',this)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> تاریک</button><button class="th-pill" data-t="pink" onclick="setTheme('pink',this)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> صورتی</button></div>
-        <div class="theme-seg" style="margin-top:6px;flex-wrap:wrap;gap:6px;">
-          <button class="th-pill" data-t="natural" onclick="setTheme('natural',this)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22V12"/><path d="M5 12C5 7 8 3 12 3s7 4 7 9"/><path d="M5 12c0 3 2 5 7 5"/></svg> طبیعت</button>
-          <button class="th-pill" data-t="blue" onclick="setTheme('blue',this)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15 15 0 0 1 0 20"/><path d="M2 12h20"/></svg> آبی</button>
-          <button class="th-pill" data-t="sand" onclick="setTheme('sand',this)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2"/></svg> صحرا</button>
-          <button class="th-pill" data-t="ice" onclick="setTheme('ice',this)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v20M4.93 4.93l14.14 14.14M2 12h20M4.93 19.07L19.07 4.93"/></svg> یخ</button>
-          <button class="th-pill" data-t="forest" onclick="setTheme('forest',this)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 14l3-3-3-3"/><path d="M10 3L7 6l3 3"/><path d="M7 20v-8l5-5 5 5v8"/><path d="M7 20h10"/></svg> جنگل</button>
-          <button class="th-pill" data-t="sunset" onclick="setTheme('sunset',this)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 10v2"/><path d="M12 2v2"/><path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 6.34l1.41-1.41"/><path d="M2 12h2M20 12h2"/><path d="M5 19a7 7 0 0 1 14 0"/><path d="M2 22h20"/></svg> غروب</button>
-          <button class="th-pill" data-t="cyber" onclick="setTheme('cyber',this)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> سایبر</button>
-          <button class="th-pill" data-t="royal" onclick="setTheme('royal',this)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7z"/><path d="M5 20h14"/></svg> یاسی</button>
-        </div>
-
-        <div style="font-size:.7rem;color:var(--t3);margin:16px 0 8px;">آیکون اپ روی هوم‌اسکرین</div>
-        <div style="display:flex;gap:10px;margin-bottom:6px;">
-          <div class="icon-pick" data-c="green" onclick="setAppIcon('green')" style="flex:1;text-align:center;cursor:pointer;border-radius:var(--r3);padding:8px;border:2px solid transparent;">
-            <img src="icons/icon-green-192.png" style="width:54px;height:54px;border-radius:14px;display:block;margin:0 auto 4px;">
-            <span style="font-size:.68rem;color:var(--t2);">سبز</span>
-          </div>
-          <div class="icon-pick" data-c="pink" onclick="setAppIcon('pink')" style="flex:1;text-align:center;cursor:pointer;border-radius:var(--r3);padding:8px;border:2px solid transparent;">
-            <img src="icons/icon-pink-192.png" style="width:54px;height:54px;border-radius:14px;display:block;margin:0 auto 4px;">
-            <span style="font-size:.68rem;color:var(--t2);">صورتی</span>
+        <div style="padding:10px 12px 8px;">
+          <div class="theme-seg"><button class="th-pill" data-t="light" onclick="setTheme('light',this)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg> روشن</button><button class="th-pill" data-t="auto" onclick="setTheme('auto',this)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg> خودکار</button><button class="th-pill" data-t="dark" onclick="setTheme('dark',this)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> تاریک</button><button class="th-pill" data-t="pink" onclick="setTheme('pink',this)"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg> صورتی</button></div>
+          <div class="theme-seg" style="margin-top:6px;flex-wrap:wrap;gap:6px;">
+            <button class="th-pill" data-t="natural" onclick="setTheme('natural',this)">طبیعت</button>
+            <button class="th-pill" data-t="blue" onclick="setTheme('blue',this)">آبی</button>
+            <button class="th-pill" data-t="sand" onclick="setTheme('sand',this)">صحرا</button>
+            <button class="th-pill" data-t="ice" onclick="setTheme('ice',this)">یخ</button>
+            <button class="th-pill" data-t="forest" onclick="setTheme('forest',this)">جنگل</button>
+            <button class="th-pill" data-t="sunset" onclick="setTheme('sunset',this)">غروب</button>
+            <button class="th-pill" data-t="cyber" onclick="setTheme('cyber',this)">سایبر</button>
+            <button class="th-pill" data-t="royal" onclick="setTheme('royal',this)">یاسی</button>
           </div>
         </div>
-        <div style="font-size:.64rem;color:var(--t3);line-height:1.7;margin-bottom:10px;">بعد از انتخاب، آیکون فعلی را از صفحهٔ اصلی گوشی پاک کن و دوباره از Safari «Add to Home Screen» بزن تا آیکون تازه نشان داده شود.</div>
         <div class="srow"><div class="srow-ico" style="background:var(--am);color:var(--a);"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 12h8M12 8v8"/></svg></div><div class="srow-body"><div class="srow-ttl">اعداد فارسی</div></div><div class="tgl on" id="tgl-persian" onclick="toggleS('persian',this)"><div class="tgl-k"></div></div></div>
         <div class="srow"><div class="srow-ico" style="background:var(--ambm);color:var(--amber);"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div><div class="srow-body"><div class="srow-ttl">انیمیشن confetti</div></div><div class="tgl" id="tgl-confetti" onclick="toggleS('confetti',this)"><div class="tgl-k"></div></div></div>
       </div>
     </div>
+
+    <!-- ⑤ برنامه‌ریزی -->
     <div class="sg-wrap">
-      <span class="sg-lbl">ویژگی‌های روزانه</span>
+      <span class="sg-lbl">برنامه‌ریزی</span>
       <div class="s-group">
-        <div class="srow" style="cursor:default;">
-          <div class="srow-ico" style="background:var(--purm);color:var(--purple);">
-            <svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20"/><path d="M12 6v6l4 2"/></svg>
-          </div>
-          <div class="srow-body"><div class="srow-ttl">آینه روز</div><div class="srow-sub">هر روز در صفحه خانه فعاله</div></div>
-          <div style="font-size:.65rem;font-weight:700;color:var(--a);background:var(--am);padding:3px 8px;border-radius:99px;border:1px solid rgba(0,184,122,.2);">فعال</div>
-        </div>
+        <div class="srow" style="cursor:default;"><div class="srow-ico" style="background:var(--purm);color:var(--purple);"><svg viewBox="0 0 24 24"><path d="M12 2a10 10 0 1 0 0 20"/><path d="M12 6v6l4 2"/></svg></div><div class="srow-body"><div class="srow-ttl">آینه روز</div><div class="srow-sub">هر روز در صفحه خانه فعاله</div></div><div style="font-size:.65rem;font-weight:700;color:var(--a);background:var(--am);padding:3px 8px;border-radius:99px;border:1px solid rgba(0,184,122,.2);">فعال</div></div>
         <div class="srow"><div class="srow-ico" style="background:var(--bluem);color:var(--blue);"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div class="srow-body"><div class="srow-ttl">برنامه زمانی</div><div class="srow-sub">نمایش کارهای زمان‌دار</div></div><div class="tgl" id="tgl-timeline" onclick="toggleS('timeline',this)"><div class="tgl-k"></div></div></div>
-        <div class="srow" onclick="openWorkHours()"><div class="srow-ico" style="background:var(--ambm);color:var(--amber);"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="srow-body"><div class="srow-ttl">ساعت‌های روز کاری</div><div class="srow-sub" id="workHoursSub">عصر از ۱۷:۰۰ · پایان روز ۱۸:۰۰</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+        <div class="srow" onclick="openSheet('shWorkHours')"><div class="srow-ico" style="background:var(--ambm);color:var(--amber);"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div class="srow-body"><div class="srow-ttl">ساعت‌های روز کاری</div><div class="srow-sub" id="workHoursSub">عصر از ۱۷:۰۰ · پایان روز ۱۸:۰۰</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
       </div>
     </div>
+
+    <!-- ⑥ اتصال -->
     <div class="sg-wrap">
-      <span class="sg-lbl">اعلان و سینک</span>
+      <span class="sg-lbl">اتصال</span>
       <div class="s-group">
-        <div class="srow" onclick="openPushSettings()"><div class="srow-ico" style="background:var(--bluem);color:var(--blue);"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div class="srow-body"><div class="srow-ttl">یادآوری واقعی (Push)</div><div class="srow-sub" id="pushSub">غیرفعال</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+        <div class="srow" onclick="openPushSettings()"><div class="srow-ico" style="background:var(--ambm);color:var(--amber);"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div class="srow-body"><div class="srow-ttl">یادآوری واقعی (Push)</div><div class="srow-sub" id="pushSub">غیرفعال</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
         <div class="srow" onclick="openSyncSettings()"><div class="srow-ico" style="background:var(--am);color:var(--a);"><svg viewBox="0 0 24 24"><path d="M21 2v6h-6M3 22v-6h6"/><path d="M3 11a9 9 0 0 1 15-6.7L21 7M21 13a9 9 0 0 1-15 6.7L3 17"/></svg></div><div class="srow-body"><div class="srow-ttl">سینک بین دستگاه‌ها</div><div class="srow-sub" id="syncSub">غیرفعال</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
       </div>
     </div>
+
+    <!-- ⑦ ابزارها -->
     <div class="sg-wrap">
-      <span class="sg-lbl">مدیریت</span>
+      <span class="sg-lbl">ابزارها</span>
       <div class="s-group">
         <div class="srow" onclick="openArchive()"><div class="srow-ico" style="background:var(--bg3);color:var(--t2);"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div><div class="srow-body"><div class="srow-ttl">آرشیو کارهای قدیمی</div><div class="srow-sub" id="archiveSub">۰ کار آرشیوشده</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
         <div class="srow" onclick="goPage('Bag')"><div class="srow-ico" style="background:var(--ambm);color:var(--amber);"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div><div class="srow-body"><div class="srow-ttl">کیف من</div><div class="srow-sub">چک‌لیست تجهیزات</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
-        <div class="srow" onclick="goPage('Birthdays')"><div class="srow-ico" style="background:var(--redm);color:var(--red);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2z"/><path d="M12 12V8"/><path d="M8 12V9"/><path d="M16 12V9"/><path d="M12 8c0-1.1-.9-2-2-2s-2 .9-2 2"/><path d="M12 4v1"/><path d="M2 17h20"/></svg></div><div class="srow-body"><div class="srow-ttl">تولد و مناسبت‌ها</div><div class="srow-sub" id="birthdayRowSub">یادآوری ۷ روز قبل</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
-        <div class="srow" onclick="resetDone()"><div class="srow-ico" style="background:rgba(46,160,67,.1);color:#2ea043;"><svg viewBox="0 0 24 24"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 .49-6H1"/></svg></div><div class="srow-body"><div class="srow-ttl">ری‌ست تیک‌ها</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
-        <div class="srow" onclick="sortByPriority()"><div class="srow-ico" style="background:var(--redm);color:var(--red);"><svg viewBox="0 0 24 24"><path d="M3 6h18M6 12h12M9 18h6"/></svg></div><div class="srow-body"><div class="srow-ttl">مرتب‌سازی اولویت</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+        <div class="srow" onclick="goPage('Birthdays')"><div class="srow-ico" style="background:var(--redm);color:var(--red);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2z"/><path d="M12 12V8"/><path d="M8 12V9"/><path d="M16 12V9"/><path d="M2 17h20"/></svg></div><div class="srow-body"><div class="srow-ttl">تولد و مناسبت‌ها</div><div class="srow-sub" id="birthdayRowSub">یادآوری ۷ روز قبل</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
         <div class="srow" onclick="exportData()"><div class="srow-ico" style="background:var(--bluem);color:var(--blue);"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div><div class="srow-body"><div class="srow-ttl">خروجی JSON</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
-        <div class="srow" onclick="openSheet('shICS')">
-          <div class="srow-ico" style="background:var(--bluem);color:var(--blue);">
-            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          </div>
-          <div class="srow-body">
-            <div class="srow-ttl">تقویم کاری (ICS)</div>
-            <div class="srow-sub" id="icsStatusLbl">وصل نشده</div>
-          </div>
-          <div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
-        </div>
+        <div class="srow" onclick="openSheet('shICS')"><div class="srow-ico" style="background:var(--bluem);color:var(--blue);"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div class="srow-body"><div class="srow-ttl">تقویم کاری (ICS)</div><div class="srow-sub" id="icsStatusLbl">وصل نشده</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
       </div>
     </div>
-    <div class="s-group">
-      <div class="sg-hdr">
-        <span class="sg-lbl" style="color:var(--a);">پشتیبان‌گیری</span>
-      </div>
-      <div class="sg-hdr">
-        <button class="d-btn" style="background:var(--am);color:var(--a);border-color:rgba(0,184,122,.3)" onclick="downloadBackup()"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> دانلود پشتیبان JSON</button>
-      </div>
-    </div>
-    <div class="s-group">
-      <div class="sg-hdr">
-        <span class="sg-lbl" style="color:var(--red);">خطر</span>
-      <div style="padding-bottom:8px;">
-        <button class="d-btn" onclick="clearDone()">حذف کارهای انجام‌شده</button>
-        <button class="d-btn" onclick="clearAll()">پاک کردن همه کارها</button>
-      </div>
-    </div>
-  </div>
 
-</div>
+    <!-- ⑧ پشتیبان و خطر -->
+    <div class="sg-wrap">
+      <span class="sg-lbl">داده‌ها</span>
+      <div class="s-group">
+        <div class="srow" onclick="downloadBackup()"><div class="srow-ico" style="background:var(--am);color:var(--a);"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div><div class="srow-body"><div class="srow-ttl">دانلود پشتیبان</div><div class="srow-sub">JSON کامل</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+        <div class="srow" onclick="clearDone()"><div class="srow-ico" style="background:var(--redm);color:var(--red);"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg></div><div class="srow-body"><div class="srow-ttl">حذف کارهای انجام‌شده</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+        <div class="srow" onclick="clearAll()"><div class="srow-ico" style="background:var(--redm);color:var(--red);"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></div><div class="srow-body"><div class="srow-ttl">پاک کردن همه کارها</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+      </div>
+    </div>
+
+  </div>
 
   <div id="meDashboard">
     <div id="meDashContent" style="display:none">
@@ -3500,6 +3520,7 @@ select.fi{
   </div>
 
 </div>
+
 
 <!-- PAGE: PROJECTS -->
 <div class="page" id="pageProjects">
@@ -7053,8 +7074,76 @@ function updateMeStats(){
   document.getElementById('meDone').textContent=num(d);
   document.getElementById('meTotal').textContent=num(tot);
   document.getElementById('mePct').textContent=num(pct)+'%';
-  document.getElementById('meName').textContent=cfg.name||'نام شما';
+  const name=cfg.name||'';
+  document.getElementById('meName').textContent=name||'نام شما';
   document.getElementById('meCompany').textContent=cfg.company||'شرکت / سمت';
+  // آواتار اول حرف اسم
+  const av=document.getElementById('meAvatarLetter');
+  if(av) av.textContent=name?name.trim()[0]:'؟';
+  // streak
+  _updateMeWeekChart();
+}
+
+function _updateMeWeekChart(){
+  // محاسبه task های ۷ روز گذشته
+  const days=['ش','۱ش','۲ش','۳ش','۴ش','۵ش','ج'];
+  // روز هفته شمسی: شنبه=0 ... جمعه=6
+  const todayJSDay=new Date().getDay(); // 0=sun,6=sat
+  // شنبه=6، یکشنبه=0 ...
+  const dayMap=[1,2,3,4,5,6,0]; // JS→Jalali week offset (ش=0)
+  const todayOffset=dayMap[todayJSDay];
+  // counts per day this week
+  const counts=Array(7).fill(0);
+  const labels=[];
+  for(let i=0;i<7;i++){
+    const offset=i-todayOffset;
+    const d=new Date(); d.setDate(d.getDate()+offset);
+    const [jy,jm,jday]=mrToJalali(d.getFullYear(),d.getMonth()+1,d.getDate());
+    const key=`${jy}-${String(jm).padStart(2,'0')}-${String(jday).padStart(2,'0')}`;
+    counts[i]=tasks.filter(t=>(t.done||t.status==='done')&&t.deadline===key).length;
+    labels[i]=days[i];
+  }
+  const mx=Math.max(...counts,1);
+  const weekTotal=counts.reduce((a,b)=>a+b,0);
+  // week count
+  const wc=document.getElementById('meWeekCount');
+  if(wc) wc.textContent=num(weekTotal)+' کار';
+  // bars
+  const barsEl=document.getElementById('meWeekBars');
+  const daysEl=barsEl?.nextElementSibling;
+  if(barsEl){
+    barsEl.innerHTML='';
+    counts.forEach((c,i)=>{
+      const bar=document.createElement('div');
+      const isToday=i===todayOffset;
+      const isFuture=i>todayOffset;
+      bar.className='me-week-bar'+(isToday?' today':c>0?' done':'');
+      bar.style.height=Math.max(c/mx*100,isFuture?0:5)+'%';
+      if(isFuture) bar.style.opacity='.2';
+      barsEl.appendChild(bar);
+    });
+  }
+  // day labels — mark today
+  if(daysEl){
+    const dayDivs=daysEl.querySelectorAll('.me-week-day');
+    dayDivs.forEach((el,i)=>{
+      el.classList.toggle('today',i===todayOffset);
+    });
+  }
+  // streak
+  let streak=0;
+  const todayKey=mrTodayKey();
+  let checkDate=new Date();
+  for(let i=0;i<365;i++){
+    const [jy,jm,jd]=mrToJalali(checkDate.getFullYear(),checkDate.getMonth()+1,checkDate.getDate());
+    const key=`${jy}-${String(jm).padStart(2,'0')}-${String(jd).padStart(2,'0')}`;
+    const hasDone=tasks.some(t=>(t.done||t.status==='done')&&t.deadline===key);
+    if(hasDone) streak++;
+    else if(key!==todayKey) break;
+    checkDate.setDate(checkDate.getDate()-1);
+  }
+  const sn=document.getElementById('meStreakNum');
+  if(sn) sn.textContent=num(streak);
   renderWeeklyStats();
 }
 
