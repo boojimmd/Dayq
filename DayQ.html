@@ -7100,7 +7100,16 @@ function _updateMeWeekChart(){
     const d=new Date(); d.setDate(d.getDate()+offset);
     const [jy,jm,jday]=mrToJalali(d.getFullYear(),d.getMonth()+1,d.getDate());
     const key=`${jy}-${String(jm).padStart(2,'0')}-${String(jday).padStart(2,'0')}`;
-    counts[i]=tasks.filter(t=>(t.done||t.status==='done')&&t.deadline===key).length;
+    counts[i]=tasks.filter(t=>{
+      if(!(t.done||t.status==='done')) return false;
+      if(t.deadline===key) return true;
+      if(!t.deadline && t.completedAt){
+        const ca=new Date(t.completedAt);
+        const [cy,cm,cd]=mrToJalali(ca.getFullYear(),ca.getMonth()+1,ca.getDate());
+        return `${cy}-${String(cm).padStart(2,'0')}-${String(cd).padStart(2,'0')}`===key;
+      }
+      return false;
+    }).length;
     labels[i]=days[i];
   }
   const mx=Math.max(...counts,1);
@@ -7130,14 +7139,27 @@ function _updateMeWeekChart(){
       el.classList.toggle('today',i===todayOffset);
     });
   }
-  // streak
+  // streak — از completedAt یا deadline استفاده کن
   let streak=0;
   const todayKey=mrTodayKey();
   let checkDate=new Date();
   for(let i=0;i<365;i++){
     const [jy,jm,jd]=mrToJalali(checkDate.getFullYear(),checkDate.getMonth()+1,checkDate.getDate());
     const key=`${jy}-${String(jm).padStart(2,'0')}-${String(jd).padStart(2,'0')}`;
-    const hasDone=tasks.some(t=>(t.done||t.status==='done')&&t.deadline===key);
+    // چک می‌کنیم: deadline اون روز باشه یا completedAt اون روز
+    const hasDone=tasks.some(t=>{
+      if(!(t.done||t.status==='done')) return false;
+      // task با deadline اون روز
+      if(t.deadline===key) return true;
+      // task بدون deadline که اون روز تیک خورده
+      if(!t.deadline && t.completedAt){
+        const ca=new Date(t.completedAt);
+        const [cy,cm,cd]=mrToJalali(ca.getFullYear(),ca.getMonth()+1,ca.getDate());
+        const caKey=`${cy}-${String(cm).padStart(2,'0')}-${String(cd).padStart(2,'0')}`;
+        return caKey===key;
+      }
+      return false;
+    });
     if(hasDone) streak++;
     else if(key!==todayKey) break;
     checkDate.setDate(checkDate.getDate()-1);
