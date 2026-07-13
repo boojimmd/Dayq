@@ -8865,7 +8865,19 @@ function calAddTask(){
 }
 
 function isJalaliLeap(jy){
-  return ((((((jy-(jy>474?473:473))%2820)+2820)%2820+474+38)*682)%2816)<682;
+  /* fix: الگوریتم قبلی (2820-cycle) اشتباه بود.
+     از mrToJalali که اثبات‌شده درسته استفاده می‌کنیم —
+     اگه Nowruz jy+1 یه روز دیرتر از معمول باشه = کبیسه */
+  const gy=jy+621;
+  let d1=null,d2=null;
+  for(let d=19;d<=22;d++){
+    const r1=mrToJalali(gy,3,d);
+    if(!d1&&r1[0]===jy&&r1[1]===1&&r1[2]===1) d1=d;
+    const r2=mrToJalali(gy+1,3,d);
+    if(!d2&&r2[0]===jy+1&&r2[1]===1&&r2[2]===1) d2=d;
+  }
+  if(!d1||!d2) return false;
+  return (new Date(gy+1,2,d2)-new Date(gy,2,d1))/86400000===366;
 }
 function _jalDaysInYear(jy){return isJalaliLeap(jy)?366:365;}
 function _jalToDays(jy,jm,jd){
