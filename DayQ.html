@@ -618,7 +618,7 @@ input,textarea{user-select:text;-webkit-user-select:text;}
 .me-name{font-size:.95rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .me-company{font-size:.72rem;color:var(--t2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .me-streak-badge{flex-shrink:0;background:var(--am);border:1px solid rgba(0,184,122,.2);border-radius:11px;padding:6px 10px;text-align:center;cursor:pointer;}
-.me-streak-fire{font-size:15px;line-height:1;display:block;}
+.me-streak-fire{width:18px;height:18px;display:block;margin:0 auto 2px;}
 .me-streak-num{font-size:15px;font-weight:900;color:var(--a);line-height:1.2;font-family:var(--mono);}
 .me-streak-lbl{font-size:7px;color:var(--t3);font-weight:700;letter-spacing:.03em;}
 /* week chart */
@@ -3393,7 +3393,7 @@ select.fi{
         <div class="me-company" id="meCompany">شرکت / سمت</div>
       </div>
       <div class="me-streak-badge" onclick="showQuickStats()" title="streak روزانه">
-        <span class="me-streak-fire">🔥</span>
+        <svg class="me-streak-fire" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c0 0-4 4-4 8a4 4 0 0 0 8 0c0-1.5-.5-3-1-4 0 0-1 2-3 2-2 0-2-2-2-2 1-2 2-4 2-4z" fill="var(--amber)" stroke="none"/><path d="M12 22c-3.3 0-6-2.7-6-6 0-3 1.5-5 3-7 .5 1.5 2 3 3 3s2-1.5 2-3c1.5 2 3 4 3 7 0 3.3-2.7 6-6 6z" fill="var(--amber)" stroke="none"/></svg>
         <div class="me-streak-num" id="meStreakNum">۰</div>
         <div class="me-streak-lbl">روز</div>
       </div>
