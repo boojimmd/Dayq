@@ -556,18 +556,25 @@ input,textarea{user-select:text;-webkit-user-select:text;}
 
 /* BAG PAGE */
 .bag-pg{padding:14px 18px 20px;}
-.bd-page-hdr{padding-top:calc(var(--topbar-h) + 14px);}
-.bd-main-area{padding:0 18px;}
-/* دکمه افزودن مناسبت موبایل */
+.bd-page-hdr{
+  padding-top:calc(var(--topbar-h) + 10px);
+  display:flex;align-items:center;justify-content:space-between;
+  padding-right:18px;padding-left:18px;padding-bottom:10px;
+}
+.bd-page-title{font-size:var(--fs-xl);font-weight:900;color:var(--t1);}
+/* دکمه افزودن مناسبت — compact روی موبایل */
 .bd-add-btn-desktop{
-  display:flex;align-items:center;gap:6px;
-  padding:8px 14px;border-radius:var(--r5);
+  display:flex;align-items:center;gap:5px;
+  padding:7px 12px;border-radius:var(--r5);
   background:var(--a);color:#fff;
   font-size:var(--fs-xs);font-weight:700;font-family:var(--f);
   border:none;cursor:pointer;
-  box-shadow:0 2px 8px rgba(0,184,122,.35);
-  touch-action:manipulation;
+  box-shadow:0 2px 8px rgba(0,184,122,.3);
+  touch-action:manipulation;flex-shrink:0;
+  transition:transform var(--dur-fast) var(--ease-out);
 }
+.bd-add-btn-desktop:active{transform:scale(.96);}
+.bd-main-area{padding:0 18px;}
 .bag-sum{background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r4);padding:15px;margin-bottom:13px;display:flex;align-items:center;gap:var(--sp3);transition:background var(--dur-base) var(--ease-std);}
 .bag-ring-w{position:relative;flex-shrink:0;}
 .bag-ring-w svg{display:block;transform:rotate(-90deg);}
