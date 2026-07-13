@@ -12094,6 +12094,19 @@ function _fuzzyCorrectDateWords(text){
 function nlpParse(raw){
   if(!raw||raw.trim().length<3) return null;
   raw=_fuzzyCorrectDateWords(raw.trim());
+
+  // ── ! prefix markers — قبل از هر چیز ──
+  // !فوری !مهم !اول → high | !متوسط !عادی → med | !کم !پایین → low
+  raw = raw.replace(/!(?:خیلی\s*)?(فوری|مهم|اورژانسی|ضروری|اول)/g, match=>{
+    return '\u200Bhigh\u200B'; // placeholder فضای صفر
+  }).replace(/!(?:متوسط|عادی|معمولی)/g, '\u200Bmed\u200B')
+    .replace(/!(?:کم|پایین|بی‌اولویت|کم‌اهمیت)/g, '\u200Blow\u200B');
+
+  // placeholder ها رو به priority تبدیل کن و از متن پاک کن
+  let _bangPri = null;
+  if(raw.includes('\u200Bhigh\u200B')){ _bangPri='high'; raw=raw.replace(/\u200Bhigh\u200B/g,'').replace(/\s{2,}/g,' ').trim(); }
+  else if(raw.includes('\u200Bmed\u200B')){ _bangPri='med'; raw=raw.replace(/\u200Bmed\u200B/g,'').replace(/\s{2,}/g,' ').trim(); }
+  else if(raw.includes('\u200Blow\u200B')){ _bangPri='low'; raw=raw.replace(/\u200Blow\u200B/g,'').replace(/\s{2,}/g,' ').trim(); }
   const n = nlpNormalize(raw);
   const result = {
     text:raw.trim(), cleanText:raw.trim(),
@@ -12126,6 +12139,8 @@ function nlpParse(raw){
     const priRe = new RegExp('(^|[\\s،,])('+kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')(?=[\\s،,]|$)');
     if(priRe.test(n)){ result.priority=NLP_PRIORITY[kw]; result.detected.push('pri'); foundPri=true; break; }
   }
+  // ! prefix بالاتر از NLP_PRIORITY هست
+  if(_bangPri){ result.priority=_bangPri; if(!result.detected.includes('pri')) result.detected.push('pri'); }
 
   // دسته — longest match first
   let foundCat = false;
