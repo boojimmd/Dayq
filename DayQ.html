@@ -281,7 +281,8 @@ input,textarea{user-select:text;-webkit-user-select:text;}
   transform:translateY(-1px);
 }
 .qcap svg{width:15px;height:15px;stroke:var(--t3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0;}
-.qcap-inp{flex:1;background:transparent;border:none;font-size:var(--fs-md);font-weight:500;color:var(--t1);resize:none;overflow-y:auto;line-height:1.5;font-family:var(--f);padding:0;max-height:120px;}
+.qcap-inp{flex:1;background:transparent;border:none;outline:none;font-size:var(--fs-md);font-weight:500;color:var(--t1);resize:none;overflow-y:auto;line-height:1.5;font-family:var(--f);padding:0;max-height:120px;}
+.qcap-inp:focus-visible{outline:none;} /* focus توسط parent .qcap:focus-within نشون داده می‌شه */
 .qcap-inp::placeholder{color:var(--t3);}
 .qcap-inp.has-project{border-color:var(--blue)!important;}
 .qcap-inp.has-label{border-color:var(--purple)!important;}
