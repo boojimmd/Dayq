@@ -2750,9 +2750,81 @@ select.fi{
   .tb-prog-mini{
     display:flex;align-items:center;gap:6px;
     flex-shrink:0;font-size:var(--fs-xs);color:var(--t3);font-weight:700;
+    position:relative;cursor:pointer;
+    border-radius:var(--r2);padding:4px 8px;margin:-4px -8px;
+    transition:background var(--dur-fast) var(--ease-out);
   }
+  .tb-prog-mini:hover{background:var(--bg2);}
   .tb-prog-bar-mini{width:50px;height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;}
   .tb-prog-fill-mini{height:100%;background:var(--a);border-radius:2px;width:100%;transform:scaleX(0);transform-origin:right;transition:transform .4s var(--ease);}
+
+  /* ── Floating Today Card ── */
+  .tb-today-card{
+    position:absolute;top:calc(100% + 10px);left:50%;transform:translateX(-50%);
+    background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r3);
+    box-shadow:0 8px 32px rgba(0,0,0,.2),0 2px 8px rgba(0,0,0,.1);
+    min-width:280px;max-width:340px;
+    padding:0;overflow:hidden;z-index:500;
+    opacity:0;transform:translateX(-50%) translateY(-4px) scale(.97);
+    pointer-events:none;
+    transition:opacity .18s var(--ease-out),transform .18s var(--ease-out);
+  }
+  .tb-prog-mini:hover .tb-today-card,
+  .tb-today-card:hover{
+    opacity:1;transform:translateX(-50%) translateY(0) scale(1);
+    pointer-events:all;
+  }
+  .tb-tc-hdr{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 14px 8px;border-bottom:1px solid var(--b2);
+    font-size:var(--fs-2xs);font-weight:700;color:var(--t3);
+    letter-spacing:.08em;text-transform:uppercase;
+  }
+  .tb-tc-hdr span:last-child{color:var(--a);font-family:var(--mono);}
+  .tb-tc-list{padding:6px;}
+  .tb-tc-item{
+    display:flex;align-items:center;gap:8px;
+    padding:7px 8px;border-radius:var(--r2);
+    cursor:pointer;transition:background var(--dur-fast) var(--ease-out);
+  }
+  .tb-tc-item:hover{background:var(--bg2);}
+  .tb-tc-chk{
+    width:16px;height:16px;border-radius:50%;border:1.5px solid var(--b2);
+    flex-shrink:0;display:flex;align-items:center;justify-content:center;
+    transition:all var(--dur-base) var(--spring-sm);
+  }
+  .tb-tc-item.done .tb-tc-chk{background:var(--a);border-color:var(--a);}
+  .tb-tc-item.done .tb-tc-chk::after{content:'';width:5px;height:5px;border-radius:50%;background:#071a0e;}
+  .tb-tc-text{font-size:var(--fs-xs);font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .tb-tc-item.done .tb-tc-text{color:var(--t3);text-decoration:line-through;}
+  .tb-tc-pri{width:4px;height:4px;border-radius:50%;flex-shrink:0;}
+  .tb-tc-empty{padding:16px;text-align:center;font-size:var(--fs-xs);color:var(--t3);}
+  .tb-tc-footer{
+    padding:8px 14px;border-top:1px solid var(--b2);
+    font-size:var(--fs-2xs);color:var(--t3);text-align:center;cursor:pointer;
+    transition:color var(--dur-fast) var(--ease-out);
+  }
+  .tb-tc-footer:hover{color:var(--a);}
+
+  /* ── Project Filter Pills ── */
+  .tb-proj-pills{
+    display:flex;align-items:center;gap:5px;
+    padding:6px 18px;border-bottom:1px solid var(--b2);
+    overflow-x:auto;scrollbar-width:none;flex-shrink:0;
+  }
+  .tb-proj-pills::-webkit-scrollbar{display:none;}
+  .tb-proj-pill{
+    display:flex;align-items:center;gap:4px;
+    padding:3px 10px;border-radius:var(--r5);
+    font-size:var(--fs-2xs);font-weight:700;
+    background:var(--bg2);color:var(--t2);border:1px solid var(--b1);
+    cursor:pointer;flex-shrink:0;
+    transition:background var(--dur-fast) var(--ease-out),color var(--dur-fast) var(--ease-out),border-color var(--dur-fast) var(--ease-out);
+    white-space:nowrap;
+  }
+  .tb-proj-pill:active{transform:scale(.96);}
+  .tb-proj-pill.active{background:var(--am);color:var(--a);border-color:rgba(0,184,122,.3);}
+  .tb-proj-pill-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
 
   /* ─── Task card desktop redesign ─── */
   .tc{
@@ -3060,7 +3132,13 @@ select.fi{
     <!-- Desktop: mini progress -->
     <div class="tb-prog-mini">
       <div class="tb-prog-bar-mini"><div class="tb-prog-fill-mini" id="tbProgFill" style="transform:scaleX(0)"></div></div>
-      <span id="tbProgTxt">۰/۰</span>
+      <span id="tbProgTxt" class="tb-prog-txt">۰/۰</span>
+      <!-- Floating Today Card -->
+      <div class="tb-today-card" id="tbTodayCard">
+        <div class="tb-tc-hdr"><span>امروز</span><span id="tbTcCount">۰/۰</span></div>
+        <div class="tb-tc-list" id="tbTcList"></div>
+        <div class="tb-tc-footer" onclick="goPage('Home')">مشاهده همه ←</div>
+      </div>
     </div>
     <div class="hbtns">
       <button class="hbtn dtl-view-btn list-mode" id="dtlViewBtn" onclick="dtlToggleView()" title="نمایش Timeline" style="display:none">
@@ -3226,6 +3304,9 @@ select.fi{
 
 <!-- PAGE: HOME -->
 <div class="page active" id="pageHome">
+<!-- Project Filter Pills — desktop only -->
+<div class="tb-proj-pills" id="tbProjPills" style="display:none"></div>
+
 <div class="dp-list">
 
   <!-- Quick Capture -->
@@ -5612,7 +5693,10 @@ function renderTasks(){
   }
   else vis=tasks.filter(t=>t.cat===curTab&&!(t.done||t.status==='done'));
 
-  // sort: undone by priority+time, done at bottom
+  // project filter از topbar pills
+  if(window._projFilter){
+    vis=vis.filter(t=>t.projectId===window._projFilter);
+  }
   const pw={high:0,med:1,low:2};
   const isDone=t=>t.done||t.status==='done';
   vis.sort((a,b)=>{
@@ -9478,6 +9562,8 @@ function dsbUpdate(){
     const tabLabels={all:'همه',today:'امروز',tomorrow:'فردا',prep:'آماده',visit:'بازدید',waiting:'منتظرم',done:'انجام شده',projects:'پروژه‌ها'};
     fEl.textContent=tabLabels[window._curTab||curTab]||'همه';
   }
+  renderProjPills();
+  tbUpdateProgress();
 }
 
 /* ══ NAV COUNTS ══ */
@@ -10130,6 +10216,70 @@ function tbUpdateProgress(){
   const pct=total>0?Math.round(done/total*100):0;
   fill.style.transform='scaleX('+Math.min(pct,100)/100+')';
   txt.textContent=num(done)+'/'+num(total);
+  // today card هم آپدیت بشه
+  renderTbTodayCard();
+}
+
+function renderTbTodayCard(){
+  const list=document.getElementById('tbTcList');
+  const cnt=document.getElementById('tbTcCount');
+  if(!list||!cnt) return;
+  const today=mrTodayKey();
+  const todayTasks=(tasks||[]).filter(t=>t.deadline===today&&t.status!=='someday')
+    .sort((a,b)=>{
+      const pw={high:0,med:1,low:2};
+      return (pw[a.priority]??1)-(pw[b.priority]??1);
+    });
+  const done=todayTasks.filter(t=>t.done||t.status==='done').length;
+  cnt.textContent=num(done)+'/'+num(todayTasks.length);
+  const priColors={high:'var(--red)',med:'var(--amber)',low:'var(--t3)'};
+  if(!todayTasks.length){
+    list.innerHTML='<div class="tb-tc-empty">امروز هیچ کاری نداری 🎉</div>';
+    return;
+  }
+  list.innerHTML=todayTasks.map(t=>{
+    const isDone=t.done||t.status==='done';
+    return `<div class="tb-tc-item${isDone?' done':''}" onclick="tbTcToggle('${esc(t.id)}')">
+      <div class="tb-tc-chk"></div>
+      <div class="tb-tc-pri" style="background:${priColors[t.priority]||'var(--t3)'}"></div>
+      <div class="tb-tc-text">${esc(t.text)}</div>
+      ${t.time?`<span style="font-size:var(--fs-2xs);color:var(--t3);font-family:var(--mono);flex-shrink:0">${normPers(t.time)}</span>`:''}
+    </div>`;
+  }).join('');
+}
+
+function tbTcToggle(id){
+  const t=tasks.find(x=>x.id===id);
+  if(!t) return;
+  if(t.done||t.status==='done'){
+    t.done=false; t.status='todo'; t.completedAt=null;
+  } else {
+    t.done=true; t.status='done'; t.completedAt=Date.now();
+  }
+  saveAll(); renderTasks(); renderTbTodayCard(); tbUpdateProgress();
+}
+
+function renderProjPills(){
+  const el=document.getElementById('tbProjPills');
+  if(!el||window.innerWidth<900){if(el)el.style.display='none';return;}
+  const projs=(typeof projects!=='undefined'?projects:[]);
+  if(!projs.length){el.style.display='none';return;}
+  el.style.display='flex';
+  const active=window._projFilter||null;
+  el.innerHTML=`
+    <button class="tb-proj-pill${!active?' active':''}" onclick="tbSetProjFilter(null)">همه</button>
+    ${projs.filter(p=>!p.archived).map(p=>`
+      <button class="tb-proj-pill${active===p.id?' active':''}" onclick="tbSetProjFilter('${esc(p.id)}')">
+        <span class="tb-proj-pill-dot" style="background:${esc(p.color||'var(--a)')}"></span>
+        ${esc(p.name)}
+      </button>`).join('')}
+  `;
+}
+
+function tbSetProjFilter(id){
+  window._projFilter=id||null;
+  renderProjPills();
+  renderTasks();
 }
 
 /* ══ PHASE 5: DAY TIMELINE VIEW ══ */
