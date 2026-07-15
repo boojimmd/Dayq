@@ -193,9 +193,15 @@ body{
   /* prevent iOS rubber-band */
   overscroll-behavior:none;
 }
-button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;outline:none;}
-input,textarea,select{
-  font-family:inherit;color:inherit;outline:none;
+/* Hallmark gate 51 — long words/task names break correctly */
+h1,h2,h3,h4,h5,h6,.tc-title,.pg-title,.bd-page-title,.srow-ttl{overflow-wrap:anywhere;min-width:0;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
+button:focus-visible{outline:2px solid var(--a);outline-offset:2px;border-radius:inherit;}
+input,textarea,select{font-family:inherit;color:inherit;}
+input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--a);outline-offset:1px;border-radius:inherit;}
+/* Hallmark — disabled state: 3 independent signals */
+button:disabled,[disabled]{opacity:.45;cursor:not-allowed;pointer-events:none;}input,textarea,select{
+  font-family:inherit;color:inherit;
   font-size:16px !important; /* iOS Safari: prevent auto-zoom on focus */
 }
 *{-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;}
@@ -2077,7 +2083,7 @@ select.fi{
   .dp-close-btn{width:26px;height:26px;border-radius:var(--r1);background:var(--bg2);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t3);font-size:.8rem;transition:var(--dur-fast) var(--ease-out);}
   .dp-close-btn:hover{background:var(--bg3);color:var(--t1);}
 
-  .dp-title{font-size:var(--fs-xl);font-weight:800;color:var(--t1);line-height:1.35;outline:none;border-radius:var(--r1);padding:4px 6px;margin:-4px -6px;transition:background var(--dur-fast) var(--ease-out);word-break:break-word;}
+  .dp-title{font-size:var(--fs-xl);font-weight:800;color:var(--t1);line-height:1.35;border-radius:var(--r1);padding:4px 6px;margin:-4px -6px;transition:background var(--dur-fast) var(--ease-out);word-break:break-word;}
   .dp-title:focus{background:var(--bg2);}
   .dp-title[contenteditable]:empty::before{content:'عنوان...';color:var(--t3);}
 
@@ -2088,7 +2094,7 @@ select.fi{
   .dp-chip.ch-done{border-color:rgba(0,184,122,.3);color:var(--a);background:var(--am);}
 
   .dp-section-lbl{font-size:var(--fs-xs);font-weight:700;color:var(--t3);margin-bottom:4px;}
-  .dp-notes-ta{width:100%;min-height:88px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 12px;font-size:var(--fs-sm);color:var(--t1);font-family:var(--f);resize:none;outline:none;line-height:1.6;transition:border-color var(--dur-fast);}
+  .dp-notes-ta{width:100%;min-height:88px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 12px;font-size:var(--fs-sm);color:var(--t1);font-family:var(--f);resize:none;line-height:1.6;transition:border-color var(--dur-fast);}
   .dp-notes-ta:focus{border-color:var(--a);}
   .dp-notes-ta::placeholder{color:var(--t3);}
 
@@ -4240,7 +4246,7 @@ select.fi{
         <div id="dsyncCodeDisp" style="font-size:1.8rem;font-weight:800;letter-spacing:.12em;direction:ltr;">—</div>
       </div>
       <div style="font-size:.7rem;color:var(--t3);text-align:center;margin-bottom:18px;" id="dsyncLastTime">—</div>
-      <button class="sh-sub" onclick="syncNow();toast_(svgIco('check'),'سینک شد')" style="margin-bottom:10px;">همگام‌سازی دستی الان</button>
+      <button class="sh-sub" onclick="syncNow();toast_(svgIco('check'),'همگام شد')" style="margin-bottom:10px;">همگام‌سازی دستی الان</button>
       <button class="sh-sub" style="background:var(--bg3);color:var(--t1);margin-bottom:10px;" onclick="dsyncCopyCalUrl()">کپی آدرس تقویم (برای Apple Calendar)</button>
       <button class="remind-clear" onclick="dsyncDisable()">غیرفعال‌کردن سینک</button>
     </div>
@@ -5100,7 +5106,7 @@ function _checkEveningTriage(){
     // روز کامل — اگر واقعاً کاری برای امروز بوده و همه تمام شده، یک تبریک کوچک و آرام
     if(hadAnyTaskToday){
       localStorage.setItem('dq5_triage_eve_shown', todayKey);
-      toast_(svgIco('check'),'امروز همه‌چی تمام شد 🎉');
+      toast_(svgIco('check'),'همه کارهای امروز تمام شد');
     }
     return;
   }
@@ -5113,7 +5119,7 @@ function triageMarkDone(id){
   const t=tasks.find(x=>x.id===id); if(!t) return;
   t.done=true; t.status='done'; t.completedAt=Date.now();
   saveAll(); renderTasks(); _renderTriageList(); _renderTriageEveList();
-  toast_(svgIco('check'),'تمام شد ✓');
+  
 }
 function triageMoveTomorrow(id){
   const t=tasks.find(x=>x.id===id); if(!t) return;
@@ -5428,7 +5434,7 @@ function downloadBackup(){
   a.download='DayQ_backup_'+d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')+'.json';
   a.click();
   URL.revokeObjectURL(url);
-  toast_(svgIco('check'),'پشتیبان ذخیره شد ✓');
+  toast_(svgIco('check'),'پشتیبان ذخیره شد');
 }
 function restoreFromAutoBackup(){
   try{
@@ -12689,7 +12695,7 @@ boot();
     <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--b2);">
       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--t3)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input id="cmdInput" type="text" autocomplete="off" spellcheck="false"
-        style="flex:1;border:none;outline:none;background:transparent;font-size:.9rem;color:var(--t1);font-family:var(--f);"
+        style="flex:1;border:none;background:transparent;font-size:.9rem;color:var(--t1);font-family:var(--f);"
         placeholder="جستجو یا دستور..." oninput="cmdFilter()" onkeydown="cmdKey(event)">
       <kbd style="font-size:.65rem;color:var(--t4);background:var(--bg2);border:1px solid var(--b1);border-radius:4px;padding:2px 6px;">Esc</kbd>
     </div>
