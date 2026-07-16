@@ -584,6 +584,13 @@ input,textarea{user-select:text;-webkit-user-select:text;}
 }
 .bd-add-btn-desktop:active{transform:scale(.96);}
 .bd-main-area{padding:0 18px;}
+/* Emil find-animation-opportunities: task stagger
+   Frequency: occasional (filter change) → eligible
+   Purpose: preventing jarring group appearance
+   30-50ms between items, reduced-motion: opacity only */
+@keyframes tcEnter{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
+.tc-wrap.entering{animation:tcEnter 180ms cubic-bezier(0.23,1,0.32,1) both;}
+@media(prefers-reduced-motion:reduce){.tc-wrap.entering{animation:none;}}
 /* Hallmark CC-5 + StyleSeed: touch target ≥44px برای المان‌های کوچک */
 /* visual size کوچک می‌مونه ولی hit area بزرگ می‌شه */
 .hbtn,.tc-del,.tc-focus,.tc-remind,.tc-hbtn,.dp-close-btn,.jdp-btn,.jci-btn,.cal-nav-btn{position:relative;}
@@ -5005,7 +5012,20 @@ function setAppIcon(color){
   applyAppIcon(color);
   toast_(svgIco('check'),'انتخاب شد ✓ — راهنمای پایین را ببین');
 }
-function setTheme(t,el){cfg.theme=t;saveCfg();applyTheme(t);document.querySelectorAll('.th-pill').forEach(p=>p.classList.toggle('sel',p.dataset.t===t));}
+function setTheme(t,el){
+  cfg.theme=t;saveCfg();
+  // Emil: theme switch is occasional → eligible for transition
+  // View Transitions API (progressive enhancement)
+  if(document.startViewTransition){
+    document.startViewTransition(()=>applyTheme(t));
+  } else {
+    // fallback: brief opacity crossfade
+    document.documentElement.style.transition='background 150ms ease,color 150ms ease';
+    applyTheme(t);
+    setTimeout(()=>document.documentElement.style.transition='',200);
+  }
+  document.querySelectorAll('.th-pill').forEach(p=>p.classList.toggle('sel',p.dataset.t===t));
+}
 function syncThemePills(){document.querySelectorAll('.th-pill').forEach(p=>p.classList.toggle('sel',p.dataset.t===cfg.theme));}
 
 /* ══ GREETING ══ */
@@ -5817,6 +5837,16 @@ function renderTasks(){
   if(window.innerWidth>=900) dpUpdateProgress();
   if(window.innerWidth>=900) tbUpdateProgress();
   if(window.innerWidth>=900){ dsbUpdate(); navCountsUpdate(); }
+  // Emil stagger: 30-50ms between items, occasional render → eligible
+  requestAnimationFrame(()=>{
+    const wraps=list.querySelectorAll('.tc-wrap:not(.entering-done)');
+    wraps.forEach((w,i)=>{
+      w.classList.add('entering');
+      w.style.animationDelay=Math.min(i*35,300)+'ms';
+      w.classList.add('entering-done');
+      setTimeout(()=>{w.classList.remove('entering');w.style.animationDelay='';},180+Math.min(i*35,300)+50);
+    });
+  });
 
   const projPage=document.getElementById('pageProjects');
   if(projPage&&projPage.classList.contains('active')) renderProjects();
