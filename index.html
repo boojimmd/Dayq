@@ -5852,6 +5852,9 @@ function renderTasks(){
   if(window.innerWidth>=900) dpUpdateProgress();
   if(window.innerWidth>=900) tbUpdateProgress();
   if(window.innerWidth>=900){ dsbUpdate(); navCountsUpdate(); }
+  // ① Browser tab title
+  const todayPending=(tasks||[]).filter(t=>t.deadline===mrTodayKey()&&!t.done&&t.status!=='done'&&t.status!=='someday').length;
+  document.title=todayPending>0?`DayQ — ${num(todayPending)} کار امروز`:'DayQ';
   // Emil stagger: 30-50ms between items, occasional render → eligible
   requestAnimationFrame(()=>{
     const wraps=list.querySelectorAll('.tc-wrap:not(.entering-done)');
@@ -5957,6 +5960,9 @@ function mkCard(task){
     <button class="tc-hbtn done-hbtn" onclick="cycleStatus('${task.id}',event)" title="تموم شد">
       <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
     </button>
+    <button class="tc-hbtn" onclick="copyTaskText('${task.id}',event)" title="کپی متن">
+      <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+    </button>
     <button class="tc-hbtn open-hbtn" onclick="openNote('${task.id}',event)" title="جزئیات">
       <svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
     </button>
@@ -5997,6 +6003,67 @@ function dlBadge(deadline){
   return '<span class="dl-badge '+cls+'"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'+txt+'</span>';
 }
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+/* ── ④ کپی متن task ── */
+function copyTaskText(id, e){
+  if(e){e.preventDefault();e.stopPropagation();}
+  const t=tasks.find(t=>t.id===id);
+  if(!t) return;
+  let txt=t.text;
+  if(t.deadline) txt+=` — ${t.deadline}`;
+  if(t.time) txt+=` ساعت ${t.time}`;
+  navigator.clipboard?.writeText(txt).then(()=>{
+    toast_(svgIco('check'),'متن کپی شد');
+  }).catch(()=>{
+    // fallback
+    const ta=document.createElement('textarea');
+    ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    toast_(svgIco('check'),'متن کپی شد');
+  });
+}
+
+/* ── right-click context menu روی task ── */
+function initTaskContextMenu(){
+  const list=document.getElementById('taskList');
+  if(!list) return;
+  list.addEventListener('contextmenu',e=>{
+    const wrap=e.target.closest('.tc-wrap');
+    if(!wrap) return;
+    const id=wrap.querySelector('[data-id]')?.dataset.id;
+    if(!id) return;
+    e.preventDefault();
+    // حذف منوی قبلی
+    document.getElementById('_tcm')?.remove();
+    const task=tasks.find(t=>t.id===id);
+    if(!task) return;
+    const m=document.createElement('div');
+    m.id='_tcm';
+    m.style.cssText=`position:fixed;z-index:9999;background:var(--bg1);border:1px solid var(--b1);
+      border-radius:10px;padding:4px;min-width:160px;box-shadow:0 8px 32px rgba(0,0,0,.2);
+      font-size:.82rem;direction:rtl;`;
+    m.style.top=Math.min(e.clientY,window.innerHeight-140)+'px';
+    m.style.right=Math.max(0,window.innerWidth-e.clientX)+'px';
+    const items=[
+      ['کپی متن','<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',()=>copyTaskText(id)],
+      ['جزئیات','<polyline points="9 18 15 12 9 6"/>',()=>openNote(id)],
+      ['تموم شد','<polyline points="20 6 9 17 4 12"/>',()=>cycleStatus(id)],
+    ];
+    items.forEach(([lbl,svg,fn])=>{
+      const row=document.createElement('div');
+      row.style.cssText='display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;cursor:pointer;';
+      row.innerHTML=`<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">${svg}</svg>${lbl}`;
+      row.onmouseenter=()=>row.style.background='var(--bg2)';
+      row.onmouseleave=()=>row.style.background='';
+      row.onclick=()=>{fn();m.remove();};
+      m.appendChild(row);
+    });
+    document.body.appendChild(m);
+    setTimeout(()=>document.addEventListener('click',()=>m.remove(),{once:true}),10);
+  });
+}
+window.addEventListener('DOMContentLoaded',()=>setTimeout(initTaskContextMenu,1200));
 
 /* ══ SWIPE TO COMPLETE/DELETE — Things 3 style ══ */
 function initListViewSwipe(){
