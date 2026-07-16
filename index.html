@@ -2843,17 +2843,11 @@ select.fi{
     z-index:35;
     background:var(--bg0);
     border-bottom:1px solid var(--b2);
-  }
-  body.dp-closed .tb-proj-pills{right:0;}
-  /* spacer وقتی pills نشون داده می‌شن */
-  .tb-proj-pills.visible ~ .dp-list #topbarSpacer,
-  #tbProjPills:not([style*="none"]) ~ .dp-list #topbarSpacer{
-    height:calc(var(--topbar-h) + 40px);
-  }
     display:flex;align-items:center;gap:5px;
-    padding:6px 18px;border-bottom:1px solid var(--b2);
+    padding:6px 18px;
     overflow-x:auto;scrollbar-width:none;flex-shrink:0;
   }
+  body.dp-closed .tb-proj-pills{right:0;}
   .tb-proj-pills::-webkit-scrollbar{display:none;}
   .tb-proj-pill{
     display:flex;align-items:center;gap:4px;
