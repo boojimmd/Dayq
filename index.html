@@ -991,10 +991,12 @@ select.fi{
   padding-top:calc(var(--topbar-h) + 8px);margin-bottom:14px;}
 .cal-page-title{font-size:1.3rem;font-weight:800;letter-spacing:-.03em;color:var(--t1);}
 .cal-nav{display:flex;align-items:center;gap:var(--sp3);}
+.cal-nav-center{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:140px;}
 .cal-nav-btn{width:40px;height:40px;border-radius:var(--r2);background:var(--bg1);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t2);transition:var(--dur-fast) var(--ease-out);box-shadow:0 1px 3px rgba(0,0,0,.06);touch-action:manipulation;}
 .cal-nav-btn:active{background:var(--bg2);transform:scale(.93);}
 .cal-nav-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;}
 .cal-month-label{font-size:var(--fs-lg);font-weight:800;min-width:90px;text-align:center;color:var(--t1);letter-spacing:-.01em;}
+.cal-sub-label{display:block;font-size:.68rem;font-weight:500;color:var(--t3);text-align:center;margin-top:2px;letter-spacing:.01em;direction:rtl;}
 
 /* Grid */
 .cal-grid-wrap{background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r4);overflow:hidden;margin-bottom:16px;transition:background var(--dur-base) var(--ease-std);box-shadow:0 1px 6px rgba(0,0,0,.04);}
@@ -3839,7 +3841,10 @@ select.fi{
         <button class="cal-nav-btn" onclick="calNextPeriod()" title="بعدی">
           <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
-        <span class="cal-month-label" id="calMonthLabel">—</span>
+        <div class="cal-nav-center">
+          <span class="cal-month-label" id="calMonthLabel">—</span>
+          <span class="cal-sub-label" id="calSubLabel"></span>
+        </div>
         <button class="cal-nav-btn" onclick="calPrevPeriod()" title="قبلی">
           <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
@@ -8957,6 +8962,42 @@ function selStatus(st,el){
    CALENDAR ENGINE — Jalali
 ══════════════════════════════════════════════════ */
 const CAL_MONTHS=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+
+// ── ماه‌های قمری (عربی) به فارسی ──
+const HIJRI_MONTHS=['محرم','صفر','ربیع‌الاول','ربیع‌الثانی','جمادی‌الاول','جمادی‌الثانی','رجب','شعبان','رمضان','شوال','ذی‌القعده','ذی‌الحجه'];
+
+// ── ماه‌های میلادی به فارسی ──
+const GREG_MONTHS=['ژانویه','فوریه','مارس','آوریل','مه','ژوئن','ژوئیه','اوت','سپتامبر','اکتبر','نوامبر','دسامبر'];
+
+// ── تبدیل میلادی → قمری (الگوریتم توبرمور — دقت ±۱ روز) ──
+function gregorianToHijri(gy, gm, gd){
+  const jd=Math.floor((1461*(gy+4800+Math.floor((gm-14)/12)))/4)
+           +Math.floor((367*(gm-2-12*Math.floor((gm-14)/12)))/12)
+           -Math.floor((3*Math.floor((gy+4900+Math.floor((gm-14)/12))/100))/4)
+           +gd-32075;
+  let l=jd-1948440+10632;
+  const n=Math.floor((l-1)/10631);
+  l=l-10631*n+354;
+  const j=Math.floor((10985-l)/5316)*Math.floor((50*l)/17719)
+          +Math.floor(l/5670)*Math.floor((43*l)/15238);
+  l=l-Math.floor((30-j)/15)*Math.floor((17719*j)/50)
+    -Math.floor(j/16)*Math.floor((15238*j)/43)+29;
+  const hm=Math.floor((24*l)/709);
+  const hd=l-Math.floor((709*hm)/24);
+  const hy=30*n+j-30;
+  return [hy, hm, hd];
+}
+
+// ── دریافت تاریخ قمری برای اول ماه شمسی ──
+function getHijriForJalali(jy, jm){
+  const [gy,gm,gd]=jalaliToGregorian(jy,jm,1);
+  return gregorianToHijri(gy,gm,gd);
+}
+
+// ── دریافت تاریخ میلادی برای اول ماه شمسی ──
+function getGregForJalali(jy, jm){
+  return jalaliToGregorian(jy,jm,1);
+}
 const CAL_DAYS_IN_MONTH=[31,31,31,31,31,31,30,30,30,30,30,29];
 // روزهای آگاهی پزشکی جهانی (تبدیل از میلادی به شمسی نزدیک)
 // برای مدرپ: ابزار detailing و آگاهی‌بخشی
@@ -9162,6 +9203,27 @@ function renderListView(){
 
 function renderCal(){
   document.getElementById('calMonthLabel').textContent=`${CAL_MONTHS[calMonth-1]} ${num(calYear)}`;
+
+  // ── زیرعنوان: قمری + میلادی ──
+  const subEl=document.getElementById('calSubLabel');
+  if(subEl){
+    // اول ماه شمسی
+    const [h1y,h1m]=gregorianToHijri(...jalaliToGregorian(calYear,calMonth,1));
+    // آخر ماه شمسی
+    const dInM=CAL_DAYS_IN_MONTH[calMonth-1]+((calMonth===12&&isJalaliLeap(calYear))?1:0);
+    const [h2y,h2m]=gregorianToHijri(...jalaliToGregorian(calYear,calMonth,dInM));
+    const [gy1,gm1]=jalaliToGregorian(calYear,calMonth,1);
+    const [gy2,gm2]=jalaliToGregorian(calYear,calMonth,dInM);
+    // قمری
+    const hijriStr=h1m===h2m
+      ? `${HIJRI_MONTHS[h1m-1]} ${num(h1y)}`
+      : `${HIJRI_MONTHS[h1m-1]} - ${HIJRI_MONTHS[h2m-1]} ${num(h2m<h1m?h2y:h1y)}`;
+    // میلادی
+    const gregStr=gm1===gm2
+      ? `${GREG_MONTHS[gm1-1]} ${gy1}`
+      : `${GREG_MONTHS[gm1-1]} - ${GREG_MONTHS[gm2-1]} ${gy2}`;
+    subEl.textContent=`${hijriStr}    ${gregStr}`;
+  }
   const daysEl=document.getElementById('calDays'); if(!daysEl)return;
   daysEl.innerHTML='';
   // First day of month — calc weekday (0=sat in jalali)
@@ -11242,6 +11304,13 @@ function renderWeekView(){
   const [ey,em,ed] = days[6].split('-').map(Number);
   document.getElementById('calMonthLabel').textContent =
     `${num(sd)} تا ${num(ed)} ${JL_MONTHS_SHORT[em-1]}`;
+  // sub-label برای هفتگی: قمری + میلادی اول هفته
+  const subEl=document.getElementById('calSubLabel');
+  if(subEl){
+    const [hy,hm]=gregorianToHijri(...jalaliToGregorian(sy,sm,sd));
+    const [gy,gm]=jalaliToGregorian(sy,sm,sd);
+    subEl.textContent=`${HIJRI_MONTHS[hm-1]} ${num(hy)}    ${GREG_MONTHS[gm-1]} ${gy}`;
+  }
   // render header
   hdr.innerHTML = '';
   days.forEach((dk,i) => {
