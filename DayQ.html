@@ -2835,8 +2835,21 @@ select.fi{
   }
   .tb-tc-footer:hover{color:var(--a);}
 
-  /* ── Project Filter Pills ── */
+  /* project pills: fixed زیر topbar، بالای dp-list */
   .tb-proj-pills{
+    position:fixed;
+    top:var(--topbar-h);
+    left:0;right:190px;
+    z-index:35;
+    background:var(--bg0);
+    border-bottom:1px solid var(--b2);
+  }
+  body.dp-closed .tb-proj-pills{right:0;}
+  /* spacer وقتی pills نشون داده می‌شن */
+  .tb-proj-pills.visible ~ .dp-list #topbarSpacer,
+  #tbProjPills:not([style*="none"]) ~ .dp-list #topbarSpacer{
+    height:calc(var(--topbar-h) + 40px);
+  }
     display:flex;align-items:center;gap:5px;
     padding:6px 18px;border-bottom:1px solid var(--b2);
     overflow-x:auto;scrollbar-width:none;flex-shrink:0;
@@ -3339,7 +3352,7 @@ select.fi{
 <div class="dp-list">
 
   <!-- Quick Capture -->
-  <div style="height:var(--topbar-h);flex-shrink:0;"></div>
+  <div style="height:var(--topbar-h);flex-shrink:0;" id="topbarSpacer"></div>
   <div class="cmd-shortcut-hint" onclick="openCmdPalette()" title="Command Palette">
     <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
     <span>جستجو یا انجام هر کار...</span>
@@ -10351,10 +10364,17 @@ function tbTcToggle(id){
 
 function renderProjPills(){
   const el=document.getElementById('tbProjPills');
+  const spacer=document.getElementById('topbarSpacer');
   if(!el||window.innerWidth<900){if(el)el.style.display='none';return;}
   const projs=(typeof projects!=='undefined'?projects:[]);
-  if(!projs.length){el.style.display='none';return;}
+  if(!projs.length){
+    el.style.display='none';
+    if(spacer) spacer.style.height='var(--topbar-h)';
+    return;
+  }
   el.style.display='flex';
+  // spacer: topbar + pills height
+  if(spacer) spacer.style.height='calc(var(--topbar-h) + 38px)';
   const active=window._projFilter||null;
   el.innerHTML=`
     <button class="tb-proj-pill${!active?' active':''}" onclick="tbSetProjFilter(null)">همه</button>
@@ -10428,7 +10448,15 @@ function renderDayTimeline(){
   const noTimeTasks= tasks.filter(t=>t.deadline===today&&!t.time&&t.status!=='someday');
 
   const cntEl = document.getElementById('dtlTimedCount');
-  if(cntEl) cntEl.textContent = num(timedTasks.length) + ' کار با زمان';
+  if(cntEl){
+    if(timedTasks.length===0){
+      cntEl.textContent='امروز کار زمان‌دار نداری';
+      cntEl.style.opacity='.5';
+    } else {
+      cntEl.textContent=num(timedTasks.length)+' کار با زمان';
+      cntEl.style.opacity='';
+    }
+  }
 
   // Build grid
   const totalH  = DTL_END - DTL_START;
