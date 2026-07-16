@@ -5989,7 +5989,10 @@ function dlBadge(deadline){
   if(diff<0)      {cls='dl-overdue'; txt=num(Math.abs(diff))+' روز گذشت';}
   else if(diff===0){cls='dl-today';   txt='امروز';}
   else if(diff===1){cls='dl-tomorrow';txt='فردا';}
-  else if(diff<=7) {cls='dl-soon';    txt=num(diff)+' روز دیگر';}
+  else if(diff===2){cls='dl-soon';    txt='پس‌فردا';}
+  else if(diff<=6) {cls='dl-soon';    txt=num(diff)+' روز دیگه';}
+  else if(diff<=13){cls='dl-normal';  txt='هفته دیگه';}
+  else if(diff<=29){cls='dl-normal';  txt=num(Math.round(diff/7))+' هفته دیگه';}
   else             {cls='dl-normal';  txt=num(jd)+' '+['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'][jm-1];}
   return '<span class="dl-badge '+cls+'"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'+txt+'</span>';
 }
@@ -6426,7 +6429,7 @@ function qcHideToolbar(){
 /* ── Persian text normalization (الهام از پاک‌نویس) ── */
 function normalizePersian(t){
   if(!t) return t;
-  return t
+  return addHalfSpace(t
     .replace(/ك/g,'ک')          // ك عربی → ک فارسی
     .replace(/ي/g,'ی')          // ي عربی → ی فارسی
     .replace(/[٠١٢٣٤٥٦٧٨٩]/g,d=>String.fromCharCode(d.charCodeAt(0)-1584+1776)) // ٠-٩ عربی → ۰-۹ فارسی
@@ -6434,7 +6437,7 @@ function normalizePersian(t){
     .replace(/;/g,'؛')          // ; → ؛
     .replace(/,(?=\S)/g,'، ')   // , بدون فاصله → ،
     .replace(/  +/g,' ')        // فاصله اضافه
-    .trim();
+    .trim());
 }
 
 function _qcCreateOne(rawSeg, qcCatFallback, qcPriFallback){
@@ -7466,6 +7469,71 @@ function _updateMeWeekChart(){
 
 /* ══ NUMBERS ══ */
 function num(n){if(!cfg.persian)return String(n);return String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d]);}
+
+/* ── ① timeAgo فارسی — نمایش نسبی تاریخ ── */
+function timeAgoFa(deadlineKey){
+  if(!deadlineKey) return '';
+  const today=mrTodayKey();
+  const [ty,tm,td]=today.split('-').map(Number);
+  const [dy,dm,dd]=deadlineKey.split('-').map(Number);
+  // تبدیل به روز مطلق (تقریبی)
+  const todayAbs=ty*365+tm*30+td;
+  const deadAbs=dy*365+dm*30+dd;
+  const diff=deadAbs-todayAbs;
+  if(diff===0) return 'امروز';
+  if(diff===1) return 'فردا';
+  if(diff===-1) return 'دیروز';
+  if(diff===2) return 'پس‌فردا';
+  if(diff>0 && diff<=6) return `${num(diff)} روز دیگه`;
+  if(diff<0 && diff>=-6) return `${num(Math.abs(diff))} روز پیش`;
+  if(diff>6 && diff<=13) return 'هفته دیگه';
+  if(diff<-6 && diff>=-13) return 'هفته پیش';
+  if(diff>13 && diff<=29) return `${num(Math.round(diff/7))} هفته دیگه`;
+  if(diff<-13 && diff>=-29) return `${num(Math.round(Math.abs(diff)/7))} هفته پیش`;
+  // ماه/سال
+  const mDiff=dm-tm+(dy-ty)*12;
+  if(mDiff===1) return 'ماه دیگه';
+  if(mDiff===-1) return 'ماه پیش';
+  if(mDiff>1) return `${num(mDiff)} ماه دیگه`;
+  if(mDiff<-1) return `${num(Math.abs(mDiff))} ماه پیش`;
+  return '';
+}
+
+/* ── ② halfSpace — نرمال‌سازی نیم‌فاصله فارسی ── */
+function addHalfSpace(text){
+  if(!text) return text;
+  const ZWNJ='\u200c';
+  const prefixes=['می','نمی','بی','هم','بر','در','بر','پر'];
+  const suffixes=['ها','تر','ترین','هایی','ایی'];
+  let t=text;
+  // پیشوندها: می رفتم → می‌رفتم
+  prefixes.forEach(p=>{
+    t=t.replace(new RegExp(`(?<![${ZWNJ}])(${p}) ([\\u0600-\\u06FF])`, 'g'),
+      (_,a,b)=>a+ZWNJ+b);
+  });
+  // پسوندها: کتاب ها → کتاب‌ها
+  suffixes.forEach(s=>{
+    t=t.replace(new RegExp(`([\\u0600-\\u06FF]) (${s})(?=[^\\u0600-\\u06FF]|$)`, 'g'),
+      (_,a,b)=>a+ZWNJ+b);
+  });
+  return t;
+}
+
+/* ── ③ شماره هفته جلالی ── */
+function jalaliWeekNumber(jy, jm, jd){
+  // روز اول سال = چند روز از شنبه؟
+  const [gy,gm,gd]=jalaliToGregorian(jy,1,1);
+  const jan1=new Date(gy,gm-1,gd);
+  // شنبه = 6 در getDay()
+  const dow=jan1.getDay(); // 0=sun..6=sat
+  const satOffset=dow===6?0:(dow+1); // فاصله از شنبه قبل
+  // روز شماره در سال
+  const CAL_D=[31,31,31,31,31,31,30,30,30,30,30,29];
+  let dayOfYear=jd;
+  for(let i=0;i<jm-1;i++) dayOfYear+=CAL_D[i];
+  if(jm===12 && isJalaliLeap(jy)) dayOfYear++;
+  return Math.ceil((dayOfYear+satOffset)/7);
+}
 
 /* ══ CONFETTI ══ */
 function spawnConfetti(e){
@@ -9223,6 +9291,9 @@ function renderCal(){
       ? `${GREG_MONTHS[gm1-1]} ${gy1}`
       : `${GREG_MONTHS[gm1-1]} - ${GREG_MONTHS[gm2-1]} ${gy2}`;
     subEl.textContent=`${hijriStr}    ${gregStr}`;
+    // شماره هفته جلالی
+    const wn=jalaliWeekNumber(calYear,calMonth,1);
+    subEl.title=`هفته ${num(wn)} سال`;
   }
   const daysEl=document.getElementById('calDays'); if(!daysEl)return;
   daysEl.innerHTML='';
@@ -9740,6 +9811,31 @@ function navCountsUpdate(){
   const projCount=(tasks||[]).filter(t=>t.projectId&&!t.done&&t.status!=='done').length;
   const pEl=document.getElementById('nic-projects');
   if(pEl) pEl.textContent=projCount>0?num(projCount):'';
+  // ④ Favicon badge
+  _updateFaviconBadge(homeCount);
+}
+
+function _updateFaviconBadge(count){
+  try{
+    const canvas=document.createElement('canvas');
+    canvas.width=32;canvas.height=32;
+    const ctx=canvas.getContext('2d');
+    // آیکون پایه — دایره سبز
+    ctx.beginPath();ctx.arc(16,16,15,0,2*Math.PI);
+    ctx.fillStyle='#00b87a';ctx.fill();
+    ctx.fillStyle='#071a0e';ctx.font='bold 16px sans-serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('D',16,17);
+    if(count>0){
+      // badge قرمز
+      ctx.beginPath();ctx.arc(25,7,8,0,2*Math.PI);
+      ctx.fillStyle='#e53e5a';ctx.fill();
+      ctx.fillStyle='#fff';ctx.font='bold 9px sans-serif';
+      ctx.fillText(count>9?'9+':String(count),25,7);
+    }
+    const link=document.querySelector('link[rel="icon"]');
+    if(link) link.href=canvas.toDataURL('image/png');
+  }catch(e){}
 }
 
 /* ══ RIGHT-CLICK CONTEXT MENU ══ */
