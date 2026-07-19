@@ -3811,11 +3811,35 @@ select.fi{
     <div class="sg-wrap">
       <span class="sg-lbl">اتصال</span>
       <div class="s-group">
-        <div class="srow" onclick="openPushSettings()"><div class="srow-ico" style="background:var(--ambm);color:var(--amber);"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div class="srow-body"><div class="srow-ttl">یادآوری واقعی (Push)</div><div class="srow-sub" id="pushSub">غیرفعال</div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
-        <div class="srow" onclick="openSyncSettings()"><div class="srow-ico" style="background:var(--am);color:var(--a);"><svg viewBox="0 0 24 24"><path d="M21 2v6h-6M3 22v-6h6"/><path d="M3 11a9 9 0 0 1 15-6.7L21 7M21 13a9 9 0 0 1-15 6.7L3 17"/></svg></div><div class="srow-body"><div class="srow-ttl">همگام‌سازی دستگاه‌ها</div><div class="srow-sub" id="syncSub">غیرفعال</div>
-        <!-- Team Row -->
+        <div class="srow" onclick="openPushSettings()">
+          <div class="srow-ico" style="background:var(--ambm);color:var(--amber);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          </div>
+          <div class="srow-body">
+            <div class="srow-ttl">یادآوری واقعی (Push)</div>
+            <div class="srow-sub" id="pushSub">غیرفعال</div>
+          </div>
+          <div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+        <div class="srow" onclick="openSyncSettings()">
+          <div class="srow-ico" style="background:var(--am);color:var(--a);">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M21 2v6h-6M3 22v-6h6"/><path d="M3 11a9 9 0 0 1 15-6.7L21 7M21 13a9 9 0 0 1-15 6.7L3 17"/></svg>
+          </div>
+          <div class="srow-body">
+            <div class="srow-ttl">همگام‌سازی دستگاه‌ها</div>
+            <div class="srow-sub" id="syncSub">غیرفعال</div>
+          </div>
+          <div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- تیم کاری — بخش جدا -->
+    <div class="sg-wrap">
+      <span class="sg-lbl">تیم</span>
+      <div class="s-group">
         <div class="srow" id="tmTeamRow" onclick="tmOpenTeamSettings()">
-          <div class="srow-ico" style="background:var(--bluem);color:var(--blue)">
+          <div class="srow-ico" style="background:var(--bluem);color:var(--blue);">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           </div>
           <div class="srow-body">
@@ -3823,26 +3847,10 @@ select.fi{
             <div class="srow-sub" id="tmTeamSub">عضو تیمی نیستی</div>
           </div>
           <div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
-        </div></div><div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div></div>
+        </div>
       </div>
     </div>
 
-    
-    <!-- سکو Button — فقط مدیر می‌بینه -->
-    <div id="tmSokoCard" style="display:none;padding:0 18px;margin-bottom:var(--sp3)">
-      <button class="tm-soko-btn" onclick="tmOpenSoko()">
-        <div style="flex:1;text-align:right">
-          <div style="font-size:var(--fs-md);font-weight:800">🏢 سکو</div>
-          <div style="font-size:var(--fs-xs);opacity:.7;margin-top:2px">مدیریت تیم</div>
-        </div>
-        <div class="tm-soko-stats">
-          <div class="tm-soko-stat"><div style="font-size:var(--fs-md);font-weight:800" id="tmSokoMemberCount">۰</div><div style="font-size:var(--fs-2xs);opacity:.7">اعضا</div></div>
-          <div class="tm-soko-stat" id="tmSokoAlertStat"><div style="font-size:var(--fs-md);font-weight:800" id="tmSokoAlertCount">۰</div><div style="font-size:var(--fs-2xs);opacity:.7">نیاز توجه</div></div>
-          <div class="tm-soko-stat"><div style="font-size:var(--fs-md);font-weight:800" id="tmSokoTaskCount">۰</div><div style="font-size:var(--fs-2xs);opacity:.7">تسک باز</div></div>
-        </div>
-      </button>
-    </div>
-    
 <!-- ⑦ ابزارها -->
     <div class="sg-wrap">
       <span class="sg-lbl">ابزارها</span>
