@@ -13844,6 +13844,40 @@ async function tmDoAssign() {
 }
 
 // ── Pending approvals check ────────────────────────────────────
+async function tmRenderPendingList(pending) {
+  const el = document.getElementById('tmPendingList');
+  if (!el) return;
+  if (!pending.length) {
+    el.innerHTML = '<div style="text-align:center;color:var(--t3);padding:var(--sp4)">درخواست جدیدی نیست</div>';
+    return;
+  }
+  el.innerHTML = pending.map(p => `
+    <div class="tm-pending-card" style="flex-direction:column;align-items:stretch">
+      <div style="display:flex;align-items:center;gap:var(--sp3);margin-bottom:var(--sp3)">
+        <div style="width:40px;height:40px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0">👤</div>
+        <div>
+          <div style="font-size:var(--fs-md);font-weight:700">${esc(p.name)}</div>
+          <div style="font-size:var(--fs-xs);color:var(--t2)">${esc(p.role||'—')}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:var(--sp2)">
+        <button class="tm-btn danger" style="flex:1;justify-content:center" onclick="tmApproveJoin('${p.uuid}','reject')">❌ رد</button>
+        <button class="tm-btn primary" style="flex:1;justify-content:center" onclick="tmApproveJoin('${p.uuid}','approve')">✅ تأیید</button>
+      </div>
+    </div>`).join('');
+}
+
+async function tmOpenPendingSheet() {
+  openSheet('shTmPending');
+  try {
+    const data = await tmAPI('GET', '/team/pending');
+    await tmRenderPendingList(data.pending || []);
+  } catch(e) {
+    const el = document.getElementById('tmPendingList');
+    if (el) el.innerHTML = `<div style="color:var(--red);text-align:center;padding:var(--sp3)">${e.message}</div>`;
+  }
+}
+
 async function tmCheckPending() {
   if (tm.role !== 'manager') return;
   try {
@@ -14936,6 +14970,21 @@ let _calMarkerTimer = null;
 
 /* ════ END TEAM STEP 5 FIXES ════ */
 
+
+// ── Approve / Reject Join Request ────────────────────────────
+async function tmApproveJoin(memberUuid, action) {
+  try {
+    await tmAPI('POST', '/team/approve', { memberUuid, action });
+    const msg = action === 'approve' ? 'عضو تأیید شد ✅' : 'درخواست رد شد';
+    toast_(svgIco('check'), msg);
+    tmCheckPending();
+    tmSyncBackground();
+    closeAll();
+  } catch(e) {
+    toast_(svgIco('flag'), 'خطا: ' + e.message);
+  }
+}
+
 boot();
 </script>
 
@@ -15356,5 +15405,19 @@ boot();
   </div>
 </div>
 <!-- ════ End Step 3 HTML ════ -->
+
+<!-- Pending Members Sheet -->
+<div class="sheet" id="shTmPending">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div class="sh-ttl">درخواست‌های عضویت</div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+  </div>
+  <div class="sh-body" id="tmPendingList">
+    <div style="text-align:center;color:var(--t3);padding:var(--sp5)">در حال بارگذاری...</div>
+  </div>
+</div>
 </body>
 </html>
