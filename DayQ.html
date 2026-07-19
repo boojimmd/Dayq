@@ -13406,8 +13406,11 @@ function tmClearState() {
 
 // ── Worker API call ────────────────────────────────────────────
 async function tmAPI(method, path, body, requireAuth = true) {
-  const base = tm.workerUrl || cfg.pushWorkerUrl;
-  if (!base) throw new Error('no_worker');
+  const rawBase = tm.workerUrl || cfg.pushWorkerUrl;
+  if (!rawBase) throw new Error('no_worker');
+  // sanitize: trim whitespace، حذف trailing slash
+  const base = rawBase.trim().replace(/\/+$/, '');
+  if (!base.startsWith('http')) throw new Error('آدرس Worker نامعتبر است');
   const headers = { 'Content-Type': 'application/json' };
   if (requireAuth && tm.token) headers['X-DayQ-Token'] = tm.token;
   const opts = { method, headers };
@@ -13670,7 +13673,13 @@ async function tmDoCreate() {
     tmApplyUI();
     toast_(svgIco('check'), 'تیم ساخته شد!');
   } catch(e) {
-    errEl.textContent = e.message === 'no_worker' ? 'Worker تنظیم نشده' : 'خطا: ' + e.message;
+    const msg = e.message === 'no_worker' ? 'Worker Push تنظیم نشده — برو اتصال'
+      : e.message.includes('pattern') || e.message.includes('URL') || e.message.includes('Failed to fetch')
+        ? 'آدرس Worker اشتباهه — در اتصال چک کن'
+      : e.message.includes('NetworkError') || e.message.includes('network')
+        ? 'اتصال اینترنت یا Worker مشکل داره'
+      : 'خطا: ' + e.message;
+    errEl.textContent = msg;
   } finally {
     btn.disabled = false;
     btn.textContent = 'ساخت تیم';
@@ -13730,7 +13739,13 @@ async function tmDoJoin() {
 
     toast_(svgIco('check'), 'درخواست ارسال شد — منتظر تأیید مدیر');
   } catch(e) {
-    errEl.textContent = e.message === 'no_worker' ? 'Worker تنظیم نشده' : 'خطا: ' + e.message;
+    const msg = e.message === 'no_worker' ? 'Worker Push تنظیم نشده — برو اتصال'
+      : e.message.includes('pattern') || e.message.includes('URL') || e.message.includes('Failed to fetch')
+        ? 'آدرس Worker اشتباهه — در اتصال چک کن'
+      : e.message.includes('NetworkError') || e.message.includes('network')
+        ? 'اتصال اینترنت یا Worker مشکل داره'
+      : 'خطا: ' + e.message;
+    errEl.textContent = msg;
   } finally {
     btn.disabled = false;
     btn.textContent = 'ارسال درخواست';
@@ -15202,7 +15217,13 @@ tmDoCreate = async function() {
     tmApplyUI();
     toast_(svgIco('check'), 'تیم ساخته شد!');
   } catch(e) {
-    errEl.textContent = e.message === 'no_worker' ? 'Worker تنظیم نشده' : 'خطا: ' + e.message;
+    const msg = e.message === 'no_worker' ? 'Worker Push تنظیم نشده — برو اتصال'
+      : e.message.includes('pattern') || e.message.includes('URL') || e.message.includes('Failed to fetch')
+        ? 'آدرس Worker اشتباهه — در اتصال چک کن'
+      : e.message.includes('NetworkError') || e.message.includes('network')
+        ? 'اتصال اینترنت یا Worker مشکل داره'
+      : 'خطا: ' + e.message;
+    errEl.textContent = msg;
   } finally {
     btn.disabled = false; btn.textContent = 'ساخت تیم';
   }
