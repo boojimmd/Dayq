@@ -14798,6 +14798,144 @@ tmSyncBackground = async function() {
 
 /* ════ END TEAM STEP 4 ════ */
 
+/* ════════════════════════════════════════════════════════════════
+   DayQ Team — سکو  |  Step 5: Bug Fixes + Performance
+   ════════════════════════════════════════════════════════════════ */
+
+// ── Fix 1: tm.sokoOpen tracking ──────────────────────────────
+(function(){
+  const _origOpen  = tmOpenSoko;
+  const _origClose = tmCloseSoko;
+  tmOpenSoko = function() {
+    tm.sokoOpen = true;
+    _origOpen.apply(this, arguments);
+  };
+  tmCloseSoko = function() {
+    tm.sokoOpen = false;
+    _origClose.apply(this, arguments);
+  };
+})();
+
+// ── Fix 2: overflow conflict با openSheet ─────────────────────
+// وقتی سکو باز هست و یه sheet داخلش باز می‌شه، بستن sheet نباید overflow رو ریست کنه
+(function(){
+  const _orig = window.closeAll;
+  window.closeAll = function() {
+    _orig.apply(this, arguments);
+    // اگه سکو هنوز باز هست، overflow رو نگه دار
+    if (tm.sokoOpen) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+    }
+  };
+})();
+
+// ── Fix 3: null-safe tmApplyUI ────────────────────────────────
+(function(){
+  const _orig = tmApplyUI;
+  tmApplyUI = function() {
+    // فقط وقتی DOM آماده‌ست
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', _orig);
+    } else {
+      try { _orig.apply(this, arguments); } catch(e) { console.log('tmApplyUI:', e.message); }
+    }
+  };
+})();
+
+// ── Fix 4: tmRenderInbox null-safe ───────────────────────────
+(function(){
+  const _orig = tmRenderInbox;
+  tmRenderInbox = function() {
+    try { _orig.apply(this, arguments); } catch(e) { console.log('tmRenderInbox:', e.message); }
+  };
+})();
+
+// ── Fix 5: tmRenderTodaySection null-safe ─────────────────────
+(function(){
+  const _orig = tmRenderTodaySection;
+  tmRenderTodaySection = function() {
+    try { _orig.apply(this, arguments); } catch(e) { console.log('tmRenderTodaySection:', e.message); }
+  };
+})();
+
+// ── Fix 6: tmCountBadge show/hide ─────────────────────────────
+(function(){
+  const _orig = tmRenderInbox;
+  tmRenderInbox = function() {
+    _orig.apply(this, arguments);
+    const count = (tm.inbox||[]).filter(t=>!t.deleted&&t.status!=='done').length;
+    const badge = document.getElementById('tmInboxCount');
+    if (badge) {
+      badge.textContent = count > 0 ? count : '';
+      badge.style.display = count > 0 ? '' : 'none';
+    }
+  };
+})();
+
+// ── Performance: Lazy Team Module ─────────────────────────────
+// همه team listeners که نیاز به DOM دارن رو defer می‌کنیم
+// تا بعد از اولین renderTasks
+let _tmDOMReady = false;
+(function(){
+  const _orig = window.renderTasks;
+  window.renderTasks = function() {
+    _orig.apply(this, arguments);
+    if (!_tmDOMReady && tm.code) {
+      _tmDOMReady = true;
+      // اولین بار که DOM آماده‌ست، همه چیز رو init کن
+      requestAnimationFrame(() => {
+        tmApplyUI();
+        if (tm.role === 'member') tmRenderInbox();
+        if (tm.role === 'manager') tmRenderTodaySection();
+        tmRenderAnnouncements();
+      });
+    }
+  };
+})();
+
+// ── Performance: Debounced Calendar Markers ──────────────────
+let _calMarkerTimer = null;
+(function(){
+  const _orig = tmAddCalendarMarkers;
+  tmAddCalendarMarkers = function() {
+    clearTimeout(_calMarkerTimer);
+    _calMarkerTimer = setTimeout(() => {
+      try { _orig.apply(this, arguments); } catch(e) {}
+    }, 50);
+  };
+})();
+
+// ── Fix 7: tmDoJoin — Worker URL fallback ─────────────────────
+// اگه Worker تنظیم نشده بود، خطای واضح بده
+(function(){
+  const _orig = tmDoJoin;
+  tmDoJoin = async function() {
+    if (!cfg.pushWorkerUrl) {
+      const errEl = document.getElementById('tmJoinErr');
+      if (errEl) errEl.textContent = 'ابتدا Worker Push رو در تنظیمات فعال کن';
+      return;
+    }
+    await _orig.apply(this, arguments);
+  };
+})();
+
+// ── Fix 8: tmDoCreate — Worker URL validation ─────────────────
+(function(){
+  const _orig = tmDoCreate;
+  tmDoCreate = async function() {
+    if (!cfg.pushWorkerUrl) {
+      const errEl = document.getElementById('tmCreateErr');
+      if (errEl) errEl.textContent = 'ابتدا Worker Push رو در تنظیمات → اتصال فعال کن';
+      return;
+    }
+    await _orig.apply(this, arguments);
+  };
+})();
+
+/* ════ END TEAM STEP 5 FIXES ════ */
+
 boot();
 </script>
 
