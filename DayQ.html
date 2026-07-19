@@ -3584,7 +3584,25 @@ select.fi{
     <div class="dtl-anytime" id="dtlAnytime"></div>
   </div>
 
-  <div class="tlist" id="taskList"></div>
+  
+  <!-- ════ تیم امروز (مدیر) ════ -->
+  <div id="tmTodaySection" style="display:none;padding:0 var(--sp4);margin-bottom:var(--sp3)">
+    <div class="tm-today-card">
+      <div class="tm-today-hdr" onclick="tmToggleTodayBody()">
+        <div style="display:flex;align-items:center;gap:var(--sp2)">
+          <span id="tmTodayArrow" style="color:var(--t3);font-size:.7rem;transition:transform var(--dur-fast) var(--ease-std)">▾</span>
+          <span class="tm-alert-chip" id="tmTodayAlertBadge" style="display:none">۱ مشکل</span>
+        </div>
+        <div class="tm-today-title">👥 تیم امروز</div>
+      </div>
+      <div class="tm-today-body" id="tmTodayBody">
+        <div style="text-align:center;padding:var(--sp3);color:var(--t3);font-size:var(--fs-xs)">در حال بارگذاری...</div>
+      </div>
+    </div>
+  </div>
+  <!-- ════ end تیم امروز ════ -->
+
+<div class="tlist" id="taskList"></div>
   <div class="empty" id="emptyState" style="display:none;">
     <svg viewBox="0 0 52 52" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="8" y="14" width="36" height="30" rx="4"/><path d="M18 14v-3a4 4 0 0 1 8 0v3M18 26h16M18 32h10"/></svg>
     <div class="empty-t">لیست خالیه</div>
@@ -3593,7 +3611,23 @@ select.fi{
 
   
 
-  <div style="height:20px;"></div>
+  
+  <!-- ════ از مدیر (کارمند) ════ -->
+  <div id="tmInboxSection" style="display:none;padding:0 var(--sp4);margin-top:var(--sp1)">
+    <div class="tm-divider"></div>
+    <div class="tm-section-hdr">
+      <span onclick="tmOpenSoko()" style="font-size:var(--fs-xs);color:var(--blue);cursor:pointer">مشاهده همه ←</span>
+      <div class="tm-section-lbl">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        از مدیر
+        <span class="tm-count-badge" id="tmInboxCount" style="display:none"></span>
+      </div>
+    </div>
+    <div id="tmInboxList"></div>
+  </div>
+  <!-- ════ end از مدیر ════ -->
+
+<div style="height:20px;"></div>
 </div><!-- /dp-list -->
 
 </div><!-- /pageHome -->
@@ -4095,7 +4129,17 @@ select.fi{
   <div class="intent-sheet">
     <div class="intent-handle"></div>
     <div class="intent-eyebrow"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/></svg> صبح بخیر</div>
-    <div class="intent-title">امروز چه ۳ کاری مهمه؟</div>
+        <!-- Team Digest — فقط مدیر، اگه alert داشته باشه -->
+    <div id="tmMorningDigest" style="display:none;margin-bottom:var(--sp3)">
+      <div style="background:var(--redm);border:1px solid rgba(229,62,90,.15);border-radius:var(--r2);padding:var(--sp3)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp2)">
+          <button onclick="tmOpenSoko();skipIntent()" style="font-size:var(--fs-2xs);color:var(--blue);background:none;border:none;cursor:pointer;font-family:var(--f)">سکو ←</button>
+          <div style="font-size:var(--fs-xs);font-weight:700;color:var(--red)">⚠️ تیم — نیاز توجه</div>
+        </div>
+        <div id="tmMorningDigestBody" style="font-size:var(--fs-xs)"></div>
+      </div>
+    </div>
+<div class="intent-title">امروز چه ۳ کاری مهمه؟</div>
     <div class="intent-sub">سه کار مهم‌تر امروزت رو انتخاب کن یا بنویس.</div>
     <div class="intent-slots" id="intentSlots">
       <div class="intent-slot" id="islot0" onclick="openIntentPicker(0)">
@@ -13909,6 +13953,166 @@ async function tmMarkWaiting() {
   }
 }
 /* ════ END TEAM STEP 1 ════ */
+
+/* ════════════════════════════════════════════════════════════════
+   DayQ Team — سکو  |  Step 2: Home Tab Integration
+   ════════════════════════════════════════════════════════════════ */
+
+// ── Hook into renderTasks ──────────────────────────────────────
+// بدون لمس کد اصلی، بعد از هر render تیم رو هم آپدیت می‌کنیم
+(function() {
+  const _orig = window.renderTasks;
+  window.renderTasks = function() {
+    if (_orig) _orig.apply(this, arguments);
+    if (tm && tm.role === 'member')  tmRenderInbox();
+    if (tm && tm.role === 'manager') tmRenderTodaySection();
+  };
+})();
+
+// ── Morning Modal — Team Digest ────────────────────────────────
+// این تابع openMorningIntent رو wrap می‌کنه تا digest اضافه بشه
+(function() {
+  const _origOpen = window.openMorningIntent || window.showIntentModal;
+  const funcName = window.openMorningIntent ? 'openMorningIntent' : 'showIntentModal';
+  window[funcName] = function() {
+    if (_origOpen) _origOpen.apply(this, arguments);
+    tmInjectMorningDigest();
+  };
+})();
+
+function tmInjectMorningDigest() {
+  const digestEl = document.getElementById('tmMorningDigest');
+  const bodyEl   = document.getElementById('tmMorningDigestBody');
+  if (!digestEl || !bodyEl) return;
+  if (tm.role !== 'manager' || !tm.snapshot) {
+    digestEl.style.display = 'none';
+    return;
+  }
+  const alerts = (tm.snapshot.members || []).filter(m => m.alert !== 'ok');
+  if (!alerts.length) {
+    digestEl.style.display = 'none';
+    return;
+  }
+  bodyEl.innerHTML = alerts.map(m => {
+    const icon = m.alert === 'blocked' ? '🔴' : '🟡';
+    const note = m.alert === 'blocked' ? 'مشکل دارم' : 'بدون آپدیت';
+    return `<div style="display:flex;align-items:center;gap:var(--sp2);padding:2px 0">
+      <span>${icon}</span>
+      <span style="color:var(--t2)">${m.name} — ${note}</span>
+    </div>`;
+  }).join('');
+  digestEl.style.display = '';
+}
+
+// ── Build Member Options در Assign Sheet ──────────────────────
+function tmBuildAssignMemberOpts(preUuid = '') {
+  const container = document.getElementById('tmAssignMemberOpts');
+  if (!container || !tm.snapshot) return;
+  const members = (tm.snapshot.members || []).filter(m => !m.isManager && m.status === 'active');
+  container.innerHTML = members.map(m => {
+    const icon = m.alert === 'blocked' ? '🔴' : m.alert !== 'ok' ? '🟡' : '🟢';
+    return `<button class="tm-btn tm-member-opt${m.uuid === preUuid ? ' active' : ''}"
+      data-uuid="${m.uuid}"
+      onclick="tmSelectAssignMember(this)"
+      style="gap:4px">
+      ${icon} ${m.name}
+    </button>`;
+  }).join('');
+}
+
+function tmSelectAssignMember(el) {
+  document.querySelectorAll('.tm-member-opt').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// override tmAssignTask تا member opts رو populate کنه
+const _origAssignTask = tmAssignTask;
+tmAssignTask = function(preUuid = '') {
+  _origAssignTask(preUuid);
+  // بعد از باز شدن sheet، member list رو build کن
+  setTimeout(() => tmBuildAssignMemberOpts(preUuid), 50);
+};
+
+// ── سکو Panel Sub text ────────────────────────────────────────
+function tmUpdateSokoPanelSub() {
+  const el = document.getElementById('tmSokoPanelSub');
+  if (!el || !tm.snapshot) return;
+  el.textContent = `${tm.teamName || ''} — ${tm.snapshot.memberCount || 0} عضو`;
+}
+
+// ── تعیین‌تکلیف شبانه — هندل کردن تسک تیمی ──────────────────
+// موقع نمایش modal، تسک‌های تیمی با option های متفاوت نشون داده می‌شن
+// این رو در Step 3 کامل می‌کنیم، الان فقط flag می‌ذاریم
+function tmIsTeamTask(task) {
+  return !!(task && task.assignedBy);
+}
+
+// ── تقویم — اضافه کردن نشانگرهای تیمی ──────────────────────
+// این رو بعد از renderCalendar hook می‌کنیم
+(function() {
+  const _origRenderCal = window.renderCalendar || window.renderCal;
+  if (_origRenderCal) {
+    const funcName = window.renderCalendar ? 'renderCalendar' : 'renderCal';
+    window[funcName] = function() {
+      _origRenderCal.apply(this, arguments);
+      tmAddCalendarMarkers();
+    };
+  }
+})();
+
+function tmAddCalendarMarkers() {
+  if (!tm.code) return;
+  // اضافه کردن ددلاین‌های تیمی به تقویم
+  // این در Step 3 کامل پیاده می‌شه
+  // الان فقط تعطیلات رسمی ایران رو اضافه می‌کنیم
+  tmMarkIranHolidays();
+}
+
+// تعطیلات رسمی ایران ۱۴۰۴
+const TM_HOLIDAYS_1404 = [
+  '1404-01-01','1404-01-02','1404-01-03','1404-01-04',
+  '1404-01-12','1404-01-13',
+  '1404-01-14', // روز جمهوری اسلامی
+  '1404-02-02', // نیمه شعبان
+  '1404-02-03', // رحلت امام خمینی
+  '1404-02-04', // قیام ۱۵ خرداد
+  '1404-04-14', // عاشورا
+  '1404-04-23', // تاسوعا
+  '1404-05-14', // عید سعید فطر
+  '1404-05-15',
+  '1404-06-26', // عید قربان
+  '1404-06-29', // عید غدیر
+  '1404-07-06', // وفات امام رضا
+  '1404-07-18', // اربعین
+  '1404-07-28', // رحلت پیامبر
+  '1404-07-30', // شهادت امام حسن
+  '1404-08-10', // شهادت امام رضا
+  '1404-09-19', // میلاد پیامبر
+  '1404-11-22', // پیروزی انقلاب
+  '1404-12-29', // ملی شدن نفت
+];
+
+function tmMarkIranHolidays() {
+  // پیدا کردن date cell های تقویم و اضافه کردن class تعطیل
+  // DayQ از data-date یا data-jdate استفاده می‌کنه
+  TM_HOLIDAYS_1404.forEach(date => {
+    const cell = document.querySelector(`[data-jdate="${date}"], [data-date="${date}"]`);
+    if (cell) {
+      cell.classList.add('tm-cal-holiday');
+      // اگه tooltip وجود داشته باشه
+      const numEl = cell.querySelector('.cal-day-num, .dp-num');
+      if (numEl) numEl.classList.add('tm-cal-holiday');
+    }
+  });
+}
+
+// ── Announce function (placeholder برای Step 3) ──────────────
+function tmOpenAnnouncement() {
+  // در Step 3 پیاده می‌شه — فعلاً toast
+  toast_(svgIco('flag'), 'اطلاعیه در Step 3 اضافه می‌شه');
+}
+
+/* ════ END TEAM STEP 2 ════ */
 
 boot();
 </script>
