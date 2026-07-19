@@ -3246,6 +3246,58 @@ select.fi{
 .tm-pending-card{background:var(--am);border:1px solid rgba(0,184,122,.25);border-radius:var(--r3);padding:var(--sp3) var(--sp4);margin-bottom:var(--sp3);display:flex;align-items:center;gap:var(--sp3);}
 
 /* ════ END TEAM STYLES ════ */
+
+/* ════════════════════════════════════════════
+   DayQ Team — Desktop Overrides (900px+)
+   ════════════════════════════════════════════ */
+@media(min-width:900px){
+
+  /* سکو panel — فضای sidebar رو رعایت کن */
+  .tm-panel{
+    right:220px;       /* sidebar رو آزاد بذار */
+    max-width:none;    /* full width بقیه صفحه */
+    margin:0;
+    border-radius:0;
+  }
+
+  /* today section — padding دسکتاپ */
+  #tmTodaySection{
+    padding:0 24px;
+  }
+
+  /* inbox section — padding دسکتاپ */
+  #tmInboxSection{
+    padding:0 24px;
+  }
+
+  /* سکو button — عرض بیشتر */
+  .tm-soko-btn{
+    max-width:420px;
+  }
+
+  /* member badge — کمی بزرگتر */
+  #tmMemberBadge{
+    font-size:var(--fs-xs);
+  }
+
+  /* announcement section */
+  #tmAnnosSection{
+    padding:0 24px;
+  }
+
+  /* team projects section */
+  #tmProjSection{
+    margin-top:0;
+  }
+}
+
+@media(min-width:1200px){
+  /* large desktop — سکو panel margin برای dpanel */
+  .tm-panel{
+    right:220px;
+    left:0;
+  }
+}
 </style>
 </head>
 <body>
