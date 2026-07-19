@@ -15118,7 +15118,13 @@ function tmModal(id, show) {
 function tmCloseModal() {
   document.querySelectorAll('.tm-modal').forEach(m => {
     m.classList.remove('tm-modal-open');
-    setTimeout(() => { m.style.display = 'none'; }, 220);
+    const _m = m;
+    setTimeout(() => {
+      // فقط اگه هنوز بسته‌ست hide کن — نه اگه دوباره باز شده
+      if (!_m.classList.contains('tm-modal-open')) {
+        _m.style.display = 'none';
+      }
+    }, 250);
   });
 }
 
