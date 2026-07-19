@@ -3567,7 +3567,10 @@ select.fi{
     </div>
   </div>
 
-  <div id="timeBanner" onclick="document.getElementById('timeBanner').classList.remove('show')">
+  
+  <!-- ════ اطلاعیه‌ها (کارمند) ════ -->
+  <div id="tmAnnosSection" style="display:none;padding:0 var(--sp4);margin-bottom:var(--sp2)"></div>
+<div id="timeBanner" onclick="document.getElementById('timeBanner').classList.remove('show')">
     <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
     <span id="timeBannerText"></span>
     <span class="tb-close">× بستن</span>
@@ -14114,6 +14117,332 @@ function tmOpenAnnouncement() {
 
 /* ════ END TEAM STEP 2 ════ */
 
+/* ════════════════════════════════════════════════════════════════
+   DayQ Team — سکو  |  Step 3: Full Features
+   ════════════════════════════════════════════════════════════════ */
+
+// ── Push Subscription برای تیم ────────────────────────────────
+async function tmRegisterTeamPush() {
+  if (!tm.token || !tm.workerUrl) return;
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub && typeof VAPID_PUBLIC_KEY !== 'undefined') {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: _urlB64ToUint8Array(VAPID_PUBLIC_KEY)
+      });
+    }
+    if (sub) {
+      await tmAPI('POST', '/team/subscribe', sub.toJSON());
+    }
+  } catch(e) {
+    console.log('tmRegisterTeamPush:', e.message);
+  }
+}
+
+// ── Soko Status Tab — Member Detail ───────────────────────────
+let _sokoDetailUuid = null;
+
+function tmOpenMemberDetail(uuid) {
+  _sokoDetailUuid = uuid;
+  const snap = tm.snapshot;
+  if (!snap) return;
+  const member = (snap.members || []).find(m => m.uuid === uuid);
+  if (!member) return;
+
+  const el = document.getElementById('tmSokoStatusContent');
+  if (!el) return;
+
+  // async: fetch task details for this member
+  tmAPI('GET', '/team/snapshot').then(data => {
+    const m = (data.members || []).find(x => x.uuid === uuid);
+    el.innerHTML = `
+      <div style="display:flex;align-items:center;gap:var(--sp2);margin-bottom:var(--sp4)">
+        <button class="tm-btn" onclick="tmSetSokoTab('status')">← برگشت</button>
+        <div>
+          <div style="font-size:var(--fs-lg);font-weight:700">${member.name}</div>
+          <div style="font-size:var(--fs-xs);color:var(--t3)">${member.role}</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp2);margin-bottom:var(--sp4)">
+        ${[
+          {l:'تسک فعال',v:member.activeTasks||0,c:'var(--t1)'},
+          {l:'مشکل‌دار',v:member.blockedTasks||0,c:'var(--red)'},
+          {l:'stale',v:member.staleTasks||0,c:'var(--amber)'}
+        ].map(s=>`<div style="background:var(--bg2);border-radius:var(--r2);padding:var(--sp2);text-align:center;border:1px solid var(--b1)">
+          <div style="font-size:1.1rem;font-weight:800;color:${s.c}">${s.v}</div>
+          <div style="font-size:var(--fs-2xs);color:var(--t3)">${s.l}</div>
+        </div>`).join('')}
+      </div>
+      <div style="display:flex;gap:var(--sp2);margin-bottom:var(--sp4)">
+        <button class="tm-btn blue" style="flex:1;justify-content:center" onclick="tmAssignTask('${uuid}');void 0">+ تسک جدید</button>
+        ${member.alert!=='ok'?`<button class="tm-btn danger" style="flex:1;justify-content:center" onclick="tmReassignAllFrom('${uuid}')">Reassign همه</button>`:''}
+      </div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2)">در حال بارگذاری تسک‌ها...</div>
+    `;
+    // fetch full task list
+    tmAPI('GET', `/team/snapshot`).then(snap2 => {
+      // member's inbox از snapshot نمیاد — باید مستقیم بگیریم
+      // فعلاً از log استفاده می‌کنیم
+    }).catch(() => {});
+  }).catch(() => {});
+}
+
+// ── Reassign All Tasks از یه عضو ──────────────────────────────
+function tmReassignAllFrom(fromUuid) {
+  const snap = tm.snapshot;
+  if (!snap) return;
+  const others = (snap.members || []).filter(m => m.uuid !== fromUuid && !m.isManager && m.status === 'active');
+  if (!others.length) { toast_(svgIco('flag'), 'عضو دیگه‌ای نیست'); return; }
+  // برای الان فقط toast می‌زنیم — در نسخه بعدی picker می‌آد
+  toast_(svgIco('flag'), 'Reassign از پنل تسک انجام بشه');
+}
+
+// ── Announcement — کامل ───────────────────────────────────────
+// override placeholder از Step 2
+tmOpenAnnouncement = function() {
+  const el = document.getElementById('tmAnnoText');
+  if (el) el.value = '';
+  const pinEl = document.getElementById('tmAnnoPinCal');
+  if (pinEl) pinEl.checked = false;
+  const errEl = document.getElementById('tmAnnoErr');
+  if (errEl) errEl.textContent = '';
+  openSheet('shTmAnnounce');
+};
+
+async function tmDoAnnounce() {
+  const text = (document.getElementById('tmAnnoText')?.value || '').trim();
+  const pin = document.getElementById('tmAnnoPinCal')?.checked || false;
+  const errEl = document.getElementById('tmAnnoErr');
+  if (!text) { if (errEl) errEl.textContent = 'متن اطلاعیه را بنویس'; return; }
+  if (text.length > 300) { if (errEl) errEl.textContent = 'حداکثر ۳۰۰ کاراکتر'; return; }
+  const btn = document.getElementById('tmAnnoBtn');
+  if (btn) btn.disabled = true;
+  try {
+    await tmAPI('POST', '/announcement', { text, pinToCalendar: pin });
+    closeAll();
+    toast_(svgIco('check'), 'اطلاعیه ارسال شد');
+    tmSyncBackground();
+  } catch(e) {
+    if (errEl) errEl.textContent = e.message;
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+// نمایش اطلاعیه‌ها برای کارمند در خانه
+function tmRenderAnnouncements() {
+  const el = document.getElementById('tmAnnosSection');
+  if (!el || tm.role !== 'member') return;
+  const unread = (tm.announcements || []).filter(a => !a.readBy?.includes(tm.uuid));
+  if (!unread.length) { el.style.display = 'none'; return; }
+  el.style.display = '';
+  el.innerHTML = unread.map(a => `
+    <div style="background:var(--am);border:1px solid rgba(0,184,122,.2);border-radius:var(--r2);padding:var(--sp3);margin-bottom:var(--sp2)">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp2)">
+        <button class="tm-read-btn" onclick="tmMarkAnnoRead('${a.id}',this)">خوندم</button>
+        <div style="font-size:var(--fs-sm);color:var(--t1);text-align:right;flex:1">${esc(a.text)}</div>
+      </div>
+      <div style="font-size:var(--fs-2xs);color:var(--a);margin-top:var(--sp1);text-align:left">📢 از مدیر</div>
+    </div>`).join('');
+}
+
+async function tmMarkAnnoRead(annoId, btn) {
+  try {
+    await tmAPI('PUT', '/announcement/read', { annoId });
+    if (btn) btn.classList.add('read'); btn.textContent = 'خونده شد ✓';
+    // آپدیت local cache
+    const a = (tm.announcements||[]).find(x => x.id === annoId);
+    if (a) { if (!a.readBy) a.readBy = []; if (!a.readBy.includes(tm.uuid)) a.readBy.push(tm.uuid); }
+    localStorage.setItem(TM_SK.annos, JSON.stringify(tm.announcements));
+    setTimeout(tmRenderAnnouncements, 500);
+  } catch(e) {}
+}
+
+// ── Announcement Read Receipts (مدیر در سکو) ─────────────────
+function tmRenderAnnoReceipts() {
+  const snap = tm.snapshot;
+  const annos = tm.announcements || [];
+  if (!annos.length) return '<div style="color:var(--t3);text-align:center;padding:var(--sp3)">اطلاعیه‌ای نداری</div>';
+  return annos.map(a => {
+    const readCount = (a.readBy||[]).length;
+    const totalMembers = (snap?.memberCount||1) - 1; // مدیر خودش رو حساب نکن
+    return `<div style="background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r2);padding:var(--sp3);margin-bottom:var(--sp2)">
+      <div style="font-size:var(--fs-sm);margin-bottom:var(--sp2);text-align:right">${esc(a.text)}</div>
+      <div style="font-size:var(--fs-xs);color:var(--t3)">خونده شده: ${readCount}/${totalMembers}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── Priority Chips برای Assign Sheet ─────────────────────────
+let _tmAssignPriority = 'normal';
+
+function tmSelectPriority(el, pri) {
+  _tmAssignPriority = pri;
+  document.querySelectorAll('.tm-pri-opt').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ── Broadcast Toggle ──────────────────────────────────────────
+let _tmBroadcast = false;
+
+function tmToggleBroadcast(el) {
+  _tmBroadcast = el.checked;
+  const memberOpts = document.getElementById('tmAssignMemberOpts');
+  if (memberOpts) {
+    memberOpts.style.opacity = _tmBroadcast ? '.4' : '1';
+    memberOpts.style.pointerEvents = _tmBroadcast ? 'none' : '';
+  }
+}
+
+// override tmDoAssign با Broadcast support
+const _origDoAssign = tmDoAssign;
+tmDoAssign = async function() {
+  if (_tmBroadcast) {
+    const title = document.getElementById('tmAssignTitle')?.value.trim();
+    const deadline = document.getElementById('tmAssignDeadline')?.value.trim();
+    const errEl = document.getElementById('tmAssignErr');
+    if (!title) { if (errEl) errEl.textContent = 'عنوان تسک را وارد کن'; return; }
+    if (!deadline) { if (errEl) errEl.textContent = 'ددلاین اجباریه'; return; }
+    const btn = document.getElementById('tmAssignBtn');
+    if (btn) btn.disabled = true;
+    try {
+      const res = await tmAPI('POST', '/task/broadcast', { title, deadline, priority: _tmAssignPriority });
+      closeAll();
+      toast_(svgIco('check'), `تسک برای ${res.taskIds?.length||0} نفر ارسال شد`);
+      _tmBroadcast = false; _tmAssignPriority = 'normal';
+      tmSyncBackground();
+    } catch(e) {
+      if (errEl) errEl.textContent = e.message;
+      if (btn) btn.disabled = false;
+    }
+  } else {
+    _origDoAssign();
+  }
+};
+
+// ── Deadline Extend Modal ─────────────────────────────────────
+let _sokoExtendTaskId = null;
+
+function tmExtendDeadline(taskId) {
+  _sokoExtendTaskId = taskId;
+  // ساده‌ترین رویکرد: prompt
+  const newDl = prompt('ددلاین جدید (مثلاً ۱۴۰۴-۰۶-۱۵):');
+  if (!newDl) return;
+  tmAPI('PUT', '/task/update', { taskId, deadline: newDl }).then(() => {
+    toast_(svgIco('check'), 'ددلاین تمدید شد');
+    tmSyncBackground();
+  }).catch(e => toast_(svgIco('flag'), e.message));
+}
+
+// ── Triage Integration برای تسک‌های تیمی ─────────────────────
+(function() {
+  const _origTriage = window._renderTriageList;
+  if (!_origTriage) return;
+  window._renderTriageList = function() {
+    _origTriage.apply(this, arguments);
+    if (tm.role !== 'member' || !tm.inbox?.length) return;
+    // تسک‌های تیمی که ددلاینشون امروزه
+    const todayKey = typeof mrTodayKey === 'function' ? mrTodayKey() : null;
+    if (!todayKey) return;
+    const teamToday = tm.inbox.filter(t =>
+      t.deadline === todayKey && t.status !== 'done' && !t.deleted
+    );
+    if (!teamToday.length) return;
+    const list = document.getElementById('triageList');
+    if (!list) return;
+    const teamHtml = `
+      <div style="margin-top:var(--sp3);padding-top:var(--sp3);border-top:1px solid var(--b1)">
+        <div style="font-size:var(--fs-xs);color:var(--blue);font-weight:700;margin-bottom:var(--sp2)">از مدیر</div>
+        ${teamToday.map(t => `
+          <div class="triage-item" style="border-right:3px solid var(--blue)">
+            <div class="triage-task">${esc(t.title)}</div>
+            <div class="triage-meta">تسک تیمی</div>
+            <div class="triage-actions">
+              <button class="triage-btn done" onclick="tmUpdateTaskStatus('done');closeAll()">✓ انجام شد</button>
+              <button class="triage-btn tmrw" onclick="tmUpdateTaskStatus('in_progress')">⏳ درحالم</button>
+              <button class="triage-btn drp" onclick="tmUpdateTaskStatus('blocked')">🚫 مشکل</button>
+            </div>
+          </div>`).join('')}
+      </div>`;
+    list.innerHTML += teamHtml;
+  };
+})();
+
+// ── گزارش هفتگی — خودکار پنجشنبه ─────────────────────────────
+function tmCheckWeeklyReport() {
+  if (tm.role !== 'manager') return;
+  const now = new Date();
+  // پنجشنبه = روز ۴ در JS (0=یکشنبه)
+  // در ایران پنجشنبه روز ۵ هفته‌ست (شنبه=0)
+  const isThursday = now.getDay() === 4; // پنجشنبه میلادی
+  const hour = now.getHours();
+  const reportKey = `tm_weekly_report_${now.toDateString()}`;
+  if (isThursday && hour >= 16 && !localStorage.getItem(reportKey)) {
+    localStorage.setItem(reportKey, '1');
+    // badge روی سکو panel
+    const reportTab = document.querySelector('.tm-tab[data-tab="report"]');
+    if (reportTab && !reportTab.querySelector('.tm-report-badge')) {
+      const badge = document.createElement('span');
+      badge.className = 'tm-report-badge';
+      badge.style.cssText = 'width:6px;height:6px;border-radius:50%;background:var(--red);display:inline-block;margin-right:3px;vertical-align:middle';
+      reportTab.prepend(badge);
+    }
+    // push داخلی
+    setTimeout(() => toast_(svgIco('check'), '📊 گزارش هفتگی آماده‌ست'), 2000);
+  }
+}
+
+// ── Deadline Warning روی Calendar ─────────────────────────────
+// وقتی مدیر assign می‌کنه و ددلاین به تعطیل می‌خوره
+function tmCheckHolidayDeadline(jalaliDate) {
+  if (!jalaliDate) return false;
+  return TM_HOLIDAYS_1404.includes(jalaliDate);
+}
+
+// ── Sync روی visibility change (اضافه‌تر) ────────────────────
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && tm.code && tm.token) {
+    tmCheckPending();
+    tmCheckWeeklyReport();
+  }
+});
+
+// ── Push پس از login برای تیم ──────────────────────────────
+// وقتی tmInit اجرا می‌شه و push موجوده، register می‌کنیم
+const _origTmInit = tmInit;
+tmInit = async function() {
+  await _origTmInit.apply(this, arguments);
+  if (tm.token && tm.workerUrl) {
+    setTimeout(() => {
+      tmRegisterTeamPush();
+      tmCheckPending();
+      tmCheckWeeklyReport();
+      tmRenderAnnouncements();
+    }, 1500);
+  }
+};
+
+// ── Pending badge در سطر تیم ─────────────────────────────────
+const _origCheckPending = tmCheckPending;
+tmCheckPending = async function() {
+  await _origCheckPending.apply(this, arguments);
+  // badge روی سطر تیم
+  const sub = document.getElementById('tmTeamSub');
+  if (!sub) return;
+  try {
+    const data = await tmAPI('GET', '/team/pending');
+    const count = (data.pending||[]).length;
+    if (count > 0) {
+      sub.innerHTML = `${tm.teamName||tm.code} <span class="tm-count-badge" style="margin-right:4px">${count} درخواست</span>`;
+    }
+  } catch(e) {}
+};
+
+/* ════ END TEAM STEP 3 ════ */
+
 boot();
 </script>
 
@@ -14449,10 +14778,30 @@ boot();
       <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">برای کی؟</div>
       <div id="tmAssignMemberOpts" style="display:flex;gap:var(--sp2);flex-wrap:wrap"></div>
     </div>
-    <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">عنوان تسک</div><input id="tmAssignTitle" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" placeholder="عنوان..." type="text"/></div>
+        <div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">اولویت</div>
+      <div style="display:flex;gap:var(--sp2)">
+        <button class="tm-btn tm-pri-opt active" data-pri="normal" onclick="tmSelectPriority(this,'normal')">عادی</button>
+        <button class="tm-btn tm-pri-opt" data-pri="high" onclick="tmSelectPriority(this,'high')" style="color:var(--amber)">⚡ مهم</button>
+        <button class="tm-btn tm-pri-opt" data-pri="urgent" onclick="tmSelectPriority(this,'urgent')" style="color:var(--red)">🔴 فوری</button>
+      </div>
+    </div>
+<div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">عنوان تسک</div><input id="tmAssignTitle" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" placeholder="عنوان..." type="text"/></div>
     <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">ددلاین <span style="color:var(--red)">*</span></div><input id="tmAssignDeadline" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3);font-family:var(--mono)" placeholder="1404-05-15" type="text"/></div>
     <div id="tmAssignErr" style="font-size:var(--fs-xs);color:var(--red);min-height:16px"></div>
-    <button id="tmAssignBtn" onclick="tmDoAssign()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--t1);color:var(--bg1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:none;cursor:pointer;margin-top:auto">ارسال تسک</button>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:var(--sp2) 0;border-top:1px solid var(--b1)">
+      <label style="display:flex;align-items:center;gap:var(--sp2);cursor:pointer">
+        <input type="checkbox" id="tmBroadcastToggle" onchange="tmToggleBroadcast(this)" style="width:16px;height:16px;accent-color:var(--blue)"/>
+        <span style="font-size:var(--fs-xs);color:var(--t2)">📢 Broadcast — ارسال به همه</span>
+      </label>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:var(--sp2) 0;border-top:1px solid var(--b1)">
+      <label style="display:flex;align-items:center;gap:var(--sp2);cursor:pointer">
+        <input type="checkbox" id="tmNeedsVerifyToggle" style="width:16px;height:16px;accent-color:var(--a)"/>
+        <span style="font-size:var(--fs-xs);color:var(--t2)">نیاز به تأیید مدیر</span>
+      </label>
+    </div>
+<button id="tmAssignBtn" onclick="tmDoAssign()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--t1);color:var(--bg1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:none;cursor:pointer;margin-top:auto">ارسال تسک</button>
   </div>
 </div>
 
@@ -14485,5 +14834,34 @@ boot();
   </div>
 </div>
 <!-- ════ END TEAM HTML ════ -->
+
+<!-- ════ Step 3 HTML ════ -->
+
+<!-- Announcement Sheet (مدیر) -->
+<div class="sheet" id="shTmAnnounce">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div class="sh-ttl">📢 اطلاعیه جدید</div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+  </div>
+  <div class="sh-body" style="gap:var(--sp3)">
+    <div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">متن اطلاعیه</div>
+      <textarea id="tmAnnoText" class="sh-iw" style="width:100%;min-height:80px;resize:none;padding:var(--sp2) var(--sp3);font-size:var(--fs-sm)" placeholder="بنویس..." maxlength="300"></textarea>
+      <div style="font-size:var(--fs-2xs);color:var(--t3);text-align:left;margin-top:2px">حداکثر ۳۰۰ کاراکتر</div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:var(--sp2) 0;border-top:1px solid var(--b1)">
+      <label style="display:flex;align-items:center;gap:var(--sp2);cursor:pointer">
+        <input type="checkbox" id="tmAnnoPinCal" style="width:16px;height:16px;accent-color:var(--a)"/>
+        <span style="font-size:var(--fs-xs);color:var(--t2)">Pin به تقویم اعضا</span>
+      </label>
+    </div>
+    <div id="tmAnnoErr" style="font-size:var(--fs-xs);color:var(--red);min-height:16px"></div>
+    <button id="tmAnnoBtn" onclick="tmDoAnnounce()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--t1);color:var(--bg1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:none;cursor:pointer;margin-top:auto">ارسال به همه</button>
+  </div>
+</div>
+<!-- ════ End Step 3 HTML ════ -->
 </body>
 </html>
