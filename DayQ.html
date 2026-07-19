@@ -3853,6 +3853,11 @@ select.fi{
       <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       پروژه جدید
     </button>
+
+    <!-- ════ تیم — پروژه‌های تیمی ════ -->
+    <div id="tmProjSection" style="display:none"></div>
+    <!-- ════ end team projects ════ -->
+
   </div>
   </div><!-- /proj-main -->
   <!-- Desktop: sidebar (column 2 = LEFT in RTL) -->
@@ -14442,6 +14447,356 @@ tmCheckPending = async function() {
 };
 
 /* ════ END TEAM STEP 3 ════ */
+
+/* ════════════════════════════════════════════════════════════════
+   DayQ Team — سکو  |  Step 4: Projects + Calendar + Polish
+   ════════════════════════════════════════════════════════════════ */
+
+// ── Projects Tab — Team Section ────────────────────────────────
+(function(){
+  const _orig = window.renderProjects;
+  if (!_orig) return;
+  window.renderProjects = function() {
+    _orig.apply(this, arguments);
+    tmRenderTeamProjects();
+  };
+})();
+
+function tmRenderTeamProjects() {
+  const el = document.getElementById('tmProjSection');
+  if (!el) return;
+  if (!tm.code) { el.style.display = 'none'; return; }
+
+  // کارمند — تسک‌های تیمی گروه‌بندی شده
+  if (tm.role === 'member') {
+    const inbox = (tm.inbox || []).filter(t => !t.deleted);
+    if (!inbox.length) { el.style.display = 'none'; return; }
+
+    const byStatus = {
+      pending: inbox.filter(t => t.status === 'pending'),
+      in_progress: inbox.filter(t => t.status === 'in_progress'),
+      blocked: inbox.filter(t => t.status === 'blocked'),
+      done: inbox.filter(t => t.status === 'done'),
+    };
+
+    el.style.display = '';
+    el.innerHTML = `
+      <div style="border-top:1px solid var(--b1);margin-top:var(--sp4);padding-top:var(--sp4)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp3)">
+          <div class="tm-section-lbl" style="font-size:var(--fs-md)">👥 تسک‌های تیمی</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp2);margin-bottom:var(--sp3)">
+          ${[
+            {l:'باید انجام بشه', v:byStatus.pending.length, c:'var(--t3)'},
+            {l:'درحال انجام', v:byStatus.in_progress.length, c:'var(--blue)'},
+            {l:'مشکل دارم', v:byStatus.blocked.length, c:'var(--red)'},
+            {l:'تموم شده', v:byStatus.done.length, c:'var(--a)'},
+          ].map(s=>`<div style="background:var(--bg2);border-radius:var(--r2);padding:var(--sp2) var(--sp3);border:1px solid var(--b1)">
+            <div style="font-size:var(--fs-lg);font-weight:800;color:${s.c}">${s.v}</div>
+            <div style="font-size:var(--fs-2xs);color:var(--t3)">${s.l}</div>
+          </div>`).join('')}
+        </div>
+        ${inbox.filter(t=>t.deadline).slice(0,3).map(t=>`
+          <div class="tc tm-task" onclick="tmOpenTaskDetail('${t.id}')" style="margin-bottom:var(--sp2)">
+            <div class="tc-body">
+              <div style="font-size:var(--fs-sm);font-weight:600">${esc(t.title)}</div>
+              <div class="tc-meta">
+                <span class="tm-badge">از مدیر</span>
+                ${t.deadline?`<span class="chip chip-label">${t.deadline}</span>`:''}
+              </div>
+            </div>
+          </div>`).join('')}
+        ${inbox.length > 3 ? `<button class="tm-btn blue" style="width:100%;justify-content:center" onclick="tmOpenSoko()">مشاهده همه ${inbox.length} تسک ←</button>` : ''}
+      </div>`;
+    return;
+  }
+
+  // مدیر — overview همه اعضا
+  if (tm.role === 'manager') {
+    const snap = tm.snapshot;
+    if (!snap?.members?.length) { el.style.display = 'none'; return; }
+
+    const members = snap.members.filter(m => !m.isManager && m.status === 'active');
+    const totalActive = members.reduce((s,m) => s + (m.activeTasks||0), 0);
+    const totalBlocked = members.reduce((s,m) => s + (m.blockedTasks||0), 0);
+
+    el.style.display = '';
+    el.innerHTML = `
+      <div style="border-top:1px solid var(--b1);margin-top:var(--sp4);padding-top:var(--sp4)">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp3)">
+          <button class="tm-btn blue" onclick="tmOpenSoko()" style="font-size:var(--fs-xs)">مشاهده کامل ←</button>
+          <div class="tm-section-lbl" style="font-size:var(--fs-md)">👥 تیم</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp2);margin-bottom:var(--sp3)">
+          ${[
+            {l:'اعضا',v:members.length,c:'var(--t1)'},
+            {l:'تسک فعال',v:totalActive,c:'var(--blue)'},
+            {l:'مشکل‌دار',v:totalBlocked,c:'var(--red)'},
+          ].map(s=>`<div style="background:var(--bg2);border-radius:var(--r2);padding:var(--sp2);text-align:center;border:1px solid var(--b1)">
+            <div style="font-size:var(--fs-xl);font-weight:800;color:${s.c}">${s.v}</div>
+            <div style="font-size:var(--fs-2xs);color:var(--t3)">${s.l}</div>
+          </div>`).join('')}
+        </div>
+        ${members.map(m=>`
+          <div class="tm-member" onclick="tmOpenSoko();tmSetSokoTab('status');setTimeout(()=>tmOpenMemberDetail('${m.uuid}'),100)" style="background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r2);margin-bottom:var(--sp2)">
+            <div class="tm-member-info">
+              <div class="tm-member-name">${esc(m.name)}</div>
+              <div class="tm-member-meta">${esc(m.role)} • ${m.activeTasks} تسک فعال</div>
+            </div>
+            <span>${m.alert==='blocked'?'🔴':m.alert!=='ok'?'🟡':'🟢'}</span>
+          </div>`).join('')}
+      </div>`;
+  }
+}
+
+// ── Calendar Markers — تیمی + تعطیلات ─────────────────────────
+// override تابع موجود در Step 2
+tmAddCalendarMarkers = function() {
+  if (!tm.code) return;
+
+  // اضافه کردن data-jdate به سلول‌های ماه جاری
+  const allCells = document.querySelectorAll('#calDays .cal-day');
+  const currentCells = Array.from(allCells).filter(c => !c.classList.contains('other-month'));
+
+  // تعیین calYear و calMonth (global در DayQ)
+  const cYear = typeof calYear !== 'undefined' ? calYear : null;
+  const cMonth = typeof calMonth !== 'undefined' ? calMonth : null;
+  if (!cYear || !cMonth) return;
+
+  currentCells.forEach((cell, i) => {
+    const day = i + 1;
+    const dateKey = `${cYear}-${String(cMonth).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    cell.dataset.jdate = dateKey;
+
+    // تعطیل رسمی
+    if (TM_HOLIDAYS_1404.includes(dateKey)) {
+      const numEl = cell.querySelector('.cal-day-num');
+      if (numEl) numEl.classList.add('tm-cal-holiday');
+    }
+  });
+
+  // تسک‌های تیمی — member
+  if (tm.role === 'member') {
+    const deadlines = new Set((tm.inbox || [])
+      .filter(t => t.deadline && !t.deleted && t.status !== 'done')
+      .map(t => t.deadline));
+
+    deadlines.forEach(dateKey => {
+      const cell = document.querySelector(`[data-jdate="${dateKey}"]`);
+      if (!cell) return;
+      let dotsWrap = cell.querySelector('.cal-dots');
+      if (!dotsWrap) {
+        dotsWrap = document.createElement('div');
+        dotsWrap.className = 'cal-dots';
+        dotsWrap.style.cssText = 'display:flex;gap:2px;justify-content:center;margin-top:2px';
+        cell.appendChild(dotsWrap);
+      }
+      if (!dotsWrap.querySelector('.tm-cal-dot')) {
+        const dot = document.createElement('span');
+        dot.className = 'tm-cal-dot';
+        dotsWrap.appendChild(dot);
+      }
+    });
+  }
+
+  // تسک‌های تیمی — manager (از snapshot)
+  if (tm.role === 'manager' && tm.snapshot?.members) {
+    // deadline‌های تسک‌های اعضا رو از inbox کش‌شده داریم
+    // فعلاً از همون inbox کارمند استفاده می‌کنیم
+    // در نسخه بعد: manager-side task list
+  }
+
+  // رویدادهای تیمی
+  (tm.events || []).forEach(ev => {
+    if (!ev.date) return;
+    const cell = document.querySelector(`[data-jdate="${ev.date}"]`);
+    if (!cell) return;
+    let dotsWrap = cell.querySelector('.cal-dots');
+    if (!dotsWrap) {
+      dotsWrap = document.createElement('div');
+      dotsWrap.className = 'cal-dots';
+      dotsWrap.style.cssText = 'display:flex;gap:2px;justify-content:center;margin-top:2px';
+      cell.appendChild(dotsWrap);
+    }
+    const dot = document.createElement('span');
+    dot.className = 'tm-cal-event';
+    dotsWrap.appendChild(dot);
+  });
+};
+
+// ── Deadline Holiday Check (کامل) ─────────────────────────────
+// override در Assign Sheet — قبل از ارسال warning بده
+const _origDoAssignFull = tmDoAssign;
+tmDoAssign = async function() {
+  const deadline = document.getElementById('tmAssignDeadline')?.value?.trim();
+  if (deadline && tmCheckHolidayDeadline(deadline)) {
+    if (!confirm(`⚠️ ${deadline} یه روز تعطیله! ادامه بدم؟`)) return;
+  }
+  await _origDoAssignFull.apply(this, arguments);
+};
+
+// ── End-of-Day — وقتی روز تموم می‌شه ─────────────────────────
+// hook روی _checkEveningTriage برای sync تیم
+(function(){
+  const _orig = window._checkEveningTriage;
+  if (!_orig) return;
+  window._checkEveningTriage = function() {
+    _orig.apply(this, arguments);
+    if (tm.code && tm.token) {
+      // sync background قبل از نمایش modal
+      tmSyncBackground().then(() => {
+        // بعد از sync، modal تعیین‌تکلیف team tasks هم آپدیت شده
+      });
+    }
+  };
+})();
+
+// ── تب پروژه‌ها — هنگام ورود sync می‌کنیم ─────────────────────
+(function(){
+  const _orig = window.setTab;
+  if (!_orig) return;
+  window.setTab = function(tab, el) {
+    _orig.apply(this, arguments);
+    if (tab === 'projects' && tm.code && tm.token) {
+      tmSyncBackground();
+    }
+  };
+})();
+
+// ── NLP — شناسایی اسم اعضا ───────────────────────────────────
+// وقتی مدیر "@علی" می‌نویسه، auto-suggest می‌کنیم
+(function(){
+  const _orig = window.nlpOnInput;
+  if (!_orig) return;
+  window.nlpOnInput = function(val) {
+    _orig.apply(this, arguments);
+    if (tm.role !== 'manager') return;
+    // @mention detection
+    const mention = val.match(/@(\S+)/);
+    if (mention && tm.snapshot?.members) {
+      const name = mention[1];
+      const match = tm.snapshot.members.find(m =>
+        m.name.includes(name) || name.includes(m.name.split(' ')[0])
+      );
+      if (match) {
+        // نمایش suggestion برای assign
+        const preview = document.getElementById('nlpPreview');
+        if (preview) {
+          const chip = document.createElement('span');
+          chip.className = 'nlp-chip chip-label tm-badge';
+          chip.textContent = `👤 ${match.name}`;
+          chip.dataset.uuid = match.uuid;
+          chip.style.cursor = 'pointer';
+          chip.onclick = () => {
+            tmAssignTask(match.uuid);
+          };
+          // اضافه به preview اگه نباشه
+          if (!preview.querySelector(`[data-uuid="${match.uuid}"]`)) {
+            preview.appendChild(chip);
+            preview.style.display = 'flex';
+          }
+        }
+      }
+    }
+  };
+})();
+
+// ── سکو Panel — keyboard shortcut ─────────────────────────────
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && tm.sokoOpen) {
+    tmCloseSoko();
+  }
+});
+
+// ── Deep Link برای approve notification ──────────────────────
+// وقتی مدیر از push notification روی approve کلیک می‌کنه
+// notification data داره {type:'join_request'} → open join approvals
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', e => {
+    const data = e.data;
+    if (!data) return;
+    if (data.type === 'join_request') {
+      setTimeout(() => {
+        tmOpenSoko();
+        tmCheckPending();
+      }, 500);
+    }
+    if (data.type === 'new_task') {
+      setTimeout(() => {
+        tmSyncBackground().then(tmRenderInbox);
+      }, 500);
+    }
+    if (data.type === 'blocked' || data.type === 'waiting') {
+      setTimeout(() => {
+        tmSyncBackground().then(() => {
+          tmOpenSoko();
+          tmSetSokoTab('status');
+        });
+      }, 500);
+    }
+  });
+}
+
+// ── Soko project tab ──────────────────────────────────────────
+function tmRenderSokoProjects() {
+  const el = document.getElementById('tmSokoProjectsContent');
+  if (!el) return;
+  if (!tm.snapshot?.members) {
+    el.innerHTML = '<div style="text-align:center;padding:var(--sp5);color:var(--t3)">اطلاعاتی برای نمایش نیست</div>';
+    return;
+  }
+  // نمایش خلاصه‌ای از تسک‌های هر عضو
+  el.innerHTML = `
+    <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp3)">خلاصه تسک‌های تیم</div>
+    ${tm.snapshot.members.filter(m=>!m.isManager&&m.status==='active').map(m=>`
+      <div style="background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r3);padding:var(--sp3);margin-bottom:var(--sp3)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--sp2)">
+          <button class="tm-btn blue" style="font-size:var(--fs-2xs)" onclick="tmAssignTask('${m.uuid}')">+ تسک</button>
+          <div>
+            <div style="font-size:var(--fs-sm);font-weight:700;text-align:right">${esc(m.name)}</div>
+            <div style="font-size:var(--fs-xs);color:var(--t3);text-align:right">${esc(m.role)}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:var(--sp2)">
+          <div style="flex:1;background:var(--bg2);border-radius:var(--r1);padding:var(--sp1) var(--sp2);text-align:center">
+            <div style="font-size:var(--fs-md);font-weight:700;color:var(--blue)">${m.activeTasks||0}</div>
+            <div style="font-size:var(--fs-2xs);color:var(--t3)">فعال</div>
+          </div>
+          <div style="flex:1;background:var(--bg2);border-radius:var(--r1);padding:var(--sp1) var(--sp2);text-align:center">
+            <div style="font-size:var(--fs-md);font-weight:700;color:${m.blockedTasks?'var(--red)':'var(--t3)'}">${m.blockedTasks||0}</div>
+            <div style="font-size:var(--fs-2xs);color:var(--t3)">مشکل</div>
+          </div>
+          <div style="flex:1;background:var(--bg2);border-radius:var(--r1);padding:var(--sp1) var(--sp2);text-align:center">
+            <div style="font-size:var(--fs-md);font-weight:700;color:${m.staleTasks?'var(--amber)':'var(--t3)'}">${m.staleTasks||0}</div>
+            <div style="font-size:var(--fs-2xs);color:var(--t3)">stale</div>
+          </div>
+        </div>
+      </div>`).join('')}`;
+}
+
+// override tmSetSokoTab برای projects tab
+const _origSetSokoTab = tmSetSokoTab;
+tmSetSokoTab = function(tab) {
+  _origSetSokoTab.apply(this, arguments);
+  if (tab === 'projects') tmRenderSokoProjects();
+};
+
+// ── tmSyncBackground بهبود یافته ──────────────────────────────
+// بعد از sync، calendar markers هم آپدیت می‌شه
+const _origSync = tmSyncBackground;
+tmSyncBackground = async function() {
+  await _origSync.apply(this, arguments);
+  // آپدیت calendar اگه باز باشه
+  if (typeof calYear !== 'undefined') {
+    setTimeout(tmAddCalendarMarkers, 100);
+  }
+  // آپدیت projects tab
+  tmRenderTeamProjects();
+  // آپدیت announcements
+  tmRenderAnnouncements();
+};
+
+/* ════ END TEAM STEP 4 ════ */
 
 boot();
 </script>
