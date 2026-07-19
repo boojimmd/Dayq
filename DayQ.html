@@ -3298,6 +3298,42 @@ select.fi{
     left:0;
   }
 }
+
+/* ════ Team Modal Engine ════ */
+.tm-modal{
+  display:none;
+  position:fixed;inset:0;
+  z-index:9999;
+  align-items:flex-end;
+  justify-content:center;
+  background:rgba(0,0,0,.5);
+  -webkit-backdrop-filter:blur(4px);
+  backdrop-filter:blur(4px);
+  opacity:0;
+  transition:opacity 220ms ease;
+}
+.tm-modal.tm-modal-open{opacity:1;}
+.tm-modal-sheet{
+  width:100%;max-width:430px;
+  background:var(--bg1);
+  border-radius:24px 24px 0 0;
+  padding:0 0 env(safe-area-inset-bottom,0px);
+  max-height:90dvh;
+  overflow-y:auto;
+  transform:translateY(40px);
+  transition:transform 280ms cubic-bezier(0.32,0.72,0,1);
+}
+.tm-modal.tm-modal-open .tm-modal-sheet{transform:translateY(0);}
+.tm-modal-handle{width:36px;height:4px;background:var(--bg3);border-radius:99px;margin:10px auto 0;}
+.tm-modal-hdr{padding:12px 18px 10px;border-bottom:1px solid var(--b2);display:flex;align-items:center;justify-content:space-between;}
+.tm-modal-ttl{font-size:var(--fs-md);font-weight:700;color:var(--t1);}
+.tm-modal-x{width:28px;height:28px;border-radius:var(--r1);background:var(--bg2);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t2);font-size:14px;}
+.tm-modal-body{padding:16px 18px 24px;display:flex;flex-direction:column;gap:14px;}
+@media(min-width:900px){
+  .tm-modal{align-items:center;}
+  .tm-modal-sheet{border-radius:var(--r4);max-width:420px;}
+}
+/* ════ End Team Modal CSS ════ */
 </style>
 </head>
 <body>
@@ -3849,6 +3885,22 @@ select.fi{
           <div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
         </div>
       </div>
+    </div>
+
+
+    <!-- سکو Button — فقط مدیر -->
+    <div id="tmSokoCard" style="display:none;padding:0 18px;margin-bottom:var(--sp3)">
+      <button class="tm-soko-btn" onclick="tmOpenSoko()">
+        <div style="flex:1;text-align:right">
+          <div style="font-size:var(--fs-md);font-weight:800">🏢 سکو</div>
+          <div style="font-size:var(--fs-xs);opacity:.7;margin-top:2px">مدیریت تیم</div>
+        </div>
+        <div class="tm-soko-stats">
+          <div class="tm-soko-stat"><div style="font-size:var(--fs-md);font-weight:800" id="tmSokoMemberCount">۰</div><div style="font-size:var(--fs-2xs);opacity:.7">اعضا</div></div>
+          <div class="tm-soko-stat"><div style="font-size:var(--fs-md);font-weight:800" id="tmSokoAlertCount">۰</div><div style="font-size:var(--fs-2xs);opacity:.7">توجه</div></div>
+          <div class="tm-soko-stat"><div style="font-size:var(--fs-md);font-weight:800" id="tmSokoTaskCount">۰</div><div style="font-size:var(--fs-2xs);opacity:.7">تسک</div></div>
+        </div>
+      </button>
     </div>
 
 <!-- ⑦ ابزارها -->
@@ -15045,6 +15097,179 @@ async function tmApproveJoin(memberUuid, action) {
   }
 }
 
+/* ════════════════════════════════════════════════════════════════
+   DayQ Team — Modal Fix: bypass sheet mechanism for team modals
+   ════════════════════════════════════════════════════════════════ */
+
+// ── Custom Modal Engine برای Team ────────────────────────────
+// از sheet DayQ استفاده نمی‌کنیم — modal مستقل با z-index بالا
+function tmModal(id, show) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (show) {
+    el.style.display = 'flex';
+    requestAnimationFrame(() => el.classList.add('tm-modal-open'));
+  } else {
+    el.classList.remove('tm-modal-open');
+    setTimeout(() => { el.style.display = 'none'; }, 220);
+  }
+}
+
+function tmCloseModal() {
+  document.querySelectorAll('.tm-modal').forEach(m => {
+    m.classList.remove('tm-modal-open');
+    setTimeout(() => { m.style.display = 'none'; }, 220);
+  });
+}
+
+// ── Override tmOpenTeamSettings ───────────────────────────────
+tmOpenTeamSettings = function() {
+  if (!tm.code) {
+    tmModal('tmModalChoice', true);
+  } else {
+    tmRefreshInfoSheet();
+    tmModal('tmModalInfo', true);
+  }
+};
+
+// ── Override tmOpenCreate ─────────────────────────────────────
+tmOpenCreate = function() {
+  tmCloseModal();
+  document.getElementById('tmMCreateName').value = cfg.company || '';
+  document.getElementById('tmMCreateMgrName').value = cfg.name || '';
+  document.getElementById('tmMCreateMgrRole').value = '';
+  document.getElementById('tmMCreatePin').value = '';
+  document.getElementById('tmMCreatePin2').value = '';
+  document.getElementById('tmMCreateErr').textContent = '';
+  tmModal('tmModalCreate', true);
+};
+
+// ── Override tmOpenJoin ───────────────────────────────────────
+tmOpenJoin = function(preCode) {
+  tmCloseModal();
+  document.getElementById('tmMJoinCode').value = preCode || '';
+  document.getElementById('tmMJoinName').value = cfg.name || '';
+  document.getElementById('tmMJoinRole').value = '';
+  document.getElementById('tmMJoinPin').value = '';
+  document.getElementById('tmMJoinErr').textContent = '';
+  document.getElementById('tmMJoinForm').style.display = '';
+  document.getElementById('tmMJoinSuccess').style.display = 'none';
+  tmModal('tmModalJoin', true);
+};
+
+// ── Override tmDoCreate ───────────────────────────────────────
+tmDoCreate = async function() {
+  const name    = document.getElementById('tmMCreateName').value.trim();
+  const mgrName = document.getElementById('tmMCreateMgrName').value.trim();
+  const mgrRole = document.getElementById('tmMCreateMgrRole').value.trim();
+  const pin     = document.getElementById('tmMCreatePin').value.trim();
+  const pin2    = document.getElementById('tmMCreatePin2').value.trim();
+  const errEl   = document.getElementById('tmMCreateErr');
+
+  if (!cfg.pushWorkerUrl) { errEl.textContent = 'ابتدا Worker Push را در اتصال تنظیم کن'; return; }
+  if (!name)    { errEl.textContent = 'نام تیم را وارد کن'; return; }
+  if (!mgrName) { errEl.textContent = 'نام خودت را وارد کن'; return; }
+  if (!/^\d{4}$/.test(pin)) { errEl.textContent = 'PIN باید ۴ رقم باشد'; return; }
+  if (pin !== pin2) { errEl.textContent = 'PIN ها یکسان نیستند'; return; }
+
+  const btn = document.getElementById('tmMCreateBtn');
+  btn.disabled = true; btn.textContent = 'در حال ساخت...'; errEl.textContent = '';
+
+  try {
+    tm.workerUrl = cfg.pushWorkerUrl;
+    const res = await tmAPI('POST', '/team/create', {
+      name, managerName: mgrName, managerRole: mgrRole || 'مدیر', pin
+    }, false);
+
+    tm.code = res.teamCode; tm.uuid = res.managerUuid;
+    tm.role = 'manager'; tm.token = res.token;
+    tm.teamName = name; tm.memberName = mgrName;
+    tm.memberRole = mgrRole || 'مدیر'; tm.workerUrl = cfg.pushWorkerUrl;
+    tmSaveState();
+    tmCloseModal();
+
+    // نمایش کد تیم
+    document.getElementById('tmMCodeDisplay').textContent = res.teamCode;
+    document.getElementById('tmMInviteLink').textContent =
+      `${location.origin}${location.pathname}?invite=${res.teamCode}`;
+    tmModal('tmModalCode', true);
+    tmApplyUI();
+    toast_(svgIco('check'), 'تیم ساخته شد!');
+  } catch(e) {
+    errEl.textContent = e.message === 'no_worker' ? 'Worker تنظیم نشده' : 'خطا: ' + e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = 'ساخت تیم';
+  }
+};
+
+// ── Override tmDoJoin ────────────────────────────────────────
+tmDoJoin = async function() {
+  const code = document.getElementById('tmMJoinCode').value.trim().toUpperCase();
+  const name = document.getElementById('tmMJoinName').value.trim();
+  const role = document.getElementById('tmMJoinRole').value.trim();
+  const pin  = document.getElementById('tmMJoinPin').value.trim();
+  const errEl = document.getElementById('tmMJoinErr');
+
+  if (!cfg.pushWorkerUrl) { errEl.textContent = 'ابتدا Worker Push را در اتصال تنظیم کن'; return; }
+  if (!code) { errEl.textContent = 'کد تیم را وارد کن'; return; }
+  if (!name) { errEl.textContent = 'نام خودت را وارد کن'; return; }
+  if (!/^\d{4}$/.test(pin)) { errEl.textContent = 'PIN باید ۴ رقم باشد'; return; }
+
+  const btn = document.getElementById('tmMJoinBtn');
+  btn.disabled = true; btn.textContent = 'در حال ارسال...'; errEl.textContent = '';
+
+  try {
+    tm.workerUrl = cfg.pushWorkerUrl;
+    const res = await tmAPI('POST', '/team/join', {
+      teamCode: code, name, role: role || 'کارمند', pin
+    }, false);
+
+    localStorage.setItem(TM_SK.uuid, res.memberUuid);
+    localStorage.setItem(TM_SK.worker, cfg.pushWorkerUrl);
+    localStorage.setItem(TM_SK.code, code);
+    localStorage.setItem(TM_SK.mname, name);
+    localStorage.setItem(TM_SK.mrole, role || 'کارمند');
+
+    document.getElementById('tmMJoinForm').style.display = 'none';
+    document.getElementById('tmMJoinSuccess').style.display = '';
+    document.getElementById('tmMJoinTeamCode').textContent = code;
+    toast_(svgIco('check'), 'درخواست ارسال شد — منتظر تأیید مدیر');
+  } catch(e) {
+    errEl.textContent = e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = 'ارسال درخواست';
+  }
+};
+
+// ── Override tmRefreshInfoSheet ───────────────────────────────
+const _origRefreshInfo = tmRefreshInfoSheet;
+tmRefreshInfoSheet = function() {
+  const el = document.getElementById('tmMInfoContent');
+  if (!el) return _origRefreshInfo();
+  const roleLabel = tm.role === 'manager' ? 'مدیر' : 'عضو';
+  el.innerHTML = `
+    <div style="margin-bottom:var(--sp3)">
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">تیم</div>
+      <div style="font-size:var(--fs-md);font-weight:700">${tm.teamName||tm.code}</div>
+    </div>
+    <div style="margin-bottom:var(--sp3)">
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نقش</div>
+      <div style="font-size:var(--fs-md)">${roleLabel} — ${tm.memberName||''}</div>
+    </div>
+    <div style="background:var(--bg2);border-radius:var(--r2);padding:var(--sp2) var(--sp3);margin-bottom:var(--sp3)">
+      <div style="font-size:var(--fs-2xs);color:var(--t3);margin-bottom:4px">کد تیم</div>
+      <div style="font-family:var(--mono);font-weight:700">${tm.code}</div>
+    </div>
+    ${tm.role==='manager'?`
+    <button class="tm-btn blue" style="width:100%;justify-content:center;margin-bottom:var(--sp2)" onclick="tmCopyCode()">📋 کپی کد دعوت</button>
+    <button class="tm-btn" style="width:100%;justify-content:center;margin-bottom:var(--sp2)" onclick="tmCloseModal();tmOpenSoko()">🏢 سکو — مدیریت تیم</button>
+    `:''}
+    <button class="tm-btn danger" style="width:100%;justify-content:center;margin-top:var(--sp2)" onclick="tmLeaveTeam()">ترک تیم</button>
+  `;
+};
+
+/* ════ END MODAL FIX ════ */
+
 boot();
 </script>
 
@@ -15479,5 +15704,144 @@ boot();
     <div style="text-align:center;color:var(--t3);padding:var(--sp5)">در حال بارگذاری...</div>
   </div>
 </div>
+
+<!-- ════ Team Modals (مستقل از sheet mechanism) ════ -->
+
+<!-- Modal: انتخاب ایجاد/پیوستن -->
+<div class="tm-modal" id="tmModalChoice">
+  <div class="tm-modal-sheet">
+    <div class="tm-modal-handle"></div>
+    <div class="tm-modal-hdr">
+      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
+      <span class="tm-modal-ttl">👥 تیم کاری</span>
+    </div>
+    <div class="tm-modal-body">
+      <div style="text-align:center;padding:var(--sp3) 0">
+        <div style="font-size:2rem;margin-bottom:var(--sp2)">👥</div>
+        <div style="font-size:var(--fs-xs);color:var(--t3)">به تیم بپیوند یا تیم جدید بساز</div>
+      </div>
+      <button onclick="tmOpenCreate()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">+ ایجاد تیم جدید</button>
+      <button onclick="tmOpenJoin()" style="width:100%;height:48px;background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">پیوستن با کد دعوت</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: ایجاد تیم -->
+<div class="tm-modal" id="tmModalCreate">
+  <div class="tm-modal-sheet">
+    <div class="tm-modal-handle"></div>
+    <div class="tm-modal-hdr">
+      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
+      <span class="tm-modal-ttl">ایجاد تیم جدید</span>
+    </div>
+    <div class="tm-modal-body">
+      <div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نام تیم</div>
+        <input id="tmMCreateName" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--f);color:var(--t1)" placeholder="مثال: دکتر عبیدی — تیم فروش" type="text"/>
+      </div>
+      <div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نام شما</div>
+        <input id="tmMCreateMgrName" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--f);color:var(--t1)" placeholder="نام کامل" type="text"/>
+      </div>
+      <div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">سمت (اختیاری)</div>
+        <input id="tmMCreateMgrRole" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--f);color:var(--t1)" placeholder="مدیر فروش" type="text"/>
+      </div>
+      <div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">PIN مدیر (۴ رقم)</div>
+        <input id="tmMCreatePin" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:1.2rem;font-family:var(--f);color:var(--t1);letter-spacing:.3em;text-align:center" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/>
+      </div>
+      <div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">تأیید PIN</div>
+        <input id="tmMCreatePin2" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:1.2rem;font-family:var(--f);color:var(--t1);letter-spacing:.3em;text-align:center" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/>
+      </div>
+      <div id="tmMCreateErr" style="font-size:var(--fs-xs);color:var(--red);text-align:center;min-height:16px"></div>
+      <button id="tmMCreateBtn" onclick="tmDoCreate()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer;margin-top:4px">ساخت تیم</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: پیوستن به تیم -->
+<div class="tm-modal" id="tmModalJoin">
+  <div class="tm-modal-sheet">
+    <div class="tm-modal-handle"></div>
+    <div class="tm-modal-hdr">
+      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
+      <span class="tm-modal-ttl">پیوستن به تیم</span>
+    </div>
+    <div class="tm-modal-body">
+      <div id="tmMJoinForm">
+        <div style="margin-bottom:14px">
+          <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">کد دعوت</div>
+          <input id="tmMJoinCode" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--mono);color:var(--t1);text-transform:uppercase;letter-spacing:.1em" placeholder="DQ-XXXXXXX" type="text"/>
+        </div>
+        <div style="margin-bottom:14px">
+          <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نام شما</div>
+          <input id="tmMJoinName" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--f);color:var(--t1)" placeholder="نام کامل" type="text"/>
+        </div>
+        <div style="margin-bottom:14px">
+          <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">سمت</div>
+          <input id="tmMJoinRole" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--f);color:var(--t1)" placeholder="کارشناس فروش" type="text"/>
+        </div>
+        <div style="margin-bottom:14px">
+          <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">PIN شخصی (۴ رقم)</div>
+          <input id="tmMJoinPin" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:1.2rem;font-family:var(--f);color:var(--t1);letter-spacing:.3em;text-align:center" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/>
+          <div style="font-size:var(--fs-2xs);color:var(--t3);margin-top:4px">برای بازیابی در دستگاه جدید</div>
+        </div>
+        <div id="tmMJoinErr" style="font-size:var(--fs-xs);color:var(--red);text-align:center;min-height:16px;margin-bottom:8px"></div>
+        <button id="tmMJoinBtn" onclick="tmDoJoin()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">ارسال درخواست</button>
+      </div>
+      <div id="tmMJoinSuccess" style="display:none;text-align:center;padding:var(--sp4) 0">
+        <div style="font-size:3rem;margin-bottom:var(--sp3)">⏳</div>
+        <div style="font-size:var(--fs-lg);font-weight:700;margin-bottom:var(--sp2)">درخواست ارسال شد</div>
+        <div style="font-size:var(--fs-sm);color:var(--t3);margin-bottom:var(--sp4)">منتظر تأیید مدیر هستی</div>
+        <div style="background:var(--bg2);border-radius:var(--r2);padding:var(--sp3);margin-bottom:var(--sp4)">
+          <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">کد تیم</div>
+          <div id="tmMJoinTeamCode" style="font-family:var(--mono);font-weight:700;font-size:var(--fs-lg)">—</div>
+        </div>
+        <button onclick="tmCloseModal()" style="width:100%;height:44px;background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-sm);font-family:var(--f);cursor:pointer">بازگشت به DayQ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: کد تیم بعد از ایجاد -->
+<div class="tm-modal" id="tmModalCode">
+  <div class="tm-modal-sheet">
+    <div class="tm-modal-handle"></div>
+    <div class="tm-modal-hdr">
+      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
+      <span class="tm-modal-ttl">✅ تیم ساخته شد!</span>
+    </div>
+    <div class="tm-modal-body">
+      <div style="background:var(--bg2);border-radius:var(--r3);padding:var(--sp4);text-align:center">
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2)">کد دعوت تیم</div>
+        <div id="tmMCodeDisplay" style="font-size:1.6rem;font-weight:900;font-family:var(--mono);color:var(--t1);letter-spacing:.2em;margin-bottom:var(--sp3)">—</div>
+        <div style="display:flex;gap:var(--sp2)">
+          <button onclick="if(navigator.clipboard)navigator.clipboard.writeText(document.getElementById('tmMCodeDisplay').textContent);toast_(svgIco('check'),'کپی شد')" class="tm-btn blue" style="flex:1;justify-content:center">📋 کپی</button>
+          <button onclick="tmShareCode()" class="tm-btn" style="flex:1;justify-content:center">📤 اشتراک</button>
+        </div>
+      </div>
+      <div id="tmMInviteLink" style="font-size:var(--fs-xs);font-family:var(--mono);color:var(--blue);word-break:break-all;background:var(--bluem);padding:var(--sp2) var(--sp3);border-radius:var(--r2)"></div>
+      <button onclick="tmCloseModal();tmOpenSoko()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">رفتن به سکو ←</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: اطلاعات تیم -->
+<div class="tm-modal" id="tmModalInfo">
+  <div class="tm-modal-sheet">
+    <div class="tm-modal-handle"></div>
+    <div class="tm-modal-hdr">
+      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
+      <span class="tm-modal-ttl">👥 تیم کاری</span>
+    </div>
+    <div class="tm-modal-body">
+      <div id="tmMInfoContent"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ End Team Modals ════ -->
 </body>
 </html>
