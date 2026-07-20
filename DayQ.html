@@ -16264,6 +16264,63 @@ window.addEventListener('load', () => {
 
 /* ════ END CRITICAL FIXES ════ */
 
+
+/* ════ Direct Login — ورود با کد+PIN ════ */
+function tmOpenDirectLogin() {
+  tmCloseModal();
+  document.getElementById('tmDLCode').value = '';
+  document.getElementById('tmDLPin').value = '';
+  document.getElementById('tmDLErr').textContent = '';
+  tmModal('tmModalDirectLogin', true);
+}
+
+async function tmDoDirectLogin() {
+  const code = document.getElementById('tmDLCode').value.trim().toUpperCase();
+  const pin  = document.getElementById('tmDLPin').value.trim();
+  const errEl = document.getElementById('tmDLErr');
+  if (!code) { errEl.textContent = 'کد تیم رو وارد کن'; return; }
+  if (!/^\d{4}$/.test(pin)) { errEl.textContent = 'PIN باید ۴ رقم باشد'; return; }
+
+  const base = (cfg.pushWorkerUrl||'').trim().replace(/\/+$/, '');
+  if (!base) { errEl.textContent = 'ابتدا Worker Push رو در اتصال تنظیم کن'; return; }
+
+  const btn = document.getElementById('tmDLBtn');
+  btn.disabled = true; btn.textContent = 'در حال ورود...';
+
+  try {
+    const res = await fetch(base + '/team/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ teamCode: code, pin })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'خطا');
+
+    tm.code       = code;
+    tm.uuid       = data.uuid;
+    tm.role       = data.role;
+    tm.token      = data.token;
+    tm.workerUrl  = data.workerUrl || base;
+    tm.teamName   = data.teamName;
+    tm.memberName = data.name;
+    tm.memberRole = data.memberRole;
+    tmSaveState();
+    tmCloseModal();
+    tmApplyUI();
+    tmSyncBackground();
+    toast_(svgIco('check'), 'وارد تیم ' + data.teamName + ' شدی');
+  } catch(e) {
+    const msg = e.message.includes('PIN') ? 'PIN اشتباهه'
+      : e.message.includes('نامعتبر') ? 'کد تیم نامعتبره'
+      : e.message.includes('pattern') || e.message.includes('fetch') ? 'آدرس Worker رو چک کن'
+      : e.message;
+    errEl.textContent = msg;
+  } finally {
+    btn.disabled = false; btn.textContent = 'ورود';
+  }
+}
+/* ════ End Direct Login ════ */
+
 boot();
 </script>
 
@@ -16725,6 +16782,7 @@ boot();
       </div>
       <button onclick="tmOpenCreate()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">+ ایجاد تیم جدید</button>
       <button onclick="tmOpenJoin()" style="width:100%;height:48px;background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">پیوستن با کد دعوت</button>
+      <button onclick="tmOpenDirectLogin()" style="width:100%;height:44px;background:none;color:var(--blue);border:none;font-size:var(--fs-sm);font-weight:600;font-family:var(--f);cursor:pointer;text-decoration:underline">قبلاً عضو بودم — ورود مستقیم</button>
     </div>
   </div>
 </div>
@@ -16846,5 +16904,32 @@ boot();
 </div>
 
 <!-- ════ End Team Modals ════ -->
+
+<!-- Direct Login Modal — ورود با کد تیم + PIN -->
+<div class="tm-modal" id="tmModalDirectLogin">
+  <div class="tm-modal-sheet">
+    <div class="tm-modal-handle"></div>
+    <div class="tm-modal-hdr">
+      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
+      <span class="tm-modal-ttl">ورود به تیم</span>
+    </div>
+    <div class="tm-modal-body">
+      <div style="background:var(--bluem);border:1px solid rgba(59,130,246,.2);border-radius:var(--r2);padding:var(--sp3);margin-bottom:2px">
+        <div style="font-size:var(--fs-xs);color:var(--blue);font-weight:600">اگه قبلاً در دستگاه دیگه‌ای عضو یا مدیر تیمی</div>
+        <div style="font-size:var(--fs-xs);color:var(--t2);margin-top:2px">فقط کد تیم و PIN رو وارد کن</div>
+      </div>
+      <div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">کد تیم</div>
+        <input id="tmDLCode" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--mono);color:var(--t1);text-transform:uppercase;letter-spacing:.1em" placeholder="DQ-XXXXXXX" type="text"/>
+      </div>
+      <div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">PIN</div>
+        <input id="tmDLPin" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:1.2rem;font-family:var(--f);color:var(--t1);letter-spacing:.3em;text-align:center" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/>
+      </div>
+      <div id="tmDLErr" style="font-size:var(--fs-xs);color:var(--red);min-height:16px;text-align:center"></div>
+      <button id="tmDLBtn" onclick="tmDoDirectLogin()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">ورود</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
