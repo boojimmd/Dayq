@@ -3287,7 +3287,7 @@ select.fi{
 .tm-log-item{font-size:var(--fs-2xs);color:var(--t3);padding:2px 0;border-bottom:1px solid var(--b2);}
 .tm-log-item:last-child{border-bottom:none;}
 
-.tm-score-bar{height:4px;border-radius:var(--r5);background:var(--bg3);overflow:hidden;margin-top:4px;}
+.tm-score-bar{height:4px;border-radius:var(--r5);background:var(--bg3);overflow:hidden;margin-top:4px;}.tm-score-num{font-variant-numeric:tabular-nums;font-feature-settings:"tnum";}
 .tm-score-fill{height:100%;border-radius:var(--r5);background:var(--a);transform-origin:right center;transition:transform var(--dur-slow) var(--ease-out);}
 .tm-score-fill.mid{background:var(--amber);}
 .tm-score-fill.low{background:var(--red);}
@@ -3383,6 +3383,15 @@ select.fi{
   }
 }
 
+
+/* ════ Team z-index scale (ibelick: fixed scale, no arbitrary) ════
+   DayQ base:    0-199
+   DayQ overlay: 200  (#ov)
+   DayQ sheet:   300  (.sheet)
+   Team panel:  1000  (.tm-panel)
+   Team sheets: 1100  (sheets inside panel)
+   Team modal:  9999  (.tm-modal) — above everything
+   ════════════════════════════════════════════════════════════ */
 /* ════ Team Modal Engine ════ */
 .tm-modal{
   display:none;
@@ -3572,7 +3581,7 @@ select.fi{
   font-size:var(--fs-xs);font-weight:600;font-family:var(--f);
   cursor:pointer;
   display:inline-flex;align-items:center;justify-content:center;gap:5px;
-  transition:transform 150ms var(--ease-out),background var(--dur-fast) var(--ease-std),opacity 150ms var(--ease-out);
+  transition:transform 150ms var(--ease-out),opacity 150ms var(--ease-out);
 }
 .tm-task-action.primary{background:var(--a);color:#fff;border-color:transparent;}
 .tm-task-action.warn{background:var(--ambm);color:var(--amber);border-color:rgba(217,119,6,.2);}
@@ -3619,9 +3628,7 @@ select.fi{
   position:fixed;inset:0;
   z-index:9999;
   align-items:flex-end;justify-content:center;
-  background:rgba(0,0,0,.48);
-  -webkit-backdrop-filter:blur(6px);
-  backdrop-filter:blur(6px);
+  background:rgba(0,0,0,.55);
   /* fade backdrop separately */
   opacity:0;
   transition:opacity 220ms var(--ease-out);
@@ -3771,6 +3778,21 @@ select.fi{
   }
 }
 
+
+/* skeleton loading — ibelick: structural skeletons */
+.tm-skeleton{
+  border-radius:var(--r1);
+  background:linear-gradient(90deg,var(--bg2) 25%,var(--bg3) 50%,var(--bg2) 75%);
+  background-size:200% 100%;
+  animation:tmSkeleton 1.4s ease infinite;
+}
+@keyframes tmSkeleton{
+  0%  {background-position:200% 0}
+  100%{background-position:-200% 0}
+}
+@media(prefers-reduced-motion:reduce){
+  .tm-skeleton{animation:none;background:var(--bg2);}
+}
 /* ════ End Emil Polish ════ */
 </style>
 </head>
@@ -4125,7 +4147,7 @@ select.fi{
         <div class="tm-today-title">👥 تیم امروز</div>
       </div>
       <div class="tm-today-body" id="tmTodayBody">
-        <div style="text-align:center;padding:var(--sp3);color:var(--t3);font-size:var(--fs-xs)">در حال بارگذاری...</div>
+        <div style="text-align:center;padding:var(--sp3);color:var(--t3);font-size:var(--fs-xs)"><span class="tm-skeleton" style="display:inline-block;width:60%;height:14px;border-radius:var(--r1)"></span></div>
       </div>
     </div>
   </div>
@@ -11730,7 +11752,7 @@ async function icsLoadFromURL(){
   if(!url){toast_(svgIco('flag'),'لینک رو وارد کن');return;}
   statusEl.style.display='block';
   statusEl.style.background='var(--bg3)';statusEl.style.color='var(--t2)';
-  statusEl.textContent='در حال بارگذاری...';
+  statusEl.textContent='<span class="tm-skeleton" style="display:inline-block;width:60%;height:14px;border-radius:var(--r1)"></span>';
   // 1. Direct
   try{
     const r=await fetch(url,{mode:'cors'});
@@ -14288,7 +14310,7 @@ function tmSetSokoTab(tab) {
 function tmRenderSokoStatus() {
   const el = document.getElementById('tmSokoStatusContent');
   if (!el || !tm.snapshot) {
-    if (el) el.innerHTML = '<div style="text-align:center;padding:var(--sp5);color:var(--t3);font-size:var(--fs-sm)">در حال بارگذاری...</div>';
+    if (el) el.innerHTML = '<div style="text-align:center;padding:var(--sp5);color:var(--t3);font-size:var(--fs-sm)"><span class="tm-skeleton" style="display:inline-block;width:60%;height:14px;border-radius:var(--r1)"></span></div>';
     return;
   }
   const members = tm.snapshot.members || [];
@@ -15822,7 +15844,11 @@ const _origRenderSokoStatus = tmRenderSokoStatus;
 tmRenderSokoStatus = function() {
   const el = document.getElementById('tmSokoStatusContent');
   if (!el || !tm.snapshot) {
-    if (el) el.innerHTML = `<div style="padding:var(--sp5);text-align:center;color:var(--t3)">در حال بارگذاری...</div>`;
+    if (el) el.innerHTML = `<div style="padding:var(--sp4)">
+      <div class="tm-skeleton" style="height:52px;border-radius:var(--r3);margin-bottom:var(--sp2)"></div>
+      <div class="tm-skeleton" style="height:52px;border-radius:var(--r3);margin-bottom:var(--sp2)"></div>
+      <div class="tm-skeleton" style="height:52px;border-radius:var(--r3)"></div>
+    </div>`;
     return;
   }
   const members = tm.snapshot.members || [];
@@ -16673,7 +16699,7 @@ boot();
     </div>
   </div>
   <div class="sh-body" id="tmPendingList">
-    <div style="text-align:center;color:var(--t3);padding:var(--sp5)">در حال بارگذاری...</div>
+    <div style="text-align:center;color:var(--t3);padding:var(--sp5)"><span class="tm-skeleton" style="display:inline-block;width:60%;height:14px;border-radius:var(--r1)"></span></div>
   </div>
 </div>
 
