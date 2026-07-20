@@ -3586,6 +3586,185 @@ select.fi{
   .tm-panel-hdr{padding-top:20px;}
 }
 /* ════ End Team UI Polish ════ */
+
+/* ════════════════════════════════════════════════════════════
+   DayQ Team — Emil Kowalski Animation Polish
+   Principles applied:
+   - ease-out for all enter animations (instant feedback)
+   - scale(0.96) + opacity instead of bare translateY
+   - Asymmetric enter(280ms)/exit(200ms)
+   - :active scale(0.97) on all pressable elements
+   - Stagger via nth-child
+   - Hover gated behind (hover:hover) media query
+   - Specific transition properties — never 'all'
+   - --ease-drawer: cubic-bezier(0.32,0.72,0,1) — iOS drawer feel
+   ════════════════════════════════════════════════════════════ */
+
+/* iOS drawer easing — از Ionic Framework, همون که Emil توصیه می‌کنه */
+:root { --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1); }
+
+/* ── Soko Panel — asymmetric timing ── */
+.tm-panel{
+  transition: transform 320ms var(--ease-drawer);
+}
+/* Exit faster than enter — Emil's principle */
+.tm-panel:not(.open){
+  transition: transform 200ms var(--ease-out);
+}
+
+/* ── Team Modal — scale + opacity entry ── */
+/* Nothing in the real world appears from nothing — Emil */
+.tm-modal{
+  display:none;
+  position:fixed;inset:0;
+  z-index:9999;
+  align-items:flex-end;justify-content:center;
+  background:rgba(0,0,0,.48);
+  -webkit-backdrop-filter:blur(6px);
+  backdrop-filter:blur(6px);
+  /* fade backdrop separately */
+  opacity:0;
+  transition:opacity 220ms var(--ease-out);
+}
+.tm-modal.tm-modal-open{opacity:1;}
+
+.tm-modal-sheet{
+  width:100%;max-width:430px;
+  background:var(--bg1);
+  border-radius:24px 24px 0 0;
+  padding:0 0 env(safe-area-inset-bottom,0px);
+  max-height:90dvh;overflow-y:auto;
+  /* start: slightly down + scaled — not from nothing */
+  transform:translateY(40px) scale(0.96);
+  opacity:0;
+  transition:
+    transform 280ms var(--ease-drawer),
+    opacity   220ms var(--ease-out);
+}
+.tm-modal.tm-modal-open .tm-modal-sheet{
+  transform:translateY(0) scale(1);
+  opacity:1;
+}
+/* Exit: faster than enter */
+.tm-modal:not(.tm-modal-open) .tm-modal-sheet{
+  transition:
+    transform 200ms var(--ease-out),
+    opacity   160ms var(--ease-out);
+}
+
+@media(min-width:900px){
+  .tm-modal{align-items:center;}
+  .tm-modal-sheet{
+    border-radius:var(--r4);
+    max-width:440px;
+    /* Desktop: scale from center, not drawer */
+    transform:scale(0.94);
+    opacity:0;
+  }
+  .tm-modal.tm-modal-open .tm-modal-sheet{
+    transform:scale(1);
+    opacity:1;
+  }
+}
+
+/* ── :active feedback — Emil: buttons must feel responsive ── */
+.tm-btn,
+.tm-panel-action-btn,
+.tm-task-action,
+.tm-modal-sheet button,
+.tm-panel-close,
+.tm-modal-x{
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    opacity   var(--dur-fast) var(--ease-out),
+    background var(--dur-fast) var(--ease-std);
+}
+.tm-btn:active,
+.tm-panel-action-btn:active,
+.tm-task-action:active,
+.tm-panel-close:active,
+.tm-modal-x:active{ transform:scale(0.97); }
+/* دکمه‌های بزرگ — scale کمتر */
+.tm-soko-btn:active{ transform:scale(0.985); opacity:.9; }
+
+/* ── Member card hover — gate behind (hover:hover) ── */
+@media(hover:hover) and (pointer:fine){
+  .tm-today-hdr:hover{ background:var(--bg2); }
+  .tm-srow-member:hover{ background:var(--bg2); }
+}
+
+/* ── Stagger: member cards در سکو ── */
+/* 50ms delay بین هر کارت — Emil's stagger rule */
+#tmSokoStatusContent > *:nth-child(1){ animation-delay:  0ms; }
+#tmSokoStatusContent > *:nth-child(2){ animation-delay: 50ms; }
+#tmSokoStatusContent > *:nth-child(3){ animation-delay:100ms; }
+#tmSokoStatusContent > *:nth-child(4){ animation-delay:150ms; }
+#tmSokoStatusContent > *:nth-child(5){ animation-delay:200ms; }
+#tmSokoStatusContent > *:nth-child(n+6){ animation-delay:250ms; }
+
+@keyframes tmFadeUp{
+  from{ opacity:0; transform:translateY(8px); }
+  to  { opacity:1; transform:translateY(0); }
+}
+#tmSokoStatusContent > *{
+  animation: tmFadeUp 220ms var(--ease-out) both;
+}
+
+/* ── Restore prompt — slides up از پایین ── */
+#tmRestorePrompt{
+  animation: tmSlideUp 280ms var(--ease-drawer) both;
+}
+@keyframes tmSlideUp{
+  from{ opacity:0; transform:translateX(50%) translateY(16px); }
+  to  { opacity:1; transform:translateX(50%) translateY(0); }
+}
+
+/* ── تسک تیمی card — hover ── */
+@media(hover:hover) and (pointer:fine){
+  #tmInboxList [onclick]:hover{
+    background:var(--bg2);
+  }
+}
+#tmInboxList [onclick]{
+  transition:background var(--dur-fast) var(--ease-std);
+}
+
+/* ── Inbox section — stagger ── */
+#tmInboxList > *:nth-child(1){ animation:tmFadeUp 200ms var(--ease-out) 0ms   both; }
+#tmInboxList > *:nth-child(2){ animation:tmFadeUp 200ms var(--ease-out) 50ms  both; }
+#tmInboxList > *:nth-child(3){ animation:tmFadeUp 200ms var(--ease-out) 100ms both; }
+
+/* ── Today section — smooth collapse ── */
+.tm-today-body{
+  transition:max-height 280ms var(--ease-out), opacity 220ms var(--ease-out);
+  max-height:400px;opacity:1;overflow:hidden;
+}
+.tm-today-body.collapsed{
+  max-height:0;opacity:0;
+  transition:max-height 200ms var(--ease-out), opacity 160ms var(--ease-out);
+}
+
+/* ── Tab pane switch — cross-fade ── */
+.tm-tab-pane{
+  animation:tmFadeIn 180ms var(--ease-out) both;
+}
+@keyframes tmFadeIn{
+  from{ opacity:0; }
+  to  { opacity:1; }
+}
+
+/* ── prefers-reduced-motion ── */
+@media(prefers-reduced-motion:reduce){
+  .tm-modal, .tm-modal-sheet, .tm-panel,
+  #tmRestorePrompt, #tmInboxList > *,
+  #tmSokoStatusContent > *, .tm-today-body{
+    animation:none !important;
+    transition:opacity 150ms linear !important;
+    transform:none !important;
+  }
+}
+
+/* ════ End Emil Polish ════ */
 </style>
 </head>
 <body>
