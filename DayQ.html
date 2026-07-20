@@ -3417,6 +3417,11 @@ select.fi{
   .tm-modal{align-items:center;}
   .tm-modal-sheet{border-radius:var(--r4);max-width:420px;}
 }
+
+@keyframes slideUp {
+  from { transform:translateX(50%) translateY(20px); opacity:0; }
+  to   { transform:translateX(50%) translateY(0);    opacity:1; }
+}
 /* ════ End Team Modal CSS ════ */
 
 /* ════ Team UI Polish ════ */
@@ -15841,6 +15846,206 @@ function tmToggleTodayBody() {
 }
 
 /* ════ END UI POLISH ════ */
+
+/* ════════════════════════════════════════════════════════════════
+   DayQ Team — سکو  |  Sync Integration
+   team state رو به sync موجود اضافه می‌کنه
+   ════════════════════════════════════════════════════════════════ */
+
+// ── Hook روی syncNow برای include کردن team state ─────────────
+(function(){
+  const _origSync = window.syncNow;
+  if (!_origSync) return;
+
+  window.syncNow = async function() {
+    if (!cfg.syncCode || typeof _syncInProgress !== 'undefined' && _syncInProgress) return;
+    _syncInProgress = true;
+
+    try {
+      const snap = _loadSyncSnap ? _loadSyncSnap() : {};
+      const tasksDiff     = _buildSyncDiff(tasks, snap.tasks||{});
+      const projectsDiff  = _buildSyncDiff(projects||[], snap.projects||{});
+      const birthdaysDiff = _buildSyncDiff(birthdays||[], snap.birthdays||{});
+
+      // cfg بدون device-specific keys
+      const syncCfg = {...cfg, updatedAt: Date.now()};
+      delete syncCfg.pushWorkerUrl;
+      delete syncCfg.syncCode;
+
+      // ── اضافه کردن team state به cfg ──
+      // token رو sync نمی‌کنیم (device-specific + security)
+      // بقیه رو sync می‌کنیم
+      if (tm.code) {
+        syncCfg._tm = {
+          code:       tm.code,
+          uuid:       tm.uuid,
+          role:       tm.role,
+          workerUrl:  tm.workerUrl,
+          teamName:   tm.teamName,
+          memberName: tm.memberName,
+          memberRole: tm.memberRole,
+          updatedAt:  Date.now(),
+        };
+      }
+
+      const base = cfg.pushWorkerUrl.trim().replace(/\/+$/, '');
+      const res = await fetch(`${base}/sync/push`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          code: cfg.syncCode,
+          tasks: tasksDiff,
+          projects: projectsDiff,
+          birthdays: birthdaysDiff,
+          cfg: syncCfg
+        })
+      });
+
+      if (!res.ok) return;
+      const merged = await res.json();
+
+      // اعمال تسک/پروژه/تولد
+      tasks    = merged.tasks.filter(t => !t.deleted);
+      projects = merged.projects.filter(p => !p.deleted);
+      if (merged.birthdays) {
+        birthdays = (merged.birthdays||[]).filter(b => !b.deleted);
+        try { localStorage.setItem(SD, JSON.stringify(birthdays)); } catch(e) {}
+      }
+
+      // اعمال cfg (نگه داشتن device-specific)
+      if (merged.cfg) {
+        const keep = {
+          pushWorkerUrl: cfg.pushWorkerUrl,
+          syncCode:      cfg.syncCode
+        };
+
+        // ── بررسی team state دریافتی ──
+        const incomingTm = merged.cfg._tm;
+        if (incomingTm && incomingTm.code) {
+          const isNewTeam = !tm.code;
+          const isDifferentTeam = tm.code && tm.code !== incomingTm.code;
+
+          if (isNewTeam || isDifferentTeam) {
+            // دستگاه جدید یا تیم جدید — اعمال کن و از کاربر PIN بخواه
+            tm.code       = incomingTm.code;
+            tm.uuid       = incomingTm.uuid;
+            tm.role       = incomingTm.role;
+            tm.workerUrl  = incomingTm.workerUrl || cfg.pushWorkerUrl;
+            tm.teamName   = incomingTm.teamName;
+            tm.memberName = incomingTm.memberName;
+            tm.memberRole = incomingTm.memberRole;
+            tm.token      = null; // token رو باید دوباره بگیریم
+
+            tmSaveState();
+            tmApplyUI();
+
+            // نمایش پیام برای وصل شدن به تیم
+            setTimeout(() => {
+              tmShowTeamRestorePrompt(incomingTm);
+            }, 500);
+          }
+        }
+
+        delete merged.cfg._tm; // از cfg اصلی حذف کن
+        Object.assign(cfg, merged.cfg, keep);
+        saveCfg();
+        applyTheme(cfg.theme);
+      }
+
+      saveAll();
+      if (typeof saveProjects === 'function') saveProjects();
+
+      // آپدیت snapshot
+      const newSnap = {tasks:{}, projects:{}, birthdays:{}};
+      merged.tasks.forEach(t    => newSnap.tasks[t.id]     = t);
+      merged.projects.forEach(p => newSnap.projects[p.id]  = p);
+      (merged.birthdays||[]).forEach(b => newSnap.birthdays[b.id] = b);
+      localStorage.setItem(SYNC_SNAP_KEY, JSON.stringify(newSnap));
+      localStorage.setItem('dq5_sync_lasttime', String(Date.now()));
+
+      renderTasks();
+      if (typeof renderProjects === 'function') renderProjects();
+
+    } catch(e) {
+      console.log('syncNow team error:', e.message);
+    } finally {
+      _syncInProgress = false;
+    }
+  };
+})();
+
+// ── نمایش prompt برای وصل شدن به تیم روی دستگاه جدید ──────────
+function tmShowTeamRestorePrompt(teamData) {
+  // modal رو با پیام نشون می‌دیم
+  const existing = document.getElementById('tmRestorePrompt');
+  if (existing) existing.remove();
+
+  const div = document.createElement('div');
+  div.id = 'tmRestorePrompt';
+  div.style.cssText = `
+    position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 80px);
+    right:50%;transform:translateX(50%);
+    width:calc(100% - 32px);max-width:400px;
+    background:var(--bg1);
+    border:1px solid var(--b1);
+    border-radius:var(--r3);
+    padding:var(--sp3) var(--sp4);
+    box-shadow:0 8px 32px rgba(0,0,0,.15);
+    z-index:2000;
+    display:flex;flex-direction:column;gap:var(--sp2);
+    animation:slideUp 300ms var(--ease-out) both;
+  `;
+  div.innerHTML = `
+    <div style="display:flex;align-items:center;gap:var(--sp3)">
+      <div style="width:36px;height:36px;border-radius:var(--r2);background:var(--bluem);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--blue)" stroke-width="1.6" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:var(--fs-sm);font-weight:700;color:var(--t1)">تیم ${esc(teamData.teamName||'')} پیدا شد</div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-top:2px">برای اتصال PIN رو وارد کن</div>
+      </div>
+      <button onclick="this.closest('#tmRestorePrompt').remove()" style="color:var(--t3);background:none;border:none;cursor:pointer;font-size:18px;flex-shrink:0">×</button>
+    </div>
+    <div style="display:flex;gap:var(--sp2)">
+      <input id="tmRestorePin" type="password" inputmode="numeric" maxlength="4"
+        placeholder="PIN ●●●●"
+        style="flex:1;padding:8px 12px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--f);color:var(--t1);letter-spacing:.2em;text-align:center"/>
+      <button onclick="tmRestoreSession()" style="height:38px;padding:0 16px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">وصل</button>
+    </div>
+    <div id="tmRestoreErr" style="font-size:var(--fs-xs);color:var(--red);min-height:14px"></div>
+  `;
+  document.body.appendChild(div);
+}
+
+// ── Login روی دستگاه جدید (بعد از sync) ─────────────────────
+async function tmRestoreSession() {
+  const pin = document.getElementById('tmRestorePin')?.value.trim();
+  const errEl = document.getElementById('tmRestoreErr');
+  if (!pin || !/^\d{4}$/.test(pin)) {
+    if (errEl) errEl.textContent = 'PIN باید ۴ رقم باشد';
+    return;
+  }
+  try {
+    const res = await tmAPI('POST', '/team/session', {
+      teamCode: tm.code,
+      uuid: tm.uuid,
+      pin
+    }, false);
+
+    tm.token = res.token;
+    tm.role  = res.role;
+    tmSaveState();
+    tmApplyUI();
+
+    document.getElementById('tmRestorePrompt')?.remove();
+    toast_(svgIco('check'), `به تیم ${tm.teamName} وصل شدی`);
+    tmSyncBackground();
+  } catch(e) {
+    if (errEl) errEl.textContent = e.message.includes('PIN') ? 'PIN اشتباهه' : e.message;
+  }
+}
+
+/* ════ END TEAM SYNC ════ */
 
 boot();
 </script>
