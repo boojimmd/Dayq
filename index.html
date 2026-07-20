@@ -16047,70 +16047,82 @@ function tmToggleTodayBody() {
    ════════════════════════════════════════════════════════════════ */
 
 // ═════════════════════════════════════════════
-// Fix 1: Sync — wrap صحیح (نه replace)
-// مشکل قبلی: syncNow کاملاً replace شد و sync شخصی شکست
-// راه‌حل: _tm رو به cfg اضافه کن قبل از sync اصلی،
-// بعد از sync _tm دریافتی رو پردازش کن
+// Fix 1: Sync — birthday-based (race-condition safe)
+// مشکل cfg: هر دستگاه updatedAt=NOW می‌فرسته → آخری wins
+// راه‌حل: از birthdays mergeById استفاده می‌کنیم
+// mergeById: item با بالاترین updatedAt حفظ می‌شه
+// دستگاه دوم آیتم _tm_state رو نداره → server آن رو حفظ می‌کنه
 // ═════════════════════════════════════════════
 (function(){
   const _orig = window.syncNow;
-  if (!_orig) { console.warn('syncNow not found'); return; }
+  if (!_orig) { console.warn('[DayQ Team] syncNow not found'); return; }
+  const TM_STATE_ID = '_tm_state_v1';
 
   window.syncNow = async function() {
-    // ─ قبل از sync: team state رو به cfg موقتاً اضافه کن ─
-    if (tm.code) {
-      cfg._tm = {
-        code:       tm.code,
-        uuid:       tm.uuid,
-        role:       tm.role,
-        workerUrl:  tm.workerUrl || cfg.pushWorkerUrl,
-        teamName:   tm.teamName,
-        memberName: tm.memberName,
-        memberRole: tm.memberRole,
-        updatedAt:  Date.now(),
-      };
+    const prevBirthdays = (typeof birthdays !== 'undefined' && birthdays) ? [...birthdays] : [];
+
+    // ─ قبل: team state رو به birthdays اضافه کن ─
+    if (tm && tm.code) {
+      if (!window.birthdays) window.birthdays = [];
+      birthdays = birthdays.filter(b => b.id !== TM_STATE_ID);
+      birthdays.push({
+        id: TM_STATE_ID,
+        _isTeamState: true,
+        tm: {
+          code:       tm.code,
+          uuid:       tm.uuid,
+          role:       tm.role,
+          workerUrl:  tm.workerUrl || cfg.pushWorkerUrl,
+          teamName:   tm.teamName,
+          memberName: tm.memberName,
+          memberRole: tm.memberRole,
+        },
+        updatedAt: Date.now(),
+        deleted: false,
+      });
     }
 
     // ─ sync اصلی — دست نخورده ─
     try {
       await _orig.apply(this, arguments);
     } catch(e) {
-      delete cfg._tm;
-      return;
+      if (window.birthdays) birthdays = prevBirthdays;
+      throw e;
     }
 
-    // ─ بعد از sync: بررسی _tm دریافتی ─
-    // اگه cfg._tm از server آمد، یعنی دستگاه دیگه‌ای team داشت
-    const received = cfg._tm;
-    delete cfg._tm; // از cfg پاک کن تا ذخیره نشه
-    if (typeof saveCfg === 'function') saveCfg();
+    // ─ بعد: بررسی _tm_state دریافتی ─
+    const received = window.birthdays
+      ? birthdays.find(b => b.id === TM_STATE_ID && b._isTeamState)
+      : null;
 
-    if (received && received.code) {
+    // حذف از birthdays — فقط برای sync بود
+    if (window.birthdays) {
+      birthdays = birthdays.filter(b => b.id !== TM_STATE_ID);
+      try { localStorage.setItem('dq5_bd', JSON.stringify(birthdays)); } catch(e) {}
+    }
+
+    if (received && received.tm && received.tm.code) {
+      const teamData = received.tm;
       if (!tm.code) {
-        // دستگاه جدید — team state دریافت شد
-        tm.code       = received.code;
-        tm.uuid       = received.uuid;
-        tm.role       = received.role;
-        tm.workerUrl  = received.workerUrl || cfg.pushWorkerUrl;
-        tm.teamName   = received.teamName;
-        tm.memberName = received.memberName;
-        tm.memberRole = received.memberRole;
-        tm.token      = null; // باید با PIN دوباره login کنه
-
+        // ✅ دستگاه جدید — team state دریافت شد
+        tm.code       = teamData.code;
+        tm.uuid       = teamData.uuid;
+        tm.role       = teamData.role;
+        tm.workerUrl  = teamData.workerUrl || cfg.pushWorkerUrl;
+        tm.teamName   = teamData.teamName;
+        tm.memberName = teamData.memberName;
+        tm.memberRole = teamData.memberRole;
+        tm.token      = null;
         tmSaveState();
         tmApplyUI();
-
-        // یه prompt کوچیک نشون بده
-        setTimeout(() => tmShowTeamRestorePrompt(received), 600);
-
-      } else if (received.code !== tm.code) {
+        setTimeout(() => tmShowTeamRestorePrompt(teamData), 600);
+      } else if (teamData.code !== tm.code) {
         // کد تیم عوض شده
-        tm.code = received.code;
-        tm.workerUrl = received.workerUrl || cfg.pushWorkerUrl;
+        tm.code = teamData.code;
+        tm.workerUrl = teamData.workerUrl || cfg.pushWorkerUrl;
         tmSaveState();
-        toast_(svgIco('flag'), 'کد تیم از دستگاه دیگه آپدیت شد');
+        toast_(svgIco('flag'), 'کد تیم آپدیت شد');
       }
-      // اگه code یکسانه — نیازی به کار نیست
     }
   };
 })();
