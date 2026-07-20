@@ -3794,6 +3794,60 @@ select.fi{
   .tm-skeleton{animation:none;background:var(--bg2);}
 }
 /* ════ End Emil Polish ════ */
+
+/* ════ Team UX — Optional & Subtle ════ */
+
+/* team task card — subtle، نه aggressive */
+.tc.tm-task {
+  border-right: 3px solid var(--blue);
+  background: var(--bg1); /* همرنگ با personal tasks */
+}
+
+/* badge «از مدیر» — smaller, subtle */
+.tm-badge {
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  padding: 1px 6px !important;
+  opacity: .8;
+}
+
+/* سطر «تیم» در اتصال — مثل push/sync */
+#tmTeamRow .srow-ico {
+  transition: opacity 150ms ease;
+}
+
+/* from مدیر section — no hard divider */
+.tm-divider {
+  height: 1px;
+  background: var(--b2);
+  margin: var(--sp2) 0;
+  opacity: .5;
+}
+
+/* تیم امروز — collapse-able و کم‌فضا */
+.tm-today-card {
+  margin-bottom: var(--sp2);
+  box-shadow: none;
+}
+
+/* Soko srow alert indicator */
+#tmSokoAlertDot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--red);
+  margin-right: 4px;
+  vertical-align: middle;
+  animation: tmPulse 2s ease infinite;
+}
+@keyframes tmPulse {
+  0%,100% { opacity: 1; }
+  50%      { opacity: .4; }
+}
+@media(prefers-reduced-motion:reduce) {
+  #tmSokoAlertDot { animation: none; }
+}
+/* ════ End Team UX ════ */
 </style>
 </head>
 <body>
@@ -4327,40 +4381,37 @@ select.fi{
           </div>
           <div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
         </div>
-      </div>
-    </div>
-
-    <!-- تیم کاری — بخش جدا -->
-    <div class="sg-wrap">
-      <span class="sg-lbl">تیم</span>
-      <div class="s-group">
+        <!-- تیم کاری — یه row ساده مثل sync و push -->
         <div class="srow" id="tmTeamRow" onclick="tmOpenTeamSettings()">
           <div class="srow-ico" style="background:var(--bluem);color:var(--blue);">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           </div>
           <div class="srow-body">
             <div class="srow-ttl">تیم کاری</div>
-            <div class="srow-sub" id="tmTeamSub">عضو تیمی نیستی</div>
+            <div class="srow-sub" id="tmTeamSub">غیرفعال</div>
           </div>
           <div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
         </div>
       </div>
     </div>
 
-
-    <!-- سکو Button — فقط مدیر -->
-    <div id="tmSokoCard" style="display:none;padding:0 18px;margin-bottom:var(--sp3)">
-      <button class="tm-soko-btn" onclick="tmOpenSoko()">
-        <div style="flex:1;text-align:right">
-          <div style="font-size:var(--fs-md);font-weight:800">🏢 سکو</div>
-          <div style="font-size:var(--fs-xs);opacity:.7;margin-top:2px">مدیریت تیم</div>
+    <!-- سکو — تیم مدیریت (فقط مدیر) -->
+    <div id="tmSokoCard" style="display:none">
+      <div class="sg-wrap">
+        <span class="sg-lbl">تیم</span>
+        <div class="s-group">
+          <div class="srow" onclick="tmOpenSoko()">
+            <div class="srow-ico" style="background:var(--bluem);color:var(--blue);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            </div>
+            <div class="srow-body">
+              <div class="srow-ttl">سکو <span id="tmSokoAlertDot" style="display:none;width:6px;height:6px;border-radius:50%;background:var(--red);margin-right:4px;vertical-align:middle;display:none"></span></div>
+              <div class="srow-sub" id="tmSokoSubText">مدیریت تیم</div>
+            </div>
+            <div class="srow-r"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></div>
+          </div>
         </div>
-        <div class="tm-soko-stats">
-          <div class="tm-soko-stat"><div style="font-size:var(--fs-md);font-weight:800" id="tmSokoMemberCount">۰</div><div style="font-size:var(--fs-2xs);opacity:.7">اعضا</div></div>
-          <div class="tm-soko-stat"><div style="font-size:var(--fs-md);font-weight:800" id="tmSokoAlertCount">۰</div><div style="font-size:var(--fs-2xs);opacity:.7">توجه</div></div>
-          <div class="tm-soko-stat"><div style="font-size:var(--fs-md);font-weight:800" id="tmSokoTaskCount">۰</div><div style="font-size:var(--fs-2xs);opacity:.7">تسک</div></div>
-        </div>
-      </button>
+      </div>
     </div>
 
 <!-- ⑦ ابزارها -->
@@ -16320,6 +16371,88 @@ async function tmDoDirectLogin() {
   }
 }
 /* ════ End Direct Login ════ */
+
+
+/* ════ UX Polish — Optional & User-Friendly ════ */
+
+// آپدیت سطر تیم در اتصال
+(function(){
+  const _orig = tmApplyUI;
+  tmApplyUI = function() {
+    try { _orig.apply(this, arguments); } catch(e) {}
+    _tmUXRefresh();
+  };
+})();
+
+function _tmUXRefresh() {
+  const hasTeam = !!tm.code;
+  const isManager = tm.role === 'manager';
+  const isMember = tm.role === 'member';
+
+  // سطر تیم در اتصال — همیشه نمایان (مثل push و sync)
+  const sub = document.getElementById('tmTeamSub');
+  if (sub) {
+    if (!hasTeam) sub.textContent = 'غیرفعال';
+    else if (isManager) sub.textContent = 'فعال — ' + (tm.teamName || '');
+    else sub.textContent = 'فعال — ' + (tm.teamName || '');
+  }
+
+  // سکو card — فقط مدیر و فقط وقتی تیم دارد
+  const sokoCard = document.getElementById('tmSokoCard');
+  if (sokoCard) sokoCard.style.display = isManager ? '' : 'none';
+
+  // سکو sub text
+  const sokoSub = document.getElementById('tmSokoSubText');
+  if (sokoSub && tm.snapshot) {
+    const alerts = (tm.snapshot.members||[]).filter(m=>m.alert!=='ok').length;
+    const members = tm.snapshot.memberCount || 0;
+    sokoSub.textContent = alerts > 0
+      ? `${members} نفر • ${alerts} نیاز توجه`
+      : `${members} نفر فعال`;
+    // alert dot
+    const dot = document.getElementById('tmSokoAlertDot');
+    if (dot) dot.style.display = alerts > 0 ? 'inline-block' : 'none';
+  }
+
+  // badge عضویت در پروفایل
+  const badge = document.getElementById('tmMemberBadge');
+  if (badge) {
+    badge.style.display = hasTeam ? '' : 'none';
+    badge.textContent = hasTeam
+      ? (isManager ? 'مدیر: ' : 'عضو: ') + (tm.teamName || tm.code)
+      : '';
+  }
+
+  // تیم امروز (مدیر) — فقط وقتی alert وجود داره
+  const todaySection = document.getElementById('tmTodaySection');
+  if (todaySection) {
+    const hasAlerts = tm.snapshot && (tm.snapshot.members||[]).some(m=>m.alert!=='ok');
+    const hasMembers = tm.snapshot && (tm.snapshot.memberCount||0) > 1;
+    todaySection.style.display = (isManager && hasMembers) ? '' : 'none';
+  }
+
+  // از مدیر (کارمند) — فقط وقتی تسک داره
+  const inboxSection = document.getElementById('tmInboxSection');
+  if (inboxSection) {
+    const activeCount = (tm.inbox||[]).filter(t=>!t.deleted&&t.status!=='done').length;
+    inboxSection.style.display = (isMember && activeCount > 0) ? '' : 'none';
+  }
+
+  // اطلاعیه‌ها — فقط وقتی خوانده‌نشده داره
+  const annosSection = document.getElementById('tmAnnosSection');
+  if (annosSection) {
+    const unread = (tm.announcements||[]).filter(a=>!(a.readBy||[]).includes(tm.uuid)).length;
+    annosSection.style.display = (isMember && unread > 0) ? '' : 'none';
+  }
+}
+
+// همچنین tmUpdateSokoCard رو آپدیت کن
+const _origUpdateSokoCard = tmUpdateSokoCard;
+tmUpdateSokoCard = function() {
+  try { _origUpdateSokoCard.apply(this, arguments); } catch(e) {}
+  _tmUXRefresh();
+};
+/* ════ End UX Polish ════ */
 
 boot();
 </script>
