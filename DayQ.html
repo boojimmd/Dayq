@@ -3312,6 +3312,20 @@ select.fi{
 
 .tm-pending-card{background:var(--am);border:1px solid rgba(0,184,122,.25);border-radius:var(--r3);padding:var(--sp3) var(--sp4);margin-bottom:var(--sp3);display:flex;align-items:center;gap:var(--sp3);}
 
+
+/* team sheets — بالاتر از سکو panel */
+#shTmAssign,
+#shTmAnnounce,
+#shTmJoin,
+#shTmCreate,
+#shTmCode,
+#shTmInfo,
+#shTmChoice,
+#tmDetailSheet,
+#shTmPending{
+  z-index:1100 !important;
+}
+
 /* ════ END TEAM STYLES ════ */
 
 /* ════════════════════════════════════════════
@@ -15366,6 +15380,45 @@ tmRefreshInfoSheet = function() {
 };
 
 /* ════ END MODAL FIX ════ */
+
+
+/* ════ z-index fix for sheets inside Soko panel ════ */
+(function(){
+  const TEAM_SHEETS = [
+    'shTmAssign','shTmAnnounce','shTmJoin','shTmCreate',
+    'shTmCode','shTmInfo','shTmChoice','tmDetailSheet','shTmPending'
+  ];
+  const _orig = window.openSheet;
+  if (!_orig) return;
+  window.openSheet = function(id) {
+    _orig.apply(this, arguments);
+    if (TEAM_SHEETS.includes(id) && tm.sokoOpen) {
+      // overlay رو بالاتر از panel بیار
+      const ov = document.getElementById('ov');
+      if (ov) ov.style.zIndex = '1099';
+      const el = document.getElementById(id);
+      if (el) el.style.zIndex = '1100';
+    }
+  };
+  const _origClose = window.closeAll;
+  window.closeAll = function() {
+    _origClose.apply(this, arguments);
+    // z-index رو reset کن
+    const ov = document.getElementById('ov');
+    if (ov) ov.style.zIndex = '';
+    TEAM_SHEETS.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.style.zIndex = '';
+    });
+    if (tm.sokoOpen) {
+      if (ov) ov.style.zIndex = '';
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+    }
+  };
+})();
+/* ════ end z-index fix ════ */
 
 boot();
 </script>
