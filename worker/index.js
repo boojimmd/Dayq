@@ -572,6 +572,32 @@ export default {
       return jsonRes({ status: 'approved', memberUuid }, 200, cors);
     }
 
+    // ── ورود مستقیم با کد + PIN (بدون UUID) ──
+    if (path === '/team/login' && req.method === 'POST') {
+      const allowed = await checkRateLimit(ip, env);
+      if (!allowed) return errRes('تعداد تلاش بیش از حد', 429, cors);
+      const { teamCode, pin } = await req.json();
+      if (!teamCode || !pin) return errRes('کد تیم و PIN اجباریه', 400, cors);
+      const metaRaw = await env.DAYQ_KV.get("team:"+teamCode+":meta");
+      if (!metaRaw) return errRes('کد تیم نامعتبره', 404, cors);
+      const meta = JSON.parse(metaRaw);
+      for (const m of meta.members) {
+        if (m.status === "removed") continue;
+        const memberRaw = await env.DAYQ_KV.get("team:"+teamCode+":member:"+m.uuid);
+        if (!memberRaw) continue;
+        const member = JSON.parse(memberRaw);
+        const pinHash = await hashPin(pin, member.salt);
+        if (pinHash === member.pinHash) {
+          await clearFailedAttempts(ip, env);
+          const role = member.isManager ? "manager" : "member";
+          const token = await createSession(m.uuid, teamCode, role, env);
+          return jsonRes({ token, role, uuid: m.uuid, name: m.name, memberRole: m.role, teamName: meta.teamName, workerUrl: url.origin }, 200, cors);
+        }
+      }
+      await recordFailedAttempt(ip, env);
+      return errRes("PIN نادرست", 401, cors);
+    }
+
     // ── لاگین (ساخت session) ──
     if (path === '/team/session' && req.method === 'POST') {
       // rate limit
