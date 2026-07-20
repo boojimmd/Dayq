@@ -3848,6 +3848,34 @@ select.fi{
   #tmSokoAlertDot { animation: none; }
 }
 /* ════ End Team UX ════ */
+
+/* ════ Assign NLP UI ════ */
+.tm-dl-chip{
+  height:30px;padding:0 12px;
+  border-radius:var(--r5);
+  border:1px solid var(--b1);
+  background:var(--bg2);
+  color:var(--t2);
+  font-size:12px;font-weight:600;font-family:var(--f);
+  cursor:pointer;
+  transition:transform 120ms var(--ease-out),background 120ms var(--ease-std);
+}
+.tm-dl-chip:active{transform:scale(0.95);}
+@media(hover:hover) and (pointer:fine){
+  .tm-dl-chip:hover{background:var(--bg3);color:var(--t1);}
+}
+.tm-nlp-chip{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:11px;font-weight:700;
+  padding:3px 8px;border-radius:var(--r5);
+}
+.tm-member-chip.active{
+  background:var(--bluem)!important;
+  color:var(--blue)!important;
+  border-color:rgba(59,130,246,.3)!important;
+}
+.tm-member-chip:active{transform:scale(0.97);}
+/* ════ End Assign NLP ════ */
 </style>
 </head>
 <body>
@@ -16454,6 +16482,302 @@ tmUpdateSokoCard = function() {
 };
 /* ════ End UX Polish ════ */
 
+/* ════════════════════════════════════════════════════════════════
+   DayQ Team — Assign NLP + Smart Deadline + Projects Full
+   ════════════════════════════════════════════════════════════════ */
+
+// ── State ─────────────────────────────────────────────────────
+let _tmAssignParsed = null;
+let _tmAssignMember = '';
+let _tmAssignBroadcast = false;
+
+// ── Deadline display helper (از nlpShowPreview الگو گرفته) ────
+function _tmFmtDeadline(dl) {
+  if (!dl) return null;
+  const [jy,jm,jd] = dl.split('-').map(Number);
+  const MONTHS = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+  const today = mrTodayKey();
+  const [ty,tm,td] = today.split('-').map(Number);
+  const diff = _jalToDays(jy,jm,jd) - _jalToDays(ty,tm,td);
+  if (diff === 0) return { label:'امروز',  color:'var(--red)',   days: 0 };
+  if (diff === 1) return { label:'فردا',   color:'var(--amber)', days: 1 };
+  if (diff === 2) return { label:'پس‌فردا', color:'var(--amber)', days: 2 };
+  if (diff < 0)   return { label:`${Math.abs(diff)} روز پیش`, color:'var(--red)', days: diff };
+  if (diff <= 7)  return { label:`${num(jd)} ${MONTHS[jm-1]}`, color:'var(--a)', days: diff };
+  return { label:`${num(jd)} ${MONTHS[jm-1]}`, color:'var(--t2)', days: diff };
+}
+
+// ── Shortcut deadline calculator ───────────────────────────────
+function _tmDeadlineShortcut(text) {
+  const p = nlpParse(text);
+  return p ? p.deadline : null;
+}
+
+// ── Open Assign Modal (NLP version) ───────────────────────────
+tmAssignTask = function(preUuid = '') {
+  _tmAssignParsed = null;
+  _tmAssignMember = preUuid || '';
+  _tmAssignBroadcast = false;
+
+  // reset form
+  const inp = document.getElementById('tmANlpInp');
+  if (inp) { inp.value = ''; inp.style.height = 'auto'; }
+  const preview = document.getElementById('tmAPreview');
+  if (preview) preview.innerHTML = '';
+  const err = document.getElementById('tmAErr');
+  if (err) err.textContent = '';
+
+  // عضو پیش‌فرض
+  _tmUpdateAssignMemberChips();
+
+  tmModal('tmModalAssign', true);
+  setTimeout(() => { const i = document.getElementById('tmANlpInp'); if(i) i.focus(); }, 300);
+};
+
+// ── NLP input handler ─────────────────────────────────────────
+function _tmAssignNlpInput(val) {
+  _tmAssignParsed = val.trim().length > 2 ? nlpParse(val) : null;
+  _tmUpdateAssignPreview();
+  // auto-grow textarea
+  const inp = document.getElementById('tmANlpInp');
+  if (inp) { inp.style.height = 'auto'; inp.style.height = Math.min(inp.scrollHeight, 100) + 'px'; }
+}
+
+// ── Update preview chips ───────────────────────────────────────
+function _tmUpdateAssignPreview() {
+  const p = document.getElementById('tmAPreview');
+  if (!p) return;
+  if (!_tmAssignParsed) { p.innerHTML = ''; return; }
+  const chips = [];
+  if (_tmAssignParsed.deadline) {
+    const d = _tmFmtDeadline(_tmAssignParsed.deadline);
+    if (d) chips.push(`<span class="tm-nlp-chip" style="background:rgba(0,184,122,.12);color:var(--a)"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${d.label}</span>`);
+  }
+  const PRI_LABEL = { high:'فوری', med:'مهم', low:'عادی' };
+  const PRI_COLOR = { high:'var(--red)', med:'var(--amber)', low:'var(--t3)' };
+  if (_tmAssignParsed.detected.includes('pri')) {
+    const pri = _tmAssignParsed.priority;
+    chips.push(`<span class="tm-nlp-chip" style="background:${PRI_COLOR[pri]}22;color:${PRI_COLOR[pri]}">${PRI_LABEL[pri]||pri}</span>`);
+  }
+  p.innerHTML = chips.join('');
+}
+
+// ── Deadline shortcut chips ────────────────────────────────────
+function _tmSetDeadlineShortcut(text) {
+  const inp = document.getElementById('tmANlpInp');
+  if (!inp) return;
+  // اگه input خالیه، text رو بذار وگرنه deadline رو append کن
+  const current = inp.value.trim();
+  // حذف deadline قبلی از متن (اگه بود)
+  const cleaned = current.replace(/(فردا|پس‌فردا|این هفته|هفته دیگه|ماه دیگه|جمعه|پنجشنبه|شنبه|یکشنبه|دوشنبه|سه‌شنبه|چهارشنبه)(\s+)/g, '').trim();
+  inp.value = (cleaned ? cleaned + ' ' : '') + text;
+  inp.style.height = 'auto';
+  inp.style.height = Math.min(inp.scrollHeight, 100) + 'px';
+  _tmAssignNlpInput(inp.value);
+  inp.focus();
+}
+
+// ── Member chips update ────────────────────────────────────────
+function _tmUpdateAssignMemberChips() {
+  const el = document.getElementById('tmAMemberChips');
+  if (!el) return;
+  const members = tm.snapshot?.members?.filter(m => !m.isManager && m.status === 'active') || [];
+  if (!members.length) {
+    el.innerHTML = '<div style="color:var(--t3);font-size:var(--fs-xs)">هنوز عضوی تأیید نشده</div>';
+    return;
+  }
+  el.innerHTML = members.map(m => {
+    const active = _tmAssignMember === m.uuid;
+    const st = m.alert === 'blocked' ? 'block' : m.alert === 'stale' ? 'warn' : 'ok';
+    return `<button
+      class="tm-member-chip${active ? ' active' : ''}"
+      data-uuid="${m.uuid}"
+      onclick="_tmSelectMember('${m.uuid}')"
+      style="display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:var(--r5);border:1px solid ${active ? 'var(--blue)' : 'var(--b1)'};background:${active ? 'var(--bluem)' : 'var(--bg2)'};color:${active ? 'var(--blue)' : 'var(--t1)'};font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;transition:all 150ms ease">
+      ${tmDot(st)}<span>${esc(m.name)}</span>
+      ${m.activeTasks > 0 ? `<span style="font-size:10px;opacity:.6">${m.activeTasks}</span>` : ''}
+    </button>`;
+  }).join('');
+}
+
+function _tmSelectMember(uuid) {
+  if (_tmAssignBroadcast) return;
+  _tmAssignMember = (_tmAssignMember === uuid) ? '' : uuid;
+  _tmUpdateAssignMemberChips();
+}
+
+function _tmToggleBroadcast() {
+  _tmAssignBroadcast = !_tmAssignBroadcast;
+  const btn = document.getElementById('tmABroadcastBtn');
+  if (btn) {
+    btn.style.background = _tmAssignBroadcast ? 'var(--bluem)' : 'var(--bg2)';
+    btn.style.color = _tmAssignBroadcast ? 'var(--blue)' : 'var(--t2)';
+    btn.style.borderColor = _tmAssignBroadcast ? 'rgba(59,130,246,.3)' : 'var(--b1)';
+    btn.textContent = _tmAssignBroadcast ? '📡 همه اعضا (فعال)' : '📡 ارسال به همه';
+  }
+  if (_tmAssignBroadcast) {
+    _tmAssignMember = '';
+    _tmUpdateAssignMemberChips();
+  }
+}
+
+// ── Priority override ─────────────────────────────────────────
+let _tmAssignPriOverride = null;
+function _tmSetPri(pri) {
+  _tmAssignPriOverride = (_tmAssignPriOverride === pri) ? null : pri;
+  document.querySelectorAll('.tm-pri-chip').forEach(c => {
+    const active = c.dataset.pri === _tmAssignPriOverride;
+    c.style.opacity = active ? '1' : '.5';
+    c.style.transform = active ? 'scale(1.05)' : 'scale(1)';
+  });
+}
+
+// ── Submit ────────────────────────────────────────────────────
+tmDoAssign = async function() {
+  const inp = document.getElementById('tmANlpInp');
+  const errEl = document.getElementById('tmAErr');
+  const rawText = inp?.value?.trim() || '';
+  const parsed = rawText.length > 1 ? (nlpParse(rawText) || {}) : {};
+  const title = parsed.cleanText || rawText;
+  const deadline = parsed.deadline || '';
+  const priority = _tmAssignPriOverride || parsed.priority || 'high';
+
+  if (!title) { errEl.textContent = 'عنوان تسک رو بنویس'; return; }
+  if (!deadline) { errEl.textContent = 'ددلاین رو مشخص کن — مثال: فردا، جمعه، هفته دیگه'; return; }
+  if (!_tmAssignBroadcast && !_tmAssignMember) {
+    errEl.textContent = 'یه عضو انتخاب کن یا «ارسال به همه» رو بزن';
+    return;
+  }
+
+  const btn = document.getElementById('tmASubmitBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'در حال ارسال...'; }
+  errEl.textContent = '';
+
+  try {
+    const endpoint = _tmAssignBroadcast ? '/task/broadcast' : '/task/assign';
+    const body = { title, deadline, priority, category: parsed.cat || '' };
+    if (!_tmAssignBroadcast) body.assignedTo = _tmAssignMember;
+
+    const res = await tmAPI('POST', endpoint, body);
+    tmCloseModal();
+    _tmAssignPriOverride = null;
+    toast_(svgIco('check'), _tmAssignBroadcast
+      ? `تسک به همه اعضا ارسال شد`
+      : `تسک به ${_tmMemberName(_tmAssignMember)} ارسال شد`);
+    tmSyncBackground();
+  } catch(e) {
+    errEl.textContent = e.message;
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'ارسال تسک'; }
+  }
+};
+
+function _tmMemberName(uuid) {
+  const m = (tm.snapshot?.members||[]).find(x => x.uuid === uuid);
+  return m ? m.name : 'عضو';
+}
+
+// ── Projects tab — task list واقعی ────────────────────────────
+tmRenderTeamProjects = function() {
+  const el = document.getElementById('tmSokoProjContent');
+  if (!el) return;
+  if (!tm.snapshot) {
+    el.innerHTML = `<div style="padding:var(--sp5);text-align:center"><div class="tm-skeleton" style="height:60px;border-radius:var(--r2);margin-bottom:var(--sp2)"></div><div class="tm-skeleton" style="height:60px;border-radius:var(--r2)"></div></div>`;
+    return;
+  }
+  const members = (tm.snapshot.members || []).filter(m => m.status === 'active');
+  if (!members.length) {
+    el.innerHTML = `<div style="padding:var(--sp5);text-align:center;color:var(--t3)">هنوز عضوی تأیید نشده</div>`;
+    return;
+  }
+
+  el.innerHTML = members.map(m => {
+    const st = tmStatusLabel(m.alert, m.activeTasks);
+    const barWidth = Math.min(100, (m.activeTasks / Math.max(...members.map(x=>x.activeTasks), 1)) * 100);
+    return `
+    <div class="tm-proj-member" style="padding:var(--sp3) var(--sp4);border-bottom:1px solid var(--b2)">
+      <div style="display:flex;align-items:center;gap:var(--sp3);cursor:pointer" onclick="_tmToggleMemberTasks('${m.uuid}')">
+        <div style="flex:1;min-width:0;text-align:right">
+          <div style="display:flex;align-items:center;gap:var(--sp2);justify-content:flex-end">
+            ${st.dot}
+            <span style="font-size:var(--fs-sm);font-weight:700;color:var(--t1)">${esc(m.name)}</span>
+          </div>
+          <div style="font-size:var(--fs-xs);color:var(--t3);margin-top:3px">${esc(m.role)}</div>
+        </div>
+        <div style="text-align:center;min-width:40px">
+          <div style="font-size:var(--fs-lg);font-weight:800;color:${st.color};font-variant-numeric:tabular-nums">${m.activeTasks}</div>
+          <div style="font-size:10px;color:var(--t3)">تسک</div>
+        </div>
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--t3)" stroke-width="2.5" stroke-linecap="round" id="tmProjArrow_${m.uuid}" style="transform:rotate(-90deg);transition:transform 200ms ease"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+
+      <!-- workload bar -->
+      ${m.activeTasks > 0 ? `
+      <div style="margin-top:8px;height:3px;background:var(--bg3);border-radius:var(--r5);overflow:hidden">
+        <div style="height:100%;border-radius:var(--r5);background:${m.alert==='blocked'?'var(--red)':m.alert==='stale'?'var(--amber)':'var(--blue)'};transform:scaleX(${barWidth/100});transform-origin:right;transition:transform 600ms cubic-bezier(0.23,1,0.32,1)"></div>
+      </div>` : ''}
+
+      <!-- task list (collapsed by default) -->
+      <div id="tmMemberTasks_${m.uuid}" style="display:none;margin-top:var(--sp3)">
+        <div class="tm-skeleton" style="height:14px;border-radius:4px;width:50%;margin-bottom:var(--sp2)"></div>
+      </div>
+
+      <!-- action buttons -->
+      <div style="display:flex;gap:var(--sp2);margin-top:var(--sp2)">
+        <button onclick="tmAssignTask('${m.uuid}')" style="height:28px;padding:0 10px;border-radius:var(--r1);background:var(--bg2);border:1px solid var(--b1);color:var(--t2);font-size:11px;font-weight:600;font-family:var(--f);cursor:pointer;display:inline-flex;align-items:center;gap:4px">
+          ${tmIco('plus',11)} تسک
+        </button>
+        ${m.alert !== 'ok' ? `
+        <button onclick="tmExtendDeadline(null,'${m.uuid}')" style="height:28px;padding:0 10px;border-radius:var(--r1);background:var(--ambm);border:1px solid rgba(217,119,6,.2);color:var(--amber);font-size:11px;font-weight:600;font-family:var(--f);cursor:pointer">
+          تمدید
+        </button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+};
+
+// ── Toggle member tasks expand ─────────────────────────────────
+async function _tmToggleMemberTasks(uuid) {
+  const el = document.getElementById(`tmMemberTasks_${uuid}`);
+  const arrow = document.getElementById(`tmProjArrow_${uuid}`);
+  if (!el) return;
+
+  const isOpen = el.style.display !== 'none';
+  el.style.display = isOpen ? 'none' : 'block';
+  if (arrow) arrow.style.transform = isOpen ? 'rotate(-90deg)' : 'rotate(0deg)';
+  if (isOpen) return;
+
+  // fetch tasks
+  try {
+    const data = await tmAPI('GET', `/task/inbox?member=${uuid}`);
+    const tasks = (data.tasks || []).filter(t => !t.deleted);
+    if (!tasks.length) {
+      el.innerHTML = '<div style="font-size:var(--fs-xs);color:var(--t3);padding:var(--sp2) 0">تسک فعالی ندارد</div>';
+      return;
+    }
+    const STATUS_MAP = {
+      pending:     { label:'باید',     color:'var(--t3)' },
+      in_progress: { label:'درحال',    color:'var(--blue)' },
+      waiting:     { label:'منتظرم',   color:'var(--amber)' },
+      blocked:     { label:'مشکل',     color:'var(--red)' },
+      done:        { label:'انجام شد', color:'var(--a)' },
+    };
+    el.innerHTML = tasks.slice(0, 5).map(t => {
+      const st = STATUS_MAP[t.status] || STATUS_MAP.pending;
+      const over = t.deadline && t.deadline < mrTodayKey() && t.status !== 'done';
+      return `<div style="display:flex;align-items:center;gap:var(--sp2);padding:6px 0;border-bottom:1px solid var(--b2)">
+        <span style="font-size:10px;font-weight:700;color:${st.color};flex-shrink:0">${st.label}</span>
+        <span style="font-size:var(--fs-xs);color:var(--t1);flex:1;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t.title)}</span>
+        ${t.deadline ? `<span style="font-size:10px;color:${over?'var(--red)':'var(--t3)'};flex-shrink:0">${t.deadline.slice(5)}</span>` : ''}
+      </div>`;
+    }).join('') + (tasks.length > 5 ? `<div style="font-size:10px;color:var(--t3);text-align:center;padding-top:4px">+${tasks.length-5} تسک دیگه</div>` : '');
+  } catch(e) {
+    el.innerHTML = `<div style="font-size:var(--fs-xs);color:var(--red)">${e.message}</div>`;
+  }
+}
+
+/* ════ End NLP Assign ════ */
+
 boot();
 </script>
 
@@ -16951,6 +17275,67 @@ boot();
       </div>
       <div id="tmMCreateErr" style="font-size:var(--fs-xs);color:var(--red);text-align:center;min-height:16px"></div>
       <button id="tmMCreateBtn" onclick="tmDoCreate()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer;margin-top:4px">ساخت تیم</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal: Assign Task — NLP powered -->
+<div class="tm-modal" id="tmModalAssign">
+  <div class="tm-modal-sheet" style="max-height:95dvh">
+    <div class="tm-modal-handle"></div>
+    <div class="tm-modal-hdr">
+      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
+      <span class="tm-modal-ttl">تسک جدید</span>
+    </div>
+    <div class="tm-modal-body" style="gap:16px">
+
+      <!-- NLP Input -->
+      <div style="background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r3);padding:12px 14px;transition:border-color 150ms ease" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--b1)'">
+        <textarea id="tmANlpInp"
+          rows="2"
+          placeholder="گزارش ماهانه بده تا جمعه !مهم"
+          oninput="_tmAssignNlpInput(this.value)"
+          style="width:100%;background:none;border:none;resize:none;font-size:var(--fs-md);font-family:var(--f);color:var(--t1);direction:rtl;outline:none;line-height:1.6;min-height:44px;max-height:100px;overflow:hidden"></textarea>
+        <!-- NLP Preview chips -->
+        <div id="tmAPreview" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px"></div>
+      </div>
+
+      <!-- Deadline shortcuts -->
+      <div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:8px">ددلاین</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button onclick="_tmSetDeadlineShortcut('فردا')"        class="tm-dl-chip">فردا</button>
+          <button onclick="_tmSetDeadlineShortcut('پس‌فردا')"     class="tm-dl-chip">پس‌فردا</button>
+          <button onclick="_tmSetDeadlineShortcut('این جمعه')"    class="tm-dl-chip">این جمعه</button>
+          <button onclick="_tmSetDeadlineShortcut('هفته دیگه')"   class="tm-dl-chip">هفته دیگه</button>
+          <button onclick="_tmSetDeadlineShortcut('ماه دیگه')"    class="tm-dl-chip">ماه دیگه</button>
+        </div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-top:8px">یا مستقیم توی متن بنویس: «جمعه»، «۱۵ مرداد»، «هفته دیگه»</div>
+      </div>
+
+      <!-- اولویت override -->
+      <div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:8px">اولویت (اختیاری — از متن تشخیص میده)</div>
+        <div style="display:flex;gap:6px">
+          <button class="tm-pri-chip" data-pri="high" onclick="_tmSetPri('high')" style="flex:1;height:34px;border-radius:var(--r2);border:1px solid rgba(248,81,73,.3);background:var(--redm);color:var(--red);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer;transition:all 120ms ease;opacity:.5">فوری</button>
+          <button class="tm-pri-chip" data-pri="med"  onclick="_tmSetPri('med')"  style="flex:1;height:34px;border-radius:var(--r2);border:1px solid rgba(217,119,6,.3);background:var(--ambm);color:var(--amber);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer;transition:all 120ms ease;opacity:.5">مهم</button>
+          <button class="tm-pri-chip" data-pri="low"  onclick="_tmSetPri('low')"  style="flex:1;height:34px;border-radius:var(--r2);border:1px solid var(--b1);background:var(--bg2);color:var(--t3);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer;transition:all 120ms ease;opacity:.5">عادی</button>
+        </div>
+      </div>
+
+      <!-- انتخاب عضو -->
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <button id="tmABroadcastBtn" onclick="_tmToggleBroadcast()" style="height:26px;padding:0 10px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--bg2);color:var(--t2);font-size:11px;font-weight:600;font-family:var(--f);cursor:pointer;transition:all 150ms ease">📡 ارسال به همه</button>
+          <div style="font-size:var(--fs-xs);color:var(--t3)">برای کی؟</div>
+        </div>
+        <div id="tmAMemberChips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      </div>
+
+      <!-- Error + Submit -->
+      <div id="tmAErr" style="font-size:var(--fs-xs);color:var(--red);min-height:14px;text-align:center"></div>
+      <button id="tmASubmitBtn" onclick="tmDoAssign()" style="width:100%;height:50px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-md);font-weight:800;font-family:var(--f);cursor:pointer">ارسال تسک</button>
     </div>
   </div>
 </div>
