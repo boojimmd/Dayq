@@ -3425,7 +3425,20 @@ select.fi{
 .tm-modal-body{padding:16px 18px 24px;display:flex;flex-direction:column;gap:14px;}
 @media(min-width:900px){
   .tm-modal{align-items:center;}
-  .tm-modal-sheet{border-radius:var(--r4);max-width:420px;}
+  .tm-modal-sheet{
+    border-radius:var(--r4);
+    max-width:min(460px,calc(100vw - 280px));
+    /* مرکز content area: (100vw - nav 220px) / 2 */
+    margin-right:calc(220px / 2);
+    margin-left:calc(220px / 2);
+    position:relative;
+    transform:none;
+  }
+  .tm-modal.tm-modal-open .tm-modal-sheet{ transform:none; opacity:1; }
+}
+@media(min-width:1400px){
+  /* dpanel=360px در عرض‌های خیلی بزرگ */
+  .tm-panel{ left:360px; }
 }
 
 @keyframes slideUp {
@@ -16483,19 +16496,6 @@ if ('serviceWorker' in navigator) {
       }
       /* نمایش انیمیشن‌های تیم روی دسکتاپ */
       .tm-panel{
-        transition:transform 280ms var(--ease-drawer,cubic-bezier(0.32,0.72,0,1));
-      }
-    }
-  `;
-  if (!document.getElementById('tm-desktop-css')) {
-    const style = document.createElement('style');
-    style.id = 'tm-desktop-css';
-    style.textContent = DESKTOP_CSS;
-    document.head.appendChild(style);
-  }
-})();
-
-// ═════════════════════════════════════════════
 // Fix 4: tmApplyUI روی دسکتاپ — مطمئن شدن
 // ════════════════════════════════════════════
 // وقتی صفحه لود می‌شه، یه بار دیگه tmApplyUI اجرا کن
