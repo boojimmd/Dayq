@@ -17327,727 +17327,8 @@ async function tmLoadReport(period) {
 /* ════ End Focus Management ════ */
 
 boot();
-</script>
-
-<!-- JALALI DATE PICKER -->
-<div class="jal-dp" id="jdp">
-  <div class="jdp-nav">
-    <button class="jdp-btn" onclick="jdpPrevMonth()">
-      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-    </button>
-    <div class="jdp-title" id="jdpTitle">—</div>
-    <button class="jdp-btn" onclick="jdpNextMonth()">
-      <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-    </button>
-  </div>
-  <div class="jdp-weekdays">
-    <div class="jdp-wd">ش</div><div class="jdp-wd">ی</div>
-    <div class="jdp-wd">د</div><div class="jdp-wd">س</div>
-    <div class="jdp-wd">چ</div><div class="jdp-wd">پ</div>
-    <div class="jdp-wd">ج</div>
-  </div>
-  <div class="jdp-days" id="jdpDays"></div>
-  <button class="jdp-clear" onclick="jdpClear()">پاک کردن تاریخ</button>
-</div>
-<div class="jal-dp-overlay" id="jdpOverlay" onclick="closeJDP()" style="display:none;position:fixed;inset:0;z-index:499;"></div>
 
 
-<nav class="nav">
-  <div class="ni active" id="ni-home" onclick="goPage('Home')">
-    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-    <span class="ni-lbl">خانه</span><span class="ni-count" id="nic-home"></span><div class="ni-dot"></div>
-  </div>
-  <div class="ni" id="ni-projects" onclick="goPage('Projects')">
-    <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-    <span class="ni-lbl">پروژه‌ها</span><span class="ni-count" id="nic-projects"></span><div class="ni-dot"></div>
-  </div>
-  <div class="nav-fab" onclick="openCmd()">
-    <div class="nav-fab-btn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
-    <span class="nav-fab-lbl">افزودن</span>
-  </div>
-  <div class="ni" id="ni-calendar" onclick="goPage('Calendar')">
-    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-    <span class="ni-lbl">تقویم</span><div class="ni-dot"></div>
-  </div>
-  <div class="ni ni-desktop-only" id="ni-birthdays" onclick="goPage('Birthdays')">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2z"/><path d="M12 12V8"/><path d="M8 12V9"/><path d="M16 12V9"/><path d="M12 8c0-1.1-.9-2-2-2s-2 .9-2 2"/><path d="M12 4v1"/><path d="M2 17h20"/></svg>
-    <span class="ni-lbl">مناسبت‌ها</span><div class="ni-dot"></div>
-  </div>
-  <div class="ni" id="ni-me" onclick="goPage('Me')">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
-    <span class="ni-lbl">من</span><div class="ni-dot"></div>
-  </div>
-
-  <!-- Desktop sidebar additions — hidden on mobile -->
-  <div class="sb-spacer"></div>
-
-  <!-- Stats -->
-  <div class="sb-stats" id="sbStats" style="display:none">
-    <div class="sb-stat s-done">
-      <span class="sb-stat-num" id="sbDone">۰</span>
-      <span class="sb-stat-lbl">تموم شد</span>
-    </div>
-    <div class="sb-stat s-pending">
-      <span class="sb-stat-num" id="sbPending">۰</span>
-      <span class="sb-stat-lbl">باقی مونده</span>
-    </div>
-    <div class="sb-stat">
-      <span class="sb-stat-num" id="sbTotal">۰</span>
-      <span class="sb-stat-lbl">کل امروز</span>
-    </div>
-  </div>
-
-  <!-- Mini calendar -->
-  <div class="sb-cal-widget" id="sbCalWidget" style="display:none">
-    <div class="sb-cal-nav">
-      <button class="jci-btn" onclick="sbCalNext()">
-        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <span class="sb-cal-title" id="sbCalTitle">—</span>
-      <button class="jci-btn" onclick="sbCalPrev()">
-        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-      </button>
-    </div>
-    <div class="jci-wds">
-      <div class="jci-wd">ش</div><div class="jci-wd">ی</div>
-      <div class="jci-wd">د</div><div class="jci-wd">س</div>
-      <div class="jci-wd">چ</div><div class="jci-wd">پ</div>
-      <div class="jci-wd">ج</div>
-    </div>
-    <div class="jci-days" id="sbCalDays"></div>
-  </div>
-
-  <!-- Date block -->
-  <div class="sb-date-block" id="sbDateBlock" style="display:none">
-    <div class="sb-weekday" id="sbWeekday">—</div>
-    <div class="sb-day" id="sbDay">—</div>
-    <div class="sb-month" id="sbMonthYear">—</div>
-  </div>
-</nav>
-
-<!-- FOCUS MODE -->
-<div class="focus-overlay" id="focusOverlay">
-  <button class="focus-close" onclick="exitFocusMode()">×</button>
-  <div class="focus-content" id="focusRunning">
-    <div class="focus-cat" id="focusCat"></div>
-    <div class="focus-title" id="focusTitle"></div>
-    <div class="focus-ring-wrap">
-      <svg width="220" height="220" viewBox="0 0 220 220">
-        <circle class="focus-ring-bg" cx="110" cy="110" r="100" fill="none" stroke-width="8"/>
-        <circle class="focus-ring-fg" id="focusRingFg" cx="110" cy="110" r="100" fill="none" stroke-width="8" stroke-linecap="round" stroke-dasharray="628"/>
-      </svg>
-      <div class="focus-timer" id="focusTimerDisplay">25:00</div>
-    </div>
-    <div class="focus-dur-lbl">مدت تمرکز (دقیقه)</div>
-    <div class="focus-duration-row" id="focusDurationRow">
-      <button onclick="focusSetDuration(15,this)">۱۵</button>
-      <button onclick="focusSetDuration(25,this)" class="sel">۲۵</button>
-      <button onclick="focusSetDuration(45,this)">۴۵</button>
-      <button onclick="focusSetDuration(60,this)">۶۰</button>
-    </div>
-    <div class="focus-actions">
-      <button class="focus-btn pause" id="focusPauseBtn" onclick="focusTogglePause()">
-        <svg id="focusPauseIco" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><line x1="8" y1="5" x2="8" y2="19"/><line x1="16" y1="5" x2="16" y2="19"/></svg>
-        <span id="focusPauseTxt">مکث</span>
-      </button>
-      <button class="focus-btn done" onclick="focusMarkDone()">
-        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>
-        <span>تمام شد</span>
-      </button>
-    </div>
-  </div>
-  <div class="focus-done-q" id="focusDoneQ">
-    <div class="q" id="focusDoneQText">زمان تمام شد — تمومش کردی؟</div>
-    <button class="yes" onclick="focusFinishYes()">
-      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-left:5px;"><polyline points="4 12 9 17 20 6"/></svg>بله، تمام شد</button>
-    <button class="extend" onclick="focusExtend()">۵ دقیقه دیگه ادامه بده</button>
-    <button class="no" onclick="exitFocusMode()">بعداً ادامه می‌دم</button>
-  </div>
-</div>
-
-<!-- OVERDUE MORNING MODAL -->
-<div class="triage-eve-modal" id="triageEveModal">
-  <div class="triage-eve-card">
-    <div class="triage-eve-head">
-      <div class="triage-eve-ttl">تعیین‌تکلیف امروز</div>
-      <button class="sh-x" onclick="closeTriageEveModal()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-    <div style="font-size:.74rem;color:var(--t3);margin-bottom:14px;">روز رو به پایانه — این کارها هنوز تمام نشده‌اند.</div>
-    <div id="triageEveList"></div>
-  </div>
-</div>
-
-<div class="overdue-modal" id="overdueModal" style="display:none;">
-  <div class="overdue-sheet">
-    <div class="overdue-title"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg> کارهای عقب‌افتاده</div>
-    <div class="overdue-sub" id="overdueSubtitle">این کارها از دیروز موندن — چیکار کنیم؟</div>
-    <div id="overdueList"></div>
-    <button onclick="closeOverdueModal()" style="width:100%;margin-top:16px;padding:12px;border-radius:var(--r2);border:none;background:var(--bg2);color:var(--t2);font-weight:700;font-size:.85rem;cursor:pointer;">همه رو نگه دار</button>
-  </div>
-</div>
-
-<!-- ═══ Command Palette ═══ -->
-<div id="cmdPalette" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);" onclick="if(event.target===this)closeCmdPalette()">
-  <div style="position:absolute;top:18%;left:calc((100vw - 220px) / 2);transform:translateX(-50%);width:min(540px,calc(100vw - 260px));background:var(--bg1);border-radius:var(--r4);border:1px solid var(--b1);box-shadow:0 32px 80px rgba(0,0,0,.3);overflow:hidden;">
-    <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--b2);">
-      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--t3)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input id="cmdInput" type="text" autocomplete="off" spellcheck="false"
-        style="flex:1;border:none;background:transparent;font-size:.9rem;color:var(--t1);font-family:var(--f);"
-        placeholder="جستجو یا دستور..." oninput="cmdFilter()" onkeydown="cmdKey(event)">
-      <kbd style="font-size:.65rem;color:var(--t4);background:var(--bg2);border:1px solid var(--b1);border-radius:4px;padding:2px 6px;">Esc</kbd>
-    </div>
-    <div id="cmdList" style="max-height:340px;overflow-y:auto;padding:6px;"></div>
-  </div>
-</div>
-
-
-</div><!-- /app -->
-
-<!-- ════════ DayQ Team HTML — سکو Step 1 ════════ -->
-
-<!-- Choice sheet: ایجاد یا پیوستن -->
-<div class="sheet" id="shTmChoice">
-  <div class="sh-handle"></div>
-  <div class="sh-head">
-    <div class="sh-tr">
-      <div class="sh-ttl">تیم کاری</div>
-      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-    <div style="font-size:var(--fs-xs);color:var(--t3);margin-top:4px">به تیم بپیوند یا تیم جدید بساز</div>
-  </div>
-  <div class="sh-body" style="gap:var(--sp3)">
-    <button onclick="tmOpenCreate();closeAll()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--t1);color:var(--bg1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:none;cursor:pointer">+ ایجاد تیم جدید</button>
-    <button onclick="tmOpenJoin();closeAll()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--bg2);color:var(--t1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:1px solid var(--b1);cursor:pointer">پیوستن با کد دعوت</button>
-  </div>
-</div>
-
-<!-- Create Team sheet -->
-<div class="sheet" id="shTmCreate">
-  <div class="sh-handle"></div>
-  <div class="sh-head">
-    <div class="sh-tr">
-      <div class="sh-ttl">ایجاد تیم جدید</div>
-      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-  </div>
-  <div class="sh-body tm-join-body">
-    <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نام تیم</div><input id="tmCreateName" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3);font-size:var(--fs-md)" placeholder="مثال: دکتر عبیدی — تیم فروش" type="text"/></div>
-    <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نام شما</div><input id="tmCreateMgrName" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" placeholder="نام کامل" type="text"/></div>
-    <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">سمت (اختیاری)</div><input id="tmCreateMgrRole" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" placeholder="مدیر فروش" type="text"/></div>
-    <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">PIN مدیر (۴ رقم)</div><input id="tmCreatePin" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/></div>
-    <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">تأیید PIN</div><input id="tmCreatePin2" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/></div>
-    <div id="tmCreateErr" style="font-size:var(--fs-xs);color:var(--red);text-align:center;min-height:16px"></div>
-    <button id="tmCreateBtn" onclick="tmDoCreate()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--t1);color:var(--bg1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:none;cursor:pointer;margin-top:auto">ساخت تیم</button>
-  </div>
-</div>
-
-<!-- Team Code sheet (بعد از ایجاد) -->
-<div class="sheet" id="shTmCode">
-  <div class="sh-handle"></div>
-  <div class="sh-head">
-    <div class="sh-tr">
-      <div class="sh-ttl">تیم ساخته شد ✅</div>
-      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-  </div>
-  <div class="sh-body" style="gap:var(--sp3)">
-    <div class="tm-code-display">
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2)">کد دعوت تیم</div>
-      <div class="tm-code-text" id="tmCodeDisplay">—</div>
-      <div style="display:flex;gap:var(--sp2)">
-        <button class="tm-btn blue" style="flex:1;justify-content:center" onclick="if(navigator.clipboard)navigator.clipboard.writeText(document.getElementById('tmCodeDisplay').textContent);toast_(svgIco('check'),'کپی شد')">📋 کپی کد</button>
-        <button class="tm-btn" style="flex:1;justify-content:center" onclick="tmShareCode()">📤 اشتراک</button>
-      </div>
-    </div>
-    <div class="tm-invite-link" id="tmInviteLink"></div>
-    <div style="font-size:var(--fs-xs);color:var(--t3);text-align:center">کارمندها با این کد یا لینک join می‌کنن</div>
-    <button onclick="tmOpenSoko();closeAll()" style="width:100%;height:44px;border-radius:var(--r2);background:var(--t1);color:var(--bg1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:none;cursor:pointer;margin-top:auto">رفتن به سکو ←</button>
-  </div>
-</div>
-
-<!-- Join Team sheet -->
-<div class="sheet" id="shTmJoin">
-  <div class="sh-handle"></div>
-  <div class="sh-head">
-    <div class="sh-tr">
-      <div class="sh-ttl">پیوستن به تیم</div>
-      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-  </div>
-  <div class="sh-body">
-    <div id="tmJoinForm" class="tm-join-body">
-      <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">کد دعوت</div><input id="tmJoinCode" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3);font-family:var(--mono);font-size:var(--fs-md);text-transform:uppercase;letter-spacing:.1em" placeholder="DQ-XXXXXXX" type="text"/></div>
-      <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نام شما</div><input id="tmJoinName" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" placeholder="نام کامل" type="text"/></div>
-      <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">سمت</div><input id="tmJoinRole" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" placeholder="کارشناس فروش" type="text"/></div>
-      <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">PIN شخصی (۴ رقم)</div><input id="tmJoinPin" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/><div style="font-size:var(--fs-2xs);color:var(--t3);margin-top:4px">برای بازیابی در دستگاه جدید</div></div>
-      <div id="tmJoinErr" style="font-size:var(--fs-xs);color:var(--red);text-align:center;min-height:16px"></div>
-      <button id="tmJoinBtn" onclick="tmDoJoin()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--t1);color:var(--bg1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:none;cursor:pointer;margin-top:auto">ارسال درخواست</button>
-    </div>
-    <div id="tmJoinSuccess" style="display:none;text-align:center;padding:var(--sp5)">
-      <div style="font-size:2.5rem;margin-bottom:var(--sp3)">⏳</div>
-      <div style="font-size:var(--fs-lg);font-weight:700;margin-bottom:var(--sp2)">درخواست ارسال شد</div>
-      <div style="font-size:var(--fs-sm);color:var(--t2);margin-bottom:var(--sp4)">منتظر تأیید مدیر هستی — به محض تأیید اعلان می‌گیری</div>
-      <div style="background:var(--bg2);border-radius:var(--r2);padding:var(--sp3);margin-bottom:var(--sp4)">
-        <div style="font-size:var(--fs-2xs);color:var(--t3);margin-bottom:4px">کد تیم</div>
-        <div id="tmJoinTeamCode" style="font-family:var(--mono);font-weight:700;font-size:var(--fs-lg)">—</div>
-      </div>
-      <button onclick="closeAll()" style="width:100%;height:44px;border-radius:var(--r2);background:var(--bg2);color:var(--t1);font-size:var(--fs-sm);font-family:var(--f);border:1px solid var(--b1);cursor:pointer">بازگشت به DayQ</button>
-    </div>
-  </div>
-</div>
-
-<!-- Team Info sheet (وقتی تیم داره) -->
-<div class="sheet" id="shTmInfo">
-  <div class="sh-handle"></div>
-  <div class="sh-head">
-    <div class="sh-tr">
-      <div class="sh-ttl">تیم کاری</div>
-      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-  </div>
-  <div class="sh-body"><div id="tmInfoContent"></div></div>
-</div>
-
-<!-- Task Detail sheet (کارمند) -->
-<div class="sheet" id="tmDetailSheet">
-  <div class="sh-handle"></div>
-  <div class="sh-head">
-    <div class="sh-tr">
-      <div>
-        <div class="sh-ttl" id="tmDetailTitle" style="font-size:var(--fs-md)">—</div>
-        <div id="tmDetailMeta" style="font-size:var(--fs-xs);color:var(--t3);margin-top:2px"></div>
-      </div>
-      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-    <span class="tm-badge" style="margin-top:var(--sp1)">از مدیر</span>
-  </div>
-  <div class="sh-body" style="gap:var(--sp3)">
-    <div>
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2)">وضعیت</div>
-      <div class="tm-status-row">
-        <button class="tm-status-opt" data-status="pending" onclick="tmUpdateTaskStatus('pending')">باید</button>
-        <button class="tm-status-opt" data-status="in_progress" onclick="tmUpdateTaskStatus('in_progress')">درحال</button>
-        <button class="tm-status-opt" data-status="done" onclick="tmUpdateTaskStatus('done')">انجام شد</button>
-        <button class="tm-status-opt" data-status="blocked" onclick="tmUpdateTaskStatus('blocked')">🚫</button>
-      </div>
-    </div>
-    <div>
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2)">چک‌لیست</div>
-      <div id="tmDetailChecklist"></div>
-    </div>
-    <div>
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2)">یادداشت برای مدیر</div>
-      <textarea id="tmDetailNote" class="sh-iw" style="width:100%;min-height:72px;resize:none;padding:var(--sp2) var(--sp3);font-size:var(--fs-sm)" placeholder="بنویس..."></textarea>
-    </div>
-    <div class="tm-log" id="tmDetailLog"></div>
-    <div class="tm-task-actions">
-      <button class="tm-task-action warn" onclick="tmMarkWaiting()">
-        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        منتظرم
-      </button>
-      <button class="tm-task-action primary" onclick="tmUpdateTaskStatus('done')">
-        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--bg1)" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-        انجام شد
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- Assign Task sheet (مدیر) -->
-<div class="sheet" id="shTmAssign">
-  <div class="sh-handle"></div>
-  <div class="sh-head">
-    <div class="sh-tr">
-      <div class="sh-ttl">تسک جدید</div>
-      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-  </div>
-  <div class="sh-body tm-join-body">
-    <div>
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">برای کی؟</div>
-      <div id="tmAssignMemberOpts" style="display:flex;gap:var(--sp2);flex-wrap:wrap"></div>
-    </div>
-        <div>
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">اولویت</div>
-      <div style="display:flex;gap:var(--sp2)">
-        <button class="tm-btn tm-pri-opt active" data-pri="normal" onclick="tmSelectPriority(this,'normal')">عادی</button>
-        <button class="tm-btn tm-pri-opt" data-pri="high" onclick="tmSelectPriority(this,'high')" style="color:var(--amber)">⚡ مهم</button>
-        <button class="tm-btn tm-pri-opt" data-pri="urgent" onclick="tmSelectPriority(this,'urgent')" style="color:var(--red)">🔴 فوری</button>
-      </div>
-    </div>
-<div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">عنوان تسک</div><input id="tmAssignTitle" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" placeholder="عنوان..." type="text"/></div>
-    <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">ددلاین <span style="color:var(--red)">*</span></div><input id="tmAssignDeadline" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3);font-family:var(--mono)" placeholder="1404-05-15" type="text"/></div>
-    <div id="tmAssignErr" style="font-size:var(--fs-xs);color:var(--red);min-height:16px"></div>
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:var(--sp2) 0;border-top:1px solid var(--b1)">
-      <label style="display:flex;align-items:center;gap:var(--sp2);cursor:pointer">
-        <input type="checkbox" id="tmBroadcastToggle" onchange="tmToggleBroadcast(this)" style="width:16px;height:16px;accent-color:var(--blue)"/>
-        <span style="font-size:var(--fs-xs);color:var(--t2)">📢 Broadcast — ارسال به همه</span>
-      </label>
-    </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:var(--sp2) 0;border-top:1px solid var(--b1)">
-      <label style="display:flex;align-items:center;gap:var(--sp2);cursor:pointer">
-        <input type="checkbox" id="tmNeedsVerifyToggle" style="width:16px;height:16px;accent-color:var(--a)"/>
-        <span style="font-size:var(--fs-xs);color:var(--t2)">نیاز به تأیید مدیر</span>
-      </label>
-    </div>
-<button id="tmAssignBtn" onclick="tmDoAssign()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--t1);color:var(--bg1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:none;cursor:pointer;margin-top:auto">ارسال تسک</button>
-  </div>
-</div>
-
-<!-- سکو Panel — full screen -->
-<div class="tm-panel" id="tmSokoPanel">
-  <div class="tm-panel-hdr">
-    <div class="tm-panel-toprow">
-      <!-- Close -->
-      <button class="tm-panel-close" onclick="tmCloseSoko()">✕</button>
-      <!-- Title -->
-      <div class="tm-panel-titles">
-        <div class="tm-panel-title">سکو</div>
-        <div class="tm-panel-sub" id="tmSokoPanelSub">تیم</div>
-      </div>
-      <!-- Actions -->
-      <div class="tm-panel-actions">
-        <button class="tm-panel-action-btn" onclick="tmOpenAnnouncement()">📢</button>
-        <button class="tm-panel-action-btn primary" onclick="tmAssignTask()">+ تسک</button>
-      </div>
-    </div>
-    <div class="tm-tabs">
-      <div class="tm-tab active" data-tab="status" onclick="tmSetSokoTab('status')">وضعیت</div>
-      <div class="tm-tab" data-tab="projects" onclick="tmSetSokoTab('projects')">پروژه‌ها</div>
-      <div class="tm-tab" data-tab="report" onclick="tmSetSokoTab('report')">گزارش</div>
-    </div>
-  </div>
-  <div class="tm-panel-body">
-    <div class="tm-tab-pane" data-pane="status" id="tmSokoStatusContent"></div>
-    <div class="tm-tab-pane" data-pane="projects" style="display:none" id="tmSokoProjectsContent">
-      <div style="text-align:center;padding:var(--sp5);color:var(--t3);font-size:var(--fs-sm)">پروژه‌های تیمی در Step 2 اضافه می‌شن</div>
-    </div>
-    <div class="tm-tab-pane" data-pane="report" style="display:none" id="tmSokoReportContent"></div>
-  </div>
-</div>
-<!-- ════ END TEAM HTML ════ -->
-
-<!-- ════ Step 3 HTML ════ -->
-
-<!-- Announcement Sheet (مدیر) -->
-<div class="sheet" id="shTmAnnounce">
-  <div class="sh-handle"></div>
-  <div class="sh-head">
-    <div class="sh-tr">
-      <div class="sh-ttl">📢 اطلاعیه جدید</div>
-      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-  </div>
-  <div class="sh-body" style="gap:var(--sp3)">
-    <div>
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">متن اطلاعیه</div>
-      <textarea id="tmAnnoText" class="sh-iw" style="width:100%;min-height:80px;resize:none;padding:var(--sp2) var(--sp3);font-size:var(--fs-sm)" placeholder="بنویس..." maxlength="300"></textarea>
-      <div style="font-size:var(--fs-2xs);color:var(--t3);text-align:left;margin-top:2px">حداکثر ۳۰۰ کاراکتر</div>
-    </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:var(--sp2) 0;border-top:1px solid var(--b1)">
-      <label style="display:flex;align-items:center;gap:var(--sp2);cursor:pointer">
-        <input type="checkbox" id="tmAnnoPinCal" style="width:16px;height:16px;accent-color:var(--a)"/>
-        <span style="font-size:var(--fs-xs);color:var(--t2)">Pin به تقویم اعضا</span>
-      </label>
-    </div>
-    <div id="tmAnnoErr" style="font-size:var(--fs-xs);color:var(--red);min-height:16px"></div>
-    <button id="tmAnnoBtn" onclick="tmDoAnnounce()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--t1);color:var(--bg1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:none;cursor:pointer;margin-top:auto">ارسال به همه</button>
-  </div>
-</div>
-<!-- ════ End Step 3 HTML ════ -->
-
-<!-- Pending Members Sheet -->
-<div class="sheet" id="shTmPending">
-  <div class="sh-handle"></div>
-  <div class="sh-head">
-    <div class="sh-tr">
-      <div class="sh-ttl">درخواست‌های عضویت</div>
-      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-  </div>
-  <div class="sh-body" id="tmPendingList">
-    <div style="text-align:center;color:var(--t3);padding:var(--sp5)"><span class="tm-skeleton" style="display:inline-block;width:60%;height:14px;border-radius:var(--r1)"></span></div>
-  </div>
-</div>
-
-<!-- ════ Team Modals (مستقل از sheet mechanism) ════ -->
-
-<!-- Modal: انتخاب ایجاد/پیوستن -->
-<div class="tm-modal" id="tmModalChoice">
-  <div class="tm-modal-sheet">
-    <div class="tm-modal-handle"></div>
-    <div class="tm-modal-hdr">
-      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
-      <span class="tm-modal-ttl">👥 تیم کاری</span>
-    </div>
-    <div class="tm-modal-body">
-      <div style="text-align:center;padding:var(--sp3) 0">
-        <div style="font-size:2rem;margin-bottom:var(--sp2)">👥</div>
-        <div style="font-size:var(--fs-xs);color:var(--t3)">به تیم بپیوند یا تیم جدید بساز</div>
-      </div>
-      <button onclick="tmOpenCreate()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">+ ایجاد تیم جدید</button>
-      <button onclick="tmOpenJoin()" style="width:100%;height:48px;background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">پیوستن با کد دعوت</button>
-      <button onclick="tmOpenDirectLogin()" style="width:100%;height:44px;background:none;color:var(--blue);border:none;font-size:var(--fs-sm);font-weight:600;font-family:var(--f);cursor:pointer;text-decoration:underline">قبلاً عضو بودم — ورود مستقیم</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal: ایجاد تیم -->
-<div class="tm-modal" id="tmModalCreate">
-  <div class="tm-modal-sheet">
-    <div class="tm-modal-handle"></div>
-    <div class="tm-modal-hdr">
-      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
-      <span class="tm-modal-ttl">ایجاد تیم جدید</span>
-    </div>
-    <div class="tm-modal-body">
-      <div>
-        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نام تیم</div>
-        <input id="tmMCreateName" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--f);color:var(--t1)" placeholder="مثال: دکتر عبیدی — تیم فروش" type="text"/>
-      </div>
-      <div>
-        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نام شما</div>
-        <input id="tmMCreateMgrName" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--f);color:var(--t1)" placeholder="نام کامل" type="text"/>
-      </div>
-      <div>
-        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">سمت (اختیاری)</div>
-        <input id="tmMCreateMgrRole" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--f);color:var(--t1)" placeholder="مدیر فروش" type="text"/>
-      </div>
-      <div>
-        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">PIN مدیر (۴ رقم)</div>
-        <input id="tmMCreatePin" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-lg);font-family:var(--f);color:var(--t1);letter-spacing:.3em;text-align:center" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/>
-      </div>
-      <div>
-        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">تأیید PIN</div>
-        <input id="tmMCreatePin2" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-lg);font-family:var(--f);color:var(--t1);letter-spacing:.3em;text-align:center" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/>
-      </div>
-      <div id="tmMCreateErr" style="font-size:var(--fs-xs);color:var(--red);text-align:center;min-height:16px"></div>
-      <button id="tmMCreateBtn" onclick="tmDoCreate()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer;margin-top:4px">ساخت تیم</button>
-    </div>
-  </div>
-</div>
-
-
-<!-- Modal: Assign Task — NLP powered -->
-<div class="tm-modal" id="tmModalAssign">
-  <div class="tm-modal-sheet" style="max-height:95dvh">
-    <div class="tm-modal-handle"></div>
-    <div class="tm-modal-hdr">
-      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
-      <span class="tm-modal-ttl">تسک جدید</span>
-    </div>
-    <div class="tm-modal-body" style="gap:16px">
-
-      <!-- NLP Input -->
-      <div style="background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r3);padding:12px 14px;transition:border-color 150ms ease" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--b1)'">
-        <textarea id="tmANlpInp"
-          rows="2"
-          placeholder="گزارش ماهانه بده تا جمعه !مهم"
-          oninput="_tmAssignNlpInput(this.value)"
-          style="width:100%;background:none;border:none;resize:none;font-size:var(--fs-md);font-family:var(--f);color:var(--t1);direction:rtl;outline:none;line-height:1.6;min-height:44px;max-height:100px;overflow:hidden"></textarea>
-        <!-- NLP Preview chips -->
-        <div id="tmAPreview" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px"></div>
-      </div>
-
-      <!-- Deadline shortcuts -->
-      <div>
-        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:8px">ددلاین</div>
-        <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <button onclick="_tmSetDeadlineShortcut('فردا')"        class="tm-dl-chip">فردا</button>
-          <button onclick="_tmSetDeadlineShortcut('پس‌فردا')"     class="tm-dl-chip">پس‌فردا</button>
-          <button onclick="_tmSetDeadlineShortcut('این جمعه')"    class="tm-dl-chip">این جمعه</button>
-          <button onclick="_tmSetDeadlineShortcut('هفته دیگه')"   class="tm-dl-chip">هفته دیگه</button>
-          <button onclick="_tmSetDeadlineShortcut('ماه دیگه')"    class="tm-dl-chip">ماه دیگه</button>
-        </div>
-        <div style="font-size:var(--fs-xs);color:var(--t3);margin-top:8px">یا مستقیم توی متن بنویس: «جمعه»، «۱۵ مرداد»، «هفته دیگه»</div>
-      </div>
-
-      <!-- اولویت override -->
-      <div>
-        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:8px">اولویت (اختیاری — از متن تشخیص میده)</div>
-        <div style="display:flex;gap:6px">
-          <button class="tm-pri-chip" data-pri="high" onclick="_tmSetPri('high')" style="flex:1;height:34px;border-radius:var(--r2);border:1px solid rgba(248,81,73,.3);background:var(--redm);color:var(--red);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer;transition:all 120ms ease;opacity:.5">فوری</button>
-          <button class="tm-pri-chip" data-pri="med"  onclick="_tmSetPri('med')"  style="flex:1;height:34px;border-radius:var(--r2);border:1px solid rgba(217,119,6,.3);background:var(--ambm);color:var(--amber);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer;transition:all 120ms ease;opacity:.5">مهم</button>
-          <button class="tm-pri-chip" data-pri="low"  onclick="_tmSetPri('low')"  style="flex:1;height:34px;border-radius:var(--r2);border:1px solid var(--b1);background:var(--bg2);color:var(--t3);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer;transition:all 120ms ease;opacity:.5">عادی</button>
-        </div>
-      </div>
-
-      <!-- انتخاب عضو -->
-      <div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-          <button id="tmABroadcastBtn" onclick="_tmToggleBroadcast()" style="height:26px;padding:0 10px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--bg2);color:var(--t2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;transition:all 150ms ease">📡 ارسال به همه</button>
-          <div style="font-size:var(--fs-xs);color:var(--t3)">برای کی؟</div>
-        </div>
-        <div id="tmAMemberChips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
-      </div>
-
-      <!-- Error + Submit -->
-      <div id="tmAErr" style="font-size:var(--fs-xs);color:var(--red);min-height:14px;text-align:center"></div>
-      <button id="tmASubmitBtn" onclick="tmDoAssign()" style="width:100%;height:50px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-md);font-weight:800;font-family:var(--f);cursor:pointer">ارسال تسک</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal: پیوستن به تیم -->
-<div class="tm-modal" id="tmModalJoin">
-  <div class="tm-modal-sheet">
-    <div class="tm-modal-handle"></div>
-    <div class="tm-modal-hdr">
-      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
-      <span class="tm-modal-ttl">پیوستن به تیم</span>
-    </div>
-    <div class="tm-modal-body">
-      <div id="tmMJoinForm">
-        <div style="margin-bottom:14px">
-          <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">کد دعوت</div>
-          <input id="tmMJoinCode" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--mono);color:var(--t1);text-transform:uppercase;letter-spacing:.1em" placeholder="DQ-XXXXXXX" type="text"/>
-        </div>
-        <div style="margin-bottom:14px">
-          <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نام شما</div>
-          <input id="tmMJoinName" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--f);color:var(--t1)" placeholder="نام کامل" type="text"/>
-        </div>
-        <div style="margin-bottom:14px">
-          <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">سمت</div>
-          <input id="tmMJoinRole" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--f);color:var(--t1)" placeholder="کارشناس فروش" type="text"/>
-        </div>
-        <div style="margin-bottom:14px">
-          <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">PIN شخصی (۴ رقم)</div>
-          <input id="tmMJoinPin" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-lg);font-family:var(--f);color:var(--t1);letter-spacing:.3em;text-align:center" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/>
-          <div style="font-size:var(--fs-2xs);color:var(--t3);margin-top:4px">برای بازیابی در دستگاه جدید</div>
-        </div>
-        <div id="tmMJoinErr" style="font-size:var(--fs-xs);color:var(--red);text-align:center;min-height:16px;margin-bottom:8px"></div>
-        <button id="tmMJoinBtn" onclick="tmDoJoin()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">ارسال درخواست</button>
-      </div>
-      <div id="tmMJoinSuccess" style="display:none;text-align:center;padding:var(--sp4) 0">
-        <div style="font-size:3rem;margin-bottom:var(--sp3)">⏳</div>
-        <div style="font-size:var(--fs-lg);font-weight:700;margin-bottom:var(--sp2)">درخواست ارسال شد</div>
-        <div style="font-size:var(--fs-sm);color:var(--t3);margin-bottom:var(--sp4)">منتظر تأیید مدیر هستی</div>
-        <div style="background:var(--bg2);border-radius:var(--r2);padding:var(--sp3);margin-bottom:var(--sp4)">
-          <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">کد تیم</div>
-          <div id="tmMJoinTeamCode" style="font-family:var(--mono);font-weight:700;font-size:var(--fs-lg)">—</div>
-        </div>
-        <button onclick="tmCloseModal()" style="width:100%;height:44px;background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-sm);font-family:var(--f);cursor:pointer">بازگشت به DayQ</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal: کد تیم بعد از ایجاد -->
-<div class="tm-modal" id="tmModalCode">
-  <div class="tm-modal-sheet">
-    <div class="tm-modal-handle"></div>
-    <div class="tm-modal-hdr">
-      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
-      <span class="tm-modal-ttl">✅ تیم ساخته شد!</span>
-    </div>
-    <div class="tm-modal-body">
-      <div style="background:var(--bg2);border-radius:var(--r3);padding:var(--sp4);text-align:center">
-        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2)">کد دعوت تیم</div>
-        <div id="tmMCodeDisplay" style="font-size:1.6rem;font-weight:900;font-family:var(--mono);color:var(--t1);letter-spacing:.2em;margin-bottom:var(--sp3)">—</div>
-        <div style="display:flex;gap:var(--sp2)">
-          <button onclick="if(navigator.clipboard)navigator.clipboard.writeText(document.getElementById('tmMCodeDisplay').textContent);toast_(svgIco('check'),'کپی شد')" class="tm-btn blue" style="flex:1;justify-content:center">📋 کپی</button>
-          <button onclick="tmShareCode()" class="tm-btn" style="flex:1;justify-content:center">📤 اشتراک</button>
-        </div>
-      </div>
-      <div id="tmMInviteLink" style="font-size:var(--fs-xs);font-family:var(--mono);color:var(--blue);word-break:break-all;background:var(--bluem);padding:var(--sp2) var(--sp3);border-radius:var(--r2)"></div>
-      <button onclick="tmCloseModal();tmOpenSoko()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">رفتن به سکو ←</button>
-    </div>
-  </div>
-</div>
-
-<!-- Modal: اطلاعات تیم -->
-<div class="tm-modal" id="tmModalInfo">
-  <div class="tm-modal-sheet">
-    <div class="tm-modal-handle"></div>
-    <div class="tm-modal-hdr">
-      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
-      <span class="tm-modal-ttl">👥 تیم کاری</span>
-    </div>
-    <div class="tm-modal-body">
-      <div id="tmMInfoContent"></div>
-    </div>
-  </div>
-</div>
-
-<!-- ════ End Team Modals ════ -->
-
-<!-- Direct Login Modal — ورود با کد تیم + PIN -->
-<div class="tm-modal" id="tmModalDirectLogin">
-  <div class="tm-modal-sheet">
-    <div class="tm-modal-handle"></div>
-    <div class="tm-modal-hdr">
-      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
-      <span class="tm-modal-ttl">ورود به تیم</span>
-    </div>
-    <div class="tm-modal-body">
-      <div style="background:var(--bluem);border:1px solid rgba(59,130,246,.2);border-radius:var(--r2);padding:var(--sp3);margin-bottom:2px">
-        <div style="font-size:var(--fs-xs);color:var(--blue);font-weight:600">اگه قبلاً در دستگاه دیگه‌ای عضو یا مدیر تیمی</div>
-        <div style="font-size:var(--fs-xs);color:var(--t2);margin-top:2px">فقط کد تیم و PIN رو وارد کن</div>
-      </div>
-      <div>
-        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">کد تیم</div>
-        <input id="tmDLCode" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--mono);color:var(--t1);text-transform:uppercase;letter-spacing:.1em" placeholder="DQ-XXXXXXX" type="text"/>
-      </div>
-      <div>
-        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">PIN</div>
-        <input id="tmDLPin" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-lg);font-family:var(--f);color:var(--t1);letter-spacing:.3em;text-align:center" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/>
-      </div>
-      <div id="tmDLErr" style="font-size:var(--fs-xs);color:var(--red);min-height:16px;text-align:center"></div>
-      <button id="tmDLBtn" onclick="tmDoDirectLogin()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">ورود</button>
-    </div>
-  </div>
-</div>
-
-<!-- Sheet: Team Task Detail — کارمند -->
-<div class="sheet" id="shTeamTaskDetail">
-  <div class="sh-handle"></div>
-  <div class="sh-head">
-    <div class="sh-tr">
-      <div class="sh-ttl" id="ttdTitle">تسک تیمی</div>
-      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-  </div>
-  <div class="sh-body tm-join-body" id="ttdBody">
-    <!-- meta -->
-    <div style="background:var(--bluem);border:1px solid rgba(59,130,246,.2);border-radius:var(--r2);padding:var(--sp3);display:flex;align-items:center;justify-content:space-between">
-      <div id="ttdDeadline" style="font-size:var(--fs-xs);color:var(--blue)"></div>
-      <div>
-        <div id="ttdManager" style="font-size:var(--fs-xs);color:var(--t2)"></div>
-        <div id="ttdPriority" style="font-size:var(--fs-xs);font-weight:700;color:var(--red)"></div>
-      </div>
-    </div>
-
-    <!-- وضعیت -->
-    <div>
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:8px">وضعیت</div>
-      <div style="display:flex;gap:6px" id="ttdStatusBtns">
-        <button onclick="_ttdSetStatus('pending')"   class="ttd-st-btn" data-st="pending"   style="flex:1;height:36px;border-radius:var(--r2);border:1px solid var(--b1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">باید</button>
-        <button onclick="_ttdSetStatus('in_progress')" class="ttd-st-btn" data-st="in_progress" style="flex:1;height:36px;border-radius:var(--r2);border:1px solid var(--b1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">درحال</button>
-        <button onclick="_ttdSetStatus('done')"      class="ttd-st-btn" data-st="done"      style="flex:1;height:36px;border-radius:var(--r2);border:1px solid var(--b1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">✓ انجام شد</button>
-        <button onclick="_ttdSetStatus('blocked')"   class="ttd-st-btn" data-st="blocked"   style="flex:1;height:36px;border-radius:var(--r2);border:1px solid rgba(248,81,73,.3);color:var(--red);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">🚫 مشکل</button>
-      </div>
-    </div>
-
-    <!-- یادداشت برای مدیر -->
-    <div>
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px">یادداشت برای مدیر (اختیاری)</div>
-      <textarea id="ttdNote" rows="3"
-        placeholder="توضیح بده — مثلاً: منتظر تأیید مدیر مالی هستم"
-        style="width:100%;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 12px;font-size:var(--fs-xs);font-family:var(--f);color:var(--t1);direction:rtl;resize:none;outline:none"></textarea>
-    </div>
-
-    <!-- چک‌لیست مدیر (read-only اگه باشه) -->
-    <div id="ttdChecklist" style="display:none">
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px">چک‌لیست</div>
-      <div id="ttdChecklistItems"></div>
-    </div>
-
-    <div id="ttdErr" style="font-size:var(--fs-xs);color:var(--red);min-height:14px;text-align:center"></div>
-    <button id="ttdSaveBtn" onclick="_ttdSave()" style="width:100%;height:46px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">ذخیره وضعیت</button>
-  </div>
-</div>
-</body>
-</html>// (desktop CSS moved to static)
 // ═════════════════════════════════════════════
 // Fix 4: tmApplyUI روی دسکتاپ — مطمئن شدن
 // ════════════════════════════════════════════
@@ -18878,9 +18159,727 @@ async function tmLoadReport(period) {
   };
 })();
 /* ════ End Focus Management ════ */
-
-boot();
 </script>
+
+
+<!-- JALALI DATE PICKER -->
+<div class="jal-dp" id="jdp">
+  <div class="jdp-nav">
+    <button class="jdp-btn" onclick="jdpPrevMonth()">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="jdp-title" id="jdpTitle">—</div>
+    <button class="jdp-btn" onclick="jdpNextMonth()">
+      <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+  <div class="jdp-weekdays">
+    <div class="jdp-wd">ش</div><div class="jdp-wd">ی</div>
+    <div class="jdp-wd">د</div><div class="jdp-wd">س</div>
+    <div class="jdp-wd">چ</div><div class="jdp-wd">پ</div>
+    <div class="jdp-wd">ج</div>
+  </div>
+  <div class="jdp-days" id="jdpDays"></div>
+  <button class="jdp-clear" onclick="jdpClear()">پاک کردن تاریخ</button>
+</div>
+<div class="jal-dp-overlay" id="jdpOverlay" onclick="closeJDP()" style="display:none;position:fixed;inset:0;z-index:499;"></div>
+
+
+<nav class="nav">
+  <div class="ni active" id="ni-home" onclick="goPage('Home')">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span class="ni-lbl">خانه</span><span class="ni-count" id="nic-home"></span><div class="ni-dot"></div>
+  </div>
+  <div class="ni" id="ni-projects" onclick="goPage('Projects')">
+    <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+    <span class="ni-lbl">پروژه‌ها</span><span class="ni-count" id="nic-projects"></span><div class="ni-dot"></div>
+  </div>
+  <div class="nav-fab" onclick="openCmd()">
+    <div class="nav-fab-btn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+    <span class="nav-fab-lbl">افزودن</span>
+  </div>
+  <div class="ni" id="ni-calendar" onclick="goPage('Calendar')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span class="ni-lbl">تقویم</span><div class="ni-dot"></div>
+  </div>
+  <div class="ni ni-desktop-only" id="ni-birthdays" onclick="goPage('Birthdays')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2z"/><path d="M12 12V8"/><path d="M8 12V9"/><path d="M16 12V9"/><path d="M12 8c0-1.1-.9-2-2-2s-2 .9-2 2"/><path d="M12 4v1"/><path d="M2 17h20"/></svg>
+    <span class="ni-lbl">مناسبت‌ها</span><div class="ni-dot"></div>
+  </div>
+  <div class="ni" id="ni-me" onclick="goPage('Me')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
+    <span class="ni-lbl">من</span><div class="ni-dot"></div>
+  </div>
+
+  <!-- Desktop sidebar additions — hidden on mobile -->
+  <div class="sb-spacer"></div>
+
+  <!-- Stats -->
+  <div class="sb-stats" id="sbStats" style="display:none">
+    <div class="sb-stat s-done">
+      <span class="sb-stat-num" id="sbDone">۰</span>
+      <span class="sb-stat-lbl">تموم شد</span>
+    </div>
+    <div class="sb-stat s-pending">
+      <span class="sb-stat-num" id="sbPending">۰</span>
+      <span class="sb-stat-lbl">باقی مونده</span>
+    </div>
+    <div class="sb-stat">
+      <span class="sb-stat-num" id="sbTotal">۰</span>
+      <span class="sb-stat-lbl">کل امروز</span>
+    </div>
+  </div>
+
+  <!-- Mini calendar -->
+  <div class="sb-cal-widget" id="sbCalWidget" style="display:none">
+    <div class="sb-cal-nav">
+      <button class="jci-btn" onclick="sbCalNext()">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="sb-cal-title" id="sbCalTitle">—</span>
+      <button class="jci-btn" onclick="sbCalPrev()">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+    <div class="jci-wds">
+      <div class="jci-wd">ش</div><div class="jci-wd">ی</div>
+      <div class="jci-wd">د</div><div class="jci-wd">س</div>
+      <div class="jci-wd">چ</div><div class="jci-wd">پ</div>
+      <div class="jci-wd">ج</div>
+    </div>
+    <div class="jci-days" id="sbCalDays"></div>
+  </div>
+
+  <!-- Date block -->
+  <div class="sb-date-block" id="sbDateBlock" style="display:none">
+    <div class="sb-weekday" id="sbWeekday">—</div>
+    <div class="sb-day" id="sbDay">—</div>
+    <div class="sb-month" id="sbMonthYear">—</div>
+  </div>
+</nav>
+
+<!-- FOCUS MODE -->
+<div class="focus-overlay" id="focusOverlay">
+  <button class="focus-close" onclick="exitFocusMode()">×</button>
+  <div class="focus-content" id="focusRunning">
+    <div class="focus-cat" id="focusCat"></div>
+    <div class="focus-title" id="focusTitle"></div>
+    <div class="focus-ring-wrap">
+      <svg width="220" height="220" viewBox="0 0 220 220">
+        <circle class="focus-ring-bg" cx="110" cy="110" r="100" fill="none" stroke-width="8"/>
+        <circle class="focus-ring-fg" id="focusRingFg" cx="110" cy="110" r="100" fill="none" stroke-width="8" stroke-linecap="round" stroke-dasharray="628"/>
+      </svg>
+      <div class="focus-timer" id="focusTimerDisplay">25:00</div>
+    </div>
+    <div class="focus-dur-lbl">مدت تمرکز (دقیقه)</div>
+    <div class="focus-duration-row" id="focusDurationRow">
+      <button onclick="focusSetDuration(15,this)">۱۵</button>
+      <button onclick="focusSetDuration(25,this)" class="sel">۲۵</button>
+      <button onclick="focusSetDuration(45,this)">۴۵</button>
+      <button onclick="focusSetDuration(60,this)">۶۰</button>
+    </div>
+    <div class="focus-actions">
+      <button class="focus-btn pause" id="focusPauseBtn" onclick="focusTogglePause()">
+        <svg id="focusPauseIco" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><line x1="8" y1="5" x2="8" y2="19"/><line x1="16" y1="5" x2="16" y2="19"/></svg>
+        <span id="focusPauseTxt">مکث</span>
+      </button>
+      <button class="focus-btn done" onclick="focusMarkDone()">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>
+        <span>تمام شد</span>
+      </button>
+    </div>
+  </div>
+  <div class="focus-done-q" id="focusDoneQ">
+    <div class="q" id="focusDoneQText">زمان تمام شد — تمومش کردی؟</div>
+    <button class="yes" onclick="focusFinishYes()">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-left:5px;"><polyline points="4 12 9 17 20 6"/></svg>بله، تمام شد</button>
+    <button class="extend" onclick="focusExtend()">۵ دقیقه دیگه ادامه بده</button>
+    <button class="no" onclick="exitFocusMode()">بعداً ادامه می‌دم</button>
+  </div>
+</div>
+
+<!-- OVERDUE MORNING MODAL -->
+<div class="triage-eve-modal" id="triageEveModal">
+  <div class="triage-eve-card">
+    <div class="triage-eve-head">
+      <div class="triage-eve-ttl">تعیین‌تکلیف امروز</div>
+      <button class="sh-x" onclick="closeTriageEveModal()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div style="font-size:.74rem;color:var(--t3);margin-bottom:14px;">روز رو به پایانه — این کارها هنوز تمام نشده‌اند.</div>
+    <div id="triageEveList"></div>
+  </div>
+</div>
+
+<div class="overdue-modal" id="overdueModal" style="display:none;">
+  <div class="overdue-sheet">
+    <div class="overdue-title"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg> کارهای عقب‌افتاده</div>
+    <div class="overdue-sub" id="overdueSubtitle">این کارها از دیروز موندن — چیکار کنیم؟</div>
+    <div id="overdueList"></div>
+    <button onclick="closeOverdueModal()" style="width:100%;margin-top:16px;padding:12px;border-radius:var(--r2);border:none;background:var(--bg2);color:var(--t2);font-weight:700;font-size:.85rem;cursor:pointer;">همه رو نگه دار</button>
+  </div>
+</div>
+
+<!-- ═══ Command Palette ═══ -->
+<div id="cmdPalette" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);" onclick="if(event.target===this)closeCmdPalette()">
+  <div style="position:absolute;top:18%;left:calc((100vw - 220px) / 2);transform:translateX(-50%);width:min(540px,calc(100vw - 260px));background:var(--bg1);border-radius:var(--r4);border:1px solid var(--b1);box-shadow:0 32px 80px rgba(0,0,0,.3);overflow:hidden;">
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--b2);">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--t3)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="cmdInput" type="text" autocomplete="off" spellcheck="false"
+        style="flex:1;border:none;background:transparent;font-size:.9rem;color:var(--t1);font-family:var(--f);"
+        placeholder="جستجو یا دستور..." oninput="cmdFilter()" onkeydown="cmdKey(event)">
+      <kbd style="font-size:.65rem;color:var(--t4);background:var(--bg2);border:1px solid var(--b1);border-radius:4px;padding:2px 6px;">Esc</kbd>
+    </div>
+    <div id="cmdList" style="max-height:340px;overflow-y:auto;padding:6px;"></div>
+  </div>
+</div>
+
+
+</div><!-- /app -->
+
+<!-- ════════ DayQ Team HTML — سکو Step 1 ════════ -->
+
+<!-- Choice sheet: ایجاد یا پیوستن -->
+<div class="sheet" id="shTmChoice">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div class="sh-ttl">تیم کاری</div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div style="font-size:var(--fs-xs);color:var(--t3);margin-top:4px">به تیم بپیوند یا تیم جدید بساز</div>
+  </div>
+  <div class="sh-body" style="gap:var(--sp3)">
+    <button onclick="tmOpenCreate();closeAll()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--t1);color:var(--bg1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:none;cursor:pointer">+ ایجاد تیم جدید</button>
+    <button onclick="tmOpenJoin();closeAll()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--bg2);color:var(--t1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:1px solid var(--b1);cursor:pointer">پیوستن با کد دعوت</button>
+  </div>
+</div>
+
+<!-- Create Team sheet -->
+<div class="sheet" id="shTmCreate">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div class="sh-ttl">ایجاد تیم جدید</div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+  </div>
+  <div class="sh-body tm-join-body">
+    <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نام تیم</div><input id="tmCreateName" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3);font-size:var(--fs-md)" placeholder="مثال: دکتر عبیدی — تیم فروش" type="text"/></div>
+    <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نام شما</div><input id="tmCreateMgrName" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" placeholder="نام کامل" type="text"/></div>
+    <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">سمت (اختیاری)</div><input id="tmCreateMgrRole" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" placeholder="مدیر فروش" type="text"/></div>
+    <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">PIN مدیر (۴ رقم)</div><input id="tmCreatePin" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/></div>
+    <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">تأیید PIN</div><input id="tmCreatePin2" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/></div>
+    <div id="tmCreateErr" style="font-size:var(--fs-xs);color:var(--red);text-align:center;min-height:16px"></div>
+    <button id="tmCreateBtn" onclick="tmDoCreate()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--t1);color:var(--bg1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:none;cursor:pointer;margin-top:auto">ساخت تیم</button>
+  </div>
+</div>
+
+<!-- Team Code sheet (بعد از ایجاد) -->
+<div class="sheet" id="shTmCode">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div class="sh-ttl">تیم ساخته شد ✅</div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+  </div>
+  <div class="sh-body" style="gap:var(--sp3)">
+    <div class="tm-code-display">
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2)">کد دعوت تیم</div>
+      <div class="tm-code-text" id="tmCodeDisplay">—</div>
+      <div style="display:flex;gap:var(--sp2)">
+        <button class="tm-btn blue" style="flex:1;justify-content:center" onclick="if(navigator.clipboard)navigator.clipboard.writeText(document.getElementById('tmCodeDisplay').textContent);toast_(svgIco('check'),'کپی شد')">📋 کپی کد</button>
+        <button class="tm-btn" style="flex:1;justify-content:center" onclick="tmShareCode()">📤 اشتراک</button>
+      </div>
+    </div>
+    <div class="tm-invite-link" id="tmInviteLink"></div>
+    <div style="font-size:var(--fs-xs);color:var(--t3);text-align:center">کارمندها با این کد یا لینک join می‌کنن</div>
+    <button onclick="tmOpenSoko();closeAll()" style="width:100%;height:44px;border-radius:var(--r2);background:var(--t1);color:var(--bg1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:none;cursor:pointer;margin-top:auto">رفتن به سکو ←</button>
+  </div>
+</div>
+
+<!-- Join Team sheet -->
+<div class="sheet" id="shTmJoin">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div class="sh-ttl">پیوستن به تیم</div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+  </div>
+  <div class="sh-body">
+    <div id="tmJoinForm" class="tm-join-body">
+      <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">کد دعوت</div><input id="tmJoinCode" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3);font-family:var(--mono);font-size:var(--fs-md);text-transform:uppercase;letter-spacing:.1em" placeholder="DQ-XXXXXXX" type="text"/></div>
+      <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نام شما</div><input id="tmJoinName" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" placeholder="نام کامل" type="text"/></div>
+      <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">سمت</div><input id="tmJoinRole" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" placeholder="کارشناس فروش" type="text"/></div>
+      <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">PIN شخصی (۴ رقم)</div><input id="tmJoinPin" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/><div style="font-size:var(--fs-2xs);color:var(--t3);margin-top:4px">برای بازیابی در دستگاه جدید</div></div>
+      <div id="tmJoinErr" style="font-size:var(--fs-xs);color:var(--red);text-align:center;min-height:16px"></div>
+      <button id="tmJoinBtn" onclick="tmDoJoin()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--t1);color:var(--bg1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:none;cursor:pointer;margin-top:auto">ارسال درخواست</button>
+    </div>
+    <div id="tmJoinSuccess" style="display:none;text-align:center;padding:var(--sp5)">
+      <div style="font-size:2.5rem;margin-bottom:var(--sp3)">⏳</div>
+      <div style="font-size:var(--fs-lg);font-weight:700;margin-bottom:var(--sp2)">درخواست ارسال شد</div>
+      <div style="font-size:var(--fs-sm);color:var(--t2);margin-bottom:var(--sp4)">منتظر تأیید مدیر هستی — به محض تأیید اعلان می‌گیری</div>
+      <div style="background:var(--bg2);border-radius:var(--r2);padding:var(--sp3);margin-bottom:var(--sp4)">
+        <div style="font-size:var(--fs-2xs);color:var(--t3);margin-bottom:4px">کد تیم</div>
+        <div id="tmJoinTeamCode" style="font-family:var(--mono);font-weight:700;font-size:var(--fs-lg)">—</div>
+      </div>
+      <button onclick="closeAll()" style="width:100%;height:44px;border-radius:var(--r2);background:var(--bg2);color:var(--t1);font-size:var(--fs-sm);font-family:var(--f);border:1px solid var(--b1);cursor:pointer">بازگشت به DayQ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Team Info sheet (وقتی تیم داره) -->
+<div class="sheet" id="shTmInfo">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div class="sh-ttl">تیم کاری</div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+  </div>
+  <div class="sh-body"><div id="tmInfoContent"></div></div>
+</div>
+
+<!-- Task Detail sheet (کارمند) -->
+<div class="sheet" id="tmDetailSheet">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div>
+        <div class="sh-ttl" id="tmDetailTitle" style="font-size:var(--fs-md)">—</div>
+        <div id="tmDetailMeta" style="font-size:var(--fs-xs);color:var(--t3);margin-top:2px"></div>
+      </div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <span class="tm-badge" style="margin-top:var(--sp1)">از مدیر</span>
+  </div>
+  <div class="sh-body" style="gap:var(--sp3)">
+    <div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2)">وضعیت</div>
+      <div class="tm-status-row">
+        <button class="tm-status-opt" data-status="pending" onclick="tmUpdateTaskStatus('pending')">باید</button>
+        <button class="tm-status-opt" data-status="in_progress" onclick="tmUpdateTaskStatus('in_progress')">درحال</button>
+        <button class="tm-status-opt" data-status="done" onclick="tmUpdateTaskStatus('done')">انجام شد</button>
+        <button class="tm-status-opt" data-status="blocked" onclick="tmUpdateTaskStatus('blocked')">🚫</button>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2)">چک‌لیست</div>
+      <div id="tmDetailChecklist"></div>
+    </div>
+    <div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2)">یادداشت برای مدیر</div>
+      <textarea id="tmDetailNote" class="sh-iw" style="width:100%;min-height:72px;resize:none;padding:var(--sp2) var(--sp3);font-size:var(--fs-sm)" placeholder="بنویس..."></textarea>
+    </div>
+    <div class="tm-log" id="tmDetailLog"></div>
+    <div class="tm-task-actions">
+      <button class="tm-task-action warn" onclick="tmMarkWaiting()">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        منتظرم
+      </button>
+      <button class="tm-task-action primary" onclick="tmUpdateTaskStatus('done')">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--bg1)" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        انجام شد
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Assign Task sheet (مدیر) -->
+<div class="sheet" id="shTmAssign">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div class="sh-ttl">تسک جدید</div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+  </div>
+  <div class="sh-body tm-join-body">
+    <div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">برای کی؟</div>
+      <div id="tmAssignMemberOpts" style="display:flex;gap:var(--sp2);flex-wrap:wrap"></div>
+    </div>
+        <div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">اولویت</div>
+      <div style="display:flex;gap:var(--sp2)">
+        <button class="tm-btn tm-pri-opt active" data-pri="normal" onclick="tmSelectPriority(this,'normal')">عادی</button>
+        <button class="tm-btn tm-pri-opt" data-pri="high" onclick="tmSelectPriority(this,'high')" style="color:var(--amber)">⚡ مهم</button>
+        <button class="tm-btn tm-pri-opt" data-pri="urgent" onclick="tmSelectPriority(this,'urgent')" style="color:var(--red)">🔴 فوری</button>
+      </div>
+    </div>
+<div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">عنوان تسک</div><input id="tmAssignTitle" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" placeholder="عنوان..." type="text"/></div>
+    <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">ددلاین <span style="color:var(--red)">*</span></div><input id="tmAssignDeadline" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3);font-family:var(--mono)" placeholder="1404-05-15" type="text"/></div>
+    <div id="tmAssignErr" style="font-size:var(--fs-xs);color:var(--red);min-height:16px"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:var(--sp2) 0;border-top:1px solid var(--b1)">
+      <label style="display:flex;align-items:center;gap:var(--sp2);cursor:pointer">
+        <input type="checkbox" id="tmBroadcastToggle" onchange="tmToggleBroadcast(this)" style="width:16px;height:16px;accent-color:var(--blue)"/>
+        <span style="font-size:var(--fs-xs);color:var(--t2)">📢 Broadcast — ارسال به همه</span>
+      </label>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:var(--sp2) 0;border-top:1px solid var(--b1)">
+      <label style="display:flex;align-items:center;gap:var(--sp2);cursor:pointer">
+        <input type="checkbox" id="tmNeedsVerifyToggle" style="width:16px;height:16px;accent-color:var(--a)"/>
+        <span style="font-size:var(--fs-xs);color:var(--t2)">نیاز به تأیید مدیر</span>
+      </label>
+    </div>
+<button id="tmAssignBtn" onclick="tmDoAssign()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--t1);color:var(--bg1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:none;cursor:pointer;margin-top:auto">ارسال تسک</button>
+  </div>
+</div>
+
+<!-- سکو Panel — full screen -->
+<div class="tm-panel" id="tmSokoPanel">
+  <div class="tm-panel-hdr">
+    <div class="tm-panel-toprow">
+      <!-- Close -->
+      <button class="tm-panel-close" onclick="tmCloseSoko()">✕</button>
+      <!-- Title -->
+      <div class="tm-panel-titles">
+        <div class="tm-panel-title">سکو</div>
+        <div class="tm-panel-sub" id="tmSokoPanelSub">تیم</div>
+      </div>
+      <!-- Actions -->
+      <div class="tm-panel-actions">
+        <button class="tm-panel-action-btn" onclick="tmOpenAnnouncement()">📢</button>
+        <button class="tm-panel-action-btn primary" onclick="tmAssignTask()">+ تسک</button>
+      </div>
+    </div>
+    <div class="tm-tabs">
+      <div class="tm-tab active" data-tab="status" onclick="tmSetSokoTab('status')">وضعیت</div>
+      <div class="tm-tab" data-tab="projects" onclick="tmSetSokoTab('projects')">پروژه‌ها</div>
+      <div class="tm-tab" data-tab="report" onclick="tmSetSokoTab('report')">گزارش</div>
+    </div>
+  </div>
+  <div class="tm-panel-body">
+    <div class="tm-tab-pane" data-pane="status" id="tmSokoStatusContent"></div>
+    <div class="tm-tab-pane" data-pane="projects" style="display:none" id="tmSokoProjectsContent">
+      <div style="text-align:center;padding:var(--sp5);color:var(--t3);font-size:var(--fs-sm)">پروژه‌های تیمی در Step 2 اضافه می‌شن</div>
+    </div>
+    <div class="tm-tab-pane" data-pane="report" style="display:none" id="tmSokoReportContent"></div>
+  </div>
+</div>
+<!-- ════ END TEAM HTML ════ -->
+
+<!-- ════ Step 3 HTML ════ -->
+
+<!-- Announcement Sheet (مدیر) -->
+<div class="sheet" id="shTmAnnounce">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div class="sh-ttl">📢 اطلاعیه جدید</div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+  </div>
+  <div class="sh-body" style="gap:var(--sp3)">
+    <div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">متن اطلاعیه</div>
+      <textarea id="tmAnnoText" class="sh-iw" style="width:100%;min-height:80px;resize:none;padding:var(--sp2) var(--sp3);font-size:var(--fs-sm)" placeholder="بنویس..." maxlength="300"></textarea>
+      <div style="font-size:var(--fs-2xs);color:var(--t3);text-align:left;margin-top:2px">حداکثر ۳۰۰ کاراکتر</div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:var(--sp2) 0;border-top:1px solid var(--b1)">
+      <label style="display:flex;align-items:center;gap:var(--sp2);cursor:pointer">
+        <input type="checkbox" id="tmAnnoPinCal" style="width:16px;height:16px;accent-color:var(--a)"/>
+        <span style="font-size:var(--fs-xs);color:var(--t2)">Pin به تقویم اعضا</span>
+      </label>
+    </div>
+    <div id="tmAnnoErr" style="font-size:var(--fs-xs);color:var(--red);min-height:16px"></div>
+    <button id="tmAnnoBtn" onclick="tmDoAnnounce()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--t1);color:var(--bg1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:none;cursor:pointer;margin-top:auto">ارسال به همه</button>
+  </div>
+</div>
+<!-- ════ End Step 3 HTML ════ -->
+
+<!-- Pending Members Sheet -->
+<div class="sheet" id="shTmPending">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div class="sh-ttl">درخواست‌های عضویت</div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+  </div>
+  <div class="sh-body" id="tmPendingList">
+    <div style="text-align:center;color:var(--t3);padding:var(--sp5)"><span class="tm-skeleton" style="display:inline-block;width:60%;height:14px;border-radius:var(--r1)"></span></div>
+  </div>
+</div>
+
+<!-- ════ Team Modals (مستقل از sheet mechanism) ════ -->
+
+<!-- Modal: انتخاب ایجاد/پیوستن -->
+<div class="tm-modal" id="tmModalChoice">
+  <div class="tm-modal-sheet">
+    <div class="tm-modal-handle"></div>
+    <div class="tm-modal-hdr">
+      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
+      <span class="tm-modal-ttl">👥 تیم کاری</span>
+    </div>
+    <div class="tm-modal-body">
+      <div style="text-align:center;padding:var(--sp3) 0">
+        <div style="font-size:2rem;margin-bottom:var(--sp2)">👥</div>
+        <div style="font-size:var(--fs-xs);color:var(--t3)">به تیم بپیوند یا تیم جدید بساز</div>
+      </div>
+      <button onclick="tmOpenCreate()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">+ ایجاد تیم جدید</button>
+      <button onclick="tmOpenJoin()" style="width:100%;height:48px;background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">پیوستن با کد دعوت</button>
+      <button onclick="tmOpenDirectLogin()" style="width:100%;height:44px;background:none;color:var(--blue);border:none;font-size:var(--fs-sm);font-weight:600;font-family:var(--f);cursor:pointer;text-decoration:underline">قبلاً عضو بودم — ورود مستقیم</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: ایجاد تیم -->
+<div class="tm-modal" id="tmModalCreate">
+  <div class="tm-modal-sheet">
+    <div class="tm-modal-handle"></div>
+    <div class="tm-modal-hdr">
+      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
+      <span class="tm-modal-ttl">ایجاد تیم جدید</span>
+    </div>
+    <div class="tm-modal-body">
+      <div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نام تیم</div>
+        <input id="tmMCreateName" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--f);color:var(--t1)" placeholder="مثال: دکتر عبیدی — تیم فروش" type="text"/>
+      </div>
+      <div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نام شما</div>
+        <input id="tmMCreateMgrName" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--f);color:var(--t1)" placeholder="نام کامل" type="text"/>
+      </div>
+      <div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">سمت (اختیاری)</div>
+        <input id="tmMCreateMgrRole" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--f);color:var(--t1)" placeholder="مدیر فروش" type="text"/>
+      </div>
+      <div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">PIN مدیر (۴ رقم)</div>
+        <input id="tmMCreatePin" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-lg);font-family:var(--f);color:var(--t1);letter-spacing:.3em;text-align:center" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/>
+      </div>
+      <div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">تأیید PIN</div>
+        <input id="tmMCreatePin2" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-lg);font-family:var(--f);color:var(--t1);letter-spacing:.3em;text-align:center" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/>
+      </div>
+      <div id="tmMCreateErr" style="font-size:var(--fs-xs);color:var(--red);text-align:center;min-height:16px"></div>
+      <button id="tmMCreateBtn" onclick="tmDoCreate()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer;margin-top:4px">ساخت تیم</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal: Assign Task — NLP powered -->
+<div class="tm-modal" id="tmModalAssign">
+  <div class="tm-modal-sheet" style="max-height:95dvh">
+    <div class="tm-modal-handle"></div>
+    <div class="tm-modal-hdr">
+      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
+      <span class="tm-modal-ttl">تسک جدید</span>
+    </div>
+    <div class="tm-modal-body" style="gap:16px">
+
+      <!-- NLP Input -->
+      <div style="background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r3);padding:12px 14px;transition:border-color 150ms ease" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--b1)'">
+        <textarea id="tmANlpInp"
+          rows="2"
+          placeholder="گزارش ماهانه بده تا جمعه !مهم"
+          oninput="_tmAssignNlpInput(this.value)"
+          style="width:100%;background:none;border:none;resize:none;font-size:var(--fs-md);font-family:var(--f);color:var(--t1);direction:rtl;outline:none;line-height:1.6;min-height:44px;max-height:100px;overflow:hidden"></textarea>
+        <!-- NLP Preview chips -->
+        <div id="tmAPreview" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px"></div>
+      </div>
+
+      <!-- Deadline shortcuts -->
+      <div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:8px">ددلاین</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button onclick="_tmSetDeadlineShortcut('فردا')"        class="tm-dl-chip">فردا</button>
+          <button onclick="_tmSetDeadlineShortcut('پس‌فردا')"     class="tm-dl-chip">پس‌فردا</button>
+          <button onclick="_tmSetDeadlineShortcut('این جمعه')"    class="tm-dl-chip">این جمعه</button>
+          <button onclick="_tmSetDeadlineShortcut('هفته دیگه')"   class="tm-dl-chip">هفته دیگه</button>
+          <button onclick="_tmSetDeadlineShortcut('ماه دیگه')"    class="tm-dl-chip">ماه دیگه</button>
+        </div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-top:8px">یا مستقیم توی متن بنویس: «جمعه»، «۱۵ مرداد»، «هفته دیگه»</div>
+      </div>
+
+      <!-- اولویت override -->
+      <div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:8px">اولویت (اختیاری — از متن تشخیص میده)</div>
+        <div style="display:flex;gap:6px">
+          <button class="tm-pri-chip" data-pri="high" onclick="_tmSetPri('high')" style="flex:1;height:34px;border-radius:var(--r2);border:1px solid rgba(248,81,73,.3);background:var(--redm);color:var(--red);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer;transition:all 120ms ease;opacity:.5">فوری</button>
+          <button class="tm-pri-chip" data-pri="med"  onclick="_tmSetPri('med')"  style="flex:1;height:34px;border-radius:var(--r2);border:1px solid rgba(217,119,6,.3);background:var(--ambm);color:var(--amber);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer;transition:all 120ms ease;opacity:.5">مهم</button>
+          <button class="tm-pri-chip" data-pri="low"  onclick="_tmSetPri('low')"  style="flex:1;height:34px;border-radius:var(--r2);border:1px solid var(--b1);background:var(--bg2);color:var(--t3);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer;transition:all 120ms ease;opacity:.5">عادی</button>
+        </div>
+      </div>
+
+      <!-- انتخاب عضو -->
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <button id="tmABroadcastBtn" onclick="_tmToggleBroadcast()" style="height:26px;padding:0 10px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--bg2);color:var(--t2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;transition:all 150ms ease">📡 ارسال به همه</button>
+          <div style="font-size:var(--fs-xs);color:var(--t3)">برای کی؟</div>
+        </div>
+        <div id="tmAMemberChips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      </div>
+
+      <!-- Error + Submit -->
+      <div id="tmAErr" style="font-size:var(--fs-xs);color:var(--red);min-height:14px;text-align:center"></div>
+      <button id="tmASubmitBtn" onclick="tmDoAssign()" style="width:100%;height:50px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-md);font-weight:800;font-family:var(--f);cursor:pointer">ارسال تسک</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: پیوستن به تیم -->
+<div class="tm-modal" id="tmModalJoin">
+  <div class="tm-modal-sheet">
+    <div class="tm-modal-handle"></div>
+    <div class="tm-modal-hdr">
+      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
+      <span class="tm-modal-ttl">پیوستن به تیم</span>
+    </div>
+    <div class="tm-modal-body">
+      <div id="tmMJoinForm">
+        <div style="margin-bottom:14px">
+          <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">کد دعوت</div>
+          <input id="tmMJoinCode" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--mono);color:var(--t1);text-transform:uppercase;letter-spacing:.1em" placeholder="DQ-XXXXXXX" type="text"/>
+        </div>
+        <div style="margin-bottom:14px">
+          <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نام شما</div>
+          <input id="tmMJoinName" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--f);color:var(--t1)" placeholder="نام کامل" type="text"/>
+        </div>
+        <div style="margin-bottom:14px">
+          <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">سمت</div>
+          <input id="tmMJoinRole" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--f);color:var(--t1)" placeholder="کارشناس فروش" type="text"/>
+        </div>
+        <div style="margin-bottom:14px">
+          <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">PIN شخصی (۴ رقم)</div>
+          <input id="tmMJoinPin" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-lg);font-family:var(--f);color:var(--t1);letter-spacing:.3em;text-align:center" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/>
+          <div style="font-size:var(--fs-2xs);color:var(--t3);margin-top:4px">برای بازیابی در دستگاه جدید</div>
+        </div>
+        <div id="tmMJoinErr" style="font-size:var(--fs-xs);color:var(--red);text-align:center;min-height:16px;margin-bottom:8px"></div>
+        <button id="tmMJoinBtn" onclick="tmDoJoin()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">ارسال درخواست</button>
+      </div>
+      <div id="tmMJoinSuccess" style="display:none;text-align:center;padding:var(--sp4) 0">
+        <div style="font-size:3rem;margin-bottom:var(--sp3)">⏳</div>
+        <div style="font-size:var(--fs-lg);font-weight:700;margin-bottom:var(--sp2)">درخواست ارسال شد</div>
+        <div style="font-size:var(--fs-sm);color:var(--t3);margin-bottom:var(--sp4)">منتظر تأیید مدیر هستی</div>
+        <div style="background:var(--bg2);border-radius:var(--r2);padding:var(--sp3);margin-bottom:var(--sp4)">
+          <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">کد تیم</div>
+          <div id="tmMJoinTeamCode" style="font-family:var(--mono);font-weight:700;font-size:var(--fs-lg)">—</div>
+        </div>
+        <button onclick="tmCloseModal()" style="width:100%;height:44px;background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-sm);font-family:var(--f);cursor:pointer">بازگشت به DayQ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: کد تیم بعد از ایجاد -->
+<div class="tm-modal" id="tmModalCode">
+  <div class="tm-modal-sheet">
+    <div class="tm-modal-handle"></div>
+    <div class="tm-modal-hdr">
+      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
+      <span class="tm-modal-ttl">✅ تیم ساخته شد!</span>
+    </div>
+    <div class="tm-modal-body">
+      <div style="background:var(--bg2);border-radius:var(--r3);padding:var(--sp4);text-align:center">
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2)">کد دعوت تیم</div>
+        <div id="tmMCodeDisplay" style="font-size:1.6rem;font-weight:900;font-family:var(--mono);color:var(--t1);letter-spacing:.2em;margin-bottom:var(--sp3)">—</div>
+        <div style="display:flex;gap:var(--sp2)">
+          <button onclick="if(navigator.clipboard)navigator.clipboard.writeText(document.getElementById('tmMCodeDisplay').textContent);toast_(svgIco('check'),'کپی شد')" class="tm-btn blue" style="flex:1;justify-content:center">📋 کپی</button>
+          <button onclick="tmShareCode()" class="tm-btn" style="flex:1;justify-content:center">📤 اشتراک</button>
+        </div>
+      </div>
+      <div id="tmMInviteLink" style="font-size:var(--fs-xs);font-family:var(--mono);color:var(--blue);word-break:break-all;background:var(--bluem);padding:var(--sp2) var(--sp3);border-radius:var(--r2)"></div>
+      <button onclick="tmCloseModal();tmOpenSoko()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">رفتن به سکو ←</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: اطلاعات تیم -->
+<div class="tm-modal" id="tmModalInfo">
+  <div class="tm-modal-sheet">
+    <div class="tm-modal-handle"></div>
+    <div class="tm-modal-hdr">
+      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
+      <span class="tm-modal-ttl">👥 تیم کاری</span>
+    </div>
+    <div class="tm-modal-body">
+      <div id="tmMInfoContent"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ End Team Modals ════ -->
+
+<!-- Direct Login Modal — ورود با کد تیم + PIN -->
+<div class="tm-modal" id="tmModalDirectLogin">
+  <div class="tm-modal-sheet">
+    <div class="tm-modal-handle"></div>
+    <div class="tm-modal-hdr">
+      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
+      <span class="tm-modal-ttl">ورود به تیم</span>
+    </div>
+    <div class="tm-modal-body">
+      <div style="background:var(--bluem);border:1px solid rgba(59,130,246,.2);border-radius:var(--r2);padding:var(--sp3);margin-bottom:2px">
+        <div style="font-size:var(--fs-xs);color:var(--blue);font-weight:600">اگه قبلاً در دستگاه دیگه‌ای عضو یا مدیر تیمی</div>
+        <div style="font-size:var(--fs-xs);color:var(--t2);margin-top:2px">فقط کد تیم و PIN رو وارد کن</div>
+      </div>
+      <div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">کد تیم</div>
+        <input id="tmDLCode" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--mono);color:var(--t1);text-transform:uppercase;letter-spacing:.1em" placeholder="DQ-XXXXXXX" type="text"/>
+      </div>
+      <div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">PIN</div>
+        <input id="tmDLPin" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-lg);font-family:var(--f);color:var(--t1);letter-spacing:.3em;text-align:center" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/>
+      </div>
+      <div id="tmDLErr" style="font-size:var(--fs-xs);color:var(--red);min-height:16px;text-align:center"></div>
+      <button id="tmDLBtn" onclick="tmDoDirectLogin()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">ورود</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sheet: Team Task Detail — کارمند -->
+<div class="sheet" id="shTeamTaskDetail">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div class="sh-ttl" id="ttdTitle">تسک تیمی</div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+  </div>
+  <div class="sh-body tm-join-body" id="ttdBody">
+    <!-- meta -->
+    <div style="background:var(--bluem);border:1px solid rgba(59,130,246,.2);border-radius:var(--r2);padding:var(--sp3);display:flex;align-items:center;justify-content:space-between">
+      <div id="ttdDeadline" style="font-size:var(--fs-xs);color:var(--blue)"></div>
+      <div>
+        <div id="ttdManager" style="font-size:var(--fs-xs);color:var(--t2)"></div>
+        <div id="ttdPriority" style="font-size:var(--fs-xs);font-weight:700;color:var(--red)"></div>
+      </div>
+    </div>
+
+    <!-- وضعیت -->
+    <div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:8px">وضعیت</div>
+      <div style="display:flex;gap:6px" id="ttdStatusBtns">
+        <button onclick="_ttdSetStatus('pending')"   class="ttd-st-btn" data-st="pending"   style="flex:1;height:36px;border-radius:var(--r2);border:1px solid var(--b1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">باید</button>
+        <button onclick="_ttdSetStatus('in_progress')" class="ttd-st-btn" data-st="in_progress" style="flex:1;height:36px;border-radius:var(--r2);border:1px solid var(--b1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">درحال</button>
+        <button onclick="_ttdSetStatus('done')"      class="ttd-st-btn" data-st="done"      style="flex:1;height:36px;border-radius:var(--r2);border:1px solid var(--b1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">✓ انجام شد</button>
+        <button onclick="_ttdSetStatus('blocked')"   class="ttd-st-btn" data-st="blocked"   style="flex:1;height:36px;border-radius:var(--r2);border:1px solid rgba(248,81,73,.3);color:var(--red);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">🚫 مشکل</button>
+      </div>
+    </div>
+
+    <!-- یادداشت برای مدیر -->
+    <div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px">یادداشت برای مدیر (اختیاری)</div>
+      <textarea id="ttdNote" rows="3"
+        placeholder="توضیح بده — مثلاً: منتظر تأیید مدیر مالی هستم"
+        style="width:100%;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 12px;font-size:var(--fs-xs);font-family:var(--f);color:var(--t1);direction:rtl;resize:none;outline:none"></textarea>
+    </div>
+
+    <!-- چک‌لیست مدیر (read-only اگه باشه) -->
+    <div id="ttdChecklist" style="display:none">
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px">چک‌لیست</div>
+      <div id="ttdChecklistItems"></div>
+    </div>
+
+    <div id="ttdErr" style="font-size:var(--fs-xs);color:var(--red);min-height:14px;text-align:center"></div>
+    <button id="ttdSaveBtn" onclick="_ttdSave()" style="width:100%;height:46px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">ذخیره وضعیت</button>
+  </div>
+</div>
+// (desktop CSS moved to static)
 
 <!-- JALALI DATE PICKER -->
 <div class="jal-dp" id="jdp">
