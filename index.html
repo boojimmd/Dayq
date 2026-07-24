@@ -3333,15 +3333,17 @@ select.fi{
    ════════════════════════════════════════════ */
 @media(min-width:900px){
 
-  /* سکو panel — desktop */
+  /* سکو panel — desktop: بین dpanel و nav */
   .tm-panel{
     right:220px;
+    left:0;          /* روی dpanel اما dpanel هنوز visible */
     max-width:none;
     margin:0;
     border-radius:0;
+    z-index:900;     /* زیر dpanel overlay اما بالای content */
   }
   .tm-panel-hdr{
-    padding-top:20px; /* desktop: no safe area needed */
+    padding-top:20px;
   }
 
   /* today section — padding دسکتاپ */
@@ -3589,9 +3591,10 @@ select.fi{
 /* badge تیم کاری در settings */
 #tmTeamRow .srow-ico svg{stroke-width:1.6;}
 
-@media(min-width:900px){
-  .tm-panel{right:220px;max-width:none;margin:0;border-radius:0;}
-  .tm-panel-hdr{padding-top:20px;}
+/* [duplicate removed] */
+@media(min-width:900px) and (max-width:1199px){
+  .tm-panel{ right:190px; }
+  .tm-modal-sheet{ right:calc(190px / 2); }
 }
 /* ════ End Team UI Polish ════ */
 
@@ -3658,20 +3661,7 @@ select.fi{
     opacity   160ms var(--ease-out);
 }
 
-@media(min-width:900px){
-  .tm-modal{align-items:center;}
-  .tm-modal-sheet{
-    border-radius:var(--r4);
-    max-width:440px;
-    /* Desktop: scale from center, not drawer */
-    transform:scale(0.94);
-    opacity:0;
-  }
-  .tm-modal.tm-modal-open .tm-modal-sheet{
-    transform:scale(1);
-    opacity:1;
-  }
-}
+/* [merged with modal desktop rule] */
 
 /* ── :active feedback — Emil: buttons must feel responsive ── */
 .tm-btn,
@@ -4005,6 +3995,35 @@ select.fi{
 .tm-status-btn:active { transform:scale(0.97); }
 
 /* ════ End Team Utility Classes ════ */
+
+/* ════ Team Desktop (from dynamic injection — moved to static) ════ */
+
+    @media(min-width:900px){
+      /* سکو button — روی دسکتاپ width مناسب */
+      #tmSokoCard{
+        padding:0 0 var(--sp4);
+        margin-bottom:var(--sp3);
+      }
+      .tm-soko-btn{
+        max-width:100%;
+        border-radius:var(--r3);
+      }
+      /* تیم امروز — در scroll area صحیح */
+      #tmTodaySection{
+        padding:0 var(--sp4);
+        margin-bottom:var(--sp3);
+      }
+      /* از مدیر — padding درست */
+      #tmInboxSection{
+        padding:0 var(--sp4);
+      }
+      /* نمایش انیمیشن‌های تیم روی دسکتاپ */
+      .tm-panel{
+        transition:transform 280ms var(--ease-drawer,cubic-bezier(0.32,0.72,0,1));
+      }
+    }
+  
+/* ════ End Team Desktop ════ */
 </style>
 </head>
 <body>
@@ -16476,6 +16495,1559 @@ if ('serviceWorker' in navigator) {
   }
 })();
 
+// ═════════════════════════════════════════════
+// Fix 4: tmApplyUI روی دسکتاپ — مطمئن شدن
+// ════════════════════════════════════════════
+// وقتی صفحه لود می‌شه، یه بار دیگه tmApplyUI اجرا کن
+// با delay تا اطمینان حاصل بشه DOM ساخته شده
+window.addEventListener('load', () => {
+  if (tm.code) {
+    setTimeout(() => {
+      tmApplyUI();
+      if (tm.role === 'manager') {
+        tmRenderTodaySection();
+        tmUpdateSokoCard();
+      }
+      if (tm.role === 'member') {
+        tmRenderInbox();
+        tmRenderAnnouncements();
+      }
+    }, 500);
+  }
+});
+
+/* ════ END CRITICAL FIXES ════ */
+
+
+/* ════ Direct Login — ورود با کد+PIN ════ */
+function tmOpenDirectLogin() {
+  tmCloseModal();
+  document.getElementById('tmDLCode').value = '';
+  document.getElementById('tmDLPin').value = '';
+  document.getElementById('tmDLErr').textContent = '';
+  tmModal('tmModalDirectLogin', true);
+}
+
+async function tmDoDirectLogin() {
+  const code = document.getElementById('tmDLCode').value.trim().toUpperCase();
+  const pin  = document.getElementById('tmDLPin').value.trim();
+  const errEl = document.getElementById('tmDLErr');
+  if (!code) { errEl.textContent = 'کد تیم رو وارد کن'; return; }
+  if (!/^\d{4}$/.test(pin)) { errEl.textContent = 'PIN باید ۴ رقم باشد'; return; }
+
+  const base = (cfg.pushWorkerUrl||'').trim().replace(/\/+$/, '');
+  if (!base) { errEl.textContent = 'ابتدا Worker Push رو در اتصال تنظیم کن'; return; }
+
+  const btn = document.getElementById('tmDLBtn');
+  btn.disabled = true; btn.textContent = 'در حال ورود...';
+
+  try {
+    const res = await fetch(base + '/team/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ teamCode: code, pin })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'خطا');
+
+    tm.code       = code;
+    tm.uuid       = data.uuid;
+    tm.role       = data.role;
+    tm.token      = data.token;
+    tm.workerUrl  = data.workerUrl || base;
+    tm.teamName   = data.teamName;
+    tm.memberName = data.name;
+    tm.memberRole = data.memberRole;
+    tmSaveState();
+    tmCloseModal();
+    tmApplyUI();
+    tmSyncBackground();
+    toast_(svgIco('check'), 'وارد تیم ' + data.teamName + ' شدی');
+  } catch(e) {
+    const msg = e.message.includes('PIN') ? 'PIN اشتباهه'
+      : e.message.includes('نامعتبر') ? 'کد تیم نامعتبره'
+      : e.message.includes('pattern') || e.message.includes('fetch') ? 'آدرس Worker رو چک کن'
+      : e.message;
+    errEl.textContent = msg;
+  } finally {
+    btn.disabled = false; btn.textContent = 'ورود';
+  }
+}
+/* ════ End Direct Login ════ */
+
+
+/* ════ UX Polish — Optional & User-Friendly ════ */
+
+// آپدیت سطر تیم در اتصال
+(function(){
+  const _orig = tmApplyUI;
+  tmApplyUI = function() {
+    try { _orig.apply(this, arguments); } catch(e) {}
+    _tmUXRefresh();
+  };
+})();
+
+function _tmUXRefresh() {
+  const hasTeam = !!tm.code;
+  const isManager = tm.role === 'manager';
+  const isMember = tm.role === 'member';
+
+  // سطر تیم در اتصال — همیشه نمایان (مثل push و sync)
+  const sub = document.getElementById('tmTeamSub');
+  if (sub) {
+    if (!hasTeam) sub.textContent = 'غیرفعال';
+    else if (isManager) sub.textContent = 'فعال — ' + (tm.teamName || '');
+    else sub.textContent = 'فعال — ' + (tm.teamName || '');
+  }
+
+  // سکو card — فقط مدیر و فقط وقتی تیم دارد
+  const sokoCard = document.getElementById('tmSokoCard');
+  if (sokoCard) sokoCard.style.display = isManager ? '' : 'none';
+
+  // سکو sub text
+  const sokoSub = document.getElementById('tmSokoSubText');
+  if (sokoSub && tm.snapshot) {
+    const alerts = (tm.snapshot.members||[]).filter(m=>m.alert!=='ok').length;
+    const members = tm.snapshot.memberCount || 0;
+    sokoSub.textContent = alerts > 0
+      ? `${members} نفر • ${alerts} نیاز توجه`
+      : `${members} نفر فعال`;
+    // alert dot
+    const dot = document.getElementById('tmSokoAlertDot');
+    if (dot) dot.style.display = alerts > 0 ? 'inline-block' : 'none';
+  }
+
+  // badge عضویت در پروفایل
+  const badge = document.getElementById('tmMemberBadge');
+  if (badge) {
+    badge.style.display = hasTeam ? '' : 'none';
+    badge.textContent = hasTeam
+      ? (isManager ? 'مدیر: ' : 'عضو: ') + (tm.teamName || tm.code)
+      : '';
+  }
+
+  // تیم امروز (مدیر) — فقط وقتی alert وجود داره
+  const todaySection = document.getElementById('tmTodaySection');
+  if (todaySection) {
+    const hasAlerts = tm.snapshot && (tm.snapshot.members||[]).some(m=>m.alert!=='ok');
+    const hasMembers = tm.snapshot && (tm.snapshot.memberCount||0) > 1;
+    todaySection.style.display = (isManager && hasMembers) ? '' : 'none';
+  }
+
+  // از مدیر (کارمند) — فقط وقتی تسک داره
+  const inboxSection = document.getElementById('tmInboxSection');
+  if (inboxSection) {
+    const activeCount = (tm.inbox||[]).filter(t=>!t.deleted&&t.status!=='done').length;
+    inboxSection.style.display = (isMember && activeCount > 0) ? '' : 'none';
+  }
+
+  // اطلاعیه‌ها — فقط وقتی خوانده‌نشده داره
+  const annosSection = document.getElementById('tmAnnosSection');
+  if (annosSection) {
+    const unread = (tm.announcements||[]).filter(a=>!(a.readBy||[]).includes(tm.uuid)).length;
+    annosSection.style.display = (isMember && unread > 0) ? '' : 'none';
+  }
+}
+
+// همچنین tmUpdateSokoCard رو آپدیت کن
+const _origUpdateSokoCard = tmUpdateSokoCard;
+tmUpdateSokoCard = function() {
+  try { _origUpdateSokoCard.apply(this, arguments); } catch(e) {}
+  _tmUXRefresh();
+};
+/* ════ End UX Polish ════ */
+
+/* ════════════════════════════════════════════════════════════════
+   DayQ Team — Assign NLP + Smart Deadline + Projects Full
+   ════════════════════════════════════════════════════════════════ */
+
+// ── State ─────────────────────────────────────────────────────
+let _tmAssignParsed = null;
+let _tmAssignMember = '';
+let _tmAssignBroadcast = false;
+
+// ── Deadline display helper (از nlpShowPreview الگو گرفته) ────
+function _tmFmtDeadline(dl) {
+  if (!dl) return null;
+  const [jy,jm,jd] = dl.split('-').map(Number);
+  const MONTHS = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+  const today = mrTodayKey();
+  const [ty,tm,td] = today.split('-').map(Number);
+  const diff = _jalToDays(jy,jm,jd) - _jalToDays(ty,tm,td);
+  if (diff === 0) return { label:'امروز',  color:'var(--red)',   days: 0 };
+  if (diff === 1) return { label:'فردا',   color:'var(--amber)', days: 1 };
+  if (diff === 2) return { label:'پس‌فردا', color:'var(--amber)', days: 2 };
+  if (diff < 0)   return { label:`${Math.abs(diff)} روز پیش`, color:'var(--red)', days: diff };
+  if (diff <= 7)  return { label:`${num(jd)} ${MONTHS[jm-1]}`, color:'var(--a)', days: diff };
+  return { label:`${num(jd)} ${MONTHS[jm-1]}`, color:'var(--t2)', days: diff };
+}
+
+// ── Shortcut deadline calculator ───────────────────────────────
+function _tmDeadlineShortcut(text) {
+  const p = nlpParse(text);
+  return p ? p.deadline : null;
+}
+
+// ── Open Assign Modal (NLP version) ───────────────────────────
+tmAssignTask = function(preUuid = '') {
+  _tmAssignParsed = null;
+  _tmAssignMember = preUuid || '';
+  _tmAssignBroadcast = false;
+
+  // reset form
+  const inp = document.getElementById('tmANlpInp');
+  if (inp) { inp.value = ''; inp.style.height = 'auto'; }
+  const preview = document.getElementById('tmAPreview');
+  if (preview) preview.innerHTML = '';
+  const err = document.getElementById('tmAErr');
+  if (err) err.textContent = '';
+
+  // عضو پیش‌فرض
+  _tmUpdateAssignMemberChips();
+
+  tmModal('tmModalAssign', true);
+  setTimeout(() => { const i = document.getElementById('tmANlpInp'); if(i) i.focus(); }, 300);
+};
+
+// ── NLP input handler ─────────────────────────────────────────
+function _tmAssignNlpInput(val) {
+  _tmAssignParsed = val.trim().length > 2 ? nlpParse(val) : null;
+  _tmUpdateAssignPreview();
+  // auto-grow textarea
+  const inp = document.getElementById('tmANlpInp');
+  if (inp) { inp.style.height = 'auto'; inp.style.height = Math.min(inp.scrollHeight, 100) + 'px'; }
+}
+
+// ── Update preview chips ───────────────────────────────────────
+function _tmUpdateAssignPreview() {
+  const p = document.getElementById('tmAPreview');
+  if (!p) return;
+  if (!_tmAssignParsed) { p.innerHTML = ''; return; }
+  const chips = [];
+  if (_tmAssignParsed.deadline) {
+    const d = _tmFmtDeadline(_tmAssignParsed.deadline);
+    if (d) chips.push(`<span class="tm-nlp-chip" style="background:var(--am);color:var(--a)"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${d.label}</span>`);
+  }
+  const PRI_LABEL = { high:'فوری', med:'مهم', low:'عادی' };
+  const PRI_COLOR = { high:'var(--red)', med:'var(--amber)', low:'var(--t3)' };
+  if (_tmAssignParsed.detected.includes('pri')) {
+    const pri = _tmAssignParsed.priority;
+    chips.push(`<span class="tm-nlp-chip" style="background:${PRI_COLOR[pri]}22;color:${PRI_COLOR[pri]}">${PRI_LABEL[pri]||pri}</span>`);
+  }
+  p.innerHTML = chips.join('');
+}
+
+// ── Deadline shortcut chips ────────────────────────────────────
+function _tmSetDeadlineShortcut(text) {
+  const inp = document.getElementById('tmANlpInp');
+  if (!inp) return;
+  // اگه input خالیه، text رو بذار وگرنه deadline رو append کن
+  const current = inp.value.trim();
+  // حذف deadline قبلی از متن (اگه بود)
+  const cleaned = current.replace(/(فردا|پس‌فردا|این هفته|هفته دیگه|ماه دیگه|جمعه|پنجشنبه|شنبه|یکشنبه|دوشنبه|سه‌شنبه|چهارشنبه)(\s+)/g, '').trim();
+  inp.value = (cleaned ? cleaned + ' ' : '') + text;
+  inp.style.height = 'auto';
+  inp.style.height = Math.min(inp.scrollHeight, 100) + 'px';
+  _tmAssignNlpInput(inp.value);
+  inp.focus();
+}
+
+// ── Member chips update ────────────────────────────────────────
+function _tmUpdateAssignMemberChips() {
+  const el = document.getElementById('tmAMemberChips');
+  if (!el) return;
+  const members = tm.snapshot?.members?.filter(m => !m.isManager && m.status === 'active') || [];
+  if (!members.length) {
+    el.innerHTML = '<div style="color:var(--t3);font-size:var(--fs-xs)">هنوز عضوی تأیید نشده</div>';
+    return;
+  }
+  el.innerHTML = members.map(m => {
+    const active = _tmAssignMember === m.uuid;
+    const st = m.alert === 'blocked' ? 'block' : m.alert === 'stale' ? 'warn' : 'ok';
+    return `<button
+      class="tm-member-chip${active ? ' active' : ''}"
+      data-uuid="${m.uuid}"
+      onclick="_tmSelectMember('${m.uuid}')"
+      style="display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:var(--r5);border:1px solid ${active ? 'var(--blue)' : 'var(--b1)'};background:${active ? 'var(--bluem)' : 'var(--bg2)'};color:${active ? 'var(--blue)' : 'var(--t1)'};font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;transition:all 150ms ease">
+      ${tmDot(st)}<span>${esc(m.name)}</span>
+      ${m.activeTasks > 0 ? `<span style="font-size:var(--fs-2xs);opacity:.6">${m.activeTasks}</span>` : ''}
+    </button>`;
+  }).join('');
+}
+
+function _tmSelectMember(uuid) {
+  if (_tmAssignBroadcast) return;
+  _tmAssignMember = (_tmAssignMember === uuid) ? '' : uuid;
+  _tmUpdateAssignMemberChips();
+}
+
+function _tmToggleBroadcast() {
+  _tmAssignBroadcast = !_tmAssignBroadcast;
+  const btn = document.getElementById('tmABroadcastBtn');
+  if (btn) {
+    btn.style.background = _tmAssignBroadcast ? 'var(--bluem)' : 'var(--bg2)';
+    btn.style.color = _tmAssignBroadcast ? 'var(--blue)' : 'var(--t2)';
+    btn.style.borderColor = _tmAssignBroadcast ? 'rgba(59,130,246,.3)' : 'var(--b1)';
+    btn.textContent = _tmAssignBroadcast ? '📡 همه اعضا (فعال)' : '📡 ارسال به همه';
+  }
+  if (_tmAssignBroadcast) {
+    _tmAssignMember = '';
+    _tmUpdateAssignMemberChips();
+  }
+}
+
+// ── Priority override ─────────────────────────────────────────
+let _tmAssignPriOverride = null;
+function _tmSetPri(pri) {
+  _tmAssignPriOverride = (_tmAssignPriOverride === pri) ? null : pri;
+  document.querySelectorAll('.tm-pri-chip').forEach(c => {
+    const active = c.dataset.pri === _tmAssignPriOverride;
+    c.style.opacity = active ? '1' : '.5';
+    c.style.transform = active ? 'scale(1.05)' : 'scale(1)';
+  });
+}
+
+// ── Submit ────────────────────────────────────────────────────
+tmDoAssign = async function() {
+  const inp = document.getElementById('tmANlpInp');
+  const errEl = document.getElementById('tmAErr');
+  const rawText = inp?.value?.trim() || '';
+  const parsed = rawText.length > 1 ? (nlpParse(rawText) || {}) : {};
+  const title = parsed.cleanText || rawText;
+  const deadline = parsed.deadline || '';
+  const priority = _tmAssignPriOverride || parsed.priority || 'high';
+
+  if (!title) { errEl.textContent = 'عنوان تسک رو بنویس'; return; }
+  if (!deadline) { errEl.textContent = 'ددلاین رو مشخص کن — مثال: فردا، جمعه، هفته دیگه'; return; }
+  if (!_tmAssignBroadcast && !_tmAssignMember) {
+    errEl.textContent = 'یه عضو انتخاب کن یا «ارسال به همه» رو بزن';
+    return;
+  }
+
+  const btn = document.getElementById('tmASubmitBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'در حال ارسال...'; }
+  errEl.textContent = '';
+
+  try {
+    const endpoint = _tmAssignBroadcast ? '/task/broadcast' : '/task/assign';
+    const body = { title, deadline, priority, category: parsed.cat || '' };
+    if (!_tmAssignBroadcast) body.assignedTo = _tmAssignMember;
+
+    const res = await tmAPI('POST', endpoint, body);
+    tmCloseModal();
+    _tmAssignPriOverride = null;
+    toast_(svgIco('check'), _tmAssignBroadcast
+      ? `تسک به همه اعضا ارسال شد`
+      : `تسک به ${_tmMemberName(_tmAssignMember)} ارسال شد`);
+    tmSyncBackground();
+  } catch(e) {
+    errEl.textContent = e.message;
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'ارسال تسک'; }
+  }
+};
+
+function _tmMemberName(uuid) {
+  const m = (tm.snapshot?.members||[]).find(x => x.uuid === uuid);
+  return m ? m.name : 'عضو';
+}
+
+// ── Projects tab — task list واقعی ────────────────────────────
+tmRenderTeamProjects = function() {
+  const el = document.getElementById('tmSokoProjContent');
+  if (!el) return;
+  if (!tm.snapshot) {
+    el.innerHTML = `<div style="padding:var(--sp5);text-align:center"><div class="tm-skeleton" style="height:60px;border-radius:var(--r2);margin-bottom:var(--sp2)"></div><div class="tm-skeleton" style="height:60px;border-radius:var(--r2)"></div></div>`;
+    return;
+  }
+  const members = (tm.snapshot.members || []).filter(m => m.status === 'active');
+  if (!members.length) {
+    el.innerHTML = `<div style="padding:var(--sp5);text-align:center;color:var(--t3)">هنوز عضوی تأیید نشده</div>`;
+    return;
+  }
+
+  el.innerHTML = members.map(m => {
+    const st = tmStatusLabel(m.alert, m.activeTasks);
+    const barWidth = Math.min(100, (m.activeTasks / Math.max(...members.map(x=>x.activeTasks), 1)) * 100);
+    return `
+    <div class="tm-proj-member" style="padding:var(--sp3) var(--sp4);border-bottom:1px solid var(--b2)">
+      <div style="display:flex;align-items:center;gap:var(--sp3);cursor:pointer" onclick="_tmToggleMemberTasks('${m.uuid}')">
+        <div style="flex:1;min-width:0;text-align:right">
+          <div style="display:flex;align-items:center;gap:var(--sp2);justify-content:flex-end">
+            ${st.dot}
+            <span style="font-size:var(--fs-sm);font-weight:700;color:var(--t1)">${esc(m.name)}</span>
+          </div>
+          <div style="font-size:var(--fs-xs);color:var(--t3);margin-top:3px">${esc(m.role)}</div>
+        </div>
+        <div style="text-align:center;min-width:40px">
+          <div style="font-size:var(--fs-lg);font-weight:800;color:${st.color};font-variant-numeric:tabular-nums">${m.activeTasks}</div>
+          <div style="font-size:var(--fs-2xs);color:var(--t3)">تسک</div>
+        </div>
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--t3)" stroke-width="2.5" stroke-linecap="round" id="tmProjArrow_${m.uuid}" style="transform:rotate(-90deg);transition:transform 200ms ease"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+
+      <!-- workload bar -->
+      ${m.activeTasks > 0 ? `
+      <div style="margin-top:8px;height:3px;background:var(--bg3);border-radius:var(--r5);overflow:hidden">
+        <div style="height:100%;border-radius:var(--r5);background:${m.alert==='blocked'?'var(--red)':m.alert==='stale'?'var(--amber)':'var(--blue)'};transform:scaleX(${barWidth/100});transform-origin:right;transition:transform 600ms cubic-bezier(0.23,1,0.32,1)"></div>
+      </div>` : ''}
+
+      <!-- task list (collapsed by default) -->
+      <div id="tmMemberTasks_${m.uuid}" style="display:none;margin-top:var(--sp3)">
+        <div class="tm-skeleton" style="height:14px;border-radius:4px;width:50%;margin-bottom:var(--sp2)"></div>
+      </div>
+
+      <!-- action buttons -->
+      <div style="display:flex;gap:var(--sp2);margin-top:var(--sp2)">
+        <button onclick="tmAssignTask('${m.uuid}')" style="height:28px;padding:0 10px;border-radius:var(--r1);background:var(--bg2);border:1px solid var(--b1);color:var(--t2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;display:inline-flex;align-items:center;gap:4px">
+          ${tmIco('plus',11)} تسک
+        </button>
+        ${m.alert !== 'ok' ? `
+        <button onclick="tmExtendDeadline(null,'${m.uuid}')" style="height:28px;padding:0 10px;border-radius:var(--r1);background:var(--ambm);border:1px solid rgba(217,119,6,.2);color:var(--amber);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">
+          تمدید
+        </button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+};
+
+// ── Toggle member tasks expand ─────────────────────────────────
+async function _tmToggleMemberTasks(uuid) {
+  const el = document.getElementById(`tmMemberTasks_${uuid}`);
+  const arrow = document.getElementById(`tmProjArrow_${uuid}`);
+  if (!el) return;
+
+  const isOpen = el.style.display !== 'none';
+  el.style.display = isOpen ? 'none' : 'block';
+  if (arrow) arrow.style.transform = isOpen ? 'rotate(-90deg)' : 'rotate(0deg)';
+  if (isOpen) return;
+
+  // fetch tasks
+  try {
+    const data = await tmAPI('GET', `/task/inbox?member=${uuid}`);
+    const tasks = (data.tasks || []).filter(t => !t.deleted);
+    if (!tasks.length) {
+      el.innerHTML = '<div style="font-size:var(--fs-xs);color:var(--t3);padding:var(--sp2) 0">تسک فعالی ندارد</div>';
+      return;
+    }
+    const STATUS_MAP = {
+      pending:     { label:'باید',     color:'var(--t3)' },
+      in_progress: { label:'درحال',    color:'var(--blue)' },
+      waiting:     { label:'منتظرم',   color:'var(--amber)' },
+      blocked:     { label:'مشکل',     color:'var(--red)' },
+      done:        { label:'انجام شد', color:'var(--a)' },
+    };
+    el.innerHTML = tasks.slice(0, 5).map(t => {
+      const st = STATUS_MAP[t.status] || STATUS_MAP.pending;
+      const over = t.deadline && t.deadline < mrTodayKey() && t.status !== 'done';
+      return `<div style="display:flex;align-items:center;gap:var(--sp2);padding:6px 0;border-bottom:1px solid var(--b2)">
+        <span style="font-size:var(--fs-2xs);font-weight:700;color:${st.color};flex-shrink:0">${st.label}</span>
+        <span style="font-size:var(--fs-xs);color:var(--t1);flex:1;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t.title)}</span>
+        ${t.deadline ? `<span style="font-size:var(--fs-2xs);color:${over?'var(--red)':'var(--t3)'};flex-shrink:0">${t.deadline.slice(5)}</span>` : ''}
+      </div>`;
+    }).join('') + (tasks.length > 5 ? `<div style="font-size:var(--fs-2xs);color:var(--t3);text-align:center;padding-top:4px">+${tasks.length-5} تسک دیگه</div>` : '');
+  } catch(e) {
+    el.innerHTML = `<div style="font-size:var(--fs-xs);color:var(--red)">${e.message}</div>`;
+  }
+}
+
+/* ════ End NLP Assign ════ */
+
+/* ════════════════════════════════════════════════════════════
+   Missing Features Implementation
+   ════════════════════════════════════════════════════════════ */
+
+// ── ۱. Team Task Detail Panel ─────────────────────────────
+let _ttdTaskId = null;
+
+function openTeamTaskDetail(taskId) {
+  const t = tm.inbox ? tm.inbox.find(x => x.id === taskId) : null;
+  if (!t) return;
+  _ttdTaskId = taskId;
+
+  document.getElementById('ttdTitle').textContent = t.title || 'تسک تیمی';
+
+  const months = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+  let dlLabel = '';
+  if (t.deadline) {
+    const [jy,jm,jd] = t.deadline.split('-').map(Number);
+    const today = mrTodayKey();
+    const [ty,tm_,td] = today.split('-').map(Number);
+    const diff = _jalToDays(jy,jm,jd) - _jalToDays(ty,tm_,td);
+    dlLabel = diff === 0 ? 'امروز' : diff === 1 ? 'فردا' : diff < 0 ? `${Math.abs(diff)} روز گذشته ⚠️` : `${num(jd)} ${months[jm-1]}`;
+  }
+  document.getElementById('ttdDeadline').textContent = dlLabel ? `📅 ${dlLabel}` : '';
+  document.getElementById('ttdManager').textContent = t.assignedBy ? `از ${t.assignedBy}` : 'از مدیر';
+  const priMap = { high:'🔴 فوری', med:'🟡 مهم', low:'⚪ عادی' };
+  document.getElementById('ttdPriority').textContent = priMap[t.priority] || '';
+
+  // وضعیت
+  const status = t.status || 'pending';
+  document.querySelectorAll('.ttd-st-btn').forEach(btn => {
+    const active = btn.dataset.st === status;
+    btn.style.background = active ? 'var(--t1)' : 'var(--bg2)';
+    btn.style.color = active ? 'var(--bg1)' : 'var(--t2)';
+    btn.style.borderColor = active ? 'var(--t1)' : 'var(--b1)';
+  });
+
+  // یادداشت
+  const noteEl = document.getElementById('ttdNote');
+  if (noteEl) noteEl.value = t.memberNote || '';
+
+  // checklist
+  const clEl = document.getElementById('ttdChecklist');
+  const clItems = document.getElementById('ttdChecklistItems');
+  if (t.checklist && t.checklist.length && clEl && clItems) {
+    clEl.style.display = '';
+    clItems.innerHTML = t.checklist.map(item =>
+      `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--b2)">
+        <div style="width:14px;height:14px;border-radius:3px;border:2px solid ${item.done ? 'var(--t1)' : 'var(--b1)'};background:${item.done ? 'var(--t1)' : 'transparent'};flex-shrink:0;display:flex;align-items:center;justify-content:center">
+          ${item.done ? '<svg viewBox="0 0 12 12" width="8" height="8"><polyline points="2,6 5,9 10,3" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>' : ''}
+        </div>
+        <span style="font-size:var(--fs-xs);color:${item.done ? 'var(--t3)' : 'var(--t1)'};text-decoration:${item.done ? 'line-through' : 'none'}">${esc(item.text)}</span>
+      </div>`
+    ).join('');
+  } else if (clEl) {
+    clEl.style.display = 'none';
+  }
+
+  document.getElementById('ttdErr').textContent = '';
+  openSheet('shTeamTaskDetail');
+}
+
+function _ttdSetStatus(st) {
+  document.querySelectorAll('.ttd-st-btn').forEach(btn => {
+    const active = btn.dataset.st === st;
+    btn.style.background = active ? 'var(--t1)' : 'var(--bg2)';
+    btn.style.color = active ? 'var(--bg1)' : 'var(--t2)';
+    btn.style.borderColor = active ? 'var(--t1)' : 'var(--b1)';
+  });
+  // اگه blocked شد، note رو focus کن
+  if (st === 'blocked') {
+    setTimeout(() => {
+      const n = document.getElementById('ttdNote');
+      if (n && !n.value) {
+        n.placeholder = 'مشکل رو توضیح بده — مدیر باید بدونه';
+        n.focus();
+      }
+    }, 200);
+  }
+}
+
+async function _ttdSave() {
+  if (!_ttdTaskId) return;
+  const activeBtn = document.querySelector('.ttd-st-btn[style*="var(--bg1)"]');
+  const status = activeBtn?.dataset.st || 'in_progress';
+  const note = document.getElementById('ttdNote')?.value.trim() || '';
+  const errEl = document.getElementById('ttdErr');
+  const btn = document.getElementById('ttdSaveBtn');
+
+  if (status === 'blocked' && !note) {
+    errEl.textContent = 'لطفاً مشکل رو توضیح بده تا مدیر بتونه کمک کنه';
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = 'در حال ذخیره...';
+  try {
+    await tmAPI('PUT', '/task/update', {
+      taskId: _ttdTaskId,
+      status,
+      memberNote: note,
+    });
+    // آپدیت local inbox
+    if (tm.inbox) {
+      const t = tm.inbox.find(x => x.id === _ttdTaskId);
+      if (t) { t.status = status; t.memberNote = note; }
+    }
+    closeAll();
+    tmApplyUI();
+    toast_(svgIco('check'), status === 'done' ? 'تسک تموم شد ✅' : 'وضعیت آپدیت شد');
+  } catch(e) {
+    errEl.textContent = e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = 'ذخیره وضعیت';
+  }
+}
+
+// hook کردن به task card های تیمی در home
+(function(){
+  const _origRenderInbox = window.tmRenderInboxSection;
+  if (_origRenderInbox) {
+    window.tmRenderInboxSection = function() {
+      _origRenderInbox.apply(this, arguments);
+      // اضافه کردن click handler به تسک‌های تیمی
+      setTimeout(() => {
+        document.querySelectorAll('.tm-task-card[data-team-task-id]').forEach(el => {
+          el.onclick = () => openTeamTaskDetail(el.dataset.teamTaskId);
+        });
+      }, 100);
+    };
+  }
+})();
+
+// ── ۲. Team Projects در تب پروژه‌ها ─────────────────────
+function tmRenderProjectsSection() {
+  const el = document.getElementById('tmProjInProjects');
+  const listEl = document.getElementById('tmProjInProjectsList');
+  if (!el || !listEl) return;
+
+  const isMember = tm.role === 'member' && tm.code;
+  if (!isMember) { el.style.display = 'none'; return; }
+
+  el.style.display = '';
+  const inbox = (tm.inbox || []).filter(t => !t.deleted);
+  if (!inbox.length) {
+    listEl.innerHTML = '<div style="color:var(--t3);font-size:var(--fs-xs);text-align:center;padding:var(--sp3)">هنوز تسک تیمی نداری</div>';
+    return;
+  }
+
+  // گروه‌بندی بر اساس category
+  const groups = {};
+  inbox.forEach(t => {
+    const g = t.category || 'عمومی';
+    if (!groups[g]) groups[g] = [];
+    groups[g].push(t);
+  });
+
+  const STATUS_COLOR = { pending:'var(--t3)', in_progress:'var(--blue)', done:'var(--a)', blocked:'var(--red)', waiting:'var(--amber)' };
+  const STATUS_LABEL = { pending:'باید', in_progress:'درحال', done:'✓', blocked:'🚫', waiting:'منتظرم' };
+
+  listEl.innerHTML = Object.entries(groups).map(([cat, tasks]) => {
+    const done = tasks.filter(t => t.status === 'done').length;
+    const pct = Math.round(done / tasks.length * 100);
+    return `<div style="background:var(--bluem);border:1px solid rgba(59,130,246,.2);border-radius:var(--r3);padding:var(--sp3);margin-bottom:var(--sp2)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp2)">
+        <span style="font-size:var(--fs-xs);color:var(--blue);font-weight:700">${pct}٪</span>
+        <span style="font-size:var(--fs-sm);font-weight:700;color:var(--t1)">👥 ${esc(cat)}</span>
+      </div>
+      <div style="height:3px;background:var(--bluem);border-radius:var(--r5);margin-bottom:var(--sp3);overflow:hidden">
+        <div style="height:100%;border-radius:var(--r5);background:var(--blue);transform:scaleX(${pct/100});transform-origin:right;transition:transform 600ms cubic-bezier(0.23,1,0.32,1)"></div>
+      </div>
+      ${tasks.slice(0,3).map(t =>
+        `<div onclick="openTeamTaskDetail('${t.id}')" style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bluem);cursor:pointer">
+          <span style="font-size:var(--fs-2xs);font-weight:700;color:${STATUS_COLOR[t.status]||'var(--t3)'}">${STATUS_LABEL[t.status]||''}</span>
+          <span style="font-size:var(--fs-xs);color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70%">${esc(t.title)}</span>
+        </div>`
+      ).join('')}
+      ${tasks.length > 3 ? `<div style="font-size:var(--fs-2xs);color:var(--t3);text-align:center;padding-top:4px">+${tasks.length-3} تسک دیگه</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// hook به renderProjects
+(function(){
+  const _orig = window.renderProjects;
+  if (_orig) {
+    window.renderProjects = function() {
+      _orig.apply(this, arguments);
+      tmRenderProjectsSection();
+    };
+  }
+  // همچنین هر بار که تب projects باز میشه
+  const _origSetTab = window.setTab;
+  if (_origSetTab) {
+    window.setTab = function(tab, el) {
+      _origSetTab.apply(this, arguments);
+      if (tab === 'projects') setTimeout(tmRenderProjectsSection, 50);
+    };
+  }
+})();
+
+// ── ۳. Calendar Filter ─────────────────────────────────────
+let _calFilter = 'all'; // 'all' | 'personal' | 'team'
+
+function _calSetFilter(f) {
+  _calFilter = f;
+  ['all','personal','team'].forEach(k => {
+    const btn = document.getElementById(`ctf-${k}`);
+    if (!btn) return;
+    btn.style.background = k === f ? 'var(--t1)' : 'none';
+    btn.style.color      = k === f ? 'var(--bg1)' : 'var(--t3)';
+  });
+  renderCal(); // re-render با filter جدید
+}
+
+// نمایش فیلتر فقط اگه عضو تیم هستیم
+(function(){
+  const _origApplyUI = window.tmApplyUI;
+  tmApplyUI = function() {
+    if (_origApplyUI) _origApplyUI.apply(this, arguments);
+    const filterEl = document.getElementById('calTeamFilter');
+    if (filterEl) filterEl.style.display = tm.code ? '' : 'none';
+  };
+})();
+
+// hook به renderCal برای اعمال filter
+(function(){
+  const _origRenderCal = window.renderCal;
+  if (!_origRenderCal) return;
+  window.renderCal = function() {
+    _origRenderCal.apply(this, arguments);
+    if (_calFilter === 'all') return;
+    // پنهان/نمایان کردن نشانگرهای تقویم
+    const isTeam = _calFilter === 'team';
+    document.querySelectorAll('.cal-dot-personal').forEach(d => {
+      d.style.display = isTeam ? 'none' : '';
+    });
+    document.querySelectorAll('.cal-dot-team').forEach(d => {
+      d.style.display = isTeam ? '' : 'none';
+    });
+  };
+})();
+
+// ── ۴. EOD (Triage) — گزینه‌های تسک تیمی ──────────────────
+(function(){
+  const _origRenderTriage = window._renderTriageList;
+  if (!_origRenderTriage) return;
+  window._renderTriageList = function() {
+    _origRenderTriage.apply(this, arguments);
+    // بعد از render، بررسی تسک‌های تیمی و اضافه کردن دکمه‌ها
+    setTimeout(() => {
+      const inboxTasks = tm.inbox ? tm.inbox.filter(t => !t.deleted && t.status !== 'done') : [];
+      if (!inboxTasks.length) return;
+      // پیدا کردن container
+      const list = document.getElementById('triageList');
+      if (!list) return;
+      // اضافه کردن یه بخش جداگانه در پایین triage برای تسک‌های تیمی
+      const existing = document.getElementById('trTeamSection');
+      if (existing) existing.remove();
+      const section = document.createElement('div');
+      section.id = 'trTeamSection';
+      section.innerHTML = `
+        <div style="margin-top:var(--sp4);padding-top:var(--sp3);border-top:1px solid var(--b2)">
+          <div style="font-size:var(--fs-xs);color:var(--blue);font-weight:700;margin-bottom:var(--sp2);text-align:right">📥 از مدیر (${inboxTasks.length} تسک)</div>
+          ${inboxTasks.slice(0,3).map(t => `
+            <div style="background:var(--bluem);border:1px solid rgba(59,130,246,.2);border-radius:var(--r2);padding:var(--sp2) var(--sp3);margin-bottom:6px">
+              <div style="font-size:var(--fs-xs);font-weight:600;color:var(--t1);margin-bottom:6px;text-align:right">${esc(t.title)}</div>
+              <div style="display:flex;gap:6px">
+                <button onclick="tmAPI('PUT','/task/update',{taskId:'${t.id}',status:'in_progress'}).then(()=>toast_(svgIco('check'),'وضعیت آپدیت شد'))" style="flex:1;height:28px;border:1px solid var(--b1);border-radius:var(--r1);background:var(--bg2);font-size:var(--fs-2xs);font-weight:600;font-family:var(--f);color:var(--t2);cursor:pointer">درحالم</button>
+                <button onclick="openTeamTaskDetail('${t.id}')" style="flex:1;height:28px;border:1px solid rgba(59,130,246,.3);border-radius:var(--r1);background:var(--bluem);font-size:var(--fs-2xs);font-weight:600;font-family:var(--f);color:var(--blue);cursor:pointer">جزئیات</button>
+              </div>
+            </div>
+          `).join('')}
+          ${inboxTasks.length > 3 ? `<div style="font-size:var(--fs-2xs);color:var(--t3);text-align:center">+${inboxTasks.length-3} تسک دیگه</div>` : ''}
+        </div>`;
+      list.appendChild(section);
+    }, 100);
+  };
+})();
+
+// ── ۵. سکو گزارش تب — render کامل ────────────────────────
+window.tmRenderReport = function() {
+  const el = document.getElementById('tmSokoReportContent');
+  if (!el) return;
+  if (!tm.snapshot) {
+    el.innerHTML = '<div style="padding:var(--sp5);text-align:center"><div class="tm-skeleton" style="height:60px;border-radius:var(--r2);margin-bottom:var(--sp2)"></div><div class="tm-skeleton" style="height:100px;border-radius:var(--r2)"></div></div>';
+    return;
+  }
+  const members = (tm.snapshot.members || []).filter(m => m.status === 'active');
+  const total = members.reduce((s, m) => s + (m.activeTasks||0), 0);
+  const done = members.reduce((s, m) => s + (m.doneTasks||0), 0);
+  const blocked = members.filter(m => m.alert === 'blocked').length;
+  const stale = members.filter(m => m.alert === 'stale').length;
+
+  el.innerHTML = `
+    <!-- آمار کلی -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--sp2);padding:var(--sp3) var(--sp4);border-bottom:1px solid var(--b2)">
+      ${[
+        {l:'تسک فعال', v:total, c:'var(--t1)'},
+        {l:'تمام‌شده', v:done,  c:'var(--a)'},
+        {l:'مشکل',   v:blocked, c:'var(--red)'},
+      ].map(s => `
+        <div style="text-align:center;background:var(--bg2);border-radius:var(--r2);padding:var(--sp3)">
+          <div style="font-size:var(--fs-lg);font-weight:800;color:${s.c};font-variant-numeric:tabular-nums">${s.v}</div>
+          <div style="font-size:var(--fs-2xs);color:var(--t3);margin-top:2px">${s.l}</div>
+        </div>`).join('')}
+    </div>
+
+    <!-- عملکرد اعضا -->
+    <div style="padding:var(--sp3) var(--sp4)">
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp3)">عملکرد این هفته</div>
+      ${members.length ? members.map(m => {
+        const mDone = m.doneTasks || 0;
+        const mTotal = (m.activeTasks||0) + mDone;
+        const score = mTotal > 0 ? Math.round(mDone / mTotal * 100) : 0;
+        const scoreColor = score >= 80 ? 'var(--a)' : score >= 50 ? 'var(--amber)' : 'var(--red)';
+        return `
+          <div style="background:var(--bg2);border-radius:var(--r2);padding:var(--sp3);margin-bottom:var(--sp2)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp2)">
+              <div style="font-size:var(--fs-md);font-weight:800;color:${scoreColor};font-variant-numeric:tabular-nums">${score}٪</div>
+              <div style="text-align:right">
+                <div style="font-size:var(--fs-sm);font-weight:700;color:var(--t1)">${esc(m.name)}</div>
+                <div style="font-size:var(--fs-2xs);color:var(--t3)">${mDone} از ${mTotal} تسک</div>
+              </div>
+            </div>
+            <div style="height:4px;background:var(--bg3);border-radius:var(--r5);overflow:hidden">
+              <div style="height:100%;border-radius:var(--r5);background:${scoreColor};transform:scaleX(${score/100});transform-origin:right;transition:transform 600ms cubic-bezier(0.23,1,0.32,1)"></div>
+            </div>
+            ${m.alert !== 'ok' ? `<div style="font-size:var(--fs-2xs);margin-top:4px;color:${m.alert==='blocked'?'var(--red)':'var(--amber)'}">${m.alert==='blocked'?'🚫 مشکل دارد':'⏳ بی‌تحرکی'}</div>` : ''}
+          </div>`;
+      }).join('') : '<div style="color:var(--t3);font-size:var(--fs-xs);text-align:center;padding:var(--sp4)">عضوی ندارد</div>'}
+    </div>
+
+    <!-- toggle هفتگی / ماهانه -->
+    <div style="padding:0 var(--sp4) var(--sp5);display:flex;gap:var(--sp2);justify-content:center">
+      <button onclick="tmLoadReport('weekly')"  style="height:28px;padding:0 12px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--t1);color:var(--bg1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">هفتگی</button>
+      <button onclick="tmLoadReport('monthly')" style="height:28px;padding:0 12px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--bg2);color:var(--t2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">ماهانه</button>
+    </div>`;
+};
+
+async function tmLoadReport(period) {
+  try {
+    const data = await tmAPI('GET', `/report/${period}`);
+    if (data && data.members) {
+      // آپدیت snapshot
+      tm.snapshot = { ...tm.snapshot, members: data.members };
+      tmRenderReport();
+    }
+  } catch(e) {
+    console.warn('tmLoadReport:', e.message);
+  }
+}
+
+/* ════ End Missing Features ════ */
+
+
+/* ════ Focus Management for team modals ════ */
+(function(){
+  const _origTmModal = window.tmModal;
+  if (!_origTmModal) return;
+  window.tmModal = function(id, open) {
+    _origTmModal.apply(this, arguments);
+    if (open) {
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const first = el.querySelector('input:not([disabled]), textarea:not([disabled])');
+        if (first) first.focus();
+      }, 320); // بعد از animation
+    }
+  };
+})();
+/* ════ End Focus Management ════ */
+
+boot();
+</script>
+
+<!-- JALALI DATE PICKER -->
+<div class="jal-dp" id="jdp">
+  <div class="jdp-nav">
+    <button class="jdp-btn" onclick="jdpPrevMonth()">
+      <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </button>
+    <div class="jdp-title" id="jdpTitle">—</div>
+    <button class="jdp-btn" onclick="jdpNextMonth()">
+      <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+  <div class="jdp-weekdays">
+    <div class="jdp-wd">ش</div><div class="jdp-wd">ی</div>
+    <div class="jdp-wd">د</div><div class="jdp-wd">س</div>
+    <div class="jdp-wd">چ</div><div class="jdp-wd">پ</div>
+    <div class="jdp-wd">ج</div>
+  </div>
+  <div class="jdp-days" id="jdpDays"></div>
+  <button class="jdp-clear" onclick="jdpClear()">پاک کردن تاریخ</button>
+</div>
+<div class="jal-dp-overlay" id="jdpOverlay" onclick="closeJDP()" style="display:none;position:fixed;inset:0;z-index:499;"></div>
+
+
+<nav class="nav">
+  <div class="ni active" id="ni-home" onclick="goPage('Home')">
+    <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    <span class="ni-lbl">خانه</span><span class="ni-count" id="nic-home"></span><div class="ni-dot"></div>
+  </div>
+  <div class="ni" id="ni-projects" onclick="goPage('Projects')">
+    <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+    <span class="ni-lbl">پروژه‌ها</span><span class="ni-count" id="nic-projects"></span><div class="ni-dot"></div>
+  </div>
+  <div class="nav-fab" onclick="openCmd()">
+    <div class="nav-fab-btn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></div>
+    <span class="nav-fab-lbl">افزودن</span>
+  </div>
+  <div class="ni" id="ni-calendar" onclick="goPage('Calendar')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+    <span class="ni-lbl">تقویم</span><div class="ni-dot"></div>
+  </div>
+  <div class="ni ni-desktop-only" id="ni-birthdays" onclick="goPage('Birthdays')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2z"/><path d="M12 12V8"/><path d="M8 12V9"/><path d="M16 12V9"/><path d="M12 8c0-1.1-.9-2-2-2s-2 .9-2 2"/><path d="M12 4v1"/><path d="M2 17h20"/></svg>
+    <span class="ni-lbl">مناسبت‌ها</span><div class="ni-dot"></div>
+  </div>
+  <div class="ni" id="ni-me" onclick="goPage('Me')">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M6 20v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
+    <span class="ni-lbl">من</span><div class="ni-dot"></div>
+  </div>
+
+  <!-- Desktop sidebar additions — hidden on mobile -->
+  <div class="sb-spacer"></div>
+
+  <!-- Stats -->
+  <div class="sb-stats" id="sbStats" style="display:none">
+    <div class="sb-stat s-done">
+      <span class="sb-stat-num" id="sbDone">۰</span>
+      <span class="sb-stat-lbl">تموم شد</span>
+    </div>
+    <div class="sb-stat s-pending">
+      <span class="sb-stat-num" id="sbPending">۰</span>
+      <span class="sb-stat-lbl">باقی مونده</span>
+    </div>
+    <div class="sb-stat">
+      <span class="sb-stat-num" id="sbTotal">۰</span>
+      <span class="sb-stat-lbl">کل امروز</span>
+    </div>
+  </div>
+
+  <!-- Mini calendar -->
+  <div class="sb-cal-widget" id="sbCalWidget" style="display:none">
+    <div class="sb-cal-nav">
+      <button class="jci-btn" onclick="sbCalNext()">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <span class="sb-cal-title" id="sbCalTitle">—</span>
+      <button class="jci-btn" onclick="sbCalPrev()">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+    <div class="jci-wds">
+      <div class="jci-wd">ش</div><div class="jci-wd">ی</div>
+      <div class="jci-wd">د</div><div class="jci-wd">س</div>
+      <div class="jci-wd">چ</div><div class="jci-wd">پ</div>
+      <div class="jci-wd">ج</div>
+    </div>
+    <div class="jci-days" id="sbCalDays"></div>
+  </div>
+
+  <!-- Date block -->
+  <div class="sb-date-block" id="sbDateBlock" style="display:none">
+    <div class="sb-weekday" id="sbWeekday">—</div>
+    <div class="sb-day" id="sbDay">—</div>
+    <div class="sb-month" id="sbMonthYear">—</div>
+  </div>
+</nav>
+
+<!-- FOCUS MODE -->
+<div class="focus-overlay" id="focusOverlay">
+  <button class="focus-close" onclick="exitFocusMode()">×</button>
+  <div class="focus-content" id="focusRunning">
+    <div class="focus-cat" id="focusCat"></div>
+    <div class="focus-title" id="focusTitle"></div>
+    <div class="focus-ring-wrap">
+      <svg width="220" height="220" viewBox="0 0 220 220">
+        <circle class="focus-ring-bg" cx="110" cy="110" r="100" fill="none" stroke-width="8"/>
+        <circle class="focus-ring-fg" id="focusRingFg" cx="110" cy="110" r="100" fill="none" stroke-width="8" stroke-linecap="round" stroke-dasharray="628"/>
+      </svg>
+      <div class="focus-timer" id="focusTimerDisplay">25:00</div>
+    </div>
+    <div class="focus-dur-lbl">مدت تمرکز (دقیقه)</div>
+    <div class="focus-duration-row" id="focusDurationRow">
+      <button onclick="focusSetDuration(15,this)">۱۵</button>
+      <button onclick="focusSetDuration(25,this)" class="sel">۲۵</button>
+      <button onclick="focusSetDuration(45,this)">۴۵</button>
+      <button onclick="focusSetDuration(60,this)">۶۰</button>
+    </div>
+    <div class="focus-actions">
+      <button class="focus-btn pause" id="focusPauseBtn" onclick="focusTogglePause()">
+        <svg id="focusPauseIco" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><line x1="8" y1="5" x2="8" y2="19"/><line x1="16" y1="5" x2="16" y2="19"/></svg>
+        <span id="focusPauseTxt">مکث</span>
+      </button>
+      <button class="focus-btn done" onclick="focusMarkDone()">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 12 9 17 20 6"/></svg>
+        <span>تمام شد</span>
+      </button>
+    </div>
+  </div>
+  <div class="focus-done-q" id="focusDoneQ">
+    <div class="q" id="focusDoneQText">زمان تمام شد — تمومش کردی؟</div>
+    <button class="yes" onclick="focusFinishYes()">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-left:5px;"><polyline points="4 12 9 17 20 6"/></svg>بله، تمام شد</button>
+    <button class="extend" onclick="focusExtend()">۵ دقیقه دیگه ادامه بده</button>
+    <button class="no" onclick="exitFocusMode()">بعداً ادامه می‌دم</button>
+  </div>
+</div>
+
+<!-- OVERDUE MORNING MODAL -->
+<div class="triage-eve-modal" id="triageEveModal">
+  <div class="triage-eve-card">
+    <div class="triage-eve-head">
+      <div class="triage-eve-ttl">تعیین‌تکلیف امروز</div>
+      <button class="sh-x" onclick="closeTriageEveModal()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div style="font-size:.74rem;color:var(--t3);margin-bottom:14px;">روز رو به پایانه — این کارها هنوز تمام نشده‌اند.</div>
+    <div id="triageEveList"></div>
+  </div>
+</div>
+
+<div class="overdue-modal" id="overdueModal" style="display:none;">
+  <div class="overdue-sheet">
+    <div class="overdue-title"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg> کارهای عقب‌افتاده</div>
+    <div class="overdue-sub" id="overdueSubtitle">این کارها از دیروز موندن — چیکار کنیم؟</div>
+    <div id="overdueList"></div>
+    <button onclick="closeOverdueModal()" style="width:100%;margin-top:16px;padding:12px;border-radius:var(--r2);border:none;background:var(--bg2);color:var(--t2);font-weight:700;font-size:.85rem;cursor:pointer;">همه رو نگه دار</button>
+  </div>
+</div>
+
+<!-- ═══ Command Palette ═══ -->
+<div id="cmdPalette" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.5);backdrop-filter:blur(8px);" onclick="if(event.target===this)closeCmdPalette()">
+  <div style="position:absolute;top:18%;left:calc((100vw - 220px) / 2);transform:translateX(-50%);width:min(540px,calc(100vw - 260px));background:var(--bg1);border-radius:var(--r4);border:1px solid var(--b1);box-shadow:0 32px 80px rgba(0,0,0,.3);overflow:hidden;">
+    <div style="display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--b2);">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="var(--t3)" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="cmdInput" type="text" autocomplete="off" spellcheck="false"
+        style="flex:1;border:none;background:transparent;font-size:.9rem;color:var(--t1);font-family:var(--f);"
+        placeholder="جستجو یا دستور..." oninput="cmdFilter()" onkeydown="cmdKey(event)">
+      <kbd style="font-size:.65rem;color:var(--t4);background:var(--bg2);border:1px solid var(--b1);border-radius:4px;padding:2px 6px;">Esc</kbd>
+    </div>
+    <div id="cmdList" style="max-height:340px;overflow-y:auto;padding:6px;"></div>
+  </div>
+</div>
+
+
+</div><!-- /app -->
+
+<!-- ════════ DayQ Team HTML — سکو Step 1 ════════ -->
+
+<!-- Choice sheet: ایجاد یا پیوستن -->
+<div class="sheet" id="shTmChoice">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div class="sh-ttl">تیم کاری</div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div style="font-size:var(--fs-xs);color:var(--t3);margin-top:4px">به تیم بپیوند یا تیم جدید بساز</div>
+  </div>
+  <div class="sh-body" style="gap:var(--sp3)">
+    <button onclick="tmOpenCreate();closeAll()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--t1);color:var(--bg1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:none;cursor:pointer">+ ایجاد تیم جدید</button>
+    <button onclick="tmOpenJoin();closeAll()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--bg2);color:var(--t1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:1px solid var(--b1);cursor:pointer">پیوستن با کد دعوت</button>
+  </div>
+</div>
+
+<!-- Create Team sheet -->
+<div class="sheet" id="shTmCreate">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div class="sh-ttl">ایجاد تیم جدید</div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+  </div>
+  <div class="sh-body tm-join-body">
+    <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نام تیم</div><input id="tmCreateName" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3);font-size:var(--fs-md)" placeholder="مثال: دکتر عبیدی — تیم فروش" type="text"/></div>
+    <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نام شما</div><input id="tmCreateMgrName" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" placeholder="نام کامل" type="text"/></div>
+    <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">سمت (اختیاری)</div><input id="tmCreateMgrRole" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" placeholder="مدیر فروش" type="text"/></div>
+    <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">PIN مدیر (۴ رقم)</div><input id="tmCreatePin" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/></div>
+    <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">تأیید PIN</div><input id="tmCreatePin2" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/></div>
+    <div id="tmCreateErr" style="font-size:var(--fs-xs);color:var(--red);text-align:center;min-height:16px"></div>
+    <button id="tmCreateBtn" onclick="tmDoCreate()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--t1);color:var(--bg1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:none;cursor:pointer;margin-top:auto">ساخت تیم</button>
+  </div>
+</div>
+
+<!-- Team Code sheet (بعد از ایجاد) -->
+<div class="sheet" id="shTmCode">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div class="sh-ttl">تیم ساخته شد ✅</div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+  </div>
+  <div class="sh-body" style="gap:var(--sp3)">
+    <div class="tm-code-display">
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2)">کد دعوت تیم</div>
+      <div class="tm-code-text" id="tmCodeDisplay">—</div>
+      <div style="display:flex;gap:var(--sp2)">
+        <button class="tm-btn blue" style="flex:1;justify-content:center" onclick="if(navigator.clipboard)navigator.clipboard.writeText(document.getElementById('tmCodeDisplay').textContent);toast_(svgIco('check'),'کپی شد')">📋 کپی کد</button>
+        <button class="tm-btn" style="flex:1;justify-content:center" onclick="tmShareCode()">📤 اشتراک</button>
+      </div>
+    </div>
+    <div class="tm-invite-link" id="tmInviteLink"></div>
+    <div style="font-size:var(--fs-xs);color:var(--t3);text-align:center">کارمندها با این کد یا لینک join می‌کنن</div>
+    <button onclick="tmOpenSoko();closeAll()" style="width:100%;height:44px;border-radius:var(--r2);background:var(--t1);color:var(--bg1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:none;cursor:pointer;margin-top:auto">رفتن به سکو ←</button>
+  </div>
+</div>
+
+<!-- Join Team sheet -->
+<div class="sheet" id="shTmJoin">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div class="sh-ttl">پیوستن به تیم</div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+  </div>
+  <div class="sh-body">
+    <div id="tmJoinForm" class="tm-join-body">
+      <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">کد دعوت</div><input id="tmJoinCode" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3);font-family:var(--mono);font-size:var(--fs-md);text-transform:uppercase;letter-spacing:.1em" placeholder="DQ-XXXXXXX" type="text"/></div>
+      <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نام شما</div><input id="tmJoinName" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" placeholder="نام کامل" type="text"/></div>
+      <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">سمت</div><input id="tmJoinRole" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" placeholder="کارشناس فروش" type="text"/></div>
+      <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">PIN شخصی (۴ رقم)</div><input id="tmJoinPin" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/><div style="font-size:var(--fs-2xs);color:var(--t3);margin-top:4px">برای بازیابی در دستگاه جدید</div></div>
+      <div id="tmJoinErr" style="font-size:var(--fs-xs);color:var(--red);text-align:center;min-height:16px"></div>
+      <button id="tmJoinBtn" onclick="tmDoJoin()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--t1);color:var(--bg1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:none;cursor:pointer;margin-top:auto">ارسال درخواست</button>
+    </div>
+    <div id="tmJoinSuccess" style="display:none;text-align:center;padding:var(--sp5)">
+      <div style="font-size:2.5rem;margin-bottom:var(--sp3)">⏳</div>
+      <div style="font-size:var(--fs-lg);font-weight:700;margin-bottom:var(--sp2)">درخواست ارسال شد</div>
+      <div style="font-size:var(--fs-sm);color:var(--t2);margin-bottom:var(--sp4)">منتظر تأیید مدیر هستی — به محض تأیید اعلان می‌گیری</div>
+      <div style="background:var(--bg2);border-radius:var(--r2);padding:var(--sp3);margin-bottom:var(--sp4)">
+        <div style="font-size:var(--fs-2xs);color:var(--t3);margin-bottom:4px">کد تیم</div>
+        <div id="tmJoinTeamCode" style="font-family:var(--mono);font-weight:700;font-size:var(--fs-lg)">—</div>
+      </div>
+      <button onclick="closeAll()" style="width:100%;height:44px;border-radius:var(--r2);background:var(--bg2);color:var(--t1);font-size:var(--fs-sm);font-family:var(--f);border:1px solid var(--b1);cursor:pointer">بازگشت به DayQ</button>
+    </div>
+  </div>
+</div>
+
+<!-- Team Info sheet (وقتی تیم داره) -->
+<div class="sheet" id="shTmInfo">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div class="sh-ttl">تیم کاری</div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+  </div>
+  <div class="sh-body"><div id="tmInfoContent"></div></div>
+</div>
+
+<!-- Task Detail sheet (کارمند) -->
+<div class="sheet" id="tmDetailSheet">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div>
+        <div class="sh-ttl" id="tmDetailTitle" style="font-size:var(--fs-md)">—</div>
+        <div id="tmDetailMeta" style="font-size:var(--fs-xs);color:var(--t3);margin-top:2px"></div>
+      </div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <span class="tm-badge" style="margin-top:var(--sp1)">از مدیر</span>
+  </div>
+  <div class="sh-body" style="gap:var(--sp3)">
+    <div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2)">وضعیت</div>
+      <div class="tm-status-row">
+        <button class="tm-status-opt" data-status="pending" onclick="tmUpdateTaskStatus('pending')">باید</button>
+        <button class="tm-status-opt" data-status="in_progress" onclick="tmUpdateTaskStatus('in_progress')">درحال</button>
+        <button class="tm-status-opt" data-status="done" onclick="tmUpdateTaskStatus('done')">انجام شد</button>
+        <button class="tm-status-opt" data-status="blocked" onclick="tmUpdateTaskStatus('blocked')">🚫</button>
+      </div>
+    </div>
+    <div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2)">چک‌لیست</div>
+      <div id="tmDetailChecklist"></div>
+    </div>
+    <div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2)">یادداشت برای مدیر</div>
+      <textarea id="tmDetailNote" class="sh-iw" style="width:100%;min-height:72px;resize:none;padding:var(--sp2) var(--sp3);font-size:var(--fs-sm)" placeholder="بنویس..."></textarea>
+    </div>
+    <div class="tm-log" id="tmDetailLog"></div>
+    <div class="tm-task-actions">
+      <button class="tm-task-action warn" onclick="tmMarkWaiting()">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        منتظرم
+      </button>
+      <button class="tm-task-action primary" onclick="tmUpdateTaskStatus('done')">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--bg1)" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        انجام شد
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Assign Task sheet (مدیر) -->
+<div class="sheet" id="shTmAssign">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div class="sh-ttl">تسک جدید</div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+  </div>
+  <div class="sh-body tm-join-body">
+    <div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">برای کی؟</div>
+      <div id="tmAssignMemberOpts" style="display:flex;gap:var(--sp2);flex-wrap:wrap"></div>
+    </div>
+        <div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">اولویت</div>
+      <div style="display:flex;gap:var(--sp2)">
+        <button class="tm-btn tm-pri-opt active" data-pri="normal" onclick="tmSelectPriority(this,'normal')">عادی</button>
+        <button class="tm-btn tm-pri-opt" data-pri="high" onclick="tmSelectPriority(this,'high')" style="color:var(--amber)">⚡ مهم</button>
+        <button class="tm-btn tm-pri-opt" data-pri="urgent" onclick="tmSelectPriority(this,'urgent')" style="color:var(--red)">🔴 فوری</button>
+      </div>
+    </div>
+<div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">عنوان تسک</div><input id="tmAssignTitle" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" placeholder="عنوان..." type="text"/></div>
+    <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">ددلاین <span style="color:var(--red)">*</span></div><input id="tmAssignDeadline" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3);font-family:var(--mono)" placeholder="1404-05-15" type="text"/></div>
+    <div id="tmAssignErr" style="font-size:var(--fs-xs);color:var(--red);min-height:16px"></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:var(--sp2) 0;border-top:1px solid var(--b1)">
+      <label style="display:flex;align-items:center;gap:var(--sp2);cursor:pointer">
+        <input type="checkbox" id="tmBroadcastToggle" onchange="tmToggleBroadcast(this)" style="width:16px;height:16px;accent-color:var(--blue)"/>
+        <span style="font-size:var(--fs-xs);color:var(--t2)">📢 Broadcast — ارسال به همه</span>
+      </label>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:var(--sp2) 0;border-top:1px solid var(--b1)">
+      <label style="display:flex;align-items:center;gap:var(--sp2);cursor:pointer">
+        <input type="checkbox" id="tmNeedsVerifyToggle" style="width:16px;height:16px;accent-color:var(--a)"/>
+        <span style="font-size:var(--fs-xs);color:var(--t2)">نیاز به تأیید مدیر</span>
+      </label>
+    </div>
+<button id="tmAssignBtn" onclick="tmDoAssign()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--t1);color:var(--bg1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:none;cursor:pointer;margin-top:auto">ارسال تسک</button>
+  </div>
+</div>
+
+<!-- سکو Panel — full screen -->
+<div class="tm-panel" id="tmSokoPanel">
+  <div class="tm-panel-hdr">
+    <div class="tm-panel-toprow">
+      <!-- Close -->
+      <button class="tm-panel-close" onclick="tmCloseSoko()">✕</button>
+      <!-- Title -->
+      <div class="tm-panel-titles">
+        <div class="tm-panel-title">سکو</div>
+        <div class="tm-panel-sub" id="tmSokoPanelSub">تیم</div>
+      </div>
+      <!-- Actions -->
+      <div class="tm-panel-actions">
+        <button class="tm-panel-action-btn" onclick="tmOpenAnnouncement()">📢</button>
+        <button class="tm-panel-action-btn primary" onclick="tmAssignTask()">+ تسک</button>
+      </div>
+    </div>
+    <div class="tm-tabs">
+      <div class="tm-tab active" data-tab="status" onclick="tmSetSokoTab('status')">وضعیت</div>
+      <div class="tm-tab" data-tab="projects" onclick="tmSetSokoTab('projects')">پروژه‌ها</div>
+      <div class="tm-tab" data-tab="report" onclick="tmSetSokoTab('report')">گزارش</div>
+    </div>
+  </div>
+  <div class="tm-panel-body">
+    <div class="tm-tab-pane" data-pane="status" id="tmSokoStatusContent"></div>
+    <div class="tm-tab-pane" data-pane="projects" style="display:none" id="tmSokoProjectsContent">
+      <div style="text-align:center;padding:var(--sp5);color:var(--t3);font-size:var(--fs-sm)">پروژه‌های تیمی در Step 2 اضافه می‌شن</div>
+    </div>
+    <div class="tm-tab-pane" data-pane="report" style="display:none" id="tmSokoReportContent"></div>
+  </div>
+</div>
+<!-- ════ END TEAM HTML ════ -->
+
+<!-- ════ Step 3 HTML ════ -->
+
+<!-- Announcement Sheet (مدیر) -->
+<div class="sheet" id="shTmAnnounce">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div class="sh-ttl">📢 اطلاعیه جدید</div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+  </div>
+  <div class="sh-body" style="gap:var(--sp3)">
+    <div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">متن اطلاعیه</div>
+      <textarea id="tmAnnoText" class="sh-iw" style="width:100%;min-height:80px;resize:none;padding:var(--sp2) var(--sp3);font-size:var(--fs-sm)" placeholder="بنویس..." maxlength="300"></textarea>
+      <div style="font-size:var(--fs-2xs);color:var(--t3);text-align:left;margin-top:2px">حداکثر ۳۰۰ کاراکتر</div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:var(--sp2) 0;border-top:1px solid var(--b1)">
+      <label style="display:flex;align-items:center;gap:var(--sp2);cursor:pointer">
+        <input type="checkbox" id="tmAnnoPinCal" style="width:16px;height:16px;accent-color:var(--a)"/>
+        <span style="font-size:var(--fs-xs);color:var(--t2)">Pin به تقویم اعضا</span>
+      </label>
+    </div>
+    <div id="tmAnnoErr" style="font-size:var(--fs-xs);color:var(--red);min-height:16px"></div>
+    <button id="tmAnnoBtn" onclick="tmDoAnnounce()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--t1);color:var(--bg1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:none;cursor:pointer;margin-top:auto">ارسال به همه</button>
+  </div>
+</div>
+<!-- ════ End Step 3 HTML ════ -->
+
+<!-- Pending Members Sheet -->
+<div class="sheet" id="shTmPending">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div class="sh-ttl">درخواست‌های عضویت</div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+  </div>
+  <div class="sh-body" id="tmPendingList">
+    <div style="text-align:center;color:var(--t3);padding:var(--sp5)"><span class="tm-skeleton" style="display:inline-block;width:60%;height:14px;border-radius:var(--r1)"></span></div>
+  </div>
+</div>
+
+<!-- ════ Team Modals (مستقل از sheet mechanism) ════ -->
+
+<!-- Modal: انتخاب ایجاد/پیوستن -->
+<div class="tm-modal" id="tmModalChoice">
+  <div class="tm-modal-sheet">
+    <div class="tm-modal-handle"></div>
+    <div class="tm-modal-hdr">
+      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
+      <span class="tm-modal-ttl">👥 تیم کاری</span>
+    </div>
+    <div class="tm-modal-body">
+      <div style="text-align:center;padding:var(--sp3) 0">
+        <div style="font-size:2rem;margin-bottom:var(--sp2)">👥</div>
+        <div style="font-size:var(--fs-xs);color:var(--t3)">به تیم بپیوند یا تیم جدید بساز</div>
+      </div>
+      <button onclick="tmOpenCreate()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">+ ایجاد تیم جدید</button>
+      <button onclick="tmOpenJoin()" style="width:100%;height:48px;background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">پیوستن با کد دعوت</button>
+      <button onclick="tmOpenDirectLogin()" style="width:100%;height:44px;background:none;color:var(--blue);border:none;font-size:var(--fs-sm);font-weight:600;font-family:var(--f);cursor:pointer;text-decoration:underline">قبلاً عضو بودم — ورود مستقیم</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: ایجاد تیم -->
+<div class="tm-modal" id="tmModalCreate">
+  <div class="tm-modal-sheet">
+    <div class="tm-modal-handle"></div>
+    <div class="tm-modal-hdr">
+      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
+      <span class="tm-modal-ttl">ایجاد تیم جدید</span>
+    </div>
+    <div class="tm-modal-body">
+      <div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نام تیم</div>
+        <input id="tmMCreateName" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--f);color:var(--t1)" placeholder="مثال: دکتر عبیدی — تیم فروش" type="text"/>
+      </div>
+      <div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نام شما</div>
+        <input id="tmMCreateMgrName" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--f);color:var(--t1)" placeholder="نام کامل" type="text"/>
+      </div>
+      <div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">سمت (اختیاری)</div>
+        <input id="tmMCreateMgrRole" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--f);color:var(--t1)" placeholder="مدیر فروش" type="text"/>
+      </div>
+      <div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">PIN مدیر (۴ رقم)</div>
+        <input id="tmMCreatePin" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-lg);font-family:var(--f);color:var(--t1);letter-spacing:.3em;text-align:center" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/>
+      </div>
+      <div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">تأیید PIN</div>
+        <input id="tmMCreatePin2" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-lg);font-family:var(--f);color:var(--t1);letter-spacing:.3em;text-align:center" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/>
+      </div>
+      <div id="tmMCreateErr" style="font-size:var(--fs-xs);color:var(--red);text-align:center;min-height:16px"></div>
+      <button id="tmMCreateBtn" onclick="tmDoCreate()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer;margin-top:4px">ساخت تیم</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal: Assign Task — NLP powered -->
+<div class="tm-modal" id="tmModalAssign">
+  <div class="tm-modal-sheet" style="max-height:95dvh">
+    <div class="tm-modal-handle"></div>
+    <div class="tm-modal-hdr">
+      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
+      <span class="tm-modal-ttl">تسک جدید</span>
+    </div>
+    <div class="tm-modal-body" style="gap:16px">
+
+      <!-- NLP Input -->
+      <div style="background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r3);padding:12px 14px;transition:border-color 150ms ease" onfocus="this.style.borderColor='var(--blue)'" onblur="this.style.borderColor='var(--b1)'">
+        <textarea id="tmANlpInp"
+          rows="2"
+          placeholder="گزارش ماهانه بده تا جمعه !مهم"
+          oninput="_tmAssignNlpInput(this.value)"
+          style="width:100%;background:none;border:none;resize:none;font-size:var(--fs-md);font-family:var(--f);color:var(--t1);direction:rtl;outline:none;line-height:1.6;min-height:44px;max-height:100px;overflow:hidden"></textarea>
+        <!-- NLP Preview chips -->
+        <div id="tmAPreview" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px"></div>
+      </div>
+
+      <!-- Deadline shortcuts -->
+      <div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:8px">ددلاین</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button onclick="_tmSetDeadlineShortcut('فردا')"        class="tm-dl-chip">فردا</button>
+          <button onclick="_tmSetDeadlineShortcut('پس‌فردا')"     class="tm-dl-chip">پس‌فردا</button>
+          <button onclick="_tmSetDeadlineShortcut('این جمعه')"    class="tm-dl-chip">این جمعه</button>
+          <button onclick="_tmSetDeadlineShortcut('هفته دیگه')"   class="tm-dl-chip">هفته دیگه</button>
+          <button onclick="_tmSetDeadlineShortcut('ماه دیگه')"    class="tm-dl-chip">ماه دیگه</button>
+        </div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-top:8px">یا مستقیم توی متن بنویس: «جمعه»، «۱۵ مرداد»، «هفته دیگه»</div>
+      </div>
+
+      <!-- اولویت override -->
+      <div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:8px">اولویت (اختیاری — از متن تشخیص میده)</div>
+        <div style="display:flex;gap:6px">
+          <button class="tm-pri-chip" data-pri="high" onclick="_tmSetPri('high')" style="flex:1;height:34px;border-radius:var(--r2);border:1px solid rgba(248,81,73,.3);background:var(--redm);color:var(--red);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer;transition:all 120ms ease;opacity:.5">فوری</button>
+          <button class="tm-pri-chip" data-pri="med"  onclick="_tmSetPri('med')"  style="flex:1;height:34px;border-radius:var(--r2);border:1px solid rgba(217,119,6,.3);background:var(--ambm);color:var(--amber);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer;transition:all 120ms ease;opacity:.5">مهم</button>
+          <button class="tm-pri-chip" data-pri="low"  onclick="_tmSetPri('low')"  style="flex:1;height:34px;border-radius:var(--r2);border:1px solid var(--b1);background:var(--bg2);color:var(--t3);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer;transition:all 120ms ease;opacity:.5">عادی</button>
+        </div>
+      </div>
+
+      <!-- انتخاب عضو -->
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <button id="tmABroadcastBtn" onclick="_tmToggleBroadcast()" style="height:26px;padding:0 10px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--bg2);color:var(--t2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;transition:all 150ms ease">📡 ارسال به همه</button>
+          <div style="font-size:var(--fs-xs);color:var(--t3)">برای کی؟</div>
+        </div>
+        <div id="tmAMemberChips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
+      </div>
+
+      <!-- Error + Submit -->
+      <div id="tmAErr" style="font-size:var(--fs-xs);color:var(--red);min-height:14px;text-align:center"></div>
+      <button id="tmASubmitBtn" onclick="tmDoAssign()" style="width:100%;height:50px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-md);font-weight:800;font-family:var(--f);cursor:pointer">ارسال تسک</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: پیوستن به تیم -->
+<div class="tm-modal" id="tmModalJoin">
+  <div class="tm-modal-sheet">
+    <div class="tm-modal-handle"></div>
+    <div class="tm-modal-hdr">
+      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
+      <span class="tm-modal-ttl">پیوستن به تیم</span>
+    </div>
+    <div class="tm-modal-body">
+      <div id="tmMJoinForm">
+        <div style="margin-bottom:14px">
+          <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">کد دعوت</div>
+          <input id="tmMJoinCode" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--mono);color:var(--t1);text-transform:uppercase;letter-spacing:.1em" placeholder="DQ-XXXXXXX" type="text"/>
+        </div>
+        <div style="margin-bottom:14px">
+          <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نام شما</div>
+          <input id="tmMJoinName" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--f);color:var(--t1)" placeholder="نام کامل" type="text"/>
+        </div>
+        <div style="margin-bottom:14px">
+          <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">سمت</div>
+          <input id="tmMJoinRole" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--f);color:var(--t1)" placeholder="کارشناس فروش" type="text"/>
+        </div>
+        <div style="margin-bottom:14px">
+          <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">PIN شخصی (۴ رقم)</div>
+          <input id="tmMJoinPin" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-lg);font-family:var(--f);color:var(--t1);letter-spacing:.3em;text-align:center" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/>
+          <div style="font-size:var(--fs-2xs);color:var(--t3);margin-top:4px">برای بازیابی در دستگاه جدید</div>
+        </div>
+        <div id="tmMJoinErr" style="font-size:var(--fs-xs);color:var(--red);text-align:center;min-height:16px;margin-bottom:8px"></div>
+        <button id="tmMJoinBtn" onclick="tmDoJoin()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">ارسال درخواست</button>
+      </div>
+      <div id="tmMJoinSuccess" style="display:none;text-align:center;padding:var(--sp4) 0">
+        <div style="font-size:3rem;margin-bottom:var(--sp3)">⏳</div>
+        <div style="font-size:var(--fs-lg);font-weight:700;margin-bottom:var(--sp2)">درخواست ارسال شد</div>
+        <div style="font-size:var(--fs-sm);color:var(--t3);margin-bottom:var(--sp4)">منتظر تأیید مدیر هستی</div>
+        <div style="background:var(--bg2);border-radius:var(--r2);padding:var(--sp3);margin-bottom:var(--sp4)">
+          <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">کد تیم</div>
+          <div id="tmMJoinTeamCode" style="font-family:var(--mono);font-weight:700;font-size:var(--fs-lg)">—</div>
+        </div>
+        <button onclick="tmCloseModal()" style="width:100%;height:44px;background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-sm);font-family:var(--f);cursor:pointer">بازگشت به DayQ</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: کد تیم بعد از ایجاد -->
+<div class="tm-modal" id="tmModalCode">
+  <div class="tm-modal-sheet">
+    <div class="tm-modal-handle"></div>
+    <div class="tm-modal-hdr">
+      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
+      <span class="tm-modal-ttl">✅ تیم ساخته شد!</span>
+    </div>
+    <div class="tm-modal-body">
+      <div style="background:var(--bg2);border-radius:var(--r3);padding:var(--sp4);text-align:center">
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2)">کد دعوت تیم</div>
+        <div id="tmMCodeDisplay" style="font-size:1.6rem;font-weight:900;font-family:var(--mono);color:var(--t1);letter-spacing:.2em;margin-bottom:var(--sp3)">—</div>
+        <div style="display:flex;gap:var(--sp2)">
+          <button onclick="if(navigator.clipboard)navigator.clipboard.writeText(document.getElementById('tmMCodeDisplay').textContent);toast_(svgIco('check'),'کپی شد')" class="tm-btn blue" style="flex:1;justify-content:center">📋 کپی</button>
+          <button onclick="tmShareCode()" class="tm-btn" style="flex:1;justify-content:center">📤 اشتراک</button>
+        </div>
+      </div>
+      <div id="tmMInviteLink" style="font-size:var(--fs-xs);font-family:var(--mono);color:var(--blue);word-break:break-all;background:var(--bluem);padding:var(--sp2) var(--sp3);border-radius:var(--r2)"></div>
+      <button onclick="tmCloseModal();tmOpenSoko()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">رفتن به سکو ←</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: اطلاعات تیم -->
+<div class="tm-modal" id="tmModalInfo">
+  <div class="tm-modal-sheet">
+    <div class="tm-modal-handle"></div>
+    <div class="tm-modal-hdr">
+      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
+      <span class="tm-modal-ttl">👥 تیم کاری</span>
+    </div>
+    <div class="tm-modal-body">
+      <div id="tmMInfoContent"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ End Team Modals ════ -->
+
+<!-- Direct Login Modal — ورود با کد تیم + PIN -->
+<div class="tm-modal" id="tmModalDirectLogin">
+  <div class="tm-modal-sheet">
+    <div class="tm-modal-handle"></div>
+    <div class="tm-modal-hdr">
+      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
+      <span class="tm-modal-ttl">ورود به تیم</span>
+    </div>
+    <div class="tm-modal-body">
+      <div style="background:var(--bluem);border:1px solid rgba(59,130,246,.2);border-radius:var(--r2);padding:var(--sp3);margin-bottom:2px">
+        <div style="font-size:var(--fs-xs);color:var(--blue);font-weight:600">اگه قبلاً در دستگاه دیگه‌ای عضو یا مدیر تیمی</div>
+        <div style="font-size:var(--fs-xs);color:var(--t2);margin-top:2px">فقط کد تیم و PIN رو وارد کن</div>
+      </div>
+      <div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">کد تیم</div>
+        <input id="tmDLCode" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--mono);color:var(--t1);text-transform:uppercase;letter-spacing:.1em" placeholder="DQ-XXXXXXX" type="text"/>
+      </div>
+      <div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">PIN</div>
+        <input id="tmDLPin" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-lg);font-family:var(--f);color:var(--t1);letter-spacing:.3em;text-align:center" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/>
+      </div>
+      <div id="tmDLErr" style="font-size:var(--fs-xs);color:var(--red);min-height:16px;text-align:center"></div>
+      <button id="tmDLBtn" onclick="tmDoDirectLogin()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">ورود</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sheet: Team Task Detail — کارمند -->
+<div class="sh" id="shTeamTaskDetail">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div class="sh-ttl" id="ttdTitle">تسک تیمی</div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+  </div>
+  <div class="sh-body tm-join-body" id="ttdBody">
+    <!-- meta -->
+    <div style="background:var(--bluem);border:1px solid rgba(59,130,246,.2);border-radius:var(--r2);padding:var(--sp3);display:flex;align-items:center;justify-content:space-between">
+      <div id="ttdDeadline" style="font-size:var(--fs-xs);color:var(--blue)"></div>
+      <div>
+        <div id="ttdManager" style="font-size:var(--fs-xs);color:var(--t2)"></div>
+        <div id="ttdPriority" style="font-size:var(--fs-xs);font-weight:700;color:var(--red)"></div>
+      </div>
+    </div>
+
+    <!-- وضعیت -->
+    <div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:8px">وضعیت</div>
+      <div style="display:flex;gap:6px" id="ttdStatusBtns">
+        <button onclick="_ttdSetStatus('pending')"   class="ttd-st-btn" data-st="pending"   style="flex:1;height:36px;border-radius:var(--r2);border:1px solid var(--b1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">باید</button>
+        <button onclick="_ttdSetStatus('in_progress')" class="ttd-st-btn" data-st="in_progress" style="flex:1;height:36px;border-radius:var(--r2);border:1px solid var(--b1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">درحال</button>
+        <button onclick="_ttdSetStatus('done')"      class="ttd-st-btn" data-st="done"      style="flex:1;height:36px;border-radius:var(--r2);border:1px solid var(--b1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">✓ انجام شد</button>
+        <button onclick="_ttdSetStatus('blocked')"   class="ttd-st-btn" data-st="blocked"   style="flex:1;height:36px;border-radius:var(--r2);border:1px solid rgba(248,81,73,.3);color:var(--red);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">🚫 مشکل</button>
+      </div>
+    </div>
+
+    <!-- یادداشت برای مدیر -->
+    <div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px">یادداشت برای مدیر (اختیاری)</div>
+      <textarea id="ttdNote" rows="3"
+        placeholder="توضیح بده — مثلاً: منتظر تأیید مدیر مالی هستم"
+        style="width:100%;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 12px;font-size:var(--fs-xs);font-family:var(--f);color:var(--t1);direction:rtl;resize:none;outline:none"></textarea>
+    </div>
+
+    <!-- چک‌لیست مدیر (read-only اگه باشه) -->
+    <div id="ttdChecklist" style="display:none">
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px">چک‌لیست</div>
+      <div id="ttdChecklistItems"></div>
+    </div>
+
+    <div id="ttdErr" style="font-size:var(--fs-xs);color:var(--red);min-height:14px;text-align:center"></div>
+    <button id="ttdSaveBtn" onclick="_ttdSave()" style="width:100%;height:46px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">ذخیره وضعیت</button>
+  </div>
+</div>
+</body>
+</html>// (desktop CSS moved to static)
 // ═════════════════════════════════════════════
 // Fix 4: tmApplyUI روی دسکتاپ — مطمئن شدن
 // ════════════════════════════════════════════
