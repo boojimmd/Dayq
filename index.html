@@ -4005,6 +4005,20 @@ select.fi{
 .tm-status-btn:active { transform:scale(0.97); }
 
 /* ════ End Team Utility Classes ════ */
+
+@media(min-width:900px){
+  /* سکو status content — max-width برای خوانایی */
+  #tmSokoStatusContent > div,
+  #tmSokoReportContent > div,
+  #tmSokoProjContent > div {
+    max-width:680px;
+    margin-left:auto;
+    margin-right:auto;
+  }
+  /* header panel — padding بیشتر */
+  .tm-panel-hdr { padding:24px 32px 0; }
+  .tm-panel-body { padding:var(--sp4) var(--sp5); }
+}
 </style>
 </head>
 <body>
@@ -14216,6 +14230,9 @@ async function tmSyncBackground() {
       localStorage.setItem(TM_SK.snap, JSON.stringify(data));
       tmUpdateSokoCard();
       tmRenderTodaySection();
+      // آپدیت status view اگه سکو باز باشه
+      if (tm.sokoTab === 'status' || !tm.sokoTab) tmRenderSokoStatus();
+      if (tm.sokoTab === 'report') { tmRenderSokoReport(); }
     }
     // رویدادهای تیمی (هر دو نقش)
     const calData = await tmAPI('GET', '/team/calendar');
@@ -14533,61 +14550,101 @@ function tmSetSokoTab(tab) {
   tm.sokoTab = tab;
   document.querySelectorAll('.tm-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
   document.querySelectorAll('.tm-tab-pane').forEach(p => p.style.display = p.dataset.pane === tab ? '' : 'none');
-  if (tab === 'status') tmRenderSokoStatus();
-  else if (tab === 'report') tmRenderSokoReport();
+  if (tab === 'status')   tmRenderSokoStatus();
+  else if (tab === 'projects') tmRenderTeamProjects();
+  else if (tab === 'report')  { tmRenderSokoReport(); tmRenderReport(); }
 }
 
 function tmRenderSokoStatus() {
   const el = document.getElementById('tmSokoStatusContent');
-  if (!el || !tm.snapshot) {
-    if (el) el.innerHTML = '<div style="text-align:center;padding:var(--sp5);color:var(--t3);font-size:var(--fs-sm)"><span class="tm-skeleton" style="display:inline-block;width:60%;height:14px;border-radius:var(--r1)"></span></div>';
-    return;
-  }
-  const members = tm.snapshot.members || [];
-  if (!members.length) {
-    el.innerHTML = `<div style="text-align:center;padding:var(--sp5)">
-      <div style="font-size:2rem;margin-bottom:var(--sp3)">👥</div>
-      <div style="font-size:var(--fs-sm);color:var(--t2)">هنوز عضوی نداری</div>
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-top:var(--sp2)">کد دعوت رو به تیمت بده</div>
-      <button class="tm-btn blue" style="margin-top:var(--sp3);justify-content:center" onclick="tmShareCode()">📤 اشتراک کد</button>
+  if (!el) return;
+  if (!tm.snapshot) {
+    el.innerHTML = `<div style="padding:var(--sp5)">
+      <div class="tm-skeleton" style="height:80px;border-radius:var(--r3);margin-bottom:var(--sp2)"></div>
+      <div class="tm-skeleton" style="height:80px;border-radius:var(--r3)"></div>
     </div>`;
     return;
   }
 
-  const alerts = members.filter(m => m.alert !== 'ok');
-  const alertHtml = alerts.length ? `
-    <div style="background:var(--redm);border:1px solid rgba(229,62,90,.2);border-radius:var(--r3);padding:var(--sp3);margin-bottom:var(--sp3)">
-      <div style="font-size:var(--fs-xs);font-weight:700;color:var(--red);margin-bottom:var(--sp2)">🔴 نیاز به توجه</div>
-      ${alerts.map(m => `<div class="tm-member-card blocked" style="margin-bottom:var(--sp2)">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp2)">
-          <div>
-            <div style="font-size:var(--fs-sm);font-weight:600">${m.name}</div>
-            <div style="font-size:var(--fs-2xs);color:var(--red)">${m.alert==='blocked'?'مشکل دارم':m.staleTasks+' تسک stale'}</div>
-          </div>
-          <span>🔴</span>
-        </div>
-        <div class="tm-member-card-actions">
-          <button class="tm-btn" onclick="tmAssignTask('${m.uuid}')">+ تسک</button>
-          <button class="tm-btn blue" onclick="tmViewMemberTasks('${m.uuid}')">مشاهده تسک‌ها</button>
-        </div>
-      </div>`).join('')}
-    </div>` : '';
+  // فیلتر: فقط اعضا (نه مدیر)
+  const allMembers = tm.snapshot.members || [];
+  const members = allMembers.filter(m => !m.isManager && m.role !== 'manager');
 
-  const membersHtml = members.filter(m => m.alert==='ok').map(m => `
-    <div class="tm-member-card" style="margin-bottom:var(--sp2)">
-      <div style="display:flex;align-items:center;justify-content:space-between">
-        <div style="display:flex;align-items:center;gap:var(--sp2)">
-          <span>🟢</span>
-          <div>
-            <div style="font-size:var(--fs-sm);font-weight:600">${m.name}</div>
-            <div style="font-size:var(--fs-2xs);color:var(--t3)">${m.role} • ${m.activeTasks} تسک فعال</div>
-          </div>
+  if (!members.length) {
+    el.innerHTML = `<div style="text-align:center;padding:var(--sp6)">
+      <div style="font-size:2rem;margin-bottom:var(--sp3)">👥</div>
+      <div style="font-size:var(--fs-sm);color:var(--t2);font-weight:600">هنوز عضوی نداری</div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-top:var(--sp2)">کد دعوت رو به تیمت بده</div>
+      <button style="margin-top:var(--sp3);height:36px;padding:0 16px;border-radius:var(--r5);border:none;background:var(--a);color:var(--bg1);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer" onclick="tmShareCode()">📤 اشتراک کد</button>
+    </div>`;
+    return;
+  }
+
+  // alert members
+  const alertMembers = members.filter(m => m.alert !== 'ok');
+  const okMembers    = members.filter(m => m.alert === 'ok');
+
+  const memberCard = (m) => {
+    const isBlocked = m.alert === 'blocked';
+    const isStale   = m.alert === 'stale';
+    const borderColor = isBlocked ? 'rgba(229,62,90,.3)' : isStale ? 'rgba(217,119,6,.3)' : 'var(--b2)';
+    const dotColor    = isBlocked ? 'var(--red)' : isStale ? 'var(--amber)' : 'var(--a)';
+    const alertLabel  = isBlocked ? '🚫 مشکل دارد' : isStale ? '⏳ بی‌تحرکی' : '';
+    const tasks = m.activeTasks || 0;
+    const done  = m.doneTasks  || 0;
+    const total = tasks + done;
+    const pct   = total > 0 ? Math.round(done/total*100) : 0;
+
+    return `<div style="background:var(--bg1);border:1px solid ${borderColor};border-radius:var(--r3);padding:var(--sp3) var(--sp4);margin-bottom:var(--sp2)">
+      <!-- header: RTL — اسم+dot سمت راست، آمار سمت چپ -->
+      <div style="display:flex;align-items:center;gap:var(--sp3)">
+        <!-- آمار سمت چپ -->
+        <button onclick="tmAssignTask('${m.uuid}')"
+          style="height:30px;padding:0 12px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--bg2);color:var(--t2);font-size:11px;font-weight:600;font-family:var(--f);cursor:pointer;flex-shrink:0">
+          + تسک
+        </button>
+        <div style="text-align:center;min-width:36px;flex-shrink:0">
+          <div style="font-size:var(--fs-md);font-weight:800;color:var(--t1);font-variant-numeric:tabular-nums">${num(tasks)}</div>
+          <div style="font-size:9px;color:var(--t3)">تسک</div>
         </div>
-        <button class="tm-btn" onclick="tmAssignTask('${m.uuid}')">+ تسک</button>
+        <!-- spacer -->
+        <div style="flex:1"></div>
+        <!-- اسم + dot — سمت راست (RTL) -->
+        <div style="text-align:right">
+          <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px">
+            <span style="font-size:var(--fs-sm);font-weight:700;color:var(--t1)">${esc(m.name)}</span>
+            <span style="width:8px;height:8px;border-radius:50%;background:${dotColor};flex-shrink:0;display:inline-block"></span>
+          </div>
+          <div style="font-size:var(--fs-xs);color:var(--t3)">${esc(m.role||'عضو تیم')}</div>
+          ${alertLabel ? `<div style="font-size:10px;color:${dotColor};margin-top:2px">${alertLabel}</div>` : ''}
+        </div>
       </div>
-    </div>`).join('');
+      <!-- workload bar -->
+      ${total > 0 ? `
+      <div style="margin-top:10px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
+          <span style="font-size:10px;color:var(--t3)">${num(pct)}٪ تکمیل</span>
+          <span style="font-size:10px;color:var(--t3)">${num(done)} از ${num(total)}</span>
+        </div>
+        <div style="height:4px;background:var(--bg3);border-radius:var(--r5);overflow:hidden">
+          <div style="height:100%;border-radius:var(--r5);background:${dotColor};transform:scaleX(${pct/100});transform-origin:right;transition:transform 600ms cubic-bezier(0.23,1,0.32,1)"></div>
+        </div>
+      </div>` : ''}
+    </div>`;
+  };
 
-  el.innerHTML = alertHtml + `<div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2)">همه اعضا</div>` + membersHtml;
+  // ساختار: alert ها اول، بقیه بعد
+  let inner = '';
+  if (alertMembers.length) {
+    inner += `<div style="font-size:var(--fs-xs);color:var(--red);font-weight:700;margin-bottom:var(--sp2);text-align:right">🔴 نیاز به توجه (${alertMembers.length})</div>`;
+    inner += alertMembers.map(memberCard).join('');
+  }
+  if (okMembers.length) {
+    if (alertMembers.length) inner += `<div style="font-size:var(--fs-xs);color:var(--t3);margin:var(--sp3) 0 var(--sp2);text-align:right">همه اعضا</div>`;
+    inner += okMembers.map(memberCard).join('');
+  }
+
+  el.innerHTML = `<div style="padding:var(--sp3) var(--sp4)">${inner}</div>`;
 }
 
 function tmRenderSokoReport() {
