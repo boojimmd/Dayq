@@ -1872,7 +1872,7 @@ select.fi{
     align-items:stretch;
     justify-content:flex-start;
     border-top:none;border-bottom:none;border-right:none;
-    border-left:1px solid var(--b1);
+    border-right:1px solid var(--b1);
     padding:16px 10px 20px;
     gap:var(--sp1);
     overflow-y:auto;
@@ -4026,7 +4026,7 @@ select.fi{
   /* panel body — flex row RTL */
   .tm-panel-body {
     display:flex;
-    flex-direction:row;
+    flex-direction:row-reverse;
     overflow:hidden;
     padding:0;
   }
@@ -20438,6 +20438,29 @@ function _xmlEsc(s) {
 }
 
 /* ════ End Excel Export ════ */
+
+
+/* ════ Z-index fix: sheets over soko panel ════ */
+(function(){
+  const _origOpen = window.openSheet;
+  window.openSheet = function(id) {
+    _origOpen && _origOpen.apply(this, arguments);
+    const sokoOpen = document.getElementById('tmSokoPanel')?.classList.contains('open');
+    if (!sokoOpen) return;
+    const sh = document.getElementById(id);
+    if (sh) sh.style.zIndex = '1100';
+    const ov = document.getElementById('ov');
+    if (ov) { ov.style.zIndex = '1050'; ov.style.display = 'block'; }
+  };
+  const _origClose = window.closeAll;
+  window.closeAll = function() {
+    _origClose && _origClose.apply(this, arguments);
+    document.querySelectorAll('.sheet').forEach(s => s.style.zIndex = '');
+    const ov = document.getElementById('ov');
+    if (ov) ov.style.zIndex = '';
+  };
+})();
+/* ════ End Z-index fix ════ */
 
 /* ════ End Team JS ════ */
 </script>
