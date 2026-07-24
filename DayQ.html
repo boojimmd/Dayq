@@ -14639,6 +14639,12 @@ function tmOpenSoko() {
   panel.classList.add('open');
   document.body.classList.add('tm-panel-open');
   document.body.style.overflow = 'hidden';
+  // iOS body lock — مثل openSheet
+  if (window.innerWidth < 900) {
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.top = '-' + (window.scrollY || 0) + 'px';
+  }
   const tab = tm.sokoTab || 'status';
   tmSetSokoTab(tab);
   // sidebar + KPI
@@ -14655,6 +14661,14 @@ function tmCloseSoko() {
   if (!panel) return;
   panel.classList.remove('open');
   document.body.classList.remove('tm-panel-open');
+  // iOS body unlock — بازگشت scroll position
+  if (window.innerWidth < 900) {
+    const scrollY = document.body.style.top;
+    document.body.style.position = '';
+    document.body.style.width = '';
+    document.body.style.top = '';
+    window.scrollTo(0, -parseInt(scrollY || '0'));
+  }
   document.body.style.overflow = '';
 }
 
