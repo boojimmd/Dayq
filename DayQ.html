@@ -4111,6 +4111,12 @@ select.fi{
 }
 .tm-sb-btn:hover{ background:var(--bg2); border-color:var(--b1); color:var(--t1); }
 /* ════ End Soko Desktop ════ */
+
+/* ════ Z-index fix: sheets over soko panel ════ */
+/* وقتی panel باز هست، overlay و sheet باید بالاتر باشن */
+.tm-panel-open .ov { z-index:1050 !important; }
+.tm-panel-open .sheet { z-index:1100 !important; }
+/* ════ End Z-index fix ════ */
 </style>
 </head>
 <body>
@@ -14622,7 +14628,9 @@ async function tmLeaveTeam() {
 function tmOpenSoko() {
   const panel = document.getElementById('tmSokoPanel');
   if (!panel) return;
+  closeAll(); // پاک کردن هر overlay قبلی
   panel.classList.add('open');
+  document.body.classList.add('tm-panel-open');
   document.body.style.overflow = 'hidden';
   const tab = tm.sokoTab || 'status';
   tmSetSokoTab(tab);
@@ -14639,6 +14647,7 @@ function tmCloseSoko() {
   const panel = document.getElementById('tmSokoPanel');
   if (!panel) return;
   panel.classList.remove('open');
+  document.body.classList.remove('tm-panel-open');
   document.body.style.overflow = '';
 }
 
@@ -20446,27 +20455,7 @@ function _xmlEsc(s) {
 /* ════ End Excel Export ════ */
 
 
-/* ════ Z-index fix: sheets over soko panel ════ */
-(function(){
-  const _origOpen = window.openSheet;
-  window.openSheet = function(id) {
-    _origOpen && _origOpen.apply(this, arguments);
-    const sokoOpen = document.getElementById('tmSokoPanel')?.classList.contains('open');
-    if (!sokoOpen) return;
-    const sh = document.getElementById(id);
-    if (sh) sh.style.zIndex = '1100';
-    const ov = document.getElementById('ov');
-    if (ov) { ov.style.zIndex = '1050'; ov.style.display = 'block'; }
-  };
-  const _origClose = window.closeAll;
-  window.closeAll = function() {
-    _origClose && _origClose.apply(this, arguments);
-    document.querySelectorAll('.sheet').forEach(s => s.style.zIndex = '');
-    const ov = document.getElementById('ov');
-    if (ov) ov.style.zIndex = '';
-  };
-})();
-/* ════ End Z-index fix ════ */
+// z-index via CSS body.tm-panel-open
 
 /* ════ End Team JS ════ */
 </script>
