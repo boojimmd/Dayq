@@ -3186,7 +3186,7 @@ select.fi{
 
 .tm-panel{
   position:fixed;inset:0;
-  z-index:1000;
+  z-index:2000;
   background:var(--bg0);
   transform:translateY(100%);
   transition:transform var(--dur-slow) var(--ease-out);
@@ -4114,14 +4114,25 @@ select.fi{
 
 /* ════ Z-index fix: sheets over soko panel ════ */
 /* وقتی panel باز هست، overlay و sheet باید بالاتر باشن */
-.tm-panel-open .ov { z-index:1050 !important; }
-.tm-panel-open .sheet { z-index:1100 !important; }
+.tm-panel-open .ov { z-index:2050 !important; }
+.tm-panel-open .sheet { z-index:2100 !important; }
 /* ════ End Z-index fix ════ */
 
 /* calTeamFilter — در جریان طبیعی، بین toggle و grid */
 #calTeamFilter {
   margin: 4px 0;
 }
+
+/* Team sheets above panel */
+#shTmAnnounce
+#shTmPending
+#shTmJoin
+#shTmCreate
+#shTmCode
+#shTmInfo
+#shTmChoice
+#tmDetailSheet
+#shTeamTaskDetail { z-index:2100; }
 </style>
 </head>
 <body>
@@ -14633,7 +14644,10 @@ async function tmLeaveTeam() {
 function tmOpenSoko() {
   const panel = document.getElementById('tmSokoPanel');
   if (!panel) return;
-  closeAll(); // پاک کردن هر overlay قبلی
+  // closeAll removed — caused body.style reset on mobile
+  // پنهان کردن ov اگه باز بود
+  const _ov = document.getElementById('ov');
+  if (_ov) _ov.classList.remove('open');
   panel.classList.add('open');
   document.body.classList.add('tm-panel-open');
   document.body.style.overflow = 'hidden';
