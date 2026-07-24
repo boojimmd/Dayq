@@ -4118,11 +4118,6 @@ select.fi{
 .tm-panel-open .sheet { z-index:2100 !important; }
 /* ════ End Z-index fix ════ */
 
-/* calTeamFilter — در جریان طبیعی، بین toggle و grid */
-#calTeamFilter {
-  margin: 4px 0;
-}
-
 /* Team sheets above panel */
 #shTmAnnounce
 #shTmPending
@@ -4944,13 +4939,6 @@ select.fi{
 
     </div>
 
-    <div id="calTeamFilter" style="display:none;padding:3px var(--sp4) 0;position:relative;z-index:1">
-      <div style="display:flex;gap:3px;background:var(--bg2);border-radius:var(--r5);padding:3px">
-        <button id="ctf-all"      onclick="_calSetFilter('all')"      style="flex:1;height:24px;border:none;border-radius:var(--r5);font-size:11px;font-weight:600;font-family:var(--f);cursor:pointer;background:var(--t1);color:var(--bg1);transition:all 150ms ease">همه</button>
-        <button id="ctf-personal" onclick="_calSetFilter('personal')" style="flex:1;height:24px;border:none;border-radius:var(--r5);font-size:11px;font-weight:600;font-family:var(--f);cursor:pointer;background:none;color:var(--t3)">شخصی</button>
-        <button id="ctf-team"     onclick="_calSetFilter('team')"     style="flex:1;height:24px;border:none;border-radius:var(--r5);font-size:11px;font-weight:600;font-family:var(--f);cursor:pointer;background:none;color:var(--t3)">تیمی</button>
-      </div>
-    </div>
 </div>
     <!-- List view — سبک Things 3: لیست عمودی، نه گرید -->
     <div class="cal-list-view" id="calListView" style="display:none;"></div>
@@ -17311,46 +17299,14 @@ function tmRenderProjectsSection() {
 })();
 
 // ── ۳. Calendar Filter ─────────────────────────────────────
-let _calFilter = 'all'; // 'all' | 'personal' | 'team'
 
-function _calSetFilter(f) {
-  _calFilter = f;
-  ['all','personal','team'].forEach(k => {
-    const btn = document.getElementById(`ctf-${k}`);
-    if (!btn) return;
-    btn.style.background = k === f ? 'var(--t1)' : 'none';
-    btn.style.color      = k === f ? 'var(--bg1)' : 'var(--t3)';
-  });
-  renderCal(); // re-render با filter جدید
-}
+
+
 
 // نمایش فیلتر فقط اگه عضو تیم هستیم
-(function(){
-  const _origApplyUI = window.tmApplyUI;
-  tmApplyUI = function() {
-    if (_origApplyUI) _origApplyUI.apply(this, arguments);
-    const filterEl = document.getElementById('calTeamFilter');
-    if (filterEl) filterEl.style.display = tm.code ? '' : 'none';
-  };
-})();
+// calTeamFilter hook removed
 
-// hook به renderCal برای اعمال filter
-(function(){
-  const _origRenderCal = window.renderCal;
-  if (!_origRenderCal) return;
-  window.renderCal = function() {
-    _origRenderCal.apply(this, arguments);
-    if (_calFilter === 'all') return;
-    // پنهان/نمایان کردن نشانگرهای تقویم
-    const isTeam = _calFilter === 'team';
-    document.querySelectorAll('.cal-dot-personal').forEach(d => {
-      d.style.display = isTeam ? 'none' : '';
-    });
-    document.querySelectorAll('.cal-dot-team').forEach(d => {
-      d.style.display = isTeam ? '' : 'none';
-    });
-  };
-})();
+
 
 // ── ۴. EOD (Triage) — گزینه‌های تسک تیمی ──────────────────
 (function(){
@@ -18904,32 +18860,9 @@ function _calSetFilter(f) {
 }
 
 // نمایش فیلتر فقط اگه عضو تیم هستیم
-(function(){
-  const _origApplyUI = window.tmApplyUI;
-  tmApplyUI = function() {
-    if (_origApplyUI) _origApplyUI.apply(this, arguments);
-    const filterEl = document.getElementById('calTeamFilter');
-    if (filterEl) filterEl.style.display = tm.code ? '' : 'none';
-  };
-})();
+// calTeamFilter hook removed
 
-// hook به renderCal برای اعمال filter
-(function(){
-  const _origRenderCal = window.renderCal;
-  if (!_origRenderCal) return;
-  window.renderCal = function() {
-    _origRenderCal.apply(this, arguments);
-    if (_calFilter === 'all') return;
-    // پنهان/نمایان کردن نشانگرهای تقویم
-    const isTeam = _calFilter === 'team';
-    document.querySelectorAll('.cal-dot-personal').forEach(d => {
-      d.style.display = isTeam ? 'none' : '';
-    });
-    document.querySelectorAll('.cal-dot-team').forEach(d => {
-      d.style.display = isTeam ? '' : 'none';
-    });
-  };
-})();
+
 
 // ── ۴. EOD (Triage) — گزینه‌های تسک تیمی ──────────────────
 (function(){
