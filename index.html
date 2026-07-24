@@ -279,7 +279,7 @@ input,textarea{user-select:text;-webkit-user-select:text;}
 .qcap{margin:0 18px 10px;display:flex;align-items:center;gap:var(--sp3);background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r2);padding:var(--sp3) var(--sp4);transition:var(--dur-base) var(--ease-std);cursor:text;}
 .qcap:focus-within{
   border-color:var(--a);
-  box-shadow:0 0 0 3px var(--am), 0 4px 20px rgba(0,184,122,.12);
+  box-shadow:0 0 0 3px var(--am), 0 4px 20px var(--am);
   transform:translateY(-1px);
 }
 .qcap svg{width:15px;height:15px;stroke:var(--t3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0;}
@@ -685,7 +685,7 @@ input,textarea{user-select:text;-webkit-user-select:text;}
 .srow-r{display:flex;align-items:center;gap:var(--sp1);color:var(--t3);}
 .tgl{width:44px;height:26px;border-radius:var(--r5);background:var(--bg3);border:2px solid var(--b1);position:relative;cursor:pointer;transition:.2s var(--ease);flex-shrink:0;}
 .tgl.on{background:var(--a);border-color:var(--a);}
-.tgl-k{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.22);transition:.2s var(--spring);}
+.tgl-k{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:var(--bg1);box-shadow:0 1px 4px rgba(0,0,0,.22);transition:.2s var(--spring);}
 .tgl.on .tgl-k{right:calc(100% - 20px);}
 .theme-seg{display:flex;gap:var(--sp1);padding:var(--sp3) var(--sp4);border-bottom:1px solid var(--b2);}
 .th-pill{flex:1;padding:var(--sp2) var(--sp2);min-height:40px;border-radius:var(--r1);text-align:center;font-size:var(--fs-xs);font-weight:600;background:var(--bg2);color:var(--t2);border:1px solid transparent;transition:.18s;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;touch-action:manipulation;}
@@ -822,7 +822,7 @@ select.fi{
 .coach-mark-arrow{position:absolute;width:11px;height:11px;background:var(--a);transform:rotate(45deg);}
 .coach-mark-arrow.up{top:-5px;}
 .coach-mark-arrow.down{bottom:-5px;}
-.coach-mark-close{position:absolute;top:6px;left:6px;width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.2);border:none;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;}
+.coach-mark-close{position:absolute;top:6px;left:6px;width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.2);border:none;color:var(--bg1);display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;}
 .coach-mark-close:active{background:rgba(255,255,255,.35);}
 .toast.up{transform:translateX(-50%) translateY(0);}
 .t-ico{width:17px;height:17px;flex-shrink:0;}
@@ -866,29 +866,29 @@ select.fi{
 .focus-overlay{position:fixed;inset:0;background:#0f1420;z-index:980;display:none;flex-direction:column;align-items:center;justify-content:center;padding:24px;}
 .focus-overlay.show{display:flex;animation:focusFadeIn .3s var(--ease);}
 @keyframes focusFadeIn{from{opacity:0;}to{opacity:1;}}
-.focus-close{position:absolute;top:max(20px,env(safe-area-inset-top));left:20px;width:38px;height:38px;border-radius:50%;border:none;background:rgba(255,255,255,.1);color:#fff;font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
+.focus-close{position:absolute;top:max(20px,env(safe-area-inset-top));left:20px;width:38px;height:38px;border-radius:50%;border:none;background:rgba(255,255,255,.1);color:var(--bg1);font-size:20px;display:flex;align-items:center;justify-content:center;cursor:pointer;}
 .focus-content{display:flex;flex-direction:column;align-items:center;gap:var(--sp2);max-width:380px;width:100%;}
 .focus-cat{font-size:var(--fs-sm);font-weight:700;color:rgba(255,255,255,.45);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px;}
-.focus-title{font-size:var(--fs-2xl);font-weight:800;color:#fff;text-align:center;line-height:1.5;margin-bottom:28px;padding:0 8px;}
+.focus-title{font-size:var(--fs-2xl);font-weight:800;color:var(--bg1);text-align:center;line-height:1.5;margin-bottom:28px;padding:0 8px;}
 .focus-ring-wrap{position:relative;width:220px;height:220px;display:flex;align-items:center;justify-content:center;margin-bottom:30px;}
 .focus-ring-wrap svg{position:absolute;inset:0;transform:rotate(-90deg);}
 .focus-ring-bg{stroke:rgba(255,255,255,.1);}
 .focus-ring-fg{stroke:var(--a);transition:stroke-dashoffset 1s linear;}
-.focus-timer{font-family:var(--mono);font-size:2.6rem;font-weight:700;color:#fff;letter-spacing:.02em;direction:ltr;}
+.focus-timer{font-family:var(--mono);font-size:2.6rem;font-weight:700;color:var(--bg1);letter-spacing:.02em;direction:ltr;}
 .focus-dur-lbl{font-size:var(--fs-xs);font-weight:700;color:rgba(255,255,255,.4);letter-spacing:.04em;margin-bottom:10px;}
 .focus-duration-row{display:flex;gap:var(--sp2);margin-bottom:30px;}
 .focus-duration-row button{border:1px solid rgba(255,255,255,.18);background:transparent;color:rgba(255,255,255,.6);border-radius:var(--r4);padding:7px 16px;font-size:var(--fs-sm);font-weight:700;cursor:pointer;}
 .focus-duration-row button.sel{background:var(--a);border-color:var(--a);color:#071a0e;}
 .focus-actions{display:flex;gap:var(--sp3);width:100%;}
 .focus-btn{flex:1;border:none;border-radius:var(--r3);padding:15px;font-size:var(--fs-lg);font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:var(--sp2);}
-.focus-btn.pause{background:rgba(255,255,255,.1);color:#fff;}
+.focus-btn.pause{background:rgba(255,255,255,.1);color:var(--bg1);}
 .focus-btn.done{background:var(--a);color:#071a0e;}
 .focus-done-q{display:none;flex-direction:column;align-items:center;gap:var(--sp4);width:100%;}
 .focus-done-q.show{display:flex;}
-.focus-done-q .q{font-size:var(--fs-xl);font-weight:800;color:#fff;margin-bottom:10px;}
+.focus-done-q .q{font-size:var(--fs-xl);font-weight:800;color:var(--bg1);margin-bottom:10px;}
 .focus-done-q button{width:100%;border:none;border-radius:var(--r3);padding:var(--sp4);font-size:var(--fs-md);font-weight:700;cursor:pointer;}
 .focus-done-q .yes{background:var(--a);color:#071a0e;}
-.focus-done-q .extend{background:rgba(255,255,255,.1);color:#fff;}
+.focus-done-q .extend{background:rgba(255,255,255,.1);color:var(--bg1);}
 .focus-done-q .no{background:transparent;color:rgba(255,255,255,.5);}
 
 .tc-remind svg{width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;}
@@ -956,7 +956,7 @@ select.fi{
 .proj-color{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
 .proj-name{font-size:var(--fs-lg);font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .proj-meta-row{display:flex;align-items:center;gap:var(--sp2);}
-.proj-waiting-badge{font-size:.64rem;font-weight:700;color:var(--blue);background:rgba(37,99,235,.1);border:1px solid rgba(37,99,235,.2);border-radius:var(--r4);padding:2px 8px;white-space:nowrap;}
+.proj-waiting-badge{font-size:.64rem;font-weight:700;color:var(--blue);background:var(--bluem);border:1px solid rgba(37,99,235,.2);border-radius:var(--r4);padding:2px 8px;white-space:nowrap;}
 .proj-count{font-size:var(--fs-xs);font-weight:700;font-family:var(--mono);color:var(--t3);background:var(--bg3);padding:var(--sp1) var(--sp2);border-radius:var(--r5);}
 .proj-deadline-badge{font-size:var(--fs-2xs);font-weight:700;padding:var(--sp1) var(--sp2);border-radius:var(--r5);}
 .pdb-red   {background:var(--redm);color:var(--red);}
@@ -999,7 +999,7 @@ select.fi{
 .cal-sub-label{display:block;font-size:.68rem;font-weight:500;color:var(--t3);text-align:center;margin-top:2px;letter-spacing:.01em;direction:rtl;}
 
 /* Grid */
-.cal-grid-wrap{background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r4);overflow:hidden;margin-bottom:16px;transition:background var(--dur-base) var(--ease-std);box-shadow:0 1px 6px rgba(0,0,0,.04);}
+.cal-grid-wrap{background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r4);overflow:hidden;margin-bottom:16px;transition:background var(--dur-base) var(--ease-std);box-shadow:0 1px 6px var(--b2);}
 .cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--b2);}
 .cal-wd{padding:9px 0;text-align:center;font-size:var(--fs-2xs);font-weight:700;color:var(--t3);letter-spacing:.03em;}
 .cal-wd:first-child{color:var(--red);}/* شنبه */
@@ -1025,7 +1025,7 @@ select.fi{
 .cal-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;opacity:.9;}
 
 /* Selected day tasks */
-.cal-selected-day{background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r4);padding:var(--sp4);transition:background var(--dur-base) var(--ease-std);margin-bottom:10px;box-shadow:0 1px 6px rgba(0,0,0,.04);}
+.cal-selected-day{background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r4);padding:var(--sp4);transition:background var(--dur-base) var(--ease-std);margin-bottom:10px;box-shadow:0 1px 6px var(--b2);}
 .cal-sel-hdr{font-size:var(--fs-md);font-weight:800;color:var(--t1);letter-spacing:-.02em;margin-bottom:10px;display:flex;align-items:center;gap:var(--sp2);}
 .cal-sel-empty{font-size:var(--fs-sm);color:var(--t3);padding:24px 0;text-align:center;line-height:2;display:flex;flex-direction:column;align-items:center;gap:var(--sp2);}
 
@@ -1054,15 +1054,15 @@ select.fi{
 /* doing: amber pulse */
 .tc-status.doing{background:var(--ambm);border-color:rgba(217,119,6,.4);}
 /* waiting status */
-.tc-status.waiting{background:rgba(37,99,235,.12);border-color:rgba(37,99,235,.35);}
+.tc-status.waiting{background:var(--bluem);border-color:rgba(37,99,235,.35);}
 .tc-status.waiting svg{stroke:var(--blue);}
 .tc.waiting-c{opacity:.85;}
-.tc-waiting-badge{display:inline-flex;align-items:center;gap:var(--sp1);font-size:.66rem;font-weight:600;color:var(--blue);background:rgba(37,99,235,.1);border:1px solid rgba(37,99,235,.2);border-radius:var(--r4);padding:2px 8px;margin-right:4px;}
+.tc-waiting-badge{display:inline-flex;align-items:center;gap:var(--sp1);font-size:.66rem;font-weight:600;color:var(--blue);background:var(--bluem);border:1px solid rgba(37,99,235,.2);border-radius:var(--r4);padding:2px 8px;margin-right:4px;}
 /* call/tel button on card */
-.tc-call{width:28px;height:28px;border-radius:var(--r1);border:none;background:rgba(0,184,122,.12);color:var(--a);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;text-decoration:none;}
+.tc-call{width:28px;height:28px;border-radius:var(--r1);border:none;background:var(--am);color:var(--a);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;text-decoration:none;}
 .tc-call svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;}
 /* time alert banner */
-#timeBanner{display:none;position:sticky;top:0;z-index:50;background:rgba(37,99,235,.12);color:var(--blue);padding:9px 14px;border-radius:12px;margin-bottom:10px;font-size:var(--fs-sm);font-weight:700;align-items:center;gap:var(--sp2);cursor:pointer;border:1px solid rgba(37,99,235,.3);}
+#timeBanner{display:none;position:sticky;top:0;z-index:50;background:var(--bluem);color:var(--blue);padding:9px 14px;border-radius:12px;margin-bottom:10px;font-size:var(--fs-sm);font-weight:700;align-items:center;gap:var(--sp2);cursor:pointer;border:1px solid rgba(37,99,235,.3);}
 #timeBanner.show{display:flex;}
 #timeBanner .tb-close{margin-right:auto;opacity:.7;font-size:var(--fs-sm);}
 /* project group header */
@@ -1108,7 +1108,7 @@ select.fi{
 /* ══════════ ADD PROJECT SHEET ══════════ */
 .color-picker{display:flex;gap:var(--sp2);flex-wrap:wrap;}
 .cp-dot{width:28px;height:28px;border-radius:50%;cursor:pointer;transition:var(--dur-base) var(--spring);border:2px solid transparent;}
-.cp-dot.sel{transform:scale(1.2);border-color:#fff;box-shadow:0 0 0 2px var(--b1);}
+.cp-dot.sel{transform:scale(1.2);border-color:var(--bg1);box-shadow:0 0 0 2px var(--b1);}
 .cp-dot:active{transform:scale(.94);}
 
 /* ══════════ ADD TASK — deadline field ══════════ */
@@ -1930,7 +1930,7 @@ select.fi{
   }
   .nav-fab-btn::after{
     content:"کار جدید";
-    color:#fff;
+    color:var(--bg1);
     font-size:var(--fs-sm);
     font-weight:700;
     font-family:var(--f);
@@ -2147,8 +2147,8 @@ select.fi{
   .dp-btn-done.is-done{background:var(--a);color:#071a0e;}
   .dp-btn-edit{flex:none;padding:0 14px;background:var(--bg2);color:var(--t2);}
   .dp-btn-edit:hover{background:var(--bg3);}
-  .dp-btn-del{flex:none;width:36px;background:var(--redm,rgba(229,62,90,.1));color:var(--red);border-color:rgba(229,62,90,.2);}
-  .dp-btn-del:hover{background:var(--red);color:#fff;}
+  .dp-btn-del{flex:none;width:36px;background:var(--redm,var(--redm));color:var(--red);border-color:rgba(229,62,90,.2);}
+  .dp-btn-del:hover{background:var(--red);color:var(--bg1);}
 
   /* کارت فعال */
   .tc-wrap.dp-active{outline:2px solid var(--a);outline-offset:1px;}
@@ -2559,7 +2559,7 @@ select.fi{
   .bd-avatar{
     width:42px;height:42px;border-radius:50%;
     display:flex;align-items:center;justify-content:center;
-    font-size:var(--fs-lg);font-weight:900;color:#fff;flex-shrink:0;
+    font-size:var(--fs-lg);font-weight:900;color:var(--bg1);flex-shrink:0;
   }
   .bd-item-body{flex:1;min-width:0;}
   .bd-item-name{font-size:var(--fs-sm);font-weight:700;color:var(--t1);}
@@ -2789,7 +2789,7 @@ select.fi{
   .tb-today-card{
     position:absolute;top:calc(100% + 8px);left:50%;
     background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r3);
-    box-shadow:0 12px 40px rgba(0,0,0,.18),0 2px 8px rgba(0,0,0,.08),0 0 0 1px rgba(0,0,0,.04);
+    box-shadow:0 12px 40px rgba(0,0,0,.18),0 2px 8px rgba(0,0,0,.08),0 0 0 1px var(--b2);
     min-width:280px;max-width:340px;
     padding:0;overflow:hidden;z-index:500;
     opacity:0;
@@ -3160,7 +3160,7 @@ select.fi{
 
 .tm-section-hdr{display:flex;align-items:center;justify-content:space-between;padding:var(--sp2) 0;}
 .tm-section-lbl{font-size:var(--fs-xs);font-weight:700;color:var(--blue);display:flex;align-items:center;gap:var(--sp1);}
-.tm-count-badge{font-size:var(--fs-2xs);font-weight:800;min-width:18px;height:18px;border-radius:var(--r5);background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;padding:0 5px;}
+.tm-count-badge{font-size:var(--fs-2xs);font-weight:800;min-width:18px;height:18px;border-radius:var(--r5);background:var(--blue);color:var(--bg1);display:flex;align-items:center;justify-content:center;padding:0 5px;}
 .tm-divider{height:1px;background:var(--b1);margin:var(--sp3) 0;}
 
 .tm-today-card{background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r3);margin-bottom:var(--sp3);overflow:hidden;}
@@ -3251,7 +3251,7 @@ select.fi{
 }
 .tm-panel-action-btn.primary{
   background:var(--a);
-  color:#fff;
+  color:var(--bg1);
   border-color:transparent;
 }
 
@@ -3400,8 +3400,7 @@ select.fi{
   align-items:flex-end;
   justify-content:center;
   background:rgba(0,0,0,.5);
-  -webkit-backdrop-filter:blur(4px);
-  backdrop-filter:blur(4px);
+
   opacity:0;
   transition:opacity 220ms ease;
 }
@@ -3527,7 +3526,7 @@ select.fi{
   display:inline-flex;align-items:center;gap:5px;
 }
 .tm-panel-action-btn.primary{
-  background:var(--a);color:#fff;border-color:transparent;
+  background:var(--a);color:var(--bg1);border-color:transparent;
 }
 .tm-panel-action-btn:active{opacity:.8;}
 
@@ -3583,7 +3582,7 @@ select.fi{
   display:inline-flex;align-items:center;justify-content:center;gap:5px;
   transition:transform 150ms var(--ease-out),opacity 150ms var(--ease-out);
 }
-.tm-task-action.primary{background:var(--a);color:#fff;border-color:transparent;}
+.tm-task-action.primary{background:var(--a);color:var(--bg1);border-color:transparent;}
 .tm-task-action.warn{background:var(--ambm);color:var(--amber);border-color:rgba(217,119,6,.2);}
 .tm-task-action:active{opacity:.8;}
 
@@ -3876,6 +3875,136 @@ select.fi{
 }
 .tm-member-chip:active{transform:scale(0.97);}
 /* ════ End Assign NLP ════ */
+
+/* ════ Team Dark Mode ════ */
+[data-theme="dark"] .tm-modal-sheet,
+[data-theme="dark"] .tm-tab-pane,
+[data-theme="dark"] .tm-panel-body { background:var(--bg1); }
+
+[data-theme="dark"] .tm-modal { background:rgba(0,0,0,.7); }
+[data-theme="dark"] .tm-modal-hdr { border-bottom-color:var(--b1); }
+[data-theme="dark"] .tm-member-card { background:var(--bg2); border-color:var(--b1); }
+[data-theme="dark"] .tm-today-card { background:var(--bg1); border-color:var(--b1); }
+[data-theme="dark"] .tm-badge { background:var(--bluem); color:var(--blue); }
+[data-theme="dark"] .tm-dot { background:var(--bg3); }
+[data-theme="dark"] .tm-dot.active { background:var(--blue); }
+[data-theme="dark"] .tm-code-display { background:var(--bg2); border-color:var(--b1); }
+[data-theme="dark"] .tm-code-text { color:var(--t1); }
+[data-theme="dark"] .tm-panel-hdr { background:var(--bg1); border-bottom-color:var(--b1); }
+[data-theme="dark"] .tm-tabs { border-bottom-color:var(--b1); }
+[data-theme="dark"] .tm-tab { color:var(--t3); }
+[data-theme="dark"] .tm-tab.active { color:var(--t1); border-bottom-color:var(--t1); }
+[data-theme="dark"] #tmSokoPanel { background:var(--bg1); }
+[data-theme="dark"] .tm-dl-chip { background:var(--bg2); color:var(--t2); border-color:var(--b1); }
+[data-theme="dark"] .tm-nlp-chip { opacity:.9; }
+[data-theme="dark"] .tm-modal-sheet { border-top-color:var(--b1); }
+/* ════ End Team Dark Mode ════ */
+
+/* ════ Team Utility Classes (extracted from inline) ════ */
+
+/* Row — flex RTL with space-between */
+.tm-row { display:flex; align-items:center; justify-content:space-between; }
+
+/* Label tiny */
+.tm-lbl { font-size:var(--fs-xs); color:var(--t3); margin-bottom:8px; }
+
+/* Member chip in assign */
+.tm-member-chip { 
+  display:inline-flex; align-items:center; gap:6px;
+  height:32px; padding:0 12px; border-radius:var(--r5);
+  border:1px solid var(--b1); background:var(--bg2); color:var(--t1);
+  font-size:var(--fs-xs); font-weight:600; font-family:var(--f);
+  cursor:pointer;
+  transition:all 150ms var(--ease-out);
+}
+.tm-member-chip.active { 
+  background:var(--bluem); color:var(--blue);
+  border-color:rgba(59,130,246,.3);
+}
+.tm-member-chip:active { transform:scale(0.97); }
+
+/* Deadline shortcut chips */
+.tm-dl-chip {
+  height:30px; padding:0 12px; border-radius:var(--r5);
+  border:1px solid var(--b1); background:var(--bg2); color:var(--t2);
+  font-size:12px; font-weight:600; font-family:var(--f); cursor:pointer;
+  transition:transform 120ms var(--ease-out), background 120ms var(--ease-std);
+}
+.tm-dl-chip:active { transform:scale(0.95); }
+@media(hover:hover) and (pointer:fine) {
+  .tm-dl-chip:hover { background:var(--bg3); color:var(--t1); }
+}
+
+/* Priority chip */
+.tm-pri-chip {
+  flex:1; height:34px; border-radius:var(--r2); border:1px solid var(--b1);
+  font-size:var(--fs-xs); font-weight:700; font-family:var(--f); cursor:pointer;
+  transition:all 120ms var(--ease-out); opacity:.5;
+}
+.tm-pri-chip.active { opacity:1; transform:scale(1.04); }
+
+/* Info box (blue tinted) */
+.tm-info-box {
+  background:var(--bluem); border:1px solid rgba(59,130,246,.2);
+  border-radius:var(--r2); padding:var(--sp3);
+}
+
+/* Team section header */
+.tm-section-hdr {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:var(--sp3);
+}
+.tm-section-lbl {
+  font-size:var(--fs-xs); font-weight:700; color:var(--blue);
+  display:flex; align-items:center; gap:var(--sp2);
+}
+
+/* Workload progress bar */
+.tm-workload-bar {
+  height:3px; background:var(--bg3); border-radius:var(--r5);
+  overflow:hidden; margin-top:8px;
+}
+.tm-workload-fill {
+  height:100%; border-radius:var(--r5);
+  transform-origin:right;
+  transition:transform 600ms cubic-bezier(0.23,1,0.32,1);
+}
+
+/* Submit button — full width, primary */
+.tm-submit-btn {
+  width:100%; height:50px; background:var(--t1); color:var(--bg1);
+  border:none; border-radius:var(--r2); font-size:var(--fs-md);
+  font-weight:800; font-family:var(--f); cursor:pointer;
+  transition:opacity 150ms ease;
+}
+.tm-submit-btn:disabled { opacity:.5; cursor:not-allowed; }
+.tm-submit-btn:active:not(:disabled) { transform:scale(0.98); }
+
+/* Error text */
+.tm-err { 
+  font-size:var(--fs-xs); color:var(--red);
+  min-height:14px; text-align:center; 
+}
+
+/* NLP preview chips */
+.tm-nlp-chip {
+  display:inline-flex; align-items:center; gap:4px;
+  font-size:11px; font-weight:700;
+  padding:3px 8px; border-radius:var(--r5);
+}
+
+/* Status button row */
+.tm-status-row { display:flex; gap:6px; }
+.tm-status-btn {
+  flex:1; height:36px; border-radius:var(--r2); border:1px solid var(--b1);
+  background:var(--bg2); color:var(--t2);
+  font-size:var(--fs-xs); font-weight:600; font-family:var(--f); cursor:pointer;
+  transition:all 150ms var(--ease-out);
+}
+.tm-status-btn.active { background:var(--t1); color:var(--bg1); border-color:var(--t1); }
+.tm-status-btn:active { transform:scale(0.97); }
+
+/* ════ End Team Utility Classes ════ */
 </style>
 </head>
 <body>
@@ -4816,7 +4945,7 @@ select.fi{
     <div class="intent-eyebrow"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M17 18a5 5 0 0 0-10 0"/><line x1="12" y1="2" x2="12" y2="9"/><line x1="4.22" y1="10.22" x2="5.64" y2="11.64"/><line x1="1" y1="18" x2="3" y2="18"/><line x1="21" y1="18" x2="23" y2="18"/><line x1="18.36" y1="11.64" x2="19.78" y2="10.22"/></svg> صبح بخیر</div>
         <!-- Team Digest — فقط مدیر، اگه alert داشته باشه -->
     <div id="tmMorningDigest" style="display:none;margin-bottom:var(--sp3)">
-      <div style="background:var(--redm);border:1px solid rgba(229,62,90,.15);border-radius:var(--r2);padding:var(--sp3)">
+      <div style="background:var(--redm);border:1px solid var(--redm);border-radius:var(--r2);padding:var(--sp3)">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp2)">
           <button onclick="tmOpenSoko();skipIntent()" style="font-size:var(--fs-2xs);color:var(--blue);background:none;border:none;cursor:pointer;font-family:var(--f)">سکو ←</button>
           <div style="font-size:var(--fs-xs);font-weight:700;color:var(--red)">⚠️ تیم — نیاز توجه</div>
@@ -4943,10 +5072,10 @@ select.fi{
 <div class="sheet" id="shProjDelConfirm">
   <div style="padding:20px 20px 8px;text-align:center;">
     <div style="font-size:.92rem;font-weight:800;color:var(--t1);margin-bottom:6px;">این پروژه حذف شود؟</div>
-    <div style="font-size:.72rem;color:var(--t3);margin-bottom:18px;" id="projDelTaskInfo"></div>
+    <div style="font-size:var(--fs-2xs);color:var(--t3);margin-bottom:18px;" id="projDelTaskInfo"></div>
     <div style="display:flex;flex-direction:column;gap:8px;">
       <button style="border:1px solid var(--b1);background:var(--bg2);color:var(--t1);border-radius:12px;padding:13px;font-weight:700;font-size:.83rem;" onclick="doDeleteProjectConfirmed(false)">فقط پروژه حذف شود — کارها بدون‌پروژه بمونن</button>
-      <button style="border:none;background:var(--red);color:#fff;border-radius:12px;padding:13px;font-weight:700;font-size:.83rem;" onclick="doDeleteProjectConfirmed(true)">پروژه و همهٔ کارهاش حذف شوند</button>
+      <button style="border:none;background:var(--red);color:var(--bg1);border-radius:12px;padding:13px;font-weight:700;font-size:.83rem;" onclick="doDeleteProjectConfirmed(true)">پروژه و همهٔ کارهاش حذف شوند</button>
       <button style="border:none;background:transparent;color:var(--t3);border-radius:12px;padding:10px;font-weight:700;font-size:.8rem;" onclick="closeAll()">انصراف</button>
     </div>
   </div>
@@ -4957,7 +5086,7 @@ select.fi{
     <div style="font-size:.92rem;font-weight:800;color:var(--t1);margin-bottom:18px;">این کار حذف شود؟</div>
     <div style="display:flex;gap:10px;">
       <button class="btn ghost" style="flex:1;border:1px solid var(--b1);background:var(--bg2);color:var(--t1);border-radius:12px;padding:12px;font-weight:700;font-size:.85rem;" onclick="closeAll()">نگه دار</button>
-      <button class="btn danger" style="flex:1;border:none;background:var(--red);color:#fff;border-radius:12px;padding:12px;font-weight:700;font-size:.85rem;" onclick="doDeleteConfirmed()">حذف کار</button>
+      <button class="btn danger" style="flex:1;border:none;background:var(--red);color:var(--bg1);border-radius:12px;padding:12px;font-weight:700;font-size:.85rem;" onclick="doDeleteConfirmed()">حذف کار</button>
     </div>
   </div>
 </div>
@@ -5133,7 +5262,7 @@ select.fi{
     <input class="t-big fi" type="time" id="eveningStartInput" style="margin-bottom:16px;">
     <div class="f-lbl">روز کاری معمولاً چه ساعتی تموم می‌شه؟</div>
     <input class="t-big fi" type="time" id="workEndInput" style="margin-bottom:4px;">
-    <div style="font-size:.68rem;color:var(--t3);margin-bottom:14px;">برای محاسبهٔ «ظرفیت روز» در صفحهٔ خانه استفاده می‌شه</div>
+    <div style="font-size:var(--fs-2xs);color:var(--t3);margin-bottom:14px;">برای محاسبهٔ «ظرفیت روز» در صفحهٔ خانه استفاده می‌شه</div>
     <button class="sh-sub" onclick="saveWorkHours()">ذخیره</button>
   </div>
 </div>
@@ -5155,7 +5284,7 @@ select.fi{
   <div class="sh-body">
     <div class="f-lbl">آدرس Worker</div>
     <input class="fi" id="pushUrlInp" placeholder="https://your-worker.workers.dev" dir="ltr" style="margin-bottom:6px;">
-    <div style="font-size:.68rem;color:var(--t3);margin-bottom:14px;">آدرسی که بعد از Deploy کردن Worker در Cloudflare می‌گیری</div>
+    <div style="font-size:var(--fs-2xs);color:var(--t3);margin-bottom:14px;">آدرسی که بعد از Deploy کردن Worker در Cloudflare می‌گیری</div>
     <button class="sh-sub" onclick="savePushSettings()">ذخیره و فعال‌سازی</button>
   </div>
 </div>
@@ -5264,11 +5393,11 @@ select.fi{
     <div>
       <div class="f-lbl">رنگ پروژه</div>
       <div class="color-picker" id="colorPicker">
-        <div class="cp-dot sel" data-c="#00b87a" style="background:#00b87a;" onclick="selProjColor('#00b87a',this)"></div>
-        <div class="cp-dot" data-c="#2563eb" style="background:#2563eb;" onclick="selProjColor('#2563eb',this)"></div>
-        <div class="cp-dot" data-c="#e53e5a" style="background:#e53e5a;" onclick="selProjColor('#e53e5a',this)"></div>
-        <div class="cp-dot" data-c="#d97706" style="background:#d97706;" onclick="selProjColor('#d97706',this)"></div>
-        <div class="cp-dot" data-c="#7c3aed" style="background:#7c3aed;" onclick="selProjColor('#7c3aed',this)"></div>
+        <div class="cp-dot sel" data-c="var(--a)" style="background:var(--a);" onclick="selProjColor('var(--a)',this)"></div>
+        <div class="cp-dot" data-c="var(--blue)" style="background:var(--blue);" onclick="selProjColor('var(--blue)',this)"></div>
+        <div class="cp-dot" data-c="var(--red)" style="background:var(--red);" onclick="selProjColor('var(--red)',this)"></div>
+        <div class="cp-dot" data-c="var(--amber)" style="background:var(--amber);" onclick="selProjColor('var(--amber)',this)"></div>
+        <div class="cp-dot" data-c="var(--purple)" style="background:var(--purple);" onclick="selProjColor('var(--purple)',this)"></div>
         <div class="cp-dot" data-c="#0891b2" style="background:#0891b2;" onclick="selProjColor('#0891b2',this)"></div>
         <div class="cp-dot" data-c="#be185d" style="background:#be185d;" onclick="selProjColor('#be185d',this)"></div>
         <div class="cp-dot" data-c="#64748b" style="background:#64748b;" onclick="selProjColor('#64748b',this)"></div>
@@ -5314,7 +5443,7 @@ select.fi{
   </div>
   <div class="sh-body">
     <div class="remind-task-name" id="remindTaskName">—</div>
-    <div id="remindTaskHint" style="font-size:.72rem;color:var(--t3);margin:-8px 0 12px;display:none;"></div>
+    <div id="remindTaskHint" style="font-size:var(--fs-2xs);color:var(--t3);margin:-8px 0 12px;display:none;"></div>
     <div class="f-lbl">زمان‌های سریع</div>
     <div class="remind-presets" id="remindPresets">
       <button class="rpreset" data-min="15"  onclick="setRemindPreset(15,this)">۱۵ دقیقه دیگر</button>
@@ -5346,31 +5475,31 @@ select.fi{
       <div style="display:flex;align-items:center;gap:10px;">
         <div style="width:8px;height:8px;border-radius:50%;background:var(--a);box-shadow:0 0 6px var(--ag);flex-shrink:0;"></div>
         <div style="flex:1;">
-          <div style="font-size:.82rem;font-weight:700;color:var(--a);" id="icsConnectedLbl">متصل</div>
+          <div style="font-size:var(--fs-xs);font-weight:700;color:var(--a);" id="icsConnectedLbl">متصل</div>
           <div style="font-size:.7rem;color:var(--a2);margin-top:1px;" id="icsEventCountLbl">—</div>
         </div>
-        <button onclick="disconnectICS()" style="font-size:.68rem;font-weight:700;color:var(--red);background:var(--redm);border:1px solid rgba(229,62,90,.2);padding:5px 10px;border-radius:8px;cursor:pointer;">قطع اتصال</button>
+        <button onclick="disconnectICS()" style="font-size:var(--fs-2xs);font-weight:700;color:var(--red);background:var(--redm);border:1px solid rgba(229,62,90,.2);padding:5px 10px;border-radius:8px;cursor:pointer;">قطع اتصال</button>
       </div>
     </div>
     <div class="f-lbl">روش اول — لینک ICS</div>
-    <div style="font-size:.72rem;color:var(--t2);line-height:1.7;margin-bottom:10px;padding:8px 12px;background:var(--bg2);border-radius:var(--r1);">
+    <div style="font-size:var(--fs-2xs);color:var(--t2);line-height:1.7;margin-bottom:10px;padding:8px 12px;background:var(--bg2);border-radius:var(--r1);">
       Google Calendar ← تنظیمات تقویم ← «Integrate calendar» ← «Secret address in iCal format»
     </div>
     <div style="display:flex;gap:8px;margin-bottom:8px;">
       <input class="fi" id="icsUrlInp" placeholder="https://calendar.google.com/calendar/ical/..." style="flex:1;">
       <button class="sh-sub" style="width:auto;padding:10px 14px;flex-shrink:0;font-size:.78rem;" onclick="icsLoadFromURL()">بارگذاری</button>
     </div>
-    <div id="icsUrlStatus" style="display:none;font-size:.72rem;padding:7px 11px;border-radius:9px;margin-bottom:10px;"></div>
+    <div id="icsUrlStatus" style="display:none;font-size:var(--fs-2xs);padding:7px 11px;border-radius:9px;margin-bottom:10px;"></div>
     <div style="display:flex;align-items:center;gap:10px;margin:14px 0;">
       <div style="flex:1;height:1px;background:var(--b1);"></div>
-      <span style="font-size:.68rem;color:var(--t3);font-weight:600;">یا</span>
+      <span style="font-size:var(--fs-2xs);color:var(--t3);font-weight:600;">یا</span>
       <div style="flex:1;height:1px;background:var(--b1);"></div>
     </div>
     <div class="f-lbl">روش دوم — فایل ICS</div>
-    <div style="font-size:.72rem;color:var(--t2);line-height:1.7;margin-bottom:10px;">Google Calendar ← Settings ← Import &amp; Export ← Export</div>
+    <div style="font-size:var(--fs-2xs);color:var(--t2);line-height:1.7;margin-bottom:10px;">Google Calendar ← Settings ← Import &amp; Export ← Export</div>
     <div onclick="document.getElementById('icsFileInp').click()" style="background:var(--bg2);border:1.5px dashed var(--b1);border-radius:var(--r2);padding:18px;text-align:center;cursor:pointer;transition:var(--dur-fast) var(--ease-out);">
       <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="var(--t3)" stroke-width="1.5" stroke-linecap="round" style="display:block;margin:0 auto 8px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-      <div style="font-size:.82rem;font-weight:600;color:var(--t2);">انتخاب فایل .ics</div>
+      <div style="font-size:var(--fs-xs);font-weight:600;color:var(--t2);">انتخاب فایل .ics</div>
       <div style="font-size:.7rem;color:var(--t3);margin-top:3px;">آفلاین — بدون نیاز به اینترنت</div>
     </div>
     <input type="file" id="icsFileInp" accept=".ics,.ical" onchange="icsLoadFromFile(this)" style="display:none;">
@@ -5454,7 +5583,7 @@ select.fi{
         <button class="pp" id="epMed"  data-p="med"  onclick="selEditPri('med',this)"><svg viewBox="0 0 10 10" fill="var(--amber)"><circle cx="5" cy="5" r="5"/></svg>متوسط</button>
         <button class="pp" id="epLow"  data-p="low"  onclick="selEditPri('low',this)"><svg viewBox="0 0 10 10" fill="var(--t4)"><circle cx="5" cy="5" r="5"/></svg>پایین</button>
       </div>
-      <button id="noteWaitBtn" class="sh-sub" style="background:rgba(37,99,235,.1);color:var(--blue);border:1px solid rgba(37,99,235,.25);margin-bottom:8px;" onclick="toggleWaitingStatus()">⏳ منتظرم</button>
+      <button id="noteWaitBtn" class="sh-sub" style="background:var(--bluem);color:var(--blue);border:1px solid rgba(37,99,235,.25);margin-bottom:8px;" onclick="toggleWaitingStatus()">⏳ منتظرم</button>
       <button id="noteSomedayBtn" class="sh-sub" style="background:var(--bg3);color:var(--t2);border:1px solid var(--b1);margin-bottom:8px;" onclick="noteToggleSomeday()">یه روزی، نه الان</button>
       <button class="sh-sub" onclick="saveEditTask()">ذخیره تغییرات</button>
       <button class="remind-clear" onclick="confirmDeleteTask()" style="margin-top:6px;">حذف کار</button>
@@ -5490,37 +5619,37 @@ const ICONS=[
   {id:'wx-snow',c:'#a1a8b3',s:`<path d="M7 13.5a4.5 4.5 0 0 1-.5-9 5.5 5.5 0 0 1 10.7-1.6A4 4 0 0 1 17 13.5H7Z" stroke-width="1.6"/><path d="M9 17.5v4M7.2 18.7l3.6 2.1M10.8 18.7l-3.6 2.1M15 17.5v4M13.2 18.7l3.6 2.1M16.8 18.7l-3.6 2.1" stroke-width="1.4"/>`},
   {id:'wx-fog',c:'#a1a8b3',s:`<path d="M5 9h11M3 13h15M5 17h13" stroke-width="1.7"/>`},
   {id:'wx-storm',c:'#a1a8b3',s:`<path d="M7 13.5a4.5 4.5 0 0 1-.5-9 5.5 5.5 0 0 1 10.7-1.6A4 4 0 0 1 17 13.5H7Z" stroke-width="1.6"/><path d="M13 14l-3 4.5h2.6L11 22.5l4.4-5.4h-2.6L13 14Z" stroke-width="1.3" stroke-linejoin="round"/>`},
-  {id:'pill',c:'#e53e5a',s:`<rect x="3" y="9" width="18" height="6" rx="3" stroke-width="1.6"/><line x1="12" y1="9" x2="12" y2="15" stroke-width="1.4"/>`},
-  {id:'steth',c:'#e53e5a',s:`<path d="M4 4a2 2 0 0 1 4 0v6a6 6 0 0 0 12 0V4" stroke-width="1.6"/><circle cx="20" cy="17" r="2" stroke-width="1.4"/>`},
-  {id:'syringe',c:'#2563eb',s:`<path d="M18 2L22 6M7 13L11 17M14 4l6 6-7 7-6-6L14 4z" stroke-width="1.5"/><path d="M3 21l4-4M12 9l-5 5" stroke-width="1.5"/>`},
-  {id:'heart',c:'#e53e5a',s:`<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke-width="1.6"/>`},
-  {id:'micro',c:'#7c3aed',s:`<rect x="8" y="2" width="8" height="14" rx="4" stroke-width="1.6"/><path d="M4 12a8 8 0 0 0 16 0M12 20v2M8 22h8" stroke-width="1.5"/>`},
-  {id:'thermo',c:'#e53e5a',s:`<path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" stroke-width="1.6"/><line x1="11.5" y1="6" x2="13.5" y2="6" stroke-width="1.3"/><line x1="11.5" y1="9" x2="13.5" y2="9" stroke-width="1.3"/>`},
-  {id:'hosp',c:'#2563eb',s:`<rect x="3" y="6" width="18" height="15" rx="2" stroke-width="1.5"/><path d="M9 21V9M3 9h18" stroke-width="1.4"/><path d="M12 11v4M10 13h4" stroke-width="1.5"/>`},
-  {id:'flask',c:'#7c3aed',s:`<path d="M9 3h6M9 3v8l-4.8 7.2A1 1 0 0 0 5 20h14a1 1 0 0 0 .8-1.6L15 11V3" stroke-width="1.5"/><path d="M7 16h10" stroke-width="1.4"/>`},
-  {id:'handshk',c:'#00b87a',s:`<path d="M17 11l-5-5H7l-4 4 4 4h5l5-5z" stroke-width="1.5"/><path d="M17 11l3 3-5 5-3-3" stroke-width="1.5"/>`},
-  {id:'target',c:'#e53e5a',s:`<circle cx="12" cy="12" r="10" stroke-width="1.5"/><circle cx="12" cy="12" r="6" stroke-width="1.4"/><circle cx="12" cy="12" r="2" stroke-width="1.4"/>`},
-  {id:'chart',c:'#00b87a',s:`<line x1="18" y1="20" x2="18" y2="10" stroke-width="1.8"/><line x1="12" y1="20" x2="12" y2="4" stroke-width="1.8"/><line x1="6" y1="20" x2="6" y2="14" stroke-width="1.8"/>`},
-  {id:'brief',c:'#d97706',s:`<rect x="2" y="7" width="20" height="14" rx="2" stroke-width="1.5"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" stroke-width="1.5"/>`},
-  {id:'phone',c:'#00b87a',s:`<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12a19.79 19.79 0 0 1-3-8.57A2 2 0 0 1 3.08 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16.92z" stroke-width="1.5"/>`},
-  {id:'car',c:'#2563eb',s:`<rect x="1" y="3" width="22" height="13" rx="2" stroke-width="1.5"/><path d="M16 16v3M8 16v3M1 12h22" stroke-width="1.4"/><path d="M5 7h2l2 4h6l2-4h2" stroke-width="1.4"/>`},
-  {id:'star',c:'#d97706',s:`<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" stroke-width="1.5"/>`},
-  {id:'clock',c:'#d97706',s:`<circle cx="12" cy="12" r="10" stroke-width="1.5"/><polyline points="12 6 12 12 16 14" stroke-width="1.6"/>`},
-  {id:'key',c:'#d97706',s:`<path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" stroke-width="1.5"/>`},
-  {id:'zap',c:'#d97706',s:`<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" stroke-width="1.5"/>`},
-  {id:'check',c:'#00b87a',s:`<polyline points="20 6 9 17 4 12" stroke-width="2"/>`},
-  {id:'clip',c:'#2563eb',s:`<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" stroke-width="1.5"/><rect x="8" y="2" width="8" height="4" rx="1" stroke-width="1.5"/><line x1="9" y1="12" x2="15" y2="12" stroke-width="1.5"/><line x1="9" y1="16" x2="13" y2="16" stroke-width="1.4"/>`},
-  {id:'pen',c:'#7c3aed',s:`<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke-width="1.5"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke-width="1.5"/>`},
-  {id:'shirt',c:'#2563eb',s:`<path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z" stroke-width="1.5"/>`},
-  {id:'batt',c:'#00b87a',s:`<rect x="2" y="7" width="18" height="11" rx="2" stroke-width="1.5"/><path d="M22 11v3" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="12" x2="10" y2="12" stroke-width="1.5"/><line x1="8" y1="10" x2="8" y2="14" stroke-width="1.5"/>`},
-  {id:'drop',c:'#2563eb',s:`<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" stroke-width="1.5"/>`},
-  {id:'smile',c:'#d97706',s:`<circle cx="12" cy="12" r="10" stroke-width="1.5"/><path d="M8 14s1.5 2 4 2 4-2 4-2" stroke-width="1.5"/><line x1="9" y1="9" x2="9.01" y2="9" stroke-width="2.5"/><line x1="15" y1="9" x2="15.01" y2="9" stroke-width="2.5"/>`},
-  {id:'camera',c:'#7c3aed',s:`<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" stroke-width="1.5"/><circle cx="12" cy="13" r="4" stroke-width="1.4"/>`},
-  {id:'pin',c:'#e53e5a',s:`<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke-width="1.5"/><circle cx="12" cy="10" r="3" stroke-width="1.4"/>`},
-  {id:'book',c:'#2563eb',s:`<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke-width="1.5"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke-width="1.5"/>`},
-  {id:'bell',c:'#d97706',s:`<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke-width="1.5"/><path d="M13.73 21a2 2 0 0 1-3.46 0" stroke-width="1.5"/>`},
-  {id:'medal',c:'#d97706',s:`<circle cx="12" cy="8" r="6" stroke-width="1.5"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11" stroke-width="1.5"/>`},
-  {id:'flag',c:'#e53e5a',s:`<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" stroke-width="1.5"/><line x1="4" y1="22" x2="4" y2="15" stroke-width="1.5"/>`},
+  {id:'pill',c:'var(--red)',s:`<rect x="3" y="9" width="18" height="6" rx="3" stroke-width="1.6"/><line x1="12" y1="9" x2="12" y2="15" stroke-width="1.4"/>`},
+  {id:'steth',c:'var(--red)',s:`<path d="M4 4a2 2 0 0 1 4 0v6a6 6 0 0 0 12 0V4" stroke-width="1.6"/><circle cx="20" cy="17" r="2" stroke-width="1.4"/>`},
+  {id:'syringe',c:'var(--blue)',s:`<path d="M18 2L22 6M7 13L11 17M14 4l6 6-7 7-6-6L14 4z" stroke-width="1.5"/><path d="M3 21l4-4M12 9l-5 5" stroke-width="1.5"/>`},
+  {id:'heart',c:'var(--red)',s:`<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" stroke-width="1.6"/>`},
+  {id:'micro',c:'var(--purple)',s:`<rect x="8" y="2" width="8" height="14" rx="4" stroke-width="1.6"/><path d="M4 12a8 8 0 0 0 16 0M12 20v2M8 22h8" stroke-width="1.5"/>`},
+  {id:'thermo',c:'var(--red)',s:`<path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" stroke-width="1.6"/><line x1="11.5" y1="6" x2="13.5" y2="6" stroke-width="1.3"/><line x1="11.5" y1="9" x2="13.5" y2="9" stroke-width="1.3"/>`},
+  {id:'hosp',c:'var(--blue)',s:`<rect x="3" y="6" width="18" height="15" rx="2" stroke-width="1.5"/><path d="M9 21V9M3 9h18" stroke-width="1.4"/><path d="M12 11v4M10 13h4" stroke-width="1.5"/>`},
+  {id:'flask',c:'var(--purple)',s:`<path d="M9 3h6M9 3v8l-4.8 7.2A1 1 0 0 0 5 20h14a1 1 0 0 0 .8-1.6L15 11V3" stroke-width="1.5"/><path d="M7 16h10" stroke-width="1.4"/>`},
+  {id:'handshk',c:'var(--a)',s:`<path d="M17 11l-5-5H7l-4 4 4 4h5l5-5z" stroke-width="1.5"/><path d="M17 11l3 3-5 5-3-3" stroke-width="1.5"/>`},
+  {id:'target',c:'var(--red)',s:`<circle cx="12" cy="12" r="10" stroke-width="1.5"/><circle cx="12" cy="12" r="6" stroke-width="1.4"/><circle cx="12" cy="12" r="2" stroke-width="1.4"/>`},
+  {id:'chart',c:'var(--a)',s:`<line x1="18" y1="20" x2="18" y2="10" stroke-width="1.8"/><line x1="12" y1="20" x2="12" y2="4" stroke-width="1.8"/><line x1="6" y1="20" x2="6" y2="14" stroke-width="1.8"/>`},
+  {id:'brief',c:'var(--amber)',s:`<rect x="2" y="7" width="20" height="14" rx="2" stroke-width="1.5"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" stroke-width="1.5"/>`},
+  {id:'phone',c:'var(--a)',s:`<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12a19.79 19.79 0 0 1-3-8.57A2 2 0 0 1 3.08 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21 16.92z" stroke-width="1.5"/>`},
+  {id:'car',c:'var(--blue)',s:`<rect x="1" y="3" width="22" height="13" rx="2" stroke-width="1.5"/><path d="M16 16v3M8 16v3M1 12h22" stroke-width="1.4"/><path d="M5 7h2l2 4h6l2-4h2" stroke-width="1.4"/>`},
+  {id:'star',c:'var(--amber)',s:`<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" stroke-width="1.5"/>`},
+  {id:'clock',c:'var(--amber)',s:`<circle cx="12" cy="12" r="10" stroke-width="1.5"/><polyline points="12 6 12 12 16 14" stroke-width="1.6"/>`},
+  {id:'key',c:'var(--amber)',s:`<path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" stroke-width="1.5"/>`},
+  {id:'zap',c:'var(--amber)',s:`<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" stroke-width="1.5"/>`},
+  {id:'check',c:'var(--a)',s:`<polyline points="20 6 9 17 4 12" stroke-width="2"/>`},
+  {id:'clip',c:'var(--blue)',s:`<path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" stroke-width="1.5"/><rect x="8" y="2" width="8" height="4" rx="1" stroke-width="1.5"/><line x1="9" y1="12" x2="15" y2="12" stroke-width="1.5"/><line x1="9" y1="16" x2="13" y2="16" stroke-width="1.4"/>`},
+  {id:'pen',c:'var(--purple)',s:`<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke-width="1.5"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke-width="1.5"/>`},
+  {id:'shirt',c:'var(--blue)',s:`<path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.57a1 1 0 0 0 .99.84H6v10a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.57a2 2 0 0 0-1.34-2.23z" stroke-width="1.5"/>`},
+  {id:'batt',c:'var(--a)',s:`<rect x="2" y="7" width="18" height="11" rx="2" stroke-width="1.5"/><path d="M22 11v3" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="12" x2="10" y2="12" stroke-width="1.5"/><line x1="8" y1="10" x2="8" y2="14" stroke-width="1.5"/>`},
+  {id:'drop',c:'var(--blue)',s:`<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" stroke-width="1.5"/>`},
+  {id:'smile',c:'var(--amber)',s:`<circle cx="12" cy="12" r="10" stroke-width="1.5"/><path d="M8 14s1.5 2 4 2 4-2 4-2" stroke-width="1.5"/><line x1="9" y1="9" x2="9.01" y2="9" stroke-width="2.5"/><line x1="15" y1="9" x2="15.01" y2="9" stroke-width="2.5"/>`},
+  {id:'camera',c:'var(--purple)',s:`<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" stroke-width="1.5"/><circle cx="12" cy="13" r="4" stroke-width="1.4"/>`},
+  {id:'pin',c:'var(--red)',s:`<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke-width="1.5"/><circle cx="12" cy="10" r="3" stroke-width="1.4"/>`},
+  {id:'book',c:'var(--blue)',s:`<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke-width="1.5"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke-width="1.5"/>`},
+  {id:'bell',c:'var(--amber)',s:`<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke-width="1.5"/><path d="M13.73 21a2 2 0 0 1-3.46 0" stroke-width="1.5"/>`},
+  {id:'medal',c:'var(--amber)',s:`<circle cx="12" cy="8" r="6" stroke-width="1.5"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11" stroke-width="1.5"/>`},
+  {id:'flag',c:'var(--red)',s:`<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" stroke-width="1.5"/><line x1="4" y1="22" x2="4" y2="15" stroke-width="1.5"/>`},
 ];
 const iconMap={};ICONS.forEach(i=>iconMap[i.id]=i);
 function svgIco(id,w=16){const ic=iconMap[id]||iconMap.check;return`<svg viewBox="0 0 24 24" width="${w}" height="${w}" fill="none" stroke="${ic.c}" stroke-linecap="round" stroke-linejoin="round">${ic.s}</svg>`;}
@@ -7709,7 +7838,7 @@ function renderBirthdayPage(){
   if(emptyEl) emptyEl.style.display='none';
 
   // Avatar color
-  const BD_COLORS=['#e53e5a','#d97706','#00b87a','#2563eb','#7c3aed','#0891b2','#be185d'];
+  const BD_COLORS=['var(--red)','var(--amber)','var(--a)','var(--blue)','var(--purple)','#0891b2','#be185d'];
   const _avatarColor=(name)=>{
     let h=0; for(const c of name) h=(h<<5)-h+c.charCodeAt(0);
     return BD_COLORS[Math.abs(h)%BD_COLORS.length];
@@ -8044,7 +8173,7 @@ function renderArchiveList(){
     const dateStr=d?mrToJalali(d.getFullYear(),d.getMonth()+1,d.getDate()).join('/'):'';
     row.innerHTML=
       '<div style="flex:1;min-width:0;">'+
-        '<div style="font-size:.82rem;color:var(--t1);text-decoration:line-through;opacity:.7;">'+esc(t.text)+'</div>'+
+        '<div style="font-size:var(--fs-xs);color:var(--t1);text-decoration:line-through;opacity:.7;">'+esc(t.text)+'</div>'+
         '<div style="font-size:.62rem;color:var(--t3);margin-top:2px;">'+dateStr+'</div>'+
       '</div>'+
       '<button class="hbtn" style="width:30px;height:30px;border-radius:9px;flex-shrink:0;" data-id="'+t.id+'" onclick="restoreFromArchive(this.dataset.id)" title="بازگرداندن">'+
@@ -8165,7 +8294,7 @@ function cmdFilter(){
   const filtered=[...CMD_ITEMS.filter(i=>!q||(i.label||'').includes(q)||(i.keys||'').toLowerCase().includes(q)),...taskResults];
   _cmdIdx=0;
   const list=document.getElementById('cmdList');
-  if(!filtered.length){list.innerHTML='<div style="padding:16px;text-align:center;color:var(--t3);font-size:.82rem;">نتیجه‌ای نیست</div>';return;}
+  if(!filtered.length){list.innerHTML='<div style="padding:16px;text-align:center;color:var(--t3);font-size:var(--fs-xs);">نتیجه‌ای نیست</div>';return;}
   list.innerHTML=filtered.map((item,i)=>`
     <div class="cmd-item${i===0?' cmd-sel':''}" data-idx="${i}"
       style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:var(--r2);cursor:pointer;transition:.1s;"
@@ -8461,7 +8590,7 @@ function jalaliWeekNumber(jy, jm, jd){
 
 /* ══ CONFETTI ══ */
 function spawnConfetti(e){
-  const cols=['#00b87a','#e53e5a','#d97706','#2563eb','#7c3aed'];
+  const cols=['var(--a)','var(--red)','var(--amber)','var(--blue)','var(--purple)'];
   const x=(e&&e.clientX)||window.innerWidth/2,y=(e&&e.clientY)||window.innerHeight/2;
   for(let i=0;i<18;i++){const el=document.createElement('div');el.className='cf';el.style.cssText=`left:${x}px;top:${y}px;background:${cols[i%cols.length]};--cx:${(Math.random()-.5)*220}px;--cy:${-(Math.random()*180+50)}px;--cr:${Math.random()*720}deg;animation-delay:${Math.random()*.25}s;border-radius:${Math.random()>.5?'50%':'3px'};`;document.body.appendChild(el);setTimeout(()=>el.remove(),1500);}
 }
@@ -9577,7 +9706,7 @@ function drawQR(){
   const payload=JSON.stringify({t:tasks,b:bagItems,c:{name:cfg.name,company:cfg.company,visitTime:cfg.visitTime}});
   const b64=btoa(unescape(encodeURIComponent(payload)));
   // Draw a simple grid pattern representing the data (visual only)
-  ctx.fillStyle=isDark?'#e8edf5':'#111827';
+  ctx.fillStyle=isDark?'#e8edf5':'var(--t1)';
   const cells=16; const cell=sz/cells;
   for(let i=0;i<cells;i++){
     for(let j=0;j<cells;j++){
@@ -9587,12 +9716,12 @@ function drawQR(){
   }
   // corner markers
   [[0,0],[0,10],[10,0]].forEach(([r,c])=>{
-    ctx.strokeStyle=isDark?'#e8edf5':'#111827'; ctx.lineWidth=2;
+    ctx.strokeStyle=isDark?'#e8edf5':'var(--t1)'; ctx.lineWidth=2;
     ctx.strokeRect(c*cell,r*cell,5*cell,5*cell);
-    ctx.fillStyle='#00b87a'; ctx.fillRect(c*cell+cell,r*cell+cell,3*cell,3*cell);
+    ctx.fillStyle='var(--a)'; ctx.fillRect(c*cell+cell,r*cell+cell,3*cell,3*cell);
   });
   // center dot
-  ctx.fillStyle='#00b87a'; ctx.beginPath();
+  ctx.fillStyle='var(--a)'; ctx.beginPath();
   ctx.arc(sz/2,sz/2,8,0,Math.PI*2); ctx.fill();
 }
 
@@ -9623,11 +9752,11 @@ function initReminders(){
 const PROJ_SK = 'dq5_projects';
 let projects = [];
 let editingProjId = null;
-let selProjColor_ = '#00b87a';
+let selProjColor_ = 'var(--a)';
 let selTaskProjId = '';
 let selTaskStatus = 'todo';
 
-const PROJ_COLORS = ['#00b87a','#2563eb','#e53e5a','#d97706','#7c3aed','#0891b2','#be185d','#64748b'];
+const PROJ_COLORS = ['var(--a)','var(--blue)','var(--red)','var(--amber)','var(--purple)','#0891b2','#be185d','#64748b'];
 
 function loadProjects(){ try{projects=JSON.parse(localStorage.getItem(PROJ_SK))||[];}catch(e){projects=[];} }
 function saveProjects(){ try{localStorage.setItem(PROJ_SK,JSON.stringify(projects));}catch(e){} _debouncedSync(); }
@@ -9767,7 +9896,7 @@ function toggleProjCard(pid, headerEl){
 }
 function openAddProject(){
   editingProjId=null;
-  selProjColor_='#00b87a';
+  selProjColor_='var(--a)';
   document.getElementById('projNameInp').value='';
   document.getElementById('projDeadlineInp').value='';
   const pdTxt=document.getElementById('projDeadlineDisp_txt');
@@ -9781,7 +9910,7 @@ function openAddProject(){
   document.getElementById('projCloseBtn').style.display='none';
   document.getElementById('projReopenBtn').style.display='none';
   const pn=document.getElementById('projNotesInp'); if(pn)pn.value='';
-  syncColorPicker('#00b87a');
+  syncColorPicker('var(--a)');
   openSheet('shProject');
 }
 function openEditProject(pidOrEl,e){
@@ -10251,7 +10380,7 @@ function renderCal(){
     const visTasks=dayTasks.slice(0,2);
     const chips=visTasks.map(t=>{
       const proj=projects.find(p=>p.id===t.projectId);
-      const baseColor=proj?proj.color:(t.priority==='high'?'#e53e5a':t.priority==='med'?'#d97706':'#6b7280');
+      const baseColor=proj?proj.color:(t.priority==='high'?'var(--red)':t.priority==='med'?'var(--amber)':'#6b7280');
       return `<div class="cal-evt-chip" style="background:${baseColor}22;color:${baseColor}">${esc(t.text)}</div>`;
     }).join('');
     const moreCount=dayTasks.length-visTasks.length;
@@ -10259,7 +10388,7 @@ function renderCal(){
     // dots برای موبایل — همیشه نشون بده
     const dots=dayTasks.slice(0,3).map(t=>{
       const proj=projects.find(p=>p.id===t.projectId);
-      const c=proj?proj.color:(t.priority==='high'?'#e53e5a':t.priority==='med'?'#d97706':'#00b87a');
+      const c=proj?proj.color:(t.priority==='high'?'var(--red)':t.priority==='med'?'var(--amber)':'var(--a)');
       return `<div class="cal-dot" style="background:${c}"></div>`;
     }).join('');
     const dotsEl=dayTasks.length?`<div class="cal-dots">${dots}</div>`:'';
@@ -10327,7 +10456,7 @@ function refreshCalDayTasks(dateKey){
   } else {
     const empty=document.createElement('div');
     empty.className='cal-sel-empty';
-    empty.innerHTML='کاری برای این روز نداری<br><span style="font-size:.68rem;color:var(--t3);">با + اضافه کن</span>';
+    empty.innerHTML='کاری برای این روز نداری<br><span style="font-size:var(--fs-2xs);color:var(--t3);">با + اضافه کن</span>';
     tasksEl.appendChild(empty);
   }
 }
@@ -10747,14 +10876,14 @@ function _updateFaviconBadge(count){
     const ctx=canvas.getContext('2d');
     // آیکون پایه — دایره سبز
     ctx.beginPath();ctx.arc(16,16,15,0,2*Math.PI);
-    ctx.fillStyle='#00b87a';ctx.fill();
+    ctx.fillStyle='var(--a)';ctx.fill();
     ctx.fillStyle='#071a0e';ctx.font='bold 16px sans-serif';
     ctx.textAlign='center';ctx.textBaseline='middle';
     ctx.fillText('D',16,17);
     if(count>0){
       // badge قرمز
       ctx.beginPath();ctx.arc(25,7,8,0,2*Math.PI);
-      ctx.fillStyle='#e53e5a';ctx.fill();
+      ctx.fillStyle='var(--red)';ctx.fill();
       ctx.fillStyle='#fff';ctx.font='bold 9px sans-serif';
       ctx.fillText(count>9?'9+':String(count),25,7);
     }
@@ -13824,9 +13953,9 @@ function nlpShowPreview(parsed){
     chips.push(`<span class="nlp-chip time"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${parsed.time}</span>`);
   }
   if(parsed.status==='waiting'&&parsed.waitingFor){
-    chips.push(`<span class="nlp-chip" style="background:rgba(37,99,235,.12);color:var(--blue)"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>منتظر: ${parsed.waitingFor}</span>`);
+    chips.push(`<span class="nlp-chip" style="background:var(--bluem);color:var(--blue)"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>منتظر: ${parsed.waitingFor}</span>`);
   } else if(parsed.status==='waiting'){
-    chips.push(`<span class="nlp-chip" style="background:rgba(37,99,235,.12);color:var(--blue)">⏳ منتظرم</span>`);
+    chips.push(`<span class="nlp-chip" style="background:var(--bluem);color:var(--blue)">⏳ منتظرم</span>`);
   }
   if(parsed.fileLink){
     chips.push(`<span class="nlp-chip" style="background:rgba(124,58,237,.12);color:var(--purple)"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>لینک فایل</span>`);
@@ -14478,7 +14607,7 @@ function tmRenderSokoReport() {
            {l:'تموم شده',v:report.totals?.done||0,c:'var(--a)'},
            {l:'miss شده',v:report.totals?.missed||0,c:'var(--red)'}].map(s=>`
           <div style="background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r2);padding:var(--sp2);text-align:center">
-            <div style="font-size:1.2rem;font-weight:800;color:${s.c}">${s.v}</div>
+            <div style="font-size:var(--fs-lg);font-weight:800;color:${s.c}">${s.v}</div>
             <div style="font-size:var(--fs-2xs);color:var(--t3)">${s.l}</div>
           </div>`).join('')}
       </div>
@@ -14547,7 +14676,7 @@ async function tmRenderPendingList(pending) {
   el.innerHTML = pending.map(p => `
     <div class="tm-pending-card" style="flex-direction:column;align-items:stretch">
       <div style="display:flex;align-items:center;gap:var(--sp3);margin-bottom:var(--sp3)">
-        <div style="width:40px;height:40px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0">👤</div>
+        <div style="width:40px;height:40px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:var(--fs-lg);flex-shrink:0">👤</div>
         <div>
           <div style="font-size:var(--fs-md);font-weight:700">${esc(p.name)}</div>
           <div style="font-size:var(--fs-xs);color:var(--t2)">${esc(p.role||'—')}</div>
@@ -14619,7 +14748,7 @@ function tmOpenTaskDetail(taskId) {
     checkEl.innerHTML = (task.checklist||[]).map((item,i) => `
       <div style="display:flex;align-items:center;gap:var(--sp2);padding:var(--sp2) 0;border-bottom:1px solid var(--b2)">
         <div onclick="tmToggleCheck('${taskId}',${i})" style="width:18px;height:18px;border-radius:var(--r1);border:2px solid ${item.done?'var(--a)':'var(--b1)'};display:flex;align-items:center;justify-content:center;background:${item.done?'var(--a)':'transparent'};cursor:pointer;flex-shrink:0">
-          ${item.done?`<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#fff" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`:''}
+          ${item.done?`<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="var(--bg1)" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>`:''}
         </div>
         <span style="font-size:var(--fs-sm);${item.done?'text-decoration:line-through;color:var(--t3)':''}">${item.text||item}</span>
       </div>`).join('') || '<div style="color:var(--t3);font-size:var(--fs-xs);text-align:center;padding:var(--sp2)">چک‌لیستی نداره</div>';
@@ -15947,7 +16076,7 @@ tmRenderSokoStatus = function() {
   let alertHtml = '';
   if (alerts.length) {
     alertHtml = `
-      <div style="background:var(--redm);border:1px solid rgba(229,62,90,.15);border-radius:var(--r3);padding:var(--sp3);margin-bottom:var(--sp4)">
+      <div style="background:var(--redm);border:1px solid var(--redm);border-radius:var(--r3);padding:var(--sp3);margin-bottom:var(--sp4)">
         <div style="display:flex;align-items:center;gap:var(--sp2);margin-bottom:var(--sp3)">
           ${tmIco('warning',14,'var(--red)')}
           <span style="font-size:var(--fs-xs);font-weight:700;color:var(--red)">نیاز به توجه</span>
@@ -16578,7 +16707,7 @@ function _tmUpdateAssignPreview() {
   const chips = [];
   if (_tmAssignParsed.deadline) {
     const d = _tmFmtDeadline(_tmAssignParsed.deadline);
-    if (d) chips.push(`<span class="tm-nlp-chip" style="background:rgba(0,184,122,.12);color:var(--a)"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${d.label}</span>`);
+    if (d) chips.push(`<span class="tm-nlp-chip" style="background:var(--am);color:var(--a)"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${d.label}</span>`);
   }
   const PRI_LABEL = { high:'فوری', med:'مهم', low:'عادی' };
   const PRI_COLOR = { high:'var(--red)', med:'var(--amber)', low:'var(--t3)' };
@@ -16622,7 +16751,7 @@ function _tmUpdateAssignMemberChips() {
       onclick="_tmSelectMember('${m.uuid}')"
       style="display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:var(--r5);border:1px solid ${active ? 'var(--blue)' : 'var(--b1)'};background:${active ? 'var(--bluem)' : 'var(--bg2)'};color:${active ? 'var(--blue)' : 'var(--t1)'};font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;transition:all 150ms ease">
       ${tmDot(st)}<span>${esc(m.name)}</span>
-      ${m.activeTasks > 0 ? `<span style="font-size:10px;opacity:.6">${m.activeTasks}</span>` : ''}
+      ${m.activeTasks > 0 ? `<span style="font-size:var(--fs-2xs);opacity:.6">${m.activeTasks}</span>` : ''}
     </button>`;
   }).join('');
 }
@@ -16733,7 +16862,7 @@ tmRenderTeamProjects = function() {
         </div>
         <div style="text-align:center;min-width:40px">
           <div style="font-size:var(--fs-lg);font-weight:800;color:${st.color};font-variant-numeric:tabular-nums">${m.activeTasks}</div>
-          <div style="font-size:10px;color:var(--t3)">تسک</div>
+          <div style="font-size:var(--fs-2xs);color:var(--t3)">تسک</div>
         </div>
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--t3)" stroke-width="2.5" stroke-linecap="round" id="tmProjArrow_${m.uuid}" style="transform:rotate(-90deg);transition:transform 200ms ease"><polyline points="9 18 15 12 9 6"/></svg>
       </div>
@@ -16751,11 +16880,11 @@ tmRenderTeamProjects = function() {
 
       <!-- action buttons -->
       <div style="display:flex;gap:var(--sp2);margin-top:var(--sp2)">
-        <button onclick="tmAssignTask('${m.uuid}')" style="height:28px;padding:0 10px;border-radius:var(--r1);background:var(--bg2);border:1px solid var(--b1);color:var(--t2);font-size:11px;font-weight:600;font-family:var(--f);cursor:pointer;display:inline-flex;align-items:center;gap:4px">
+        <button onclick="tmAssignTask('${m.uuid}')" style="height:28px;padding:0 10px;border-radius:var(--r1);background:var(--bg2);border:1px solid var(--b1);color:var(--t2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;display:inline-flex;align-items:center;gap:4px">
           ${tmIco('plus',11)} تسک
         </button>
         ${m.alert !== 'ok' ? `
-        <button onclick="tmExtendDeadline(null,'${m.uuid}')" style="height:28px;padding:0 10px;border-radius:var(--r1);background:var(--ambm);border:1px solid rgba(217,119,6,.2);color:var(--amber);font-size:11px;font-weight:600;font-family:var(--f);cursor:pointer">
+        <button onclick="tmExtendDeadline(null,'${m.uuid}')" style="height:28px;padding:0 10px;border-radius:var(--r1);background:var(--ambm);border:1px solid rgba(217,119,6,.2);color:var(--amber);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">
           تمدید
         </button>` : ''}
       </div>
@@ -16793,11 +16922,11 @@ async function _tmToggleMemberTasks(uuid) {
       const st = STATUS_MAP[t.status] || STATUS_MAP.pending;
       const over = t.deadline && t.deadline < mrTodayKey() && t.status !== 'done';
       return `<div style="display:flex;align-items:center;gap:var(--sp2);padding:6px 0;border-bottom:1px solid var(--b2)">
-        <span style="font-size:10px;font-weight:700;color:${st.color};flex-shrink:0">${st.label}</span>
+        <span style="font-size:var(--fs-2xs);font-weight:700;color:${st.color};flex-shrink:0">${st.label}</span>
         <span style="font-size:var(--fs-xs);color:var(--t1);flex:1;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t.title)}</span>
-        ${t.deadline ? `<span style="font-size:10px;color:${over?'var(--red)':'var(--t3)'};flex-shrink:0">${t.deadline.slice(5)}</span>` : ''}
+        ${t.deadline ? `<span style="font-size:var(--fs-2xs);color:${over?'var(--red)':'var(--t3)'};flex-shrink:0">${t.deadline.slice(5)}</span>` : ''}
       </div>`;
-    }).join('') + (tasks.length > 5 ? `<div style="font-size:10px;color:var(--t3);text-align:center;padding-top:4px">+${tasks.length-5} تسک دیگه</div>` : '');
+    }).join('') + (tasks.length > 5 ? `<div style="font-size:var(--fs-2xs);color:var(--t3);text-align:center;padding-top:4px">+${tasks.length-5} تسک دیگه</div>` : '');
   } catch(e) {
     el.innerHTML = `<div style="font-size:var(--fs-xs);color:var(--red)">${e.message}</div>`;
   }
@@ -16972,16 +17101,16 @@ function tmRenderProjectsSection() {
         <span style="font-size:var(--fs-xs);color:var(--blue);font-weight:700">${pct}٪</span>
         <span style="font-size:var(--fs-sm);font-weight:700;color:var(--t1)">👥 ${esc(cat)}</span>
       </div>
-      <div style="height:3px;background:rgba(59,130,246,.15);border-radius:var(--r5);margin-bottom:var(--sp3);overflow:hidden">
+      <div style="height:3px;background:var(--bluem);border-radius:var(--r5);margin-bottom:var(--sp3);overflow:hidden">
         <div style="height:100%;border-radius:var(--r5);background:var(--blue);transform:scaleX(${pct/100});transform-origin:right;transition:transform 600ms cubic-bezier(0.23,1,0.32,1)"></div>
       </div>
       ${tasks.slice(0,3).map(t =>
-        `<div onclick="openTeamTaskDetail('${t.id}')" style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(59,130,246,.1);cursor:pointer">
-          <span style="font-size:10px;font-weight:700;color:${STATUS_COLOR[t.status]||'var(--t3)'}">${STATUS_LABEL[t.status]||''}</span>
+        `<div onclick="openTeamTaskDetail('${t.id}')" style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bluem);cursor:pointer">
+          <span style="font-size:var(--fs-2xs);font-weight:700;color:${STATUS_COLOR[t.status]||'var(--t3)'}">${STATUS_LABEL[t.status]||''}</span>
           <span style="font-size:var(--fs-xs);color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70%">${esc(t.title)}</span>
         </div>`
       ).join('')}
-      ${tasks.length > 3 ? `<div style="font-size:10px;color:var(--t3);text-align:center;padding-top:4px">+${tasks.length-3} تسک دیگه</div>` : ''}
+      ${tasks.length > 3 ? `<div style="font-size:var(--fs-2xs);color:var(--t3);text-align:center;padding-top:4px">+${tasks.length-3} تسک دیگه</div>` : ''}
     </div>`;
   }).join('');
 }
@@ -17072,12 +17201,12 @@ function _calSetFilter(f) {
             <div style="background:var(--bluem);border:1px solid rgba(59,130,246,.2);border-radius:var(--r2);padding:var(--sp2) var(--sp3);margin-bottom:6px">
               <div style="font-size:var(--fs-xs);font-weight:600;color:var(--t1);margin-bottom:6px;text-align:right">${esc(t.title)}</div>
               <div style="display:flex;gap:6px">
-                <button onclick="tmAPI('PUT','/task/update',{taskId:'${t.id}',status:'in_progress'}).then(()=>toast_(svgIco('check'),'وضعیت آپدیت شد'))" style="flex:1;height:28px;border:1px solid var(--b1);border-radius:var(--r1);background:var(--bg2);font-size:10px;font-weight:600;font-family:var(--f);color:var(--t2);cursor:pointer">درحالم</button>
-                <button onclick="openTeamTaskDetail('${t.id}')" style="flex:1;height:28px;border:1px solid rgba(59,130,246,.3);border-radius:var(--r1);background:var(--bluem);font-size:10px;font-weight:600;font-family:var(--f);color:var(--blue);cursor:pointer">جزئیات</button>
+                <button onclick="tmAPI('PUT','/task/update',{taskId:'${t.id}',status:'in_progress'}).then(()=>toast_(svgIco('check'),'وضعیت آپدیت شد'))" style="flex:1;height:28px;border:1px solid var(--b1);border-radius:var(--r1);background:var(--bg2);font-size:var(--fs-2xs);font-weight:600;font-family:var(--f);color:var(--t2);cursor:pointer">درحالم</button>
+                <button onclick="openTeamTaskDetail('${t.id}')" style="flex:1;height:28px;border:1px solid rgba(59,130,246,.3);border-radius:var(--r1);background:var(--bluem);font-size:var(--fs-2xs);font-weight:600;font-family:var(--f);color:var(--blue);cursor:pointer">جزئیات</button>
               </div>
             </div>
           `).join('')}
-          ${inboxTasks.length > 3 ? `<div style="font-size:10px;color:var(--t3);text-align:center">+${inboxTasks.length-3} تسک دیگه</div>` : ''}
+          ${inboxTasks.length > 3 ? `<div style="font-size:var(--fs-2xs);color:var(--t3);text-align:center">+${inboxTasks.length-3} تسک دیگه</div>` : ''}
         </div>`;
       list.appendChild(section);
     }, 100);
@@ -17108,7 +17237,7 @@ window.tmRenderReport = function() {
       ].map(s => `
         <div style="text-align:center;background:var(--bg2);border-radius:var(--r2);padding:var(--sp3)">
           <div style="font-size:var(--fs-lg);font-weight:800;color:${s.c};font-variant-numeric:tabular-nums">${s.v}</div>
-          <div style="font-size:10px;color:var(--t3);margin-top:2px">${s.l}</div>
+          <div style="font-size:var(--fs-2xs);color:var(--t3);margin-top:2px">${s.l}</div>
         </div>`).join('')}
     </div>
 
@@ -17126,21 +17255,21 @@ window.tmRenderReport = function() {
               <div style="font-size:var(--fs-md);font-weight:800;color:${scoreColor};font-variant-numeric:tabular-nums">${score}٪</div>
               <div style="text-align:right">
                 <div style="font-size:var(--fs-sm);font-weight:700;color:var(--t1)">${esc(m.name)}</div>
-                <div style="font-size:10px;color:var(--t3)">${mDone} از ${mTotal} تسک</div>
+                <div style="font-size:var(--fs-2xs);color:var(--t3)">${mDone} از ${mTotal} تسک</div>
               </div>
             </div>
             <div style="height:4px;background:var(--bg3);border-radius:var(--r5);overflow:hidden">
               <div style="height:100%;border-radius:var(--r5);background:${scoreColor};transform:scaleX(${score/100});transform-origin:right;transition:transform 600ms cubic-bezier(0.23,1,0.32,1)"></div>
             </div>
-            ${m.alert !== 'ok' ? `<div style="font-size:10px;margin-top:4px;color:${m.alert==='blocked'?'var(--red)':'var(--amber)'}">${m.alert==='blocked'?'🚫 مشکل دارد':'⏳ بی‌تحرکی'}</div>` : ''}
+            ${m.alert !== 'ok' ? `<div style="font-size:var(--fs-2xs);margin-top:4px;color:${m.alert==='blocked'?'var(--red)':'var(--amber)'}">${m.alert==='blocked'?'🚫 مشکل دارد':'⏳ بی‌تحرکی'}</div>` : ''}
           </div>`;
       }).join('') : '<div style="color:var(--t3);font-size:var(--fs-xs);text-align:center;padding:var(--sp4)">عضوی ندارد</div>'}
     </div>
 
     <!-- toggle هفتگی / ماهانه -->
     <div style="padding:0 var(--sp4) var(--sp5);display:flex;gap:var(--sp2);justify-content:center">
-      <button onclick="tmLoadReport('weekly')"  style="height:28px;padding:0 12px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--t1);color:var(--bg1);font-size:11px;font-weight:600;font-family:var(--f);cursor:pointer">هفتگی</button>
-      <button onclick="tmLoadReport('monthly')" style="height:28px;padding:0 12px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--bg2);color:var(--t2);font-size:11px;font-weight:600;font-family:var(--f);cursor:pointer">ماهانه</button>
+      <button onclick="tmLoadReport('weekly')"  style="height:28px;padding:0 12px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--t1);color:var(--bg1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">هفتگی</button>
+      <button onclick="tmLoadReport('monthly')" style="height:28px;padding:0 12px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--bg2);color:var(--t2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">ماهانه</button>
     </div>`;
 };
 
@@ -17158,6 +17287,25 @@ async function tmLoadReport(period) {
 }
 
 /* ════ End Missing Features ════ */
+
+
+/* ════ Focus Management for team modals ════ */
+(function(){
+  const _origTmModal = window.tmModal;
+  if (!_origTmModal) return;
+  window.tmModal = function(id, open) {
+    _origTmModal.apply(this, arguments);
+    if (open) {
+      setTimeout(() => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const first = el.querySelector('input:not([disabled]), textarea:not([disabled])');
+        if (first) first.focus();
+      }, 320); // بعد از animation
+    }
+  };
+})();
+/* ════ End Focus Management ════ */
 
 boot();
 </script>
@@ -17479,7 +17627,7 @@ boot();
         منتظرم
       </button>
       <button class="tm-task-action primary" onclick="tmUpdateTaskStatus('done')">
-        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--bg1)" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
         انجام شد
       </button>
     </div>
@@ -17648,11 +17796,11 @@ boot();
       </div>
       <div>
         <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">PIN مدیر (۴ رقم)</div>
-        <input id="tmMCreatePin" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:1.2rem;font-family:var(--f);color:var(--t1);letter-spacing:.3em;text-align:center" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/>
+        <input id="tmMCreatePin" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-lg);font-family:var(--f);color:var(--t1);letter-spacing:.3em;text-align:center" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/>
       </div>
       <div>
         <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">تأیید PIN</div>
-        <input id="tmMCreatePin2" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:1.2rem;font-family:var(--f);color:var(--t1);letter-spacing:.3em;text-align:center" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/>
+        <input id="tmMCreatePin2" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-lg);font-family:var(--f);color:var(--t1);letter-spacing:.3em;text-align:center" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/>
       </div>
       <div id="tmMCreateErr" style="font-size:var(--fs-xs);color:var(--red);text-align:center;min-height:16px"></div>
       <button id="tmMCreateBtn" onclick="tmDoCreate()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer;margin-top:4px">ساخت تیم</button>
@@ -17708,7 +17856,7 @@ boot();
       <!-- انتخاب عضو -->
       <div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-          <button id="tmABroadcastBtn" onclick="_tmToggleBroadcast()" style="height:26px;padding:0 10px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--bg2);color:var(--t2);font-size:11px;font-weight:600;font-family:var(--f);cursor:pointer;transition:all 150ms ease">📡 ارسال به همه</button>
+          <button id="tmABroadcastBtn" onclick="_tmToggleBroadcast()" style="height:26px;padding:0 10px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--bg2);color:var(--t2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;transition:all 150ms ease">📡 ارسال به همه</button>
           <div style="font-size:var(--fs-xs);color:var(--t3)">برای کی؟</div>
         </div>
         <div id="tmAMemberChips" style="display:flex;gap:6px;flex-wrap:wrap"></div>
@@ -17745,7 +17893,7 @@ boot();
         </div>
         <div style="margin-bottom:14px">
           <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">PIN شخصی (۴ رقم)</div>
-          <input id="tmMJoinPin" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:1.2rem;font-family:var(--f);color:var(--t1);letter-spacing:.3em;text-align:center" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/>
+          <input id="tmMJoinPin" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-lg);font-family:var(--f);color:var(--t1);letter-spacing:.3em;text-align:center" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/>
           <div style="font-size:var(--fs-2xs);color:var(--t3);margin-top:4px">برای بازیابی در دستگاه جدید</div>
         </div>
         <div id="tmMJoinErr" style="font-size:var(--fs-xs);color:var(--red);text-align:center;min-height:16px;margin-bottom:8px"></div>
@@ -17823,7 +17971,7 @@ boot();
       </div>
       <div>
         <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">PIN</div>
-        <input id="tmDLPin" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:1.2rem;font-family:var(--f);color:var(--t1);letter-spacing:.3em;text-align:center" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/>
+        <input id="tmDLPin" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-lg);font-family:var(--f);color:var(--t1);letter-spacing:.3em;text-align:center" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/>
       </div>
       <div id="tmDLErr" style="font-size:var(--fs-xs);color:var(--red);min-height:16px;text-align:center"></div>
       <button id="tmDLBtn" onclick="tmDoDirectLogin()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">ورود</button>
