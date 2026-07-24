@@ -4499,6 +4499,15 @@ select.fi{
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
       <div class="proj-empty-t">پروژه‌ای نداری</div>
       <div class="proj-empty-s">با + پروژه جدید بساز</div>
+    <!-- پروژه‌های تیمی — کارمند -->
+    <div id="tmProjInProjects" style="display:none;padding:var(--sp4) var(--sp4) var(--sp6)">
+      <div style="display:flex;align-items:center;gap:var(--sp2);margin-bottom:var(--sp3)">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--blue)" stroke-width="2" stroke-linecap="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span style="font-size:var(--fs-xs);font-weight:700;color:var(--blue)">پروژه‌های تیمی</span>
+      </div>
+      <div id="tmProjInProjectsList"></div>
+    </div>
+
     </div>
     <button class="add-proj-btn" onclick="openAddProject()">
       <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -4675,7 +4684,24 @@ select.fi{
       <button class="cvt active" data-v="month" onclick="setCalView('month',this)">ماهانه</button>
       <button class="cvt"        data-v="week"  onclick="setCalView('week',this)">هفتگی</button>
       <button class="cvt"        data-v="list"  onclick="setCalView('list',this)">فهرست</button>
+    
+      <!-- فیلتر تقویم: شخصی / تیمی / همه -->
+      <div id="calTeamFilter" style="display:none;padding:4px 0 0;display:none">
+        <div style="display:flex;gap:4px;background:var(--bg2);border-radius:var(--r5);padding:3px">
+          <button id="ctf-all"      onclick="_calSetFilter('all')"      style="flex:1;height:26px;border:none;border-radius:var(--r5);font-size:11px;font-weight:600;font-family:var(--f);cursor:pointer;background:var(--t1);color:var(--bg1)">همه</button>
+          <button id="ctf-personal" onclick="_calSetFilter('personal')" style="flex:1;height:26px;border:none;border-radius:var(--r5);font-size:11px;font-weight:600;font-family:var(--f);cursor:pointer;background:none;color:var(--t3)">شخصی</button>
+          <button id="ctf-team"     onclick="_calSetFilter('team')"     style="flex:1;height:26px;border:none;border-radius:var(--r5);font-size:11px;font-weight:600;font-family:var(--f);cursor:pointer;background:none;color:var(--t3)">تیمی</button>
+        </div>
+      </div>
+
+    <div id="calTeamFilter" style="display:none;padding:3px var(--sp4) 0">
+      <div style="display:flex;gap:3px;background:var(--bg2);border-radius:var(--r5);padding:3px">
+        <button id="ctf-all"      onclick="_calSetFilter('all')"      style="flex:1;height:24px;border:none;border-radius:var(--r5);font-size:11px;font-weight:600;font-family:var(--f);cursor:pointer;background:var(--t1);color:var(--bg1);transition:all 150ms ease">همه</button>
+        <button id="ctf-personal" onclick="_calSetFilter('personal')" style="flex:1;height:24px;border:none;border-radius:var(--r5);font-size:11px;font-weight:600;font-family:var(--f);cursor:pointer;background:none;color:var(--t3)">شخصی</button>
+        <button id="ctf-team"     onclick="_calSetFilter('team')"     style="flex:1;height:24px;border:none;border-radius:var(--r5);font-size:11px;font-weight:600;font-family:var(--f);cursor:pointer;background:none;color:var(--t3)">تیمی</button>
+      </div>
     </div>
+</div>
     <!-- List view — سبک Things 3: لیست عمودی، نه گرید -->
     <div class="cal-list-view" id="calListView" style="display:none;"></div>
     <!-- Weekly view -->
@@ -9608,6 +9634,7 @@ function saveProjects(){ try{localStorage.setItem(PROJ_SK,JSON.stringify(project
 
 function renderProjects(){
   loadProjects();
+  setTimeout(tmRenderProjectsSection, 50);
   const list=document.getElementById('projList');
   const empty=document.getElementById('projEmpty');
   if(!list)return;
@@ -14129,7 +14156,7 @@ function tmRenderInbox() {
       const active = (t.status==='pending'&&i===0)||(t.status==='in_progress'&&i===1)||(t.status==='done'&&i===2);
       return `<span class="tm-dot${active?' active':''}"></span>`;
     }).join('');
-    return `<div class="tc tm-task" onclick="tmOpenTaskDetail('${t.id}')" style="margin-bottom:var(--sp2)">
+    return `<div class="tc tm-task" onclick="openTeamTaskDetail('${t.id}')" style="margin-bottom:var(--sp2)">
       <div class="tc-body">
         <div class="tc-title" style="font-size:var(--fs-sm);font-weight:600">${t.title}</div>
         <div class="tc-meta">
@@ -16778,6 +16805,360 @@ async function _tmToggleMemberTasks(uuid) {
 
 /* ════ End NLP Assign ════ */
 
+/* ════════════════════════════════════════════════════════════
+   Missing Features Implementation
+   ════════════════════════════════════════════════════════════ */
+
+// ── ۱. Team Task Detail Panel ─────────────────────────────
+let _ttdTaskId = null;
+
+function openTeamTaskDetail(taskId) {
+  const t = tm.inbox ? tm.inbox.find(x => x.id === taskId) : null;
+  if (!t) return;
+  _ttdTaskId = taskId;
+
+  document.getElementById('ttdTitle').textContent = t.title || 'تسک تیمی';
+
+  const months = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+  let dlLabel = '';
+  if (t.deadline) {
+    const [jy,jm,jd] = t.deadline.split('-').map(Number);
+    const today = mrTodayKey();
+    const [ty,tm_,td] = today.split('-').map(Number);
+    const diff = _jalToDays(jy,jm,jd) - _jalToDays(ty,tm_,td);
+    dlLabel = diff === 0 ? 'امروز' : diff === 1 ? 'فردا' : diff < 0 ? `${Math.abs(diff)} روز گذشته ⚠️` : `${num(jd)} ${months[jm-1]}`;
+  }
+  document.getElementById('ttdDeadline').textContent = dlLabel ? `📅 ${dlLabel}` : '';
+  document.getElementById('ttdManager').textContent = t.assignedBy ? `از ${t.assignedBy}` : 'از مدیر';
+  const priMap = { high:'🔴 فوری', med:'🟡 مهم', low:'⚪ عادی' };
+  document.getElementById('ttdPriority').textContent = priMap[t.priority] || '';
+
+  // وضعیت
+  const status = t.status || 'pending';
+  document.querySelectorAll('.ttd-st-btn').forEach(btn => {
+    const active = btn.dataset.st === status;
+    btn.style.background = active ? 'var(--t1)' : 'var(--bg2)';
+    btn.style.color = active ? 'var(--bg1)' : 'var(--t2)';
+    btn.style.borderColor = active ? 'var(--t1)' : 'var(--b1)';
+  });
+
+  // یادداشت
+  const noteEl = document.getElementById('ttdNote');
+  if (noteEl) noteEl.value = t.memberNote || '';
+
+  // checklist
+  const clEl = document.getElementById('ttdChecklist');
+  const clItems = document.getElementById('ttdChecklistItems');
+  if (t.checklist && t.checklist.length && clEl && clItems) {
+    clEl.style.display = '';
+    clItems.innerHTML = t.checklist.map(item =>
+      `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--b2)">
+        <div style="width:14px;height:14px;border-radius:3px;border:2px solid ${item.done ? 'var(--t1)' : 'var(--b1)'};background:${item.done ? 'var(--t1)' : 'transparent'};flex-shrink:0;display:flex;align-items:center;justify-content:center">
+          ${item.done ? '<svg viewBox="0 0 12 12" width="8" height="8"><polyline points="2,6 5,9 10,3" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>' : ''}
+        </div>
+        <span style="font-size:var(--fs-xs);color:${item.done ? 'var(--t3)' : 'var(--t1)'};text-decoration:${item.done ? 'line-through' : 'none'}">${esc(item.text)}</span>
+      </div>`
+    ).join('');
+  } else if (clEl) {
+    clEl.style.display = 'none';
+  }
+
+  document.getElementById('ttdErr').textContent = '';
+  openSheet('shTeamTaskDetail');
+}
+
+function _ttdSetStatus(st) {
+  document.querySelectorAll('.ttd-st-btn').forEach(btn => {
+    const active = btn.dataset.st === st;
+    btn.style.background = active ? 'var(--t1)' : 'var(--bg2)';
+    btn.style.color = active ? 'var(--bg1)' : 'var(--t2)';
+    btn.style.borderColor = active ? 'var(--t1)' : 'var(--b1)';
+  });
+  // اگه blocked شد، note رو focus کن
+  if (st === 'blocked') {
+    setTimeout(() => {
+      const n = document.getElementById('ttdNote');
+      if (n && !n.value) {
+        n.placeholder = 'مشکل رو توضیح بده — مدیر باید بدونه';
+        n.focus();
+      }
+    }, 200);
+  }
+}
+
+async function _ttdSave() {
+  if (!_ttdTaskId) return;
+  const activeBtn = document.querySelector('.ttd-st-btn[style*="var(--bg1)"]');
+  const status = activeBtn?.dataset.st || 'in_progress';
+  const note = document.getElementById('ttdNote')?.value.trim() || '';
+  const errEl = document.getElementById('ttdErr');
+  const btn = document.getElementById('ttdSaveBtn');
+
+  if (status === 'blocked' && !note) {
+    errEl.textContent = 'لطفاً مشکل رو توضیح بده تا مدیر بتونه کمک کنه';
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = 'در حال ذخیره...';
+  try {
+    await tmAPI('PUT', '/task/update', {
+      taskId: _ttdTaskId,
+      status,
+      memberNote: note,
+    });
+    // آپدیت local inbox
+    if (tm.inbox) {
+      const t = tm.inbox.find(x => x.id === _ttdTaskId);
+      if (t) { t.status = status; t.memberNote = note; }
+    }
+    closeAll();
+    tmApplyUI();
+    toast_(svgIco('check'), status === 'done' ? 'تسک تموم شد ✅' : 'وضعیت آپدیت شد');
+  } catch(e) {
+    errEl.textContent = e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = 'ذخیره وضعیت';
+  }
+}
+
+// hook کردن به task card های تیمی در home
+(function(){
+  const _origRenderInbox = window.tmRenderInboxSection;
+  if (_origRenderInbox) {
+    window.tmRenderInboxSection = function() {
+      _origRenderInbox.apply(this, arguments);
+      // اضافه کردن click handler به تسک‌های تیمی
+      setTimeout(() => {
+        document.querySelectorAll('.tm-task-card[data-team-task-id]').forEach(el => {
+          el.onclick = () => openTeamTaskDetail(el.dataset.teamTaskId);
+        });
+      }, 100);
+    };
+  }
+})();
+
+// ── ۲. Team Projects در تب پروژه‌ها ─────────────────────
+function tmRenderProjectsSection() {
+  const el = document.getElementById('tmProjInProjects');
+  const listEl = document.getElementById('tmProjInProjectsList');
+  if (!el || !listEl) return;
+
+  const isMember = tm.role === 'member' && tm.code;
+  if (!isMember) { el.style.display = 'none'; return; }
+
+  el.style.display = '';
+  const inbox = (tm.inbox || []).filter(t => !t.deleted);
+  if (!inbox.length) {
+    listEl.innerHTML = '<div style="color:var(--t3);font-size:var(--fs-xs);text-align:center;padding:var(--sp3)">هنوز تسک تیمی نداری</div>';
+    return;
+  }
+
+  // گروه‌بندی بر اساس category
+  const groups = {};
+  inbox.forEach(t => {
+    const g = t.category || 'عمومی';
+    if (!groups[g]) groups[g] = [];
+    groups[g].push(t);
+  });
+
+  const STATUS_COLOR = { pending:'var(--t3)', in_progress:'var(--blue)', done:'var(--a)', blocked:'var(--red)', waiting:'var(--amber)' };
+  const STATUS_LABEL = { pending:'باید', in_progress:'درحال', done:'✓', blocked:'🚫', waiting:'منتظرم' };
+
+  listEl.innerHTML = Object.entries(groups).map(([cat, tasks]) => {
+    const done = tasks.filter(t => t.status === 'done').length;
+    const pct = Math.round(done / tasks.length * 100);
+    return `<div style="background:var(--bluem);border:1px solid rgba(59,130,246,.2);border-radius:var(--r3);padding:var(--sp3);margin-bottom:var(--sp2)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp2)">
+        <span style="font-size:var(--fs-xs);color:var(--blue);font-weight:700">${pct}٪</span>
+        <span style="font-size:var(--fs-sm);font-weight:700;color:var(--t1)">👥 ${esc(cat)}</span>
+      </div>
+      <div style="height:3px;background:rgba(59,130,246,.15);border-radius:var(--r5);margin-bottom:var(--sp3);overflow:hidden">
+        <div style="height:100%;border-radius:var(--r5);background:var(--blue);transform:scaleX(${pct/100});transform-origin:right;transition:transform 600ms cubic-bezier(0.23,1,0.32,1)"></div>
+      </div>
+      ${tasks.slice(0,3).map(t =>
+        `<div onclick="openTeamTaskDetail('${t.id}')" style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(59,130,246,.1);cursor:pointer">
+          <span style="font-size:10px;font-weight:700;color:${STATUS_COLOR[t.status]||'var(--t3)'}">${STATUS_LABEL[t.status]||''}</span>
+          <span style="font-size:var(--fs-xs);color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70%">${esc(t.title)}</span>
+        </div>`
+      ).join('')}
+      ${tasks.length > 3 ? `<div style="font-size:10px;color:var(--t3);text-align:center;padding-top:4px">+${tasks.length-3} تسک دیگه</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// hook به renderProjects
+(function(){
+  const _orig = window.renderProjects;
+  if (_orig) {
+    window.renderProjects = function() {
+      _orig.apply(this, arguments);
+      tmRenderProjectsSection();
+    };
+  }
+  // همچنین هر بار که تب projects باز میشه
+  const _origSetTab = window.setTab;
+  if (_origSetTab) {
+    window.setTab = function(tab, el) {
+      _origSetTab.apply(this, arguments);
+      if (tab === 'projects') setTimeout(tmRenderProjectsSection, 50);
+    };
+  }
+})();
+
+// ── ۳. Calendar Filter ─────────────────────────────────────
+let _calFilter = 'all'; // 'all' | 'personal' | 'team'
+
+function _calSetFilter(f) {
+  _calFilter = f;
+  ['all','personal','team'].forEach(k => {
+    const btn = document.getElementById(`ctf-${k}`);
+    if (!btn) return;
+    btn.style.background = k === f ? 'var(--t1)' : 'none';
+    btn.style.color      = k === f ? 'var(--bg1)' : 'var(--t3)';
+  });
+  renderCal(); // re-render با filter جدید
+}
+
+// نمایش فیلتر فقط اگه عضو تیم هستیم
+(function(){
+  const _origApplyUI = window.tmApplyUI;
+  tmApplyUI = function() {
+    if (_origApplyUI) _origApplyUI.apply(this, arguments);
+    const filterEl = document.getElementById('calTeamFilter');
+    if (filterEl) filterEl.style.display = tm.code ? '' : 'none';
+  };
+})();
+
+// hook به renderCal برای اعمال filter
+(function(){
+  const _origRenderCal = window.renderCal;
+  if (!_origRenderCal) return;
+  window.renderCal = function() {
+    _origRenderCal.apply(this, arguments);
+    if (_calFilter === 'all') return;
+    // پنهان/نمایان کردن نشانگرهای تقویم
+    const isTeam = _calFilter === 'team';
+    document.querySelectorAll('.cal-dot-personal').forEach(d => {
+      d.style.display = isTeam ? 'none' : '';
+    });
+    document.querySelectorAll('.cal-dot-team').forEach(d => {
+      d.style.display = isTeam ? '' : 'none';
+    });
+  };
+})();
+
+// ── ۴. EOD (Triage) — گزینه‌های تسک تیمی ──────────────────
+(function(){
+  const _origRenderTriage = window._renderTriageList;
+  if (!_origRenderTriage) return;
+  window._renderTriageList = function() {
+    _origRenderTriage.apply(this, arguments);
+    // بعد از render، بررسی تسک‌های تیمی و اضافه کردن دکمه‌ها
+    setTimeout(() => {
+      const inboxTasks = tm.inbox ? tm.inbox.filter(t => !t.deleted && t.status !== 'done') : [];
+      if (!inboxTasks.length) return;
+      // پیدا کردن container
+      const list = document.getElementById('triageList');
+      if (!list) return;
+      // اضافه کردن یه بخش جداگانه در پایین triage برای تسک‌های تیمی
+      const existing = document.getElementById('trTeamSection');
+      if (existing) existing.remove();
+      const section = document.createElement('div');
+      section.id = 'trTeamSection';
+      section.innerHTML = `
+        <div style="margin-top:var(--sp4);padding-top:var(--sp3);border-top:1px solid var(--b2)">
+          <div style="font-size:var(--fs-xs);color:var(--blue);font-weight:700;margin-bottom:var(--sp2);text-align:right">📥 از مدیر (${inboxTasks.length} تسک)</div>
+          ${inboxTasks.slice(0,3).map(t => `
+            <div style="background:var(--bluem);border:1px solid rgba(59,130,246,.2);border-radius:var(--r2);padding:var(--sp2) var(--sp3);margin-bottom:6px">
+              <div style="font-size:var(--fs-xs);font-weight:600;color:var(--t1);margin-bottom:6px;text-align:right">${esc(t.title)}</div>
+              <div style="display:flex;gap:6px">
+                <button onclick="tmAPI('PUT','/task/update',{taskId:'${t.id}',status:'in_progress'}).then(()=>toast_(svgIco('check'),'وضعیت آپدیت شد'))" style="flex:1;height:28px;border:1px solid var(--b1);border-radius:var(--r1);background:var(--bg2);font-size:10px;font-weight:600;font-family:var(--f);color:var(--t2);cursor:pointer">درحالم</button>
+                <button onclick="openTeamTaskDetail('${t.id}')" style="flex:1;height:28px;border:1px solid rgba(59,130,246,.3);border-radius:var(--r1);background:var(--bluem);font-size:10px;font-weight:600;font-family:var(--f);color:var(--blue);cursor:pointer">جزئیات</button>
+              </div>
+            </div>
+          `).join('')}
+          ${inboxTasks.length > 3 ? `<div style="font-size:10px;color:var(--t3);text-align:center">+${inboxTasks.length-3} تسک دیگه</div>` : ''}
+        </div>`;
+      list.appendChild(section);
+    }, 100);
+  };
+})();
+
+// ── ۵. سکو گزارش تب — render کامل ────────────────────────
+window.tmRenderReport = function() {
+  const el = document.getElementById('tmSokoReportContent');
+  if (!el) return;
+  if (!tm.snapshot) {
+    el.innerHTML = '<div style="padding:var(--sp5);text-align:center"><div class="tm-skeleton" style="height:60px;border-radius:var(--r2);margin-bottom:var(--sp2)"></div><div class="tm-skeleton" style="height:100px;border-radius:var(--r2)"></div></div>';
+    return;
+  }
+  const members = (tm.snapshot.members || []).filter(m => m.status === 'active');
+  const total = members.reduce((s, m) => s + (m.activeTasks||0), 0);
+  const done = members.reduce((s, m) => s + (m.doneTasks||0), 0);
+  const blocked = members.filter(m => m.alert === 'blocked').length;
+  const stale = members.filter(m => m.alert === 'stale').length;
+
+  el.innerHTML = `
+    <!-- آمار کلی -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--sp2);padding:var(--sp3) var(--sp4);border-bottom:1px solid var(--b2)">
+      ${[
+        {l:'تسک فعال', v:total, c:'var(--t1)'},
+        {l:'تمام‌شده', v:done,  c:'var(--a)'},
+        {l:'مشکل',   v:blocked, c:'var(--red)'},
+      ].map(s => `
+        <div style="text-align:center;background:var(--bg2);border-radius:var(--r2);padding:var(--sp3)">
+          <div style="font-size:var(--fs-lg);font-weight:800;color:${s.c};font-variant-numeric:tabular-nums">${s.v}</div>
+          <div style="font-size:10px;color:var(--t3);margin-top:2px">${s.l}</div>
+        </div>`).join('')}
+    </div>
+
+    <!-- عملکرد اعضا -->
+    <div style="padding:var(--sp3) var(--sp4)">
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp3)">عملکرد این هفته</div>
+      ${members.length ? members.map(m => {
+        const mDone = m.doneTasks || 0;
+        const mTotal = (m.activeTasks||0) + mDone;
+        const score = mTotal > 0 ? Math.round(mDone / mTotal * 100) : 0;
+        const scoreColor = score >= 80 ? 'var(--a)' : score >= 50 ? 'var(--amber)' : 'var(--red)';
+        return `
+          <div style="background:var(--bg2);border-radius:var(--r2);padding:var(--sp3);margin-bottom:var(--sp2)">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp2)">
+              <div style="font-size:var(--fs-md);font-weight:800;color:${scoreColor};font-variant-numeric:tabular-nums">${score}٪</div>
+              <div style="text-align:right">
+                <div style="font-size:var(--fs-sm);font-weight:700;color:var(--t1)">${esc(m.name)}</div>
+                <div style="font-size:10px;color:var(--t3)">${mDone} از ${mTotal} تسک</div>
+              </div>
+            </div>
+            <div style="height:4px;background:var(--bg3);border-radius:var(--r5);overflow:hidden">
+              <div style="height:100%;border-radius:var(--r5);background:${scoreColor};transform:scaleX(${score/100});transform-origin:right;transition:transform 600ms cubic-bezier(0.23,1,0.32,1)"></div>
+            </div>
+            ${m.alert !== 'ok' ? `<div style="font-size:10px;margin-top:4px;color:${m.alert==='blocked'?'var(--red)':'var(--amber)'}">${m.alert==='blocked'?'🚫 مشکل دارد':'⏳ بی‌تحرکی'}</div>` : ''}
+          </div>`;
+      }).join('') : '<div style="color:var(--t3);font-size:var(--fs-xs);text-align:center;padding:var(--sp4)">عضوی ندارد</div>'}
+    </div>
+
+    <!-- toggle هفتگی / ماهانه -->
+    <div style="padding:0 var(--sp4) var(--sp5);display:flex;gap:var(--sp2);justify-content:center">
+      <button onclick="tmLoadReport('weekly')"  style="height:28px;padding:0 12px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--t1);color:var(--bg1);font-size:11px;font-weight:600;font-family:var(--f);cursor:pointer">هفتگی</button>
+      <button onclick="tmLoadReport('monthly')" style="height:28px;padding:0 12px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--bg2);color:var(--t2);font-size:11px;font-weight:600;font-family:var(--f);cursor:pointer">ماهانه</button>
+    </div>`;
+};
+
+async function tmLoadReport(period) {
+  try {
+    const data = await tmAPI('GET', `/report/${period}`);
+    if (data && data.members) {
+      // آپدیت snapshot
+      tm.snapshot = { ...tm.snapshot, members: data.members };
+      tmRenderReport();
+    }
+  } catch(e) {
+    console.warn('tmLoadReport:', e.message);
+  }
+}
+
+/* ════ End Missing Features ════ */
+
 boot();
 </script>
 
@@ -17447,6 +17828,55 @@ boot();
       <div id="tmDLErr" style="font-size:var(--fs-xs);color:var(--red);min-height:16px;text-align:center"></div>
       <button id="tmDLBtn" onclick="tmDoDirectLogin()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">ورود</button>
     </div>
+  </div>
+</div>
+
+<!-- Sheet: Team Task Detail — کارمند -->
+<div class="sh" id="shTeamTaskDetail">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div class="sh-ttl" id="ttdTitle">تسک تیمی</div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+  </div>
+  <div class="sh-body tm-join-body" id="ttdBody">
+    <!-- meta -->
+    <div style="background:var(--bluem);border:1px solid rgba(59,130,246,.2);border-radius:var(--r2);padding:var(--sp3);display:flex;align-items:center;justify-content:space-between">
+      <div id="ttdDeadline" style="font-size:var(--fs-xs);color:var(--blue)"></div>
+      <div>
+        <div id="ttdManager" style="font-size:var(--fs-xs);color:var(--t2)"></div>
+        <div id="ttdPriority" style="font-size:var(--fs-xs);font-weight:700;color:var(--red)"></div>
+      </div>
+    </div>
+
+    <!-- وضعیت -->
+    <div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:8px">وضعیت</div>
+      <div style="display:flex;gap:6px" id="ttdStatusBtns">
+        <button onclick="_ttdSetStatus('pending')"   class="ttd-st-btn" data-st="pending"   style="flex:1;height:36px;border-radius:var(--r2);border:1px solid var(--b1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">باید</button>
+        <button onclick="_ttdSetStatus('in_progress')" class="ttd-st-btn" data-st="in_progress" style="flex:1;height:36px;border-radius:var(--r2);border:1px solid var(--b1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">درحال</button>
+        <button onclick="_ttdSetStatus('done')"      class="ttd-st-btn" data-st="done"      style="flex:1;height:36px;border-radius:var(--r2);border:1px solid var(--b1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">✓ انجام شد</button>
+        <button onclick="_ttdSetStatus('blocked')"   class="ttd-st-btn" data-st="blocked"   style="flex:1;height:36px;border-radius:var(--r2);border:1px solid rgba(248,81,73,.3);color:var(--red);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">🚫 مشکل</button>
+      </div>
+    </div>
+
+    <!-- یادداشت برای مدیر -->
+    <div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px">یادداشت برای مدیر (اختیاری)</div>
+      <textarea id="ttdNote" rows="3"
+        placeholder="توضیح بده — مثلاً: منتظر تأیید مدیر مالی هستم"
+        style="width:100%;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 12px;font-size:var(--fs-xs);font-family:var(--f);color:var(--t1);direction:rtl;resize:none;outline:none"></textarea>
+    </div>
+
+    <!-- چک‌لیست مدیر (read-only اگه باشه) -->
+    <div id="ttdChecklist" style="display:none">
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px">چک‌لیست</div>
+      <div id="ttdChecklistItems"></div>
+    </div>
+
+    <div id="ttdErr" style="font-size:var(--fs-xs);color:var(--red);min-height:14px;text-align:center"></div>
+    <button id="ttdSaveBtn" onclick="_ttdSave()" style="width:100%;height:46px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">ذخیره وضعیت</button>
   </div>
 </div>
 </body>
