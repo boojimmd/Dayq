@@ -4112,11 +4112,7 @@ select.fi{
 .tm-sb-btn:hover{ background:var(--bg2); border-color:var(--b1); color:var(--t1); }
 /* ════ End Soko Desktop ════ */
 
-/* ════ Z-index fix: sheets over soko panel ════ */
-/* وقتی panel باز هست، overlay و sheet باید بالاتر باشن */
-.tm-panel-open .ov { z-index:2050 !important; }
-.tm-panel-open .sheet { z-index:2100 !important; }
-/* ════ End Z-index fix ════ */
+/* z-index via JS hook */
 
 /* Team sheets above panel */
 #shTmAnnounce
@@ -14639,14 +14635,8 @@ async function tmLeaveTeam() {
 function tmOpenSoko() {
   const panel = document.getElementById('tmSokoPanel');
   if (!panel) return;
-  // closeAll removed — caused body.style reset on mobile
-  // پنهان کردن ov اگه باز بود
-  const _ov = document.getElementById('ov');
-  if (_ov) _ov.classList.remove('open');
   panel.classList.add('open');
-  document.body.classList.add('tm-panel-open');
   document.body.style.overflow = 'hidden';
-  // iOS body lock — مثل openSheet
   if (window.innerWidth < 900) {
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
@@ -14654,12 +14644,10 @@ function tmOpenSoko() {
   }
   const tab = tm.sokoTab || 'status';
   tmSetSokoTab(tab);
-  // sidebar + KPI
   if (typeof tmRenderSidebar === 'function') {
     tmRenderSidebar(tab);
     _tmUpdateHdrKpi && _tmUpdateHdrKpi();
   }
-  // sync fresh
   tmSyncBackground();
 }
 
@@ -14667,8 +14655,6 @@ function tmCloseSoko() {
   const panel = document.getElementById('tmSokoPanel');
   if (!panel) return;
   panel.classList.remove('open');
-  document.body.classList.remove('tm-panel-open');
-  // iOS body unlock — بازگشت scroll position
   if (window.innerWidth < 900) {
     const scrollY = document.body.style.top;
     document.body.style.position = '';
@@ -20422,6 +20408,32 @@ function _xmlEsc(s) {
 
 
 // z-index via CSS body.tm-panel-open
+
+
+/* ════ Z-index: sheets over soko panel ════ */
+(function(){
+  const _orig = window.openSheet;
+  if (!_orig) return;
+  window.openSheet = function(id) {
+    _orig.apply(this, arguments);
+    const panel = document.getElementById('tmSokoPanel');
+    if (!panel || !panel.classList.contains('open')) return;
+    // panel باز هست — sheet و ov باید بالاتر باشن
+    const sh = document.getElementById(id);
+    if (sh) sh.style.zIndex = '2100';
+    const ov = document.getElementById('ov');
+    if (ov) ov.style.zIndex = '2050';
+  };
+  const _origClose = window.closeAll;
+  if (!_origClose) return;
+  window.closeAll = function() {
+    _origClose.apply(this, arguments);
+    document.querySelectorAll('.sheet').forEach(s => s.style.zIndex = '');
+    const ov = document.getElementById('ov');
+    if (ov) ov.style.zIndex = '';
+  };
+})();
+/* ════ End Z-index ════ */
 
 /* ════ End Team JS ════ */
 </script>
