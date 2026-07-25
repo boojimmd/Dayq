@@ -16878,6 +16878,7 @@ tmAssignTask = function(preUuid = '') {
 function _tmAssignNlpInput(val) {
   _tmAssignParsed = val.trim().length > 2 ? nlpParse(val) : null;
   _tmUpdateAssignPreview();
+  _tmValidateSubmit();
   // auto-grow textarea
   const inp = document.getElementById('tmANlpInp');
   if (inp) { inp.style.height = 'auto'; inp.style.height = Math.min(inp.scrollHeight, 100) + 'px'; }
@@ -16943,6 +16944,7 @@ function _tmUpdateAssignMemberChips() {
 function _tmSelectMember(uuid) {
   if (_tmAssignBroadcast) return;
   _tmAssignMember = (_tmAssignMember === uuid) ? '' : uuid;
+  _tmValidateSubmit();
   _tmUpdateAssignMemberChips();
 }
 
