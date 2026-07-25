@@ -17463,6 +17463,20 @@ async function tmLoadReport(period) {
 })();
 /* ════ End Focus Management ════ */
 
+/* ════ Sheet Navigation Helper ════ */
+function _sheetNav(fromId, nextFn) {
+  // فقط sheet فعلی رو ببند — نه body lock، نه ov
+  const fromEl = document.getElementById(fromId);
+  if (fromEl) {
+    fromEl.classList.add('closing');
+    fromEl.classList.remove('open');
+    setTimeout(() => fromEl.classList.remove('closing'), 190);
+  }
+  // sheet بعدی رو باز کن — ov هنوز open هست
+  setTimeout(nextFn, 30);
+}
+/* ════ End Sheet Navigation ════ */
+
 boot();
 </script>
 
@@ -17653,8 +17667,8 @@ boot();
     <div style="font-size:var(--fs-xs);color:var(--t3);margin-top:4px">به تیم بپیوند یا تیم جدید بساز</div>
   </div>
   <div class="sh-body" style="gap:var(--sp3)">
-    <button onclick="closeAll();tmOpenCreate()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--t1);color:var(--bg1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:none;cursor:pointer">+ ایجاد تیم جدید</button>
-    <button onclick="closeAll();tmOpenJoin()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--bg2);color:var(--t1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:1px solid var(--b1);cursor:pointer">پیوستن با کد دعوت</button>
+    <button onclick="_sheetNav('shTmChoice', tmOpenCreate)" style="width:100%;height:48px;border-radius:var(--r2);background:var(--t1);color:var(--bg1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:none;cursor:pointer">+ ایجاد تیم جدید</button>
+    <button onclick="_sheetNav('shTmChoice', tmOpenJoin)" style="width:100%;height:48px;border-radius:var(--r2);background:var(--bg2);color:var(--t1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:1px solid var(--b1);cursor:pointer">پیوستن با کد دعوت</button>
   </div>
 </div>
 
@@ -17949,8 +17963,8 @@ boot();
         <div style="font-size:2rem;margin-bottom:var(--sp2)">👥</div>
         <div style="font-size:var(--fs-xs);color:var(--t3)">به تیم بپیوند یا تیم جدید بساز</div>
       </div>
-      <button onclick="closeAll();tmOpenCreate()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">+ ایجاد تیم جدید</button>
-      <button onclick="closeAll();tmOpenJoin()" style="width:100%;height:48px;background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">پیوستن با کد دعوت</button>
+      <button onclick="_sheetNav('shTmChoice', tmOpenCreate)" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">+ ایجاد تیم جدید</button>
+      <button onclick="_sheetNav('shTmChoice', tmOpenJoin)" style="width:100%;height:48px;background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">پیوستن با کد دعوت</button>
       <button onclick="tmOpenDirectLogin()" style="width:100%;height:44px;background:none;color:var(--blue);border:none;font-size:var(--fs-sm);font-weight:600;font-family:var(--f);cursor:pointer;text-decoration:underline">قبلاً عضو بودم — ورود مستقیم</button>
     </div>
   </div>
