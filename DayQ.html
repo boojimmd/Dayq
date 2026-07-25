@@ -14588,10 +14588,10 @@ function tmOpenTeamSettings() {
         '<div style="font-size:var(--fs-sm);font-family:var(--mono);background:var(--bg2);padding:var(--sp2) var(--sp3);border-radius:var(--r2)">' + esc(code) + '</div>' +
       '</div>' +
       (tm.role === 'manager'
-        ? '<button class="tm-btn blue" style="width:100%;justify-content:center;margin-bottom:var(--sp2)" onclick="tmCopyCode()">📋 کپی کد دعوت</button>' +
-          '<button class="tm-btn" style="width:100%;justify-content:center;margin-bottom:var(--sp2)" onclick="closeAll();tmOpenSoko()">🏢 باز کردن سکو</button>'
+        ? '<button class="tm-btn blue" style="width:100%;justify-content:center;margin-bottom:var(--sp2);direction:rtl" onclick="tmCopyCode()">📋 کپی کد دعوت</button>' +
+          '<button class="tm-btn" style="width:100%;justify-content:center;margin-bottom:var(--sp2);direction:rtl" onclick="closeAll();tmOpenSoko()">🏢 باز کردن سکو</button>'
         : '') +
-      '<button class="tm-btn danger" style="width:100%;justify-content:center;margin-top:var(--sp2)" onclick="tmLeaveTeam()">ترک تیم</button>';
+      '<button class="tm-btn danger" style="width:100%;justify-content:center;margin-top:var(--sp2);direction:rtl" onclick="tmLeaveTeam()">ترک تیم</button>';
   }, 80);
 }
 
@@ -17734,8 +17734,8 @@ boot();
   <div class="sh-handle"></div>
   <div class="sh-head">
     <div class="sh-tr">
-      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       <div class="sh-ttl">تیم کاری</div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
   </div>
   <div class="sh-body" style="padding:var(--sp4)">
