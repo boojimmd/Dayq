@@ -15978,15 +15978,7 @@ function tmCloseModal() {
   });
 }
 
-// ── Override tmOpenTeamSettings ───────────────────────────────
-tmOpenTeamSettings = function() {
-  if (!tm.code) {
-    tmModal('tmModalChoice', true);
-  } else {
-    tmRefreshInfoSheet();
-    tmModal('tmModalInfo', true);
-  }
-};
+// tmOpenTeamSettings uses openSheet (defined in core JS)
 
 // ── Override tmOpenCreate ─────────────────────────────────────
 tmOpenCreate = function() {
