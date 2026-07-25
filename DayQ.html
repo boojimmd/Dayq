@@ -4019,6 +4019,53 @@ select.fi{
   .tm-panel-hdr { padding:24px 32px 0; }
   .tm-panel-body { padding:var(--sp4) var(--sp5); }
 }
+
+/* ════ Soko Desktop Layout ════ */
+@media(min-width:900px){
+  .tm-panel-body {
+    display:flex;
+    flex-direction:row;
+    overflow:hidden;
+    padding:0;
+  }
+  .tm-panel-main {
+    flex:1;
+    overflow-y:auto;
+    padding:var(--sp4) var(--sp5);
+    scrollbar-width:none;
+    direction:rtl;
+  }
+  .tm-panel-main::-webkit-scrollbar{ display:none; }
+  .tm-panel-sidebar {
+    width:220px;
+    flex-shrink:0;
+    border-left:1px solid var(--b1);
+    background:var(--bg0);
+    overflow-y:auto;
+    padding:var(--sp4) var(--sp3);
+    display:flex;
+    flex-direction:column;
+    gap:var(--sp2);
+    scrollbar-width:none;
+    direction:rtl;
+  }
+  #tmHdrKpi { display:flex !important; }
+  .tm-panel-hdr { border-bottom:1px solid var(--b1); }
+  .tm-panel-toprow { margin-bottom:0; padding-bottom:12px; }
+  .tm-tab-pane { padding:0; }
+}
+.tm-sb-section { margin-bottom:var(--sp3); }
+.tm-sb-lbl { font-size:10px;font-weight:700;color:var(--t3);letter-spacing:.06em;margin-bottom:var(--sp2);text-align:right; }
+.tm-sb-kpi { display:flex;align-items:center;justify-content:space-between;background:var(--bg1);border:1px solid var(--b2);border-radius:var(--r2);padding:var(--sp2) var(--sp3);margin-bottom:6px; }
+.tm-sb-kpi-val { font-size:var(--fs-md);font-weight:800;font-variant-numeric:tabular-nums; }
+.tm-sb-kpi-lbl { font-size:10px;color:var(--t3); }
+.tm-sb-filter { display:flex;align-items:center;justify-content:space-between;height:34px;padding:0 var(--sp3);border-radius:var(--r2);border:none;background:none;color:var(--t2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;width:100%;text-align:right;transition:background 120ms ease; }
+.tm-sb-filter:hover{ background:var(--bg2); }
+.tm-sb-filter.active{ background:var(--bg2);color:var(--t1);font-weight:700; }
+.tm-sb-divider { height:1px;background:var(--b1);margin:var(--sp2) 0; }
+.tm-sb-btn { display:flex;align-items:center;justify-content:center;gap:6px;height:36px;width:100%;border-radius:var(--r2);border:1px dashed var(--b1);background:none;color:var(--t2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;transition:all 120ms ease; }
+.tm-sb-btn:hover{ background:var(--bg2);color:var(--t1); }
+/* ════ End Soko Desktop ════ */
 </style>
 </head>
 <body>
@@ -17733,33 +17780,57 @@ boot();
 
 <!-- سکو Panel — full screen -->
 <div class="tm-panel" id="tmSokoPanel">
+  <!-- Header جدید — RTL -->
   <div class="tm-panel-hdr">
     <div class="tm-panel-toprow">
-      <!-- Close -->
-      <button class="tm-panel-close" onclick="tmCloseSoko()">✕</button>
-      <!-- Title -->
-      <div class="tm-panel-titles">
-        <div class="tm-panel-title">سکو</div>
-        <div class="tm-panel-sub" id="tmSokoPanelSub">تیم</div>
+      <!-- راست: close + عنوان -->
+      <div style="display:flex;align-items:center;gap:var(--sp3);flex:1;min-width:0">
+        <button class="tm-panel-close" onclick="tmCloseSoko()">✕</button>
+        <div style="min-width:0">
+          <div style="font-size:var(--fs-md);font-weight:800;color:var(--t1)">سکو</div>
+          <div id="tmSokoPanelSub" style="font-size:var(--fs-xs);color:var(--t3)">تیم</div>
+        </div>
       </div>
-      <!-- Actions -->
-      <div class="tm-panel-actions">
+      <!-- چپ: KPI strip + actions -->
+      <div style="display:flex;align-items:center;gap:var(--sp3);flex-shrink:0">
+        <div id="tmHdrKpi" style="display:none;align-items:center;gap:var(--sp3)">
+          <div style="text-align:center">
+            <div id="tmHdrTask" style="font-size:var(--fs-md);font-weight:800;color:var(--t1);font-variant-numeric:tabular-nums">۰</div>
+            <div style="font-size:9px;color:var(--t3)">تسک</div>
+          </div>
+          <div style="text-align:center">
+            <div id="tmHdrAlert" style="font-size:var(--fs-md);font-weight:800;color:var(--red);font-variant-numeric:tabular-nums">۰</div>
+            <div style="font-size:9px;color:var(--t3)">مشکل</div>
+          </div>
+          <div style="text-align:center">
+            <div id="tmHdrScore" style="font-size:var(--fs-md);font-weight:800;color:var(--a);font-variant-numeric:tabular-nums">—</div>
+            <div style="font-size:9px;color:var(--t3)">موفقیت</div>
+          </div>
+          <div style="width:1px;height:28px;background:var(--b1)"></div>
+        </div>
         <button class="tm-panel-action-btn" onclick="tmOpenAnnouncement()">📢</button>
         <button class="tm-panel-action-btn primary" onclick="tmAssignTask()">+ تسک</button>
       </div>
     </div>
     <div class="tm-tabs">
-      <div class="tm-tab active" data-tab="status" onclick="tmSetSokoTab('status')">وضعیت</div>
-      <div class="tm-tab" data-tab="projects" onclick="tmSetSokoTab('projects')">پروژه‌ها</div>
-      <div class="tm-tab" data-tab="report" onclick="tmSetSokoTab('report')">گزارش</div>
+      <div class="tm-tab active" data-tab="status"   onclick="tmSetSokoTab('status')">وضعیت</div>
+      <div class="tm-tab"        data-tab="projects" onclick="tmSetSokoTab('projects')">پروژه‌ها</div>
+      <div class="tm-tab"        data-tab="report"   onclick="tmSetSokoTab('report')">گزارش</div>
     </div>
   </div>
+
+  <!-- Body — desktop: flex row (sidebar چپ + main راست) -->
   <div class="tm-panel-body">
+    <!-- Sidebar — فقط دسکتاپ -->
+    <div class="tm-panel-sidebar" id="tmPanelSidebar"></div>
+    <!-- Main content -->
+    <div class="tm-panel-main">
     <div class="tm-tab-pane" data-pane="status" id="tmSokoStatusContent"></div>
     <div class="tm-tab-pane" data-pane="projects" style="display:none" id="tmSokoProjectsContent">
       <div style="text-align:center;padding:var(--sp5);color:var(--t3);font-size:var(--fs-sm)">پروژه‌های تیمی در Step 2 اضافه می‌شن</div>
     </div>
     <div class="tm-tab-pane" data-pane="report" style="display:none" id="tmSokoReportContent"></div>
+    </div>
   </div>
 </div>
 <!-- ════ END TEAM HTML ════ -->
@@ -21974,6 +22045,115 @@ function _xmlEsc(s) {
  ════ */
 
 function _tmValidateSubmit(){const btn=document.getElementById('tmASubmitBtn');if(!btn)return;const inp=document.getElementById('tmANlpInp');const hasText=inp&&inp.value.trim().length>0;const hasMember=_tmAssignMember||_tmAssignBroadcast;if(!hasText){btn.disabled=true;btn.textContent='عنوان تسک رو بنویس';btn.style.opacity='.45';}else if(!hasMember){btn.disabled=true;btn.textContent='یه عضو انتخاب کن';btn.style.opacity='.45';}else{btn.disabled=false;btn.textContent='ارسال تسک';btn.style.opacity='1';}}
+
+
+/* ════ Soko Desktop Sidebar ════ */
+function tmRenderSidebar(tab) {
+  const sb = document.getElementById('tmPanelSidebar');
+  if (!sb) return;
+  if (tab === 'status')        _tmSbStatus(sb);
+  else if (tab === 'projects') _tmSbProjects(sb);
+  else if (tab === 'report')   _tmSbReport(sb);
+  else sb.innerHTML = '';
+}
+
+function _tmSbStatus(sb) {
+  const members = (tm.snapshot?.members || []).filter(m => !m.isManager && m.role !== 'manager');
+  const total = members.reduce((s,m)=>s+(m.activeTasks||0),0);
+  const alerts = members.filter(m=>m.alert==='blocked').length;
+  const done = members.reduce((s,m)=>s+(m.doneTasks||0),0);
+  const score = (total+done)>0 ? Math.round(done/(total+done)*100) : null;
+  sb.innerHTML = `
+    <div class="tm-sb-section">
+      <div class="tm-sb-lbl">آمار تیم</div>
+      <div class="tm-sb-kpi"><span class="tm-sb-kpi-lbl">تسک فعال</span><span class="tm-sb-kpi-val" style="color:var(--t1)">${num(total)}</span></div>
+      <div class="tm-sb-kpi"><span class="tm-sb-kpi-lbl">مشکل</span><span class="tm-sb-kpi-val" style="color:${alerts>0?'var(--red)':'var(--t3)'}">${num(alerts)}</span></div>
+      <div class="tm-sb-kpi"><span class="tm-sb-kpi-lbl">موفقیت</span><span class="tm-sb-kpi-val" style="color:var(--a)">${score!==null?num(score)+'٪':'—'}</span></div>
+    </div>
+    <div class="tm-sb-divider"></div>
+    <div class="tm-sb-section">
+      <div class="tm-sb-lbl">نمایش</div>
+      <button class="tm-sb-filter active" id="sbfAll" onclick="_tmSbFilter('all')"><span>همه اعضا</span><span>${num(members.length)}</span></button>
+      ${alerts>0?`<button class="tm-sb-filter" id="sbfBlocked" onclick="_tmSbFilter('blocked')"><span>🚫 مشکل</span><span style="color:var(--red)">${num(alerts)}</span></button>`:''}
+      <button class="tm-sb-filter" id="sbfOk" onclick="_tmSbFilter('ok')"><span>✅ فعال</span><span style="color:var(--a)">${num(members.filter(m=>m.alert==='ok').length)}</span></button>
+    </div>
+    <div class="tm-sb-divider"></div>
+    <button class="tm-sb-btn" onclick="tmAssignTask()">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      تسک جدید
+    </button>
+  `;
+}
+
+let _tmSbActiveFilter = 'all';
+function _tmSbFilter(f) {
+  _tmSbActiveFilter = f;
+  ['All','Blocked','Ok'].forEach(k => {
+    const btn = document.getElementById('sbf'+k);
+    if (btn) btn.classList.toggle('active', k.toLowerCase()===f);
+  });
+  const el = document.getElementById('tmSokoStatusContent');
+  if (!el||!tm.snapshot) return;
+  const all = (tm.snapshot.members||[]).filter(m=>!m.isManager&&m.role!=='manager');
+  const filtered = f==='all'?all:all.filter(m=>m.alert===f);
+  const orig = tm.snapshot.members;
+  tm.snapshot.members = [...filtered,...(tm.snapshot.members||[]).filter(m=>m.isManager)];
+  tmRenderSokoStatus();
+  tm.snapshot.members = orig;
+}
+
+function _tmSbProjects(sb) {
+  sb.innerHTML = `
+    <div class="tm-sb-section">
+      <div class="tm-sb-lbl">پروژه‌ها</div>
+      <button class="tm-sb-btn" onclick="tmNewProject&&tmNewProject()">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        پروژه جدید
+      </button>
+    </div>`;
+}
+
+function _tmSbReport(sb) {
+  sb.innerHTML = `
+    <div class="tm-sb-section">
+      <div class="tm-sb-lbl">بازه زمانی</div>
+      <button class="tm-sb-filter active" onclick="">این هفته</button>
+      <button class="tm-sb-filter" onclick="">این ماه</button>
+    </div>`;
+}
+
+function _tmUpdateHdrKpi() {
+  if (!tm.snapshot) return;
+  const members = (tm.snapshot.members||[]).filter(m=>!m.isManager&&m.role!=='manager');
+  const tasks = members.reduce((s,m)=>s+(m.activeTasks||0),0);
+  const alerts = members.filter(m=>m.alert==='blocked').length;
+  const done = members.reduce((s,m)=>s+(m.doneTasks||0),0);
+  const score = (tasks+done)>0?Math.round(done/(tasks+done)*100):null;
+  const t=document.getElementById('tmHdrTask'); if(t) t.textContent=num(tasks);
+  const a=document.getElementById('tmHdrAlert'); if(a) a.textContent=num(alerts);
+  const s=document.getElementById('tmHdrScore'); if(s) s.textContent=score!==null?num(score)+'٪':'—';
+  const sub=document.getElementById('tmSokoPanelSub');
+  if(sub) sub.textContent=(tm.teamName||'')+(members.length?` · ${num(members.length)} نفر`:'');
+}
+
+(function(){
+  const _origSetTab = window.tmSetSokoTab;
+  window.tmSetSokoTab = function(tab) {
+    _origSetTab && _origSetTab(tab);
+    tmRenderSidebar(tab);
+    _tmUpdateHdrKpi();
+    _tmSbActiveFilter = 'all';
+  };
+  const _origSync = window.tmSyncBackground;
+  if (_origSync) {
+    window.tmSyncBackground = async function() {
+      await _origSync.apply(this, arguments);
+      _tmUpdateHdrKpi();
+      tmRenderSidebar(tm.sokoTab || 'status');
+    };
+  }
+})();
+/* ════ End Soko Desktop Sidebar ════ */
 </script>
 </body>
 </html>
