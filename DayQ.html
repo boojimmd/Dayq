@@ -4139,29 +4139,34 @@ select.fi{
 
 /* ════ Calendar Grid Explicit Placement ════ */
 @media(min-width:900px){
-  /* cal-page (navigation + toggle) → ستون چپ ۲۸۰px */
-  #pageCalendar.page.active .cal-page {
-    grid-column: 2;
-    grid-row: 1;
-    min-width:0;
+  /* pageCalendar: ۲ ردیف — ناوبری + محتوا */
+  #pageCalendar.page.active {
+    grid-template-rows: auto 1fr;
   }
-  /* ماه تقویم اصلی → ستون راست ۱fr (کل ارتفاع) */
+  /* cal-page (ناوبری + toggle) → کل عرض، ردیف ۱ */
+  #pageCalendar.page.active .cal-page {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    min-width: 0;
+  }
+  /* grid ماهانه → ستون اصلی (col1=راست در RTL)، ردیف ۲ */
   #pageCalendar.page.active #monthViewWrap {
     grid-column: 1;
-    grid-row: 1 / span 2;
-    min-width:0;
+    grid-row: 2;
+    min-width: 0;
+    overflow: hidden;
   }
-  /* list view نیز در ستون راست */
+  /* فهرست → همان محل monthViewWrap */
   #pageCalendar.page.active #calListView {
     grid-column: 1;
-    grid-row: 1 / span 2;
+    grid-row: 2;
   }
-  /* week view نیز در ستون راست */
+  /* هفتگی → همان محل */
   #pageCalendar.page.active #weekView {
     grid-column: 1;
-    grid-row: 1 / span 2;
+    grid-row: 2;
   }
-  /* day panel → ستون چپ ۲۸۰px، ردیف دوم */
+  /* پانل روز → ستون ۲ (چپ=280px)، ردیف ۲ */
   #pageCalendar.page.active #calDayPanelDesktop {
     grid-column: 2;
     grid-row: 2;
