@@ -2295,7 +2295,6 @@ select.fi{
     display:grid;grid-template-columns:1fr 280px;
     align-items:start;min-height:100svh;
     padding-top:0;padding-bottom:0;
-    margin-right:220px;  /* nav */
   }
   .cal-page{
     min-width:0;padding-bottom:48px;
@@ -4126,53 +4125,19 @@ select.fi{
 #tmDetailSheet
 #shTeamTaskDetail { z-index:2100; }
 
-/* ════ Calendar Desktop Fix ════ */
-/* calDayPanelDesktop با JS نشون داده می‌شد
-   اگه goPage صدا نشه، grid فقط ۲ item داره → monthViewWrap توی ۲۸۰px گیر می‌کنه
-   Fix: روی دسکتاپ همیشه flex */
-@media(min-width:900px){
-  #pageCalendar.page.active #calDayPanelDesktop {
-    display:flex !important;
-  }
-}
-/* ════ End Calendar Desktop Fix ════ */
 
-/* ════ Calendar Grid Explicit Placement ════ */
+
+
+
+/* ════ Calendar Day Panel Fix ════ */
 @media(min-width:900px){
-  /* pageCalendar: ۲ ردیف — ناوبری + محتوا */
-  #pageCalendar.page.active {
-    grid-template-rows: auto 1fr;
-  }
-  /* cal-page (ناوبری + toggle) → کل عرض، ردیف ۱ */
-  #pageCalendar.page.active .cal-page {
-    grid-column: 1 / -1;
-    grid-row: 1;
-    min-width: 0;
-  }
-  /* grid ماهانه → ستون اصلی (col1=راست در RTL)، ردیف ۲ */
-  #pageCalendar.page.active #monthViewWrap {
-    grid-column: 1;
-    grid-row: 2;
-    min-width: 0;
-    overflow: hidden;
-  }
-  /* فهرست → همان محل monthViewWrap */
-  #pageCalendar.page.active #calListView {
-    grid-column: 1;
-    grid-row: 2;
-  }
-  /* هفتگی → همان محل */
-  #pageCalendar.page.active #weekView {
-    grid-column: 1;
-    grid-row: 2;
-  }
-  /* پانل روز → ستون ۲ (چپ=280px)، ردیف ۲ */
-  #pageCalendar.page.active #calDayPanelDesktop {
-    grid-column: 2;
-    grid-row: 2;
+  #calDayPanelDesktop {
+    /* از grid بیرون نزنه */
+    overflow-y:auto;
+    max-height:100svh;
   }
 }
-/* ════ End Calendar Grid Fix ════ */
+/* ════ End Calendar Day Panel Fix ════ */
 </style>
 </head>
 <body>
