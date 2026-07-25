@@ -4019,8 +4019,8 @@ select.fi{
 }
 
 /* ════ Soko Desktop Layout ════ */
-/* sidebar: mobile مخفی */
-.tm-panel-sidebar { display:none; }
+/* tm-panel-sidebar — فقط داخل panel (نه global) */
+#tmSokoPanel .tm-panel-sidebar { display:none; }
 
 @media(min-width:900px){
 
@@ -4043,7 +4043,7 @@ select.fi{
   .tm-panel-main::-webkit-scrollbar{ display:none; }
 
   /* sidebar — چپ، ۲۲۰px */
-  .tm-panel-sidebar {
+  #tmSokoPanel .tm-panel-sidebar {
     width:220px;
     flex-shrink:0;
     border-right:2px solid var(--b1);
@@ -4136,6 +4136,38 @@ select.fi{
   }
 }
 /* ════ End Calendar Desktop Fix ════ */
+
+/* ════ Calendar Grid Explicit Placement ════ */
+@media(min-width:900px){
+  /* cal-page (navigation + toggle) → ستون چپ ۲۸۰px */
+  #pageCalendar.page.active .cal-page {
+    grid-column: 2;
+    grid-row: 1;
+    min-width:0;
+  }
+  /* ماه تقویم اصلی → ستون راست ۱fr (کل ارتفاع) */
+  #pageCalendar.page.active #monthViewWrap {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    min-width:0;
+  }
+  /* list view نیز در ستون راست */
+  #pageCalendar.page.active #calListView {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+  /* week view نیز در ستون راست */
+  #pageCalendar.page.active #weekView {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+  }
+  /* day panel → ستون چپ ۲۸۰px، ردیف دوم */
+  #pageCalendar.page.active #calDayPanelDesktop {
+    grid-column: 2;
+    grid-row: 2;
+  }
+}
+/* ════ End Calendar Grid Fix ════ */
 </style>
 </head>
 <body>
