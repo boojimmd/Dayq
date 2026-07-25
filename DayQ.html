@@ -4035,6 +4035,7 @@ select.fi{
     scrollbar-width:none;
     direction:rtl;
     min-width:0;
+    order:0;        /* RTL: order پایین = سمت راست */
   }
   .tm-panel-main::-webkit-scrollbar{ display:none; }
   /* محدود کردن عرض محتوای وضعیت و گزارش */
@@ -4049,7 +4050,8 @@ select.fi{
   .tm-panel-sidebar {
     width:220px;
     flex-shrink:0;
-    border-right:1px solid var(--b1);
+    order:1;        /* RTL: order بالا = سمت چپ */
+    border-left:1px solid var(--b1);
     background:var(--bg0);
     overflow-y:auto;
     padding:var(--sp4) var(--sp3);
