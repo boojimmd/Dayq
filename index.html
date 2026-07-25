@@ -4129,47 +4129,41 @@ select.fi{
 
 
 
-/* ════ Calendar Desktop Layout Fix ════ */
+
+/* ════ Calendar Desktop Layout ════ */
 @media(min-width:900px){
 
-  /* ردیف ۱: ناوبری کل عرض | ردیف ۲: grid + dayPanel */
+  /* تغییر grid: 280px راست (day panel) + 1fr چپ (calendar) */
   #pageCalendar.page.active{
+    grid-template-columns: 280px 1fr;
     grid-template-rows: auto 1fr;
   }
 
-  /* cal-page (تیتر + toggle) → ردیف ۱، کل عرض */
+  /* cal-page (ناوبری + toggleها) → ردیف ۱، کل عرض */
   #pageCalendar.page.active .cal-page{
     grid-column: 1 / -1;
     grid-row: 1;
   }
 
-  /* grid ماهانه → ردیف ۲، col1 (1fr راست در RTL) */
-  #pageCalendar.page.active #monthViewWrap{
-    grid-column: 1;
-    grid-row: 2;
-  }
-  #pageCalendar.page.active #calListView{
-    grid-column: 1;
-    grid-row: 2;
-  }
-  #pageCalendar.page.active #weekView{
-    grid-column: 1;
+  /* calendar grid → ردیف ۲، col2 (1fr، چپ = محتوای اصلی) */
+  #pageCalendar.page.active #monthViewWrap,
+  #pageCalendar.page.active #calListView,
+  #pageCalendar.page.active #weekView {
+    grid-column: 2;
     grid-row: 2;
   }
 
-  /* dayPanel → ردیف ۲، col2 (280px چپ)
-     position:sticky را override کن — گرنه از grid فرار می‌کنه */
+  /* day details panel → ردیف ۲، col1 (280px، راست) */
   #pageCalendar.page.active #calDayPanelDesktop{
-    grid-column: 2;
+    grid-column: 1;
     grid-row: 2;
-    position: relative;  /* override sticky */
+    position: relative;  /* override sticky — گرنه از grid فرار می‌کنه */
     height: auto;        /* override 100svh */
     overflow-y: auto;
     align-self: stretch;
   }
 }
-/* ════ End Calendar Desktop Layout Fix ════ */
-</style>
+/* ════ End Calendar Desktop Layout ════ */</style>
 </head>
 <body>
 <div id="app">
