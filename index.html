@@ -4038,6 +4038,15 @@ select.fi{
     order:0;        /* RTL: order پایین = سمت راست */
   }
   .tm-panel-main::-webkit-scrollbar{ display:none; }
+
+  .tm-panel-main {
+    display:flex;
+    flex-direction:column;
+  }
+  .tm-panel-main .tm-tab-pane {
+    flex:1;
+    overflow-y:auto;
+  }
   /* محدود کردن عرض محتوای وضعیت و گزارش */
   #tmSokoStatusContent,
   #tmSokoReportContent,
@@ -4063,14 +4072,23 @@ select.fi{
   }
   #tmHdrKpi { display:flex !important; }
   /* هدر: border پایین + padding مناسب */
-  #tmSokoPanel .tm-panel-hdr {
+  /* Header الان داخل main هست — نه full-width */
+  .tm-panel-main > .tm-panel-hdr {
     border-bottom:1px solid var(--b1);
-    padding-left:var(--sp4);
-    padding-right:var(--sp4);
+    padding:var(--sp3) var(--sp4) 0;
+    flex-shrink:0;
+    position:sticky;
+    top:0;
+    background:var(--bg1);
+    z-index:2;
   }
-  .tm-panel-toprow {
+  .tm-panel-main > .tm-panel-hdr .tm-panel-toprow {
     margin-bottom:0;
     padding-bottom:var(--sp3);
+  }
+  /* tabs underline فقط زیر متن */
+  .tm-tabs {
+    justify-content:flex-end;
   }
   .tm-tab-pane { padding:0; }
 }
@@ -14774,11 +14792,11 @@ function tmRenderSokoReport() {
       ${members.map(m => `
         <div style="background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r2);padding:var(--sp3);margin-bottom:var(--sp2)">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--sp2)">
-            <div style="font-size:var(--fs-sm);font-weight:700;color:${m.score>=80?'var(--a)':m.score>=50?'var(--amber)':'var(--red)'}">${m.score}٪</div>
+            <div style="font-size:var(--fs-sm);font-weight:700;color:${(m.score||0)>=80?'var(--a)':(m.score||0)>=50?'var(--amber)':'var(--red)'}">${m.score!==undefined?m.score:0}٪</div>
             <div style="font-size:var(--fs-sm);font-weight:600">${m.name}</div>
           </div>
-          <div class="tm-score-bar"><div class="tm-score-fill${m.score>=80?'':m.score>=50?' mid':' low'}" style="transform:scaleX(\${m.score/100})"></div></div>
-          <div style="font-size:var(--fs-2xs);color:var(--t3);margin-top:4px;text-align:left">${m.done}/${m.total}</div>
+          <div class="tm-score-bar"><div class="tm-score-fill${(m.score||0)>=80?'':((m.score||0))>=50?' mid':' low'}" style="transform:scaleX(${(m.score||0)/100})"></div></div>
+          <div style="font-size:var(--fs-2xs);color:var(--t3);margin-top:4px;text-align:left">${m.done||0}/${m.total||0}</div>
         </div>`).join('')}`;
   }).catch(() => {
     el.innerHTML = '<div style="text-align:center;padding:var(--sp4);color:var(--red);font-size:var(--fs-sm)">خطا در بارگذاری گزارش</div>';
@@ -17800,43 +17818,7 @@ boot();
 
 <!-- سکو Panel — full screen -->
 <div class="tm-panel" id="tmSokoPanel">
-  <!-- Header جدید — RTL -->
-  <div class="tm-panel-hdr">
-    <div class="tm-panel-toprow">
-      <!-- close -->
-      <button class="tm-panel-close" onclick="tmCloseSoko()">✕</button>
-      <!-- عنوان وسط -->
-      <div style="flex:1;text-align:center;min-width:0;padding:0 var(--sp3)">
-        <div style="font-size:var(--fs-md);font-weight:800;color:var(--t1)">سکو</div>
-        <div id="tmSokoPanelSub" style="font-size:var(--fs-xs);color:var(--t3)">تیم</div>
-      </div>
-      <!-- KPI + actions -->
-      <div style="display:flex;align-items:center;gap:var(--sp3);flex-shrink:0">
-        <div id="tmHdrKpi" style="display:none;align-items:center;gap:var(--sp3)">
-          <div style="text-align:center">
-            <div id="tmHdrTask" style="font-size:var(--fs-md);font-weight:800;color:var(--t1);font-variant-numeric:tabular-nums">۰</div>
-            <div style="font-size:9px;color:var(--t3)">تسک</div>
-          </div>
-          <div style="text-align:center">
-            <div id="tmHdrAlert" style="font-size:var(--fs-md);font-weight:800;color:var(--red);font-variant-numeric:tabular-nums">۰</div>
-            <div style="font-size:9px;color:var(--t3)">مشکل</div>
-          </div>
-          <div style="text-align:center">
-            <div id="tmHdrScore" style="font-size:var(--fs-md);font-weight:800;color:var(--a);font-variant-numeric:tabular-nums">—</div>
-            <div style="font-size:9px;color:var(--t3)">موفقیت</div>
-          </div>
-          <div style="width:1px;height:28px;background:var(--b1)"></div>
-        </div>
-        <button class="tm-panel-action-btn" onclick="tmOpenAnnouncement()">📢</button>
-        <button class="tm-panel-action-btn primary" onclick="tmAssignTask()">+ تسک</button>
-      </div>
-    </div>
-    <div class="tm-tabs">
-      <div class="tm-tab active" data-tab="status"   onclick="tmSetSokoTab('status')">وضعیت</div>
-      <div class="tm-tab"        data-tab="projects" onclick="tmSetSokoTab('projects')">پروژه‌ها</div>
-      <div class="tm-tab"        data-tab="report"   onclick="tmSetSokoTab('report')">گزارش</div>
-    </div>
-  </div>
+
 
   <!-- Body — desktop: flex row (sidebar چپ + main راست) -->
   <div class="tm-panel-body">
@@ -17844,6 +17826,44 @@ boot();
     <div class="tm-panel-sidebar" id="tmPanelSidebar"></div>
     <!-- Main content -->
     <div class="tm-panel-main">
+    <!-- Header جدید — RTL -->
+    <div class="tm-panel-hdr">
+      <div class="tm-panel-toprow">
+        <!-- close -->
+        <button class="tm-panel-close" onclick="tmCloseSoko()">✕</button>
+        <!-- عنوان وسط -->
+        <div style="flex:1;text-align:center;min-width:0;padding:0 var(--sp3)">
+          <div style="font-size:var(--fs-md);font-weight:800;color:var(--t1)">سکو</div>
+          <div id="tmSokoPanelSub" style="font-size:var(--fs-xs);color:var(--t3)">تیم</div>
+          </div>
+        <!-- KPI + actions -->
+        <div style="display:flex;align-items:center;gap:var(--sp3);flex-shrink:0">
+          <div id="tmHdrKpi" style="display:none;align-items:center;gap:var(--sp3)">
+            <div style="text-align:center">
+              <div id="tmHdrTask" style="font-size:var(--fs-md);font-weight:800;color:var(--t1);font-variant-numeric:tabular-nums">۰</div>
+              <div style="font-size:9px;color:var(--t3)">تسک</div>
+              </div>
+            <div style="text-align:center">
+              <div id="tmHdrAlert" style="font-size:var(--fs-md);font-weight:800;color:var(--red);font-variant-numeric:tabular-nums">۰</div>
+              <div style="font-size:9px;color:var(--t3)">مشکل</div>
+              </div>
+            <div style="text-align:center">
+              <div id="tmHdrScore" style="font-size:var(--fs-md);font-weight:800;color:var(--a);font-variant-numeric:tabular-nums">—</div>
+              <div style="font-size:9px;color:var(--t3)">موفقیت</div>
+              </div>
+            <div style="width:1px;height:28px;background:var(--b1)"></div>
+            </div>
+          <button class="tm-panel-action-btn" onclick="tmOpenAnnouncement()">📢</button>
+          <button class="tm-panel-action-btn primary" onclick="tmAssignTask()">+ تسک</button>
+          </div>
+        </div>
+      <div class="tm-tabs">
+        <div class="tm-tab active" data-tab="status"   onclick="tmSetSokoTab('status')">وضعیت</div>
+        <div class="tm-tab"        data-tab="projects" onclick="tmSetSokoTab('projects')">پروژه‌ها</div>
+        <div class="tm-tab"        data-tab="report"   onclick="tmSetSokoTab('report')">گزارش</div>
+        </div>
+      </div>
+
     <div class="tm-tab-pane" data-pane="status" id="tmSokoStatusContent"></div>
     <div class="tm-tab-pane" data-pane="projects" style="display:none" id="tmSokoProjectsContent">
       <div style="text-align:center;padding:var(--sp5);color:var(--t3);font-size:var(--fs-sm)">پروژه‌های تیمی در Step 2 اضافه می‌شن</div>
