@@ -17465,15 +17465,22 @@ async function tmLoadReport(period) {
 
 /* ════ Sheet Navigation Helper ════ */
 function _sheetNav(fromId, nextFn) {
-  // فقط sheet فعلی رو ببند — نه body lock، نه ov
+  // بستن sheet فعلی بدون closeAll
   const fromEl = document.getElementById(fromId);
   if (fromEl) {
     fromEl.classList.add('closing');
     fromEl.classList.remove('open');
     setTimeout(() => fromEl.classList.remove('closing'), 190);
   }
-  // sheet بعدی رو باز کن — ov هنوز open هست
-  setTimeout(nextFn, 30);
+  // ghost click guard: ov رو موقتاً کر کن
+  // انگشت بالا میاد → click روی ov → closeAll ← این fix جلوش رو میگیره
+  const ov = document.getElementById('ov');
+  if (ov) {
+    ov.style.pointerEvents = 'none';
+    setTimeout(() => { ov.style.pointerEvents = ''; }, 450);
+  }
+  // sheet بعدی — کمی بعد تا close animation شروع بشه
+  setTimeout(nextFn, 50);
 }
 /* ════ End Sheet Navigation ════ */
 
