@@ -4125,6 +4125,17 @@ select.fi{
 #shTmChoice
 #tmDetailSheet
 #shTeamTaskDetail { z-index:2100; }
+
+/* ════ Calendar Desktop Fix ════ */
+/* calDayPanelDesktop با JS نشون داده می‌شد
+   اگه goPage صدا نشه، grid فقط ۲ item داره → monthViewWrap توی ۲۸۰px گیر می‌کنه
+   Fix: روی دسکتاپ همیشه flex */
+@media(min-width:900px){
+  #pageCalendar.page.active #calDayPanelDesktop {
+    display:flex !important;
+  }
+}
+/* ════ End Calendar Desktop Fix ════ */
 </style>
 </head>
 <body>
