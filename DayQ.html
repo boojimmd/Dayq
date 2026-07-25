@@ -4129,15 +4129,46 @@ select.fi{
 
 
 
-/* ════ Calendar Day Panel Fix ════ */
+/* ════ Calendar Desktop Layout Fix ════ */
 @media(min-width:900px){
-  #calDayPanelDesktop {
-    /* از grid بیرون نزنه */
-    overflow-y:auto;
-    max-height:100svh;
+
+  /* ردیف ۱: ناوبری کل عرض | ردیف ۲: grid + dayPanel */
+  #pageCalendar.page.active{
+    grid-template-rows: auto 1fr;
+  }
+
+  /* cal-page (تیتر + toggle) → ردیف ۱، کل عرض */
+  #pageCalendar.page.active .cal-page{
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  /* grid ماهانه → ردیف ۲، col1 (1fr راست در RTL) */
+  #pageCalendar.page.active #monthViewWrap{
+    grid-column: 1;
+    grid-row: 2;
+  }
+  #pageCalendar.page.active #calListView{
+    grid-column: 1;
+    grid-row: 2;
+  }
+  #pageCalendar.page.active #weekView{
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  /* dayPanel → ردیف ۲، col2 (280px چپ)
+     position:sticky را override کن — گرنه از grid فرار می‌کنه */
+  #pageCalendar.page.active #calDayPanelDesktop{
+    grid-column: 2;
+    grid-row: 2;
+    position: relative;  /* override sticky */
+    height: auto;        /* override 100svh */
+    overflow-y: auto;
+    align-self: stretch;
   }
 }
-/* ════ End Calendar Day Panel Fix ════ */
+/* ════ End Calendar Desktop Layout Fix ════ */
 </style>
 </head>
 <body>
