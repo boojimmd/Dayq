@@ -20763,7 +20763,6 @@ function _tmUpdateAssignMemberChips() {
 }
 
 // Fix 2: state reset کامل
-const _origTmAssignTask = window.tmAssignTask;
 window.tmAssignTask = function(preUuid = '') {
   _tmAssignParsed = null;
   _tmAssignMember = preUuid || '';
@@ -21526,7 +21525,6 @@ function _xmlEsc(s) {
 /* ════ End Z-index ════ */
 
 /* ════ End Team JS ════ */
- ════ */
 
 function _tmValidateSubmit(){const btn=document.getElementById('tmASubmitBtn');if(!btn)return;const inp=document.getElementById('tmANlpInp');const hasText=inp&&inp.value.trim().length>0;const hasMember=_tmAssignMember||_tmAssignBroadcast;if(!hasText){btn.disabled=true;btn.textContent='عنوان تسک رو بنویس';btn.style.opacity='.45';}else if(!hasMember){btn.disabled=true;btn.textContent='یه عضو انتخاب کن';btn.style.opacity='.45';}else{btn.disabled=false;btn.textContent='ارسال تسک';btn.style.opacity='1';}}
 
@@ -21569,7 +21567,6 @@ function _tmSbStatus(sb) {
   `;
 }
 
-let _tmSbActiveFilter = 'all';
 function _tmSbFilter(f) {
   _tmSbActiveFilter = f;
   ['All','Blocked','Ok'].forEach(k => {
