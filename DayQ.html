@@ -14561,13 +14561,38 @@ async function tmDoJoin() {
 // ── Team Settings (از تب من) ───────────────────────────────────
 function tmOpenTeamSettings() {
   if (!tm.code) {
-    // هنوز عضو نیست — modal انتخاب
     openSheet('shTmChoice');
-  } else {
-    // هم مدیر هم عضو — sheet اطلاعات تیم
-    openSheet('shTmInfo');
-    tmRefreshInfoSheet();
+    return;
   }
+  // باز کردن sheet
+  openSheet('shTmInfo');
+  // پر کردن محتوا — با delay تا sheet کاملاً باز بشه
+  setTimeout(function() {
+    const el = document.getElementById('tmInfoContent');
+    if (!el) return;
+    const teamName = tm.teamName || tm.code || '—';
+    const roleFa = tm.role === 'manager' ? 'مدیر' : 'عضو';
+    const memberName = tm.memberName || '';
+    const code = tm.code || '—';
+    el.innerHTML =
+      '<div style="margin-bottom:var(--sp3)">' +
+        '<div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">تیم</div>' +
+        '<div style="font-size:var(--fs-md);font-weight:700">' + esc(teamName) + '</div>' +
+      '</div>' +
+      '<div style="margin-bottom:var(--sp3)">' +
+        '<div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نقش</div>' +
+        '<div style="font-size:var(--fs-md)">' + roleFa + (memberName ? ' — ' + esc(memberName) : '') + '</div>' +
+      '</div>' +
+      '<div style="margin-bottom:var(--sp4)">' +
+        '<div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">کد تیم</div>' +
+        '<div style="font-size:var(--fs-sm);font-family:var(--mono);background:var(--bg2);padding:var(--sp2) var(--sp3);border-radius:var(--r2)">' + esc(code) + '</div>' +
+      '</div>' +
+      (tm.role === 'manager'
+        ? '<button class="tm-btn blue" style="width:100%;justify-content:center;margin-bottom:var(--sp2)" onclick="tmCopyCode()">📋 کپی کد دعوت</button>' +
+          '<button class="tm-btn" style="width:100%;justify-content:center;margin-bottom:var(--sp2)" onclick="closeAll();tmOpenSoko()">🏢 باز کردن سکو</button>'
+        : '') +
+      '<button class="tm-btn danger" style="width:100%;justify-content:center;margin-top:var(--sp2)" onclick="tmLeaveTeam()">ترک تیم</button>';
+  }, 80);
 }
 
 function tmRefreshInfoSheet() {
@@ -17713,8 +17738,10 @@ boot();
       <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
   </div>
-  <div class="sh-body">
-    <div id="tmInfoContent"></div>
+  <div class="sh-body" style="padding:var(--sp4)">
+    <div id="tmInfoContent">
+      <div style="text-align:center;padding:var(--sp5);color:var(--t3)">در حال بارگذاری...</div>
+    </div>
   </div>
 </div>
 
