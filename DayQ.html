@@ -4034,12 +4034,22 @@ select.fi{
     padding:var(--sp4) var(--sp5);
     scrollbar-width:none;
     direction:rtl;
+    min-width:0;
   }
   .tm-panel-main::-webkit-scrollbar{ display:none; }
+  /* محدود کردن عرض محتوای وضعیت و گزارش */
+  #tmSokoStatusContent,
+  #tmSokoReportContent,
+  #tmSokoProjectsContent {
+    max-width:720px;
+    margin-left:auto;
+    margin-right:auto;
+    width:100%;
+  }
   .tm-panel-sidebar {
     width:220px;
     flex-shrink:0;
-    border-left:1px solid var(--b1);
+    border-right:1px solid var(--b1);
     background:var(--bg0);
     overflow-y:auto;
     padding:var(--sp4) var(--sp3);
@@ -4050,8 +4060,16 @@ select.fi{
     direction:rtl;
   }
   #tmHdrKpi { display:flex !important; }
-  .tm-panel-hdr { border-bottom:1px solid var(--b1); }
-  .tm-panel-toprow { margin-bottom:0; padding-bottom:12px; }
+  /* هدر: border پایین + padding مناسب */
+  #tmSokoPanel .tm-panel-hdr {
+    border-bottom:1px solid var(--b1);
+    padding-left:var(--sp4);
+    padding-right:var(--sp4);
+  }
+  .tm-panel-toprow {
+    margin-bottom:0;
+    padding-bottom:var(--sp3);
+  }
   .tm-tab-pane { padding:0; }
 }
 .tm-sb-section { margin-bottom:var(--sp3); }
@@ -17783,15 +17801,14 @@ boot();
   <!-- Header جدید — RTL -->
   <div class="tm-panel-hdr">
     <div class="tm-panel-toprow">
-      <!-- راست: close + عنوان -->
-      <div style="display:flex;align-items:center;gap:var(--sp3);flex:1;min-width:0">
-        <button class="tm-panel-close" onclick="tmCloseSoko()">✕</button>
-        <div style="min-width:0">
-          <div style="font-size:var(--fs-md);font-weight:800;color:var(--t1)">سکو</div>
-          <div id="tmSokoPanelSub" style="font-size:var(--fs-xs);color:var(--t3)">تیم</div>
-        </div>
+      <!-- close -->
+      <button class="tm-panel-close" onclick="tmCloseSoko()">✕</button>
+      <!-- عنوان وسط -->
+      <div style="flex:1;text-align:center;min-width:0;padding:0 var(--sp3)">
+        <div style="font-size:var(--fs-md);font-weight:800;color:var(--t1)">سکو</div>
+        <div id="tmSokoPanelSub" style="font-size:var(--fs-xs);color:var(--t3)">تیم</div>
       </div>
-      <!-- چپ: KPI strip + actions -->
+      <!-- KPI + actions -->
       <div style="display:flex;align-items:center;gap:var(--sp3);flex-shrink:0">
         <div id="tmHdrKpi" style="display:none;align-items:center;gap:var(--sp3)">
           <div style="text-align:center">
