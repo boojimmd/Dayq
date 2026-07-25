@@ -14561,10 +14561,10 @@ async function tmDoJoin() {
 // ── Team Settings (از تب من) ───────────────────────────────────
 function tmOpenTeamSettings() {
   if (!tm.code) {
+    // هنوز عضو نیست — modal انتخاب
     openSheet('shTmChoice');
-  } else if (tm.role === 'manager') {
-    tmOpenSoko();
   } else {
+    // هم مدیر هم عضو — sheet اطلاعات تیم
     openSheet('shTmInfo');
     tmRefreshInfoSheet();
   }
