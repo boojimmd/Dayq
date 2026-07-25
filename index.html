@@ -18043,7 +18043,7 @@ boot();
 
       <!-- Error + Submit -->
       <div id="tmAErr" style="font-size:var(--fs-xs);color:var(--red);min-height:14px;text-align:center"></div>
-      <button id="tmASubmitBtn" onclick="tmDoAssign()" style="width:100%;height:50px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-md);font-weight:800;font-family:var(--f);cursor:pointer">ارسال تسک</button>
+      <button id="tmASubmitBtn" onclick="tmDoAssign()" disabled style="width:100%;height:50px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-md);font-weight:800;font-family:var(--f);cursor:pointer">ارسال تسک</button>
     </div>
   </div>
 </div>
@@ -18208,7 +18208,30 @@ boot();
   </div>
 </div>
 
-<script>
+/* ════ Submit Validation ════ */
+function _tmValidateSubmit() {
+  const btn = document.getElementById('tmASubmitBtn');
+  if (!btn) return;
+  const inp = document.getElementById('tmANlpInp');
+  const hasText = inp && inp.value.trim().length > 0;
+  const hasMember = _tmAssignMember || _tmAssignBroadcast;
+  
+  if (!hasText) {
+    btn.disabled = true;
+    btn.textContent = 'عنوان تسک رو بنویس';
+    btn.style.opacity = '.45';
+  } else if (!hasMember) {
+    btn.disabled = true;
+    btn.textContent = 'یه عضو انتخاب کن';
+    btn.style.opacity = '.45';
+  } else {
+    btn.disabled = false;
+    btn.textContent = 'ارسال تسک';
+    btn.style.opacity = '1';
+  }
+}
+/* ════ End Submit Validation ════ */
+
 /* ════ DayQ Soko — Team JS ════ */
 
 // ═════════════════════════════════════════════
@@ -18422,7 +18445,11 @@ tmAssignTask = function(preUuid = '') {
   _tmUpdateAssignMemberChips();
 
   tmModal('tmModalAssign', true);
-  setTimeout(() => { const i = document.getElementById('tmANlpInp'); if(i) i.focus(); }, 300);
+  setTimeout(() => {
+      const i = document.getElementById('tmANlpInp');
+      if(i) i.focus();
+      _tmValidateSubmit();
+    }, 300);
 };
 
 // ── NLP input handler ─────────────────────────────────────────
@@ -18472,7 +18499,12 @@ function _tmSetDeadlineShortcut(text) {
 function _tmUpdateAssignMemberChips() {
   const el = document.getElementById('tmAMemberChips');
   if (!el) return;
-  const members = tm.snapshot?.members?.filter(m => !m.isManager && m.status === 'active') || [];
+  const members = (tm.snapshot?.members || []).filter(m =>
+    m.uuid !== tm.uuid &&
+    !m.isManager &&
+    m.role !== 'manager' &&
+    (m.status === 'active' || m.status === 'approved')
+  );
   if (!members.length) {
     el.innerHTML = '<div style="color:var(--t3);font-size:var(--fs-xs)">هنوز عضوی تأیید نشده</div>';
     return;
@@ -18498,7 +18530,10 @@ function _tmSelectMember(uuid) {
 }
 
 function _tmToggleBroadcast() {
-  _tmAssignBroadcast = !_tmAssignBroadcast;
+  if (_tmAssignBroadcast) {
+    _tmAssignBroadcast = false;
+    _tmValidateSubmit();
+  _tmValidateSubmit();
   const btn = document.getElementById('tmABroadcastBtn');
   if (btn) {
     btn.style.background = _tmAssignBroadcast ? 'var(--bluem)' : 'var(--bg2)';
@@ -19117,7 +19152,12 @@ function _tmSetDeadlineShortcut(text) {
 function _tmUpdateAssignMemberChips() {
   const el = document.getElementById('tmAMemberChips');
   if (!el) return;
-  const members = tm.snapshot?.members?.filter(m => !m.isManager && m.status === 'active') || [];
+  const members = (tm.snapshot?.members || []).filter(m =>
+    m.uuid !== tm.uuid &&
+    !m.isManager &&
+    m.role !== 'manager' &&
+    (m.status === 'active' || m.status === 'approved')
+  );
   if (!members.length) {
     el.innerHTML = '<div style="color:var(--t3);font-size:var(--fs-xs)">هنوز عضوی تأیید نشده</div>';
     return;
@@ -19143,7 +19183,9 @@ function _tmSelectMember(uuid) {
 }
 
 function _tmToggleBroadcast() {
-  _tmAssignBroadcast = !_tmAssignBroadcast;
+  if (_tmAssignBroadcast) {
+    _tmAssignBroadcast = false;
+    _tmValidateSubmit();
   const btn = document.getElementById('tmABroadcastBtn');
   if (btn) {
     btn.style.background = _tmAssignBroadcast ? 'var(--bluem)' : 'var(--bg2)';
@@ -20453,6 +20495,7 @@ function _xmlEsc(s) {
 /* ════ End Z-index ════ */
 
 /* ════ End Team JS ════ */
+ ════ */
 </script>
 </body>
 </html>
