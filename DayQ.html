@@ -14808,6 +14808,16 @@ function tmAssignTask(preUuid = '') {
   document.getElementById('tmAssignTitle').value = '';
   document.getElementById('tmAssignDeadline').value = '';
   document.getElementById('tmAssignErr').textContent = '';
+  // reset priority
+  _tmAssignPriority = 'normal';
+  document.querySelectorAll('.tm-pri-opt').forEach(b => {
+    b.classList.toggle('active', b.dataset.pri === 'normal');
+  });
+  // reset checkboxes
+  const bc = document.getElementById('tmBroadcastToggle');
+  const nv = document.getElementById('tmNeedsVerifyToggle');
+  if (bc) bc.checked = false;
+  if (nv) nv.checked = false;
   // pre-select member
   document.querySelectorAll('.tm-member-opt').forEach(opt => {
     opt.classList.toggle('active', opt.dataset.uuid === preUuid);
@@ -14831,9 +14841,20 @@ async function tmDoAssign() {
   errEl.textContent = '';
 
   try {
-    await tmAPI('POST', '/task/assign', { title, deadline, assignedTo, priority:'normal' });
+    const needsVerify = document.getElementById('tmNeedsVerifyToggle')?.checked || false;
+    const broadcast   = document.getElementById('tmBroadcastToggle')?.checked || false;
+    await tmAPI('POST', '/task/assign', {
+      title,
+      deadline,
+      assignedTo: broadcast ? null : assignedTo,
+      broadcast,
+      priority: _tmAssignPriority || 'normal',
+      needsVerify,
+    });
     closeAll();
-    toast_(svgIco('check'), 'تسک ارسال شد');
+    toast_(svgIco('check'), broadcast ? '📢 تسک به همه ارسال شد' : 'تسک ارسال شد');
+    // push به کارمند از طریق Worker — اگه Worker پشتیبانی کنه
+    _tmTryPushToMember(assignedTo, title, broadcast);
     tmSyncBackground();
   } catch(e) {
     errEl.textContent = e.message;
@@ -14841,6 +14862,24 @@ async function tmDoAssign() {
     btn.disabled = false;
   }
 }
+// ── Push به کارمند بعد از تسک ──────────────────────────────
+async function _tmTryPushToMember(memberUuid, taskTitle, broadcast) {
+  try {
+    const workerUrl = (tm.workerUrl || cfg.pushWorkerUrl || '').trim().replace(/\/+$/, '');
+    if (!workerUrl || !tm.token) return;
+    // Worker باید endpoint داشته باشه — graceful fail
+    await fetch(workerUrl + '/task/notify', {
+      method: 'POST',
+      headers: { 'Content-Type':'application/json', 'X-DayQ-Token': tm.token },
+      body: JSON.stringify({
+        to: broadcast ? 'all' : memberUuid,
+        title: '📋 تسک جدید از مدیر',
+        body: taskTitle,
+      })
+    });
+  } catch(e) { /* graceful — اگه Worker این endpoint رو نداره مهم نیست */ }
+}
+
 
 // ── Pending approvals check ────────────────────────────────────
 async function tmRenderPendingList(pending) {
