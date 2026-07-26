@@ -17632,6 +17632,96 @@ async function _tmAutoRegisterPush() {
 
 boot();
 
+
+
+/* ════ Member Management ════ */
+async function _tmMemberAction(uuid, action, val) {
+  if (action === 'remove') {
+    if (!confirm('عضو حذف بشه؟')) return;
+    try {
+      await tmAPI('POST', '/member/remove', { memberUuid: uuid });
+      toast_(svgIco('check'), 'عضو حذف شد');
+      await tmSyncBackground(); tmRefreshInfoSheet();
+    } catch(e) { toast_(svgIco('x'), e.message); }
+  } else if (action === 'toggle') {
+    try {
+      await tmAPI('PUT', '/member/status', { memberUuid: uuid, status: val ? 'active' : 'inactive' });
+      await tmSyncBackground(); tmRefreshInfoSheet();
+    } catch(e) { toast_(svgIco('x'), e.message); }
+  } else if (action === 'pin') {
+    if (!confirm('PIN این عضو ریست بشه؟')) return;
+    try {
+      const d = await tmAPI('POST', '/member/pin-reset', { memberUuid: uuid });
+      alert('PIN موقت: ' + d.tempPin);
+    } catch(e) { toast_(svgIco('x'), e.message); }
+  } else if (action === 'thread') {
+    if (typeof tmOpenTaskThread === 'function') tmOpenTaskThread(uuid);
+  }
+}
+/* ════ End Member Management ════ */
+
+
+/* ════ Comment Thread ════ */
+let _ttdTaskId = null, _mgThreadTaskId = null;
+function _commentTime(ts){const d=new Date(ts);return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');}
+function _renderThread(comments,viewerRole,container){
+  if(!container)return;
+  if(!comments||!comments.length){container.innerHTML='<div class="tm-thread-empty">هنوز پیامی نیست</div>';return;}
+  container.innerHTML=comments.map(c=>`<div class="ttd-bubble from-${c.from}"><div>${esc(c.text)}</div><div class="ttd-bubble-meta">${c.from===viewerRole?'':((c.from==='manager'?'مدیر':'کارمند')+' · ')}${_commentTime(c.ts)}</div></div>`).join('');
+  setTimeout(()=>{container.scrollTop=container.scrollHeight;},50);
+}
+function _ttdRefreshThread(){
+  const task=tm.inbox?.find(t=>t.id===_ttdTaskId);
+  const el=document.getElementById('ttdThreadMsgs');
+  if(el)_renderThread(task?.comments,'member',el);
+}
+async function _ttdSendComment(){
+  const inp=document.querySelector('#ttdCommentSection .ttd-reply-inp');
+  if(!inp||!inp.value.trim()||!_ttdTaskId)return;
+  const text=inp.value.trim();
+  const btn=document.querySelector('#ttdCommentSection .ttd-reply-send');
+  if(btn)btn.disabled=true;
+  try{
+    await tmAPI('POST','/task/comment',{taskId:_ttdTaskId,text,from:'member'});
+    const task=tm.inbox?.find(t=>t.id===_ttdTaskId);
+    if(task){if(!task.comments)task.comments=[];task.comments.push({from:'member',text,ts:Date.now()});}
+    inp.value='';inp.style.height='auto';_ttdRefreshThread();
+  }catch(e){
+    const task=tm.inbox?.find(t=>t.id===_ttdTaskId);
+    if(task){if(!task.comments)task.comments=[];task.comments.push({from:'member',text,ts:Date.now()});inp.value='';_ttdRefreshThread();}
+  }finally{if(btn)btn.disabled=false;}
+}
+function tmOpenTaskThread(taskId){
+  const members=tm.snapshot?.members||[];
+  const task=members.flatMap(m=>(m.tasks||[]).map(t=>({...t,memberName:m.name}))).find(t=>t.id===taskId)||(tm.inbox||[]).find(t=>t.id===taskId);
+  if(!task)return;
+  _mgThreadTaskId=taskId;
+  const sheet=document.getElementById('shTaskThread');if(!sheet)return;
+  const ttl=document.getElementById('mgThreadTitle');if(ttl)ttl.textContent=task.title||'گفتگو';
+  const meta=document.getElementById('mgThreadMeta');
+  if(meta){const ST={pending:'باید',in_progress:'درحال',done:'✓',blocked:'🚫'};meta.innerHTML=`<span style="font-size:var(--fs-xs);font-weight:700">${esc(task.memberName||'')}</span><span style="font-size:var(--fs-xs);color:var(--t3)">· ${ST[task.status]||''}</span>`;}
+  const threadEl=document.getElementById('mgThreadMsgs');
+  if(threadEl)_renderThread(task.comments,'manager',threadEl);
+  const noteEl=document.getElementById('mgThreadNote');
+  if(noteEl&&task.memberNote){noteEl.style.display='';noteEl.querySelector('.mg-note-text').textContent=task.memberNote;}else if(noteEl)noteEl.style.display='none';
+  openSheet('shTaskThread');
+}
+async function _mgSendComment(){
+  const inp=document.querySelector('#shTaskThread .ttd-reply-inp');
+  if(!inp||!inp.value.trim()||!_mgThreadTaskId)return;
+  const text=inp.value.trim();
+  const btn=document.querySelector('#shTaskThread .ttd-reply-send');
+  if(btn)btn.disabled=true;
+  try{await tmAPI('POST','/task/comment',{taskId:_mgThreadTaskId,text,from:'manager'});}catch(e){}
+  const members=tm.snapshot?.members||[];
+  for(const m of members){const t=(m.tasks||[]).find(t=>t.id===_mgThreadTaskId);if(t){if(!t.comments)t.comments=[];t.comments.push({from:'manager',text,ts:Date.now()});break;}}
+  inp.value='';inp.style.height='auto';
+  const threadEl=document.getElementById('mgThreadMsgs');
+  const task=members.flatMap(m=>(m.tasks||[]).map(t=>({...t}))).find(t=>t.id===_mgThreadTaskId);
+  if(threadEl&&task)_renderThread(task.comments,'manager',threadEl);
+  if(btn)btn.disabled=false;
+}
+/* ════ End Comment Thread ════ */
 </script>
 
 
