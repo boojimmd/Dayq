@@ -4120,6 +4120,65 @@ select.fi{
 .tm-mgr-view .from-member{align-self:flex-start;background:var(--bg2);border:1px solid var(--b1);border-bottom-left-radius:4px;color:var(--t1);}
 .tm-mgr-view .from-manager{align-self:flex-end;background:var(--bluem);border:1px solid rgba(59,130,246,.15);border-bottom-right-radius:4px;color:var(--blue);}
 .tm-thread-empty{text-align:center;padding:var(--sp4) 0;color:var(--t3);font-size:var(--fs-xs);}
+
+/* ════ Apple Design — Soko ════ */
+
+/* §1 Response: instant pointer-down feedback */
+.tm-panel-action-btn,
+.tm-panel-close,
+.tm-tab,
+.tm-sb-filter,
+.tm-sb-btn,
+.tm-member-card,
+.tm-task-row {
+  transition: transform 100ms ease-out, opacity 100ms ease-out, background 120ms ease;
+}
+.tm-panel-action-btn:active { transform: scale(0.96); }
+.tm-panel-close:active       { transform: scale(0.92); }
+.tm-tab:active               { transform: scale(0.97); }
+.tm-sb-filter:active         { transform: scale(0.97); opacity: .8; }
+.tm-sb-btn:active            { transform: scale(0.97); }
+
+/* §4 Spring panel — JS animates, remove CSS transition */
+.tm-panel {
+  transition: none !important;
+  will-change: transform;
+}
+
+/* §12 Glass materials */
+.tm-panel-sidebar {
+  background: color-mix(in srgb, var(--bg0) 72%, transparent) !important;
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-right: 1px solid rgba(128,128,128,.12) !important;
+}
+
+/* header glass — فقط دسکتاپ */
+@media(min-width:900px){
+  .tm-panel-main > .tm-panel-hdr {
+    background: color-mix(in srgb, var(--bg1) 82%, transparent) !important;
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border-bottom: 1px solid rgba(128,128,128,.1) !important;
+  }
+}
+
+/* §14 Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .tm-panel {
+    transition: opacity 200ms ease !important;
+    transform: none !important;
+  }
+  .tm-panel:not(.open) { opacity: 0; pointer-events: none; }
+  .tm-panel.open       { opacity: 1; pointer-events: auto; }
+  .tm-panel-action-btn:active,
+  .tm-panel-close:active,
+  .tm-tab:active,
+  .tm-sb-filter:active,
+  .tm-sb-btn:active { transform: none; opacity: .7; }
+}
+
+/* ════ End Apple Design ════ */
 </style>
 </head>
 <body>
@@ -14667,6 +14726,11 @@ function tmOpenSoko() {
   if (!panel) return;
   panel.classList.add('open');
   document.body.style.overflow = 'hidden';
+  // §4 Spring open + §9 rubber-band drag
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    _sokoSpringOpen && _sokoSpringOpen(panel);
+    _initPanelDrag && _initPanelDrag(panel);
+  }
   if (window.innerWidth < 900) {
     document.body.style.position = 'fixed';
     document.body.style.width = '100%';
@@ -17576,6 +17640,137 @@ async function _tmAutoRegisterPush() {
 }
 /* ════ End Auto Push ════ */
 
+/* ════ §4 Spring Physics Engine (Apple WWDC 2018) ════ */
+(function() {
+  // Apple parameters → stiffness/damping
+  // response=0.3, dampingRatio=0.8 → drawer/sheet
+  const PANEL_SPRING = { stiffness: 437, damping: 33.5 };
+
+  function springStep(state, target, spring, dt) {
+    const dt2 = Math.min(dt, 0.064); // cap at 64ms
+    const force = -spring.stiffness * (state.x - target) - spring.damping * state.v;
+    state.v += force * dt2;
+    state.x += state.v * dt2;
+    const settled = Math.abs(state.x - target) < 0.2 && Math.abs(state.v) < 0.5;
+    return settled;
+  }
+
+  // §9 Rubber-band formula (Apple sample code)
+  function rubberband(overshoot, dim, c) {
+    c = c || 0.55;
+    return (overshoot * dim * c) / (dim + c * Math.abs(overshoot));
+  }
+
+  let _panelRaf = null;
+  let _panelState = { x: 100, v: 0 }; // % translateY
+
+  function _animatePanel(el, target, initVelocity) {
+    if (_panelRaf) cancelAnimationFrame(_panelRaf);
+    _panelState.v = initVelocity || 0;
+    let last = null;
+
+    function frame(ts) {
+      if (!last) last = ts;
+      const dt = (ts - last) / 1000;
+      last = ts;
+      const settled = springStep(_panelState, target, PANEL_SPRING, dt);
+      el.style.transform = `translateY(${_panelState.x}%)`;
+      if (!settled) _panelRaf = requestAnimationFrame(frame);
+      else { _panelState.x = target; el.style.transform = `translateY(${target}%)`; }
+    }
+    _panelRaf = requestAnimationFrame(frame);
+  }
+
+  // Override tmOpenSoko/tmCloseSoko با spring
+  window._sokoSpringOpen = function(el) {
+    _panelState.x = 100; // از پایین
+    el.style.transform = 'translateY(100%)';
+    _animatePanel(el, 0, -8); // کمی velocity اولیه
+  };
+
+  window._sokoSpringClose = function(el, velocity) {
+    _animatePanel(el, 100, velocity || 15);
+  };
+
+  // §9 Rubber-band drag روی panel
+  window._initPanelDrag = function(panel) {
+    if (panel._dragInit) return;
+    panel._dragInit = true;
+    const handle = panel.querySelector('.tm-panel-hdr');
+    if (!handle) return;
+
+    let startY = 0, currentY = 0, dragging = false;
+    let history = []; // برای velocity
+
+    handle.addEventListener('pointerdown', e => {
+      if (e.target.closest('button, input, textarea, select')) return;
+      dragging = true;
+      startY = e.clientY;
+      currentY = 0;
+      history = [{ y: e.clientY, t: e.timeStamp }];
+      if (_panelRaf) { cancelAnimationFrame(_panelRaf); _panelRaf = null; }
+      handle.setPointerCapture(e.pointerId);
+      e.stopPropagation();
+    });
+
+    handle.addEventListener('pointermove', e => {
+      if (!dragging) return;
+      const dy = e.clientY - startY;
+      currentY = dy;
+      history.push({ y: e.clientY, t: e.timeStamp });
+      if (history.length > 6) history.shift();
+
+      if (dy > 0) {
+        // §9 rubber-band پایین‌تر از boundary
+        const h = window.innerHeight;
+        const rb = rubberband(dy, h);
+        const pct = (rb / h) * 100;
+        _panelState.x = pct;
+        panel.style.transform = `translateY(${pct}%)`;
+      } else {
+        // بالاتر از صفر — rubber-band سبک
+        const rb = rubberband(-dy, window.innerHeight, 0.25);
+        const pct = -(rb / window.innerHeight) * 100;
+        panel.style.transform = `translateY(${pct}%)`;
+        _panelState.x = pct;
+      }
+    });
+
+    handle.addEventListener('pointerup', e => {
+      if (!dragging) return;
+      dragging = false;
+
+      // محاسبه velocity از history
+      let velocity = 0;
+      if (history.length >= 2) {
+        const last = history[history.length - 1];
+        const prev = history[0];
+        const dt = (last.t - prev.t) / 1000;
+        if (dt > 0) {
+          const dpx = last.y - prev.y;
+          velocity = (dpx / dt / window.innerHeight) * 100; // % per second
+        }
+      }
+
+      // تصمیم: بسته یا باز — از velocity sign (§10 Apple: use velocity sign, not position)
+      const THRESHOLD = 30; // %/s
+      if (currentY > window.innerHeight * 0.35 || velocity > THRESHOLD) {
+        // بستن — با velocity
+        _sokoSpringClose(panel, velocity);
+        setTimeout(() => {
+          panel.classList.remove('open');
+          document.body.style.overflow = '';
+          document.body.style.position = '';
+        }, 300);
+      } else {
+        // برگشتن به باز
+        _animatePanel(panel, 0, velocity);
+      }
+    });
+  };
+})();
+/* ════ End Spring Engine ════ */
+
 boot();
 
  try { tm.snapshot = JSON.parse(get(TM_SK.snap) || 'null'); } catch(e){}
@@ -17629,6 +17824,137 @@ async function _tmAutoRegisterPush() {
   } catch(e) { /* silent */ }
 }
 /* ════ End Auto Push ════ */
+
+/* ════ §4 Spring Physics Engine (Apple WWDC 2018) ════ */
+(function() {
+  // Apple parameters → stiffness/damping
+  // response=0.3, dampingRatio=0.8 → drawer/sheet
+  const PANEL_SPRING = { stiffness: 437, damping: 33.5 };
+
+  function springStep(state, target, spring, dt) {
+    const dt2 = Math.min(dt, 0.064); // cap at 64ms
+    const force = -spring.stiffness * (state.x - target) - spring.damping * state.v;
+    state.v += force * dt2;
+    state.x += state.v * dt2;
+    const settled = Math.abs(state.x - target) < 0.2 && Math.abs(state.v) < 0.5;
+    return settled;
+  }
+
+  // §9 Rubber-band formula (Apple sample code)
+  function rubberband(overshoot, dim, c) {
+    c = c || 0.55;
+    return (overshoot * dim * c) / (dim + c * Math.abs(overshoot));
+  }
+
+  let _panelRaf = null;
+  let _panelState = { x: 100, v: 0 }; // % translateY
+
+  function _animatePanel(el, target, initVelocity) {
+    if (_panelRaf) cancelAnimationFrame(_panelRaf);
+    _panelState.v = initVelocity || 0;
+    let last = null;
+
+    function frame(ts) {
+      if (!last) last = ts;
+      const dt = (ts - last) / 1000;
+      last = ts;
+      const settled = springStep(_panelState, target, PANEL_SPRING, dt);
+      el.style.transform = `translateY(${_panelState.x}%)`;
+      if (!settled) _panelRaf = requestAnimationFrame(frame);
+      else { _panelState.x = target; el.style.transform = `translateY(${target}%)`; }
+    }
+    _panelRaf = requestAnimationFrame(frame);
+  }
+
+  // Override tmOpenSoko/tmCloseSoko با spring
+  window._sokoSpringOpen = function(el) {
+    _panelState.x = 100; // از پایین
+    el.style.transform = 'translateY(100%)';
+    _animatePanel(el, 0, -8); // کمی velocity اولیه
+  };
+
+  window._sokoSpringClose = function(el, velocity) {
+    _animatePanel(el, 100, velocity || 15);
+  };
+
+  // §9 Rubber-band drag روی panel
+  window._initPanelDrag = function(panel) {
+    if (panel._dragInit) return;
+    panel._dragInit = true;
+    const handle = panel.querySelector('.tm-panel-hdr');
+    if (!handle) return;
+
+    let startY = 0, currentY = 0, dragging = false;
+    let history = []; // برای velocity
+
+    handle.addEventListener('pointerdown', e => {
+      if (e.target.closest('button, input, textarea, select')) return;
+      dragging = true;
+      startY = e.clientY;
+      currentY = 0;
+      history = [{ y: e.clientY, t: e.timeStamp }];
+      if (_panelRaf) { cancelAnimationFrame(_panelRaf); _panelRaf = null; }
+      handle.setPointerCapture(e.pointerId);
+      e.stopPropagation();
+    });
+
+    handle.addEventListener('pointermove', e => {
+      if (!dragging) return;
+      const dy = e.clientY - startY;
+      currentY = dy;
+      history.push({ y: e.clientY, t: e.timeStamp });
+      if (history.length > 6) history.shift();
+
+      if (dy > 0) {
+        // §9 rubber-band پایین‌تر از boundary
+        const h = window.innerHeight;
+        const rb = rubberband(dy, h);
+        const pct = (rb / h) * 100;
+        _panelState.x = pct;
+        panel.style.transform = `translateY(${pct}%)`;
+      } else {
+        // بالاتر از صفر — rubber-band سبک
+        const rb = rubberband(-dy, window.innerHeight, 0.25);
+        const pct = -(rb / window.innerHeight) * 100;
+        panel.style.transform = `translateY(${pct}%)`;
+        _panelState.x = pct;
+      }
+    });
+
+    handle.addEventListener('pointerup', e => {
+      if (!dragging) return;
+      dragging = false;
+
+      // محاسبه velocity از history
+      let velocity = 0;
+      if (history.length >= 2) {
+        const last = history[history.length - 1];
+        const prev = history[0];
+        const dt = (last.t - prev.t) / 1000;
+        if (dt > 0) {
+          const dpx = last.y - prev.y;
+          velocity = (dpx / dt / window.innerHeight) * 100; // % per second
+        }
+      }
+
+      // تصمیم: بسته یا باز — از velocity sign (§10 Apple: use velocity sign, not position)
+      const THRESHOLD = 30; // %/s
+      if (currentY > window.innerHeight * 0.35 || velocity > THRESHOLD) {
+        // بستن — با velocity
+        _sokoSpringClose(panel, velocity);
+        setTimeout(() => {
+          panel.classList.remove('open');
+          document.body.style.overflow = '';
+          document.body.style.position = '';
+        }, 300);
+      } else {
+        // برگشتن به باز
+        _animatePanel(panel, 0, velocity);
+      }
+    });
+  };
+})();
+/* ════ End Spring Engine ════ */
 
 boot();
 
