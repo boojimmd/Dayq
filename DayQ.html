@@ -4105,6 +4105,11 @@ select.fi{
 .tm-sb-btn:hover{ background:var(--bg2);color:var(--t1); }
 /* ════ End Soko Desktop ════ */
 
+/* calTeamFilter desktop — layout fix */
+@media(min-width:900px){
+  #calTeamFilter { margin-bottom:8px; }
+}
+
 .ttd-thread{display:flex;flex-direction:column;gap:var(--sp2);min-height:40px;max-height:220px;overflow-y:auto;scrollbar-width:none;padding:var(--sp2) 0;}.ttd-thread::-webkit-scrollbar{display:none;}.ttd-bubble{max-width:78%;padding:var(--sp2) var(--sp3);font-size:var(--fs-xs);line-height:1.5;direction:rtl;word-break:break-word;}.ttd-bubble.from-member{align-self:flex-end;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2) var(--r2) 4px var(--r2);color:var(--t1);}.ttd-bubble.from-manager{align-self:flex-start;background:var(--bluem);border:1px solid rgba(59,130,246,.15);border-radius:var(--r2) var(--r2) var(--r2) 4px;color:var(--blue);}.ttd-bubble-meta{font-size:var(--fs-2xs);color:var(--t3);margin-top:3px;}.ttd-reply-inp{flex:1;min-height:36px;max-height:90px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:8px var(--sp3);font-family:var(--f);font-size:var(--fs-xs);color:var(--t1);direction:rtl;resize:none;outline:none;}.ttd-reply-inp:focus{border-color:var(--t3);}.ttd-reply-inp::placeholder{color:var(--t4);}.ttd-reply-send{width:36px;height:36px;flex-shrink:0;background:var(--a);color:var(--bg1);border:none;border-radius:var(--r2);cursor:pointer;display:flex;align-items:center;justify-content:center;}.ttd-reply-send:active{transform:scale(.94);}.tm-mgr-view .from-member{align-self:flex-start;border-radius:var(--r2) var(--r2) var(--r2) 4px;background:var(--bg2);border:1px solid var(--b1);color:var(--t1);}.tm-mgr-view .from-manager{align-self:flex-end;border-radius:var(--r2) var(--r2) 4px var(--r2);background:var(--bluem);border:1px solid rgba(59,130,246,.15);color:var(--blue);}.tm-thread-empty{text-align:center;padding:var(--sp4) 0;color:var(--t3);font-size:var(--fs-xs);}</style>
 </head>
 <body>
@@ -17448,7 +17453,8 @@ async function tmLoadReport(period) {
 })();
 /* ════ End Focus Management ════ */
 
-(function tmLoadState(){
+// tmLoadState بعد از boot() اجرا میشه — تا layout اولیه درست باشه
+setTimeout(function tmLoadState(){
   var g=function(k){return localStorage.getItem(k);};
   tm.code=g(TM_SK.code)||null;tm.uuid=g(TM_SK.uuid)||null;
   tm.role=g(TM_SK.role)||null;tm.token=g(TM_SK.token)||null;
@@ -17456,8 +17462,12 @@ async function tmLoadReport(period) {
   tm.memberName=g(TM_SK.mname)||null;tm.memberRole=g(TM_SK.mrole)||null;
   try{tm.inbox=JSON.parse(g(TM_SK.inbox)||'[]');}catch(e){tm.inbox=[];}
   try{tm.snapshot=JSON.parse(g(TM_SK.snap)||'null');}catch(e){tm.snapshot=null;}
-  if(tm.token&&tm.workerUrl){setTimeout(tmSyncBackground,800);setTimeout(_tmAutoRegisterPush,1500);}
-})();
+  if(tm.token&&tm.workerUrl){
+    _tmUXRefresh&&_tmUXRefresh();
+    setTimeout(tmSyncBackground,800);
+    setTimeout(_tmAutoRegisterPush,1500);
+  }
+},0);
 async function _tmAutoRegisterPush(){
   if(Notification.permission!=='granted'||!tm.token||!tm.workerUrl)return;
   try{var reg=await navigator.serviceWorker.ready,sub=await reg.pushManager.getSubscription();
