@@ -18389,7 +18389,7 @@ function _tmUXRefresh() {
 }
 
 // همچنین tmUpdateSokoCard رو آپدیت کن
-const _origUpdateSokoCard = tmUpdateSokoCard;
+// const _origUpdateSokoCard = tmUpdateSokoCard; // already declared in script1
 tmUpdateSokoCard = function() {
   try { _origUpdateSokoCard.apply(this, arguments); } catch(e) {}
   _tmUXRefresh();
@@ -18401,9 +18401,9 @@ tmUpdateSokoCard = function() {
    ════════════════════════════════════════════════════════════════ */
 
 // ── State ─────────────────────────────────────────────────────
-let _tmAssignParsed = null;
-let _tmAssignMember = '';
-let _tmAssignBroadcast = false;
+// let _tmAssignParsed = null; // already declared in script1
+// let _tmAssignMember = ''; // already declared in script1
+// let _tmAssignBroadcast = false; // already declared in script1
 
 // ── Deadline display helper (از nlpShowPreview الگو گرفته) ────
 function _tmFmtDeadline(dl) {
@@ -18536,7 +18536,7 @@ function _tmToggleBroadcast() {
 }
 
 // ── Priority override ─────────────────────────────────────────
-let _tmAssignPriOverride = null;
+// let _tmAssignPriOverride = null; // already declared in script1
 function _tmSetPri(pri) {
   _tmAssignPriOverride = (_tmAssignPriOverride === pri) ? null : pri;
   document.querySelectorAll('.tm-pri-chip').forEach(c => {
@@ -18697,7 +18697,7 @@ async function _tmToggleMemberTasks(uuid) {
    ════════════════════════════════════════════════════════════ */
 
 // ── ۱. Team Task Detail Panel ─────────────────────────────
-let _ttdTaskId = null;
+// let _ttdTaskId = null; // already declared in script1
 
 function openTeamTaskDetail(taskId) {
   const t = tm.inbox ? tm.inbox.find(x => x.id === taskId) : null;
