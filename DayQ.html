@@ -14232,7 +14232,7 @@ async function tmInit() {
     tmSyncBackground();
     // هر ۲ دقیقه sync
     if (tm._syncTimer) clearInterval(tm._syncTimer);
-    tm._syncTimer = setInterval(tmSyncBackground, 120000);
+    tm._syncTimer = setInterval(tmSyncBackground, 60000)  // sync هر ۶۰ ثانیه;
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden) tmSyncBackground();
     });
@@ -17445,6 +17445,37 @@ async function tmLoadReport(period) {
   };
 })();
 /* ════ End Focus Management ════ */
+
+// ═══ بارگذاری state تیم از localStorage ═══
+(function tmLoadState() {
+  const get = k => localStorage.getItem(k);
+  tm.code       = get(TM_SK.code)   || null;
+  tm.uuid       = get(TM_SK.uuid)   || null;
+  tm.role       = get(TM_SK.role)   || null;
+  tm.token      = get(TM_SK.token)  || null;
+  tm.workerUrl  = get(TM_SK.worker) || null;
+  tm.teamName   = get(TM_SK.name)   || null;
+  tm.memberName = get(TM_SK.mname)  || null;
+  tm.memberRole = get(TM_SK.mrole)  || null;
+  try { tm.inbox = JSON.parse(get(TM_SK.inbox) || '[]'); } catch(e){}
+  try { tm.snapshot = JSON.parse(get(TM_SK.snap) || 'null'); } catch(e){}
+})();
+
+// ═══ NOTIF_CLICK از Service Worker ═══
+navigator.serviceWorker && navigator.serviceWorker.addEventListener('message', e => {
+  if (e.data?.type === 'NOTIF_CLICK') {
+    // باز کردن سکو + تب pending
+    if (tm.role === 'manager' && tm.code) {
+      setTimeout(() => {
+        tmOpenSoko && tmOpenSoko();
+        setTimeout(() => openSheet && openSheet('shTmPending'), 400);
+      }, 300);
+    }
+  }
+  if (e.data?.type === 'SHARE_TARGET') {
+    _applyShare && _applyShare(e.data.title, e.data.text, e.data.url);
+  }
+});
 
 boot();
 
