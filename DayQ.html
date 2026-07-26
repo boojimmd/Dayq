@@ -14748,15 +14748,24 @@ function tmOpenSoko() {
 function tmCloseSoko() {
   const panel = document.getElementById('tmSokoPanel');
   if (!panel) return;
-  panel.classList.remove('open');
-  if (window.innerWidth < 900) {
-    const scrollY = document.body.style.top;
-    document.body.style.position = '';
-    document.body.style.width = '';
-    document.body.style.top = '';
-    window.scrollTo(0, -parseInt(scrollY || '0'));
+  const doClose = () => {
+    panel.classList.remove('open');
+    panel.style.transform = '';
+    if (window.innerWidth < 900) {
+      const scrollY = document.body.style.top;
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+      window.scrollTo(0, -parseInt(scrollY || '0'));
+    }
+    document.body.style.overflow = '';
+  };
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && window._sokoSpringClose) {
+    _sokoSpringClose(panel, 0);
+    setTimeout(doClose, 320);
+  } else {
+    doClose();
   }
-  document.body.style.overflow = '';
 }
 
 function tmSetSokoTab(tab) {
