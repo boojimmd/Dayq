@@ -9439,9 +9439,25 @@ async function initPush(){
         applicationServerKey:_urlB64ToUint8Array(VAPID_PUBLIC_KEY)
       });
     }
+    // ارسال subscription — با UUID تیم اگه عضو باشه
+    const subPayload = {
+      ...sub.toJSON(),
+      memberUuid: tm.uuid || null,
+      teamCode:   tm.code || null,
+      role:       tm.role || null,
+    };
     await fetch(cfg.pushWorkerUrl.replace(/\/$/,'')+'/subscribe',{
-      method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(sub.toJSON())
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(subPayload)
     });
+    // اگه تیم Worker جداست، اونجا هم ثبت کن
+    if (tm.workerUrl && tm.workerUrl !== cfg.pushWorkerUrl && tm.token) {
+      fetch(tm.workerUrl.replace(/\/$/,'')+'/member/subscribe', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-DayQ-Token':tm.token},
+        body: JSON.stringify({ subscription: sub.toJSON(), memberUuid: tm.uuid })
+      }).catch(()=>{});
+    }
     toast_(svgIco('check'),'Push فعال شد ✓');
     _syncRemindersToServer();
   }catch(e){
