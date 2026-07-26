@@ -4104,6 +4104,22 @@ select.fi{
 .tm-sb-btn { display:flex;align-items:center;justify-content:center;gap:6px;height:36px;width:100%;border-radius:var(--r2);border:1px dashed var(--b1);background:none;color:var(--t2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;transition:all 120ms ease; }
 .tm-sb-btn:hover{ background:var(--bg2);color:var(--t1); }
 /* ════ End Soko Desktop ════ */
+
+/* ── Comment Thread ── */
+.ttd-thread{display:flex;flex-direction:column;gap:var(--sp2);min-height:40px;max-height:220px;overflow-y:auto;scrollbar-width:none;padding:var(--sp2) 0;}
+.ttd-thread::-webkit-scrollbar{display:none;}
+.ttd-bubble{max-width:78%;padding:var(--sp2) var(--sp3);font-size:var(--fs-xs);line-height:1.5;direction:rtl;word-break:break-word;border-radius:var(--r2);}
+.ttd-bubble.from-member{align-self:flex-end;background:var(--bg2);border:1px solid var(--b1);border-bottom-right-radius:4px;color:var(--t1);}
+.ttd-bubble.from-manager{align-self:flex-start;background:var(--bluem);border:1px solid rgba(59,130,246,.15);border-bottom-left-radius:4px;color:var(--blue);}
+.ttd-bubble-meta{font-size:var(--fs-2xs);color:var(--t3);margin-top:3px;}
+.ttd-reply-inp{flex:1;min-height:36px;max-height:90px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:8px var(--sp3);font-family:var(--f);font-size:var(--fs-xs);color:var(--t1);direction:rtl;resize:none;outline:none;line-height:1.5;transition:border-color 120ms;}
+.ttd-reply-inp:focus{border-color:var(--t3);}
+.ttd-reply-inp::placeholder{color:var(--t4);}
+.ttd-reply-send{width:36px;height:36px;flex-shrink:0;background:var(--a);color:var(--bg1);border:none;border-radius:var(--r2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:opacity 120ms,transform 120ms;}
+.ttd-reply-send:active{transform:scale(.94);}
+.tm-mgr-view .from-member{align-self:flex-start;background:var(--bg2);border:1px solid var(--b1);border-bottom-left-radius:4px;color:var(--t1);}
+.tm-mgr-view .from-manager{align-self:flex-end;background:var(--bluem);border:1px solid rgba(59,130,246,.15);border-bottom-right-radius:4px;color:var(--blue);}
+.tm-thread-empty{text-align:center;padding:var(--sp4) 0;color:var(--t3);font-size:var(--fs-xs);}
 </style>
 </head>
 <body>
@@ -5673,35 +5689,7 @@ select.fi{
       <div class="pri-row" style="margin-bottom:12px;">
         <button class="pp" id="epHigh" data-p="high" onclick="selEditPri('high',this)"><svg viewBox="0 0 10 10" fill="var(--red)"><circle cx="5" cy="5" r="5"/></svg>فوری</button>
         <button class="pp" id="epMed"  data-p="med"  onclick="selEditPri('med',this)"><svg viewBox="0 0 10 10" fill="var(--amber)"><circle cx="5" cy="5" r="5"/></svg>متوسط</button>
-        <button class="pp" id="epLow"  data-p="low"  onclick="selEditPri('low',this)"><svg viewBox="0 0 10 10" fill="var(--t4)"><circle cx="5" cy="5" r="5"/></svg>پایین</button>
-      </div>
-      <button id="noteWaitBtn" class="sh-sub" style="background:var(--bluem);color:var(--blue);border:1px solid rgba(37,99,235,.25);margin-bottom:8px;" onclick="toggleWaitingStatus()">⏳ منتظرم</button>
-      <button id="noteSomedayBtn" class="sh-sub" style="background:var(--bg3);color:var(--t2);border:1px solid var(--b1);margin-bottom:8px;" onclick="noteToggleSomeday()">یه روزی، نه الان</button>
-      <button class="sh-sub" onclick="saveEditTask()">ذخیره تغییرات</button>
-      <button class="remind-clear" onclick="confirmDeleteTask()" style="margin-top:6px;">حذف کار</button>
-    </div>
-    <!-- Note panel -->
-    <div class="note-panel active" id="notePanelNote">
-      <textarea class="note-ta" id="noteTa" placeholder="یادداشت، توضیح، لینک..." rows="5"></textarea>
-      <button class="sh-sub" onclick="saveNote()">ذخیره یادداشت</button>
-      <button class="remind-clear" id="noteClearBtn" onclick="clearNote()" style="display:none;margin-top:6px;">حذف یادداشت</button>
-    </div>
-    <!-- Checklist panel -->
-    <div class="note-panel" id="notePanelCheck">
-      <div class="cl-list" id="clList"></div>
-      <div class="cl-add">
-        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--t3)" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        <input class="cl-add-inp" id="clAddInp" placeholder="آیتم جدید..." maxlength="100" autocomplete="off">
-      </div>
-      <button class="sh-sub" style="margin-top:12px;" onclick="saveChecklist()">ذخیره چک‌لیست</button>
-    </div>
-  </div>
-</div>
-
-<!-- TOAST -->
-<div class="toast" id="toast"><span class="t-ico" id="tIco"></span><span id="tMsg"></span></div>
-
-<script>
+        <button class="pp" id="epLow"  data-p="low"  onclick="selEditPri('low',this)"
 
 /* ══ ICON LIBRARY ══ */
 const ICONS=[
@@ -14603,25 +14591,41 @@ function tmOpenTeamSettings() {
 function tmRefreshInfoSheet() {
   const el = document.getElementById('tmInfoContent');
   if (!el) return;
-  const roleLabel = tm.role === 'manager' ? 'مدیر' : 'عضو';
+  if (!tm.snapshot) { el.innerHTML = '<div style="padding:var(--sp3);color:var(--t3)">در حال بارگذاری...</div>'; return; }
+  const members = (tm.snapshot.members || []).filter(m => !m.isManager && m.status !== 'removed');
+  const ST = { ok:'✅ فعال', blocked:'🚫 مشکل', stale:'⏳ بی‌تحرکی', overloaded:'🔴 پرکار' };
   el.innerHTML = `
     <div style="margin-bottom:var(--sp3)">
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">تیم</div>
-      <div style="font-size:var(--fs-md);font-weight:700">${tm.teamName || tm.code}</div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2)">اعضای تیم</div>
+      ${members.length ? members.map(m => `
+        <div style="background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r2);padding:var(--sp3);margin-bottom:var(--sp2)">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp2)">
+            <div style="display:flex;gap:var(--sp2);align-items:center">
+              <button onclick="_tmMemberAction('${m.uuid}','thread')" style="font-size:var(--fs-xs);padding:4px 8px;border-radius:var(--r2);border:1px solid var(--b1);background:var(--bg2);cursor:pointer;color:var(--t2)">💬</button>
+              <button onclick="_tmMemberAction('${m.uuid}','remove')" style="font-size:var(--fs-xs);padding:4px 8px;border-radius:var(--r2);border:1px solid rgba(239,68,68,.3);background:var(--redm);cursor:pointer;color:var(--red)">حذف</button>
+              <button onclick="_tmMemberAction('${m.uuid}','pin')" style="font-size:var(--fs-xs);padding:4px 8px;border-radius:var(--r2);border:1px solid var(--b1);background:var(--bg2);cursor:pointer;color:var(--t2)">PIN</button>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:var(--fs-sm);font-weight:700">${esc(m.name)}</div>
+              <div style="font-size:var(--fs-xs);color:var(--t3)">${esc(m.role||'')} · ${ST[m.alert]||'فعال'}</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:var(--sp2)">
+            <span style="font-size:var(--fs-2xs);color:var(--t3)">${m.activeTasks||0} تسک فعال</span>
+            <label style="display:flex;align-items:center;gap:4px;cursor:pointer;margin-right:auto">
+              <input type="checkbox" ${m.status==='active'?'checked':''} 
+                onchange="_tmMemberAction('${m.uuid}','toggle',this.checked)"
+                style="width:14px;height:14px;accent-color:var(--a)">
+              <span style="font-size:var(--fs-2xs);color:var(--t3)">فعال</span>
+            </label>
+          </div>
+        </div>`).join('') : '<div style="color:var(--t3);font-size:var(--fs-xs);padding:var(--sp3)">هنوز عضوی نیست</div>'}
     </div>
-    <div style="margin-bottom:var(--sp3)">
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نقش</div>
-      <div style="font-size:var(--fs-md)">${roleLabel} — ${tm.memberName||''}</div>
+    <div style="border-top:1px solid var(--b1);padding-top:var(--sp3)">
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2)">تیم</div>
+      <div style="font-size:var(--fs-sm);font-weight:700">${esc(tm.teamName||'')}</div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-top:4px">کد: ${esc(tm.code||'')}</div>
     </div>
-    <div style="margin-bottom:var(--sp3)">
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">کد تیم</div>
-      <div style="font-size:var(--fs-sm);font-family:var(--mono);background:var(--bg2);padding:var(--sp2) var(--sp3);border-radius:var(--r2)">${tm.code}</div>
-    </div>
-    ${tm.role === 'manager' ? `
-    <button class="tm-btn blue" style="width:100%;justify-content:center;margin-bottom:var(--sp2)" onclick="tmCopyCode()">📋 کپی کد دعوت</button>
-    <button class="tm-btn" style="width:100%;justify-content:center" onclick="tmOpenSoko();closeAll()">🏢 باز کردن سکو</button>
-    ` : ''}
-    <button class="tm-btn danger" style="width:100%;justify-content:center;margin-top:var(--sp3)" onclick="tmLeaveTeam()">ترک تیم</button>
   `;
 }
 
@@ -17226,6 +17230,7 @@ function openTeamTaskDetail(taskId) {
 
   document.getElementById('ttdErr').textContent = '';
   openSheet('shTeamTaskDetail');
+  setTimeout(()=>{ _ttdRefreshThread && _ttdRefreshThread(); },80);
 }
 
 function _ttdSetStatus(st) {
@@ -17520,6 +17525,60 @@ async function tmLoadReport(period) {
   tm.memberRole = get(TM_SK.mrole)  || null;
   try { tm.inbox = JSON.parse(get(TM_SK.inbox) || '[]'); } catch(e){}
   try { tm.snapshot = JSON.parse(get(TM_SK.snap) || 'null'); } catch(e){}
+})();
+// auto push بعد از load state
+if(tm.token) setTimeout(_tmAutoRegisterPush, 1000);
+
+
+// ═══ NOTIF_CLICK از Service Worker ═══
+navigator.serviceWorker && navigator.serviceWorker.addEventListener('message', e => {
+  if (e.data?.type === 'NOTIF_CLICK') {
+    // باز کردن سکو + تب pending
+    if (tm.role === 'manager' && tm.code) {
+      setTimeout(() => {
+        tmOpenSoko && tmOpenSoko();
+        setTimeout(() => openSheet && openSheet('shTmPending'), 400);
+      }, 300);
+    }
+  }
+  if (e.data?.type === 'SHARE_TARGET') {
+    _applyShare && _applyShare(e.data.title, e.data.text, e.data.url);
+  }
+});
+
+/* ════ Auto Push Registration — بعد از login تیم ════ */
+async function _tmAutoRegisterPush() {
+  // فقط اگه قبلاً permission داده شده
+  if (Notification.permission !== 'granted') return;
+  if (!tm.token) return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      // سعی کن re-subscribe کنی (بدون popup)
+      const vapidKey = document.querySelector('meta[name=vapid-key]')?.content
+        || (typeof VAPID_PUBLIC_KEY !== 'undefined' ? VAPID_PUBLIC_KEY : null);
+      if (!vapidKey) return;
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: _urlB64ToUint8Array(vapidKey)
+      });
+    }
+    // ثبت در team Worker
+    const workerUrl = (tm.workerUrl || cfg.pushWorkerUrl || '').trim().replace(/\/+$/, '');
+    if (!workerUrl) return;
+    await fetch(workerUrl + '/team/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-DayQ-Token': tm.token },
+      body: JSON.stringify(sub.toJSON())
+    });
+  } catch(e) { /* silent */ }
+}
+/* ════ End Auto Push ════ */
+
+boot();
+
+ try { tm.snapshot = JSON.parse(get(TM_SK.snap) || 'null'); } catch(e){}
 })();
 // auto push بعد از load state
 if(tm.token) setTimeout(_tmAutoRegisterPush, 1000);
@@ -18265,61 +18324,7 @@ boot();
         <input id="tmDLPin" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-lg);font-family:var(--f);color:var(--t1);letter-spacing:.3em;text-align:center" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/>
       </div>
       <div id="tmDLErr" style="font-size:var(--fs-xs);color:var(--red);min-height:16px;text-align:center"></div>
-      <button id="tmDLBtn" onclick="tmDoDirectLogin()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">ورود</button>
-    </div>
-  </div>
-</div>
-
-<!-- Sheet: Team Task Detail — کارمند -->
-<div class="sheet" id="shTeamTaskDetail">
-  <div class="sh-handle"></div>
-  <div class="sh-head">
-    <div class="sh-tr">
-      <div class="sh-ttl" id="ttdTitle">تسک تیمی</div>
-      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-  </div>
-  <div class="sh-body tm-join-body" id="ttdBody">
-    <!-- meta -->
-    <div style="background:var(--bluem);border:1px solid rgba(59,130,246,.2);border-radius:var(--r2);padding:var(--sp3);display:flex;align-items:center;justify-content:space-between">
-      <div id="ttdDeadline" style="font-size:var(--fs-xs);color:var(--blue)"></div>
-      <div>
-        <div id="ttdManager" style="font-size:var(--fs-xs);color:var(--t2)"></div>
-        <div id="ttdPriority" style="font-size:var(--fs-xs);font-weight:700;color:var(--red)"></div>
-      </div>
-    </div>
-
-    <!-- وضعیت -->
-    <div>
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:8px">وضعیت</div>
-      <div style="display:flex;gap:6px" id="ttdStatusBtns">
-        <button onclick="_ttdSetStatus('pending')"   class="ttd-st-btn" data-st="pending"   style="flex:1;height:36px;border-radius:var(--r2);border:1px solid var(--b1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">باید</button>
-        <button onclick="_ttdSetStatus('in_progress')" class="ttd-st-btn" data-st="in_progress" style="flex:1;height:36px;border-radius:var(--r2);border:1px solid var(--b1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">درحال</button>
-        <button onclick="_ttdSetStatus('done')"      class="ttd-st-btn" data-st="done"      style="flex:1;height:36px;border-radius:var(--r2);border:1px solid var(--b1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">✓ انجام شد</button>
-        <button onclick="_ttdSetStatus('blocked')"   class="ttd-st-btn" data-st="blocked"   style="flex:1;height:36px;border-radius:var(--r2);border:1px solid rgba(248,81,73,.3);color:var(--red);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">🚫 مشکل</button>
-      </div>
-    </div>
-
-    <!-- یادداشت برای مدیر -->
-    <div>
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px">یادداشت برای مدیر (اختیاری)</div>
-      <textarea id="ttdNote" rows="3"
-        placeholder="توضیح بده — مثلاً: منتظر تأیید مدیر مالی هستم"
-        style="width:100%;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 12px;font-size:var(--fs-xs);font-family:var(--f);color:var(--t1);direction:rtl;resize:none;outline:none"></textarea>
-    </div>
-
-    <!-- چک‌لیست مدیر (read-only اگه باشه) -->
-    <div id="ttdChecklist" style="display:none">
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px">چک‌لیست</div>
-      <div id="ttdChecklistItems"></div>
-    </div>
-
-    <div id="ttdErr" style="font-size:var(--fs-xs);color:var(--red);min-height:14px;text-align:center"></div>
-    <button id="ttdSaveBtn" onclick="_ttdSave()" style="width:100%;height:46px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">ذخیره وضعیت</button>
-  </div>
-</div>
-
-<script>
+      <button id="tmDLBtn" onclick="tmDoDirectLogin()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--
 
 /* ════ DayQ Soko — Team JS ════ */
 
@@ -21801,6 +21806,244 @@ function _tmUpdateHdrKpi() {
 /* ════ End Soko Desktop Sidebar ════ */
 
 }
+
+
+async function _tmMemberAction(uuid, action, val) {
+  if (action === 'remove') {
+    if (!confirm('عضو حذف بشه؟')) return;
+    try {
+      await tmAPI('POST', '/member/remove', { memberUuid: uuid });
+      toast_(svgIco('check'), 'عضو حذف شد');
+      await tmSyncBackground();
+      tmRefreshInfoSheet();
+    } catch(e) { toast_(svgIco('x'), e.message); }
+  } else if (action === 'toggle') {
+    try {
+      await tmAPI('PUT', '/member/status', { memberUuid: uuid, status: val ? 'active' : 'inactive' });
+      await tmSyncBackground();
+      tmRefreshInfoSheet();
+    } catch(e) { toast_(svgIco('x'), e.message); }
+  } else if (action === 'pin') {
+    if (!confirm('PIN این عضو ریست بشه؟ یه PIN موقت داده میشه.')) return;
+    try {
+      const d = await tmAPI('POST', '/member/pin-reset', { memberUuid: uuid });
+      alert('PIN موقت: ' + d.tempPin + '\nبه عضو بده تا بعد از ورود تغییرش بده.');
+    } catch(e) { toast_(svgIco('x'), e.message); }
+  } else if (action === 'thread') {
+    // باز کردن thread مدیر
+    if (typeof tmOpenTaskThread === 'function') tmOpenTaskThread(uuid);
+  }
+}
+
+
+/* ════ Comment Thread ════ */
+let _ttdTaskId = null, _mgThreadTaskId = null;
+
+function _commentTime(ts) {
+  const d=new Date(ts);
+  return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');
+}
+
+function _renderThread(comments, viewerRole, container) {
+  if (!container) return;
+  if (!comments||!comments.length) { container.innerHTML='<div class="tm-thread-empty">هنوز پیامی نیست</div>'; return; }
+  container.innerHTML = comments.map(c => {
+    const isOwn = c.from===viewerRole;
+    return `<div class="ttd-bubble from-${c.from}">
+      <div>${esc(c.text)}</div>
+      <div class="ttd-bubble-meta">${isOwn?'':((c.from==='manager'?'مدیر':'کارمند')+' · ')}${_commentTime(c.ts)}</div>
+    </div>`;
+  }).join('');
+  setTimeout(()=>{ container.scrollTop=container.scrollHeight; },50);
+}
+
+function _ttdRefreshThread() {
+  const task = tm.inbox?.find(t=>t.id===_ttdTaskId);
+  const el = document.getElementById('ttdThreadMsgs');
+  if (el) _renderThread(task?.comments, 'member', el);
+}
+
+async function _ttdSendComment() {
+  const inp = document.querySelector('#ttdCommentSection .ttd-reply-inp');
+  if (!inp||!inp.value.trim()||!_ttdTaskId) return;
+  const text = inp.value.trim();
+  const btn = document.querySelector('#ttdCommentSection .ttd-reply-send');
+  if (btn) btn.disabled=true;
+  try {
+    await tmAPI('POST','/task/comment',{taskId:_ttdTaskId,text,from:'member'});
+    const task=tm.inbox?.find(t=>t.id===_ttdTaskId);
+    if(task){if(!task.comments)task.comments=[];task.comments.push({from:'member',text,ts:Date.now()});}
+    inp.value=''; inp.style.height='auto'; _ttdRefreshThread();
+  } catch(e) {
+    const task=tm.inbox?.find(t=>t.id===_ttdTaskId);
+    if(task){if(!task.comments)task.comments=[];task.comments.push({from:'member',text,ts:Date.now()});inp.value='';_ttdRefreshThread();}
+  } finally { if(btn) btn.disabled=false; }
+}
+
+function tmOpenTaskThread(taskId) {
+  const members = tm.snapshot?.members||[];
+  const task = members.flatMap(m=>(m.tasks||[]).map(t=>({...t,memberName:m.name}))).find(t=>t.id===taskId)
+    || (tm.inbox||[]).find(t=>t.id===taskId);
+  if (!task) return;
+  _mgThreadTaskId = taskId;
+  const sheet = document.getElementById('shTaskThread');
+  if (!sheet) return;
+  const ttl = sheet.querySelector('#mgThreadTitle');
+  if (ttl) ttl.textContent = task.title||'گفتگو';
+  const meta = document.getElementById('mgThreadMeta');
+  if (meta) {
+    const ST={pending:'باید',in_progress:'درحال',done:'✓ انجام شد',blocked:'🚫 مشکل'};
+    meta.innerHTML=`<span style="font-size:var(--fs-xs);font-weight:700">${esc(task.memberName||'')}</span><span style="font-size:var(--fs-xs);color:var(--t3)">·</span><span style="font-size:var(--fs-xs);color:var(--t3)">${ST[task.status]||''}</span>`;
+  }
+  const threadEl = document.getElementById('mgThreadMsgs');
+  if (threadEl) _renderThread(task.comments,'manager',threadEl);
+  const noteEl = document.getElementById('mgThreadNote');
+  if (noteEl&&task.memberNote){noteEl.style.display='';noteEl.querySelector('.mg-note-text').textContent=task.memberNote;}
+  else if(noteEl) noteEl.style.display='none';
+  openSheet('shTaskThread');
+}
+
+async function _mgSendComment() {
+  const inp = document.querySelector('#shTaskThread .ttd-reply-inp');
+  if (!inp||!inp.value.trim()||!_mgThreadTaskId) return;
+  const text=inp.value.trim();
+  const btn=document.querySelector('#shTaskThread .ttd-reply-send');
+  if(btn) btn.disabled=true;
+  try { await tmAPI('POST','/task/comment',{taskId:_mgThreadTaskId,text,from:'manager'}); } catch(e){}
+  const members=tm.snapshot?.members||[];
+  for(const m of members){
+    const t=(m.tasks||[]).find(t=>t.id===_mgThreadTaskId);
+    if(t){if(!t.comments)t.comments=[];t.comments.push({from:'manager',text,ts:Date.now()});break;}
+  }
+  inp.value=''; inp.style.height='auto';
+  const threadEl=document.getElementById('mgThreadMsgs');
+  const task=members.flatMap(m=>(m.tasks||[]).map(t=>({...t}))).find(t=>t.id===_mgThreadTaskId);
+  if(threadEl&&task) _renderThread(task.comments,'manager',threadEl);
+  if(btn) btn.disabled=false;
+}
+/* ════ End Comment Thread ════ */
+= members.reduce((s,m)=>s+(m.activeTasks||0),0);
+  const alerts = members.filter(m=>m.alert==='blocked').length;
+  const done = members.reduce((s,m)=>s+(m.doneTasks||0),0);
+  const score = (total+done)>0 ? Math.round(done/(total+done)*100) : null;
+  sb.innerHTML = `
+    <div class="tm-sb-section">
+      <div class="tm-sb-lbl">آمار تیم</div>
+      <div class="tm-sb-kpi"><span class="tm-sb-kpi-lbl">تسک فعال</span><span class="tm-sb-kpi-val" style="color:var(--t1)">${num(total)}</span></div>
+      <div class="tm-sb-kpi"><span class="tm-sb-kpi-lbl">مشکل</span><span class="tm-sb-kpi-val" style="color:${alerts>0?'var(--red)':'var(--t3)'}">${num(alerts)}</span></div>
+      <div class="tm-sb-kpi"><span class="tm-sb-kpi-lbl">موفقیت</span><span class="tm-sb-kpi-val" style="color:var(--a)">${score!==null?num(score)+'٪':'—'}</span></div>
+    </div>
+    <div class="tm-sb-divider"></div>
+    <div class="tm-sb-section">
+      <div class="tm-sb-lbl">نمایش</div>
+      <button class="tm-sb-filter active" id="sbfAll" onclick="_tmSbFilter('all')"><span>همه اعضا</span><span>${num(members.length)}</span></button>
+      ${alerts>0?`<button class="tm-sb-filter" id="sbfBlocked" onclick="_tmSbFilter('blocked')"><span>🚫 مشکل</span><span style="color:var(--red)">${num(alerts)}</span></button>`:''}
+      <button class="tm-sb-filter" id="sbfOk" onclick="_tmSbFilter('ok')"><span>✅ فعال</span><span style="color:var(--a)">${num(members.filter(m=>m.alert==='ok').length)}</span></button>
+    </div>
+    <div class="tm-sb-divider"></div>
+    <button class="tm-sb-btn" onclick="tmAssignTask()">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      تسک جدید
+    </button>
+  `;
+}
+
+function _tmSbFilter(f) {
+  _tmSbActiveFilter = f;
+  ['All','Blocked','Ok'].forEach(k => {
+    const btn = document.getElementById('sbf'+k);
+    if (btn) btn.classList.toggle('active', k.toLowerCase()===f);
+  });
+  const el = document.getElementById('tmSokoStatusContent');
+  if (!el||!tm.snapshot) return;
+  const all = (tm.snapshot.members||[]).filter(m=>!m.isManager&&m.role!=='manager');
+  const filtered = f==='all'?all:all.filter(m=>m.alert===f);
+  const orig = tm.snapshot.members;
+  tm.snapshot.members = [...filtered,...(tm.snapshot.members||[]).filter(m=>m.isManager)];
+  tmRenderSokoStatus();
+  tm.snapshot.members = orig;
+}
+
+function _tmSbProjects(sb) {
+  sb.innerHTML = `
+    <div class="tm-sb-section">
+      <div class="tm-sb-lbl">پروژه‌ها</div>
+      <button class="tm-sb-btn" onclick="tmNewProject&&tmNewProject()">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        پروژه جدید
+      </button>
+    </div>`;
+}
+
+function _tmSbReport(sb) {
+  sb.innerHTML = `
+    <div class="tm-sb-section">
+      <div class="tm-sb-lbl">بازه زمانی</div>
+      <button class="tm-sb-filter active" onclick="">این هفته</button>
+      <button class="tm-sb-filter" onclick="">این ماه</button>
+    </div>`;
+}
+
+function _tmUpdateHdrKpi() {
+  if (!tm.snapshot) return;
+  const members = (tm.snapshot.members||[]).filter(m=>!m.isManager&&m.role!=='manager');
+  const tasks = members.reduce((s,m)=>s+(m.activeTasks||0),0);
+  const alerts = members.filter(m=>m.alert==='blocked').length;
+  const done = members.reduce((s,m)=>s+(m.doneTasks||0),0);
+  const score = (tasks+done)>0?Math.round(done/(tasks+done)*100):null;
+  const t=document.getElementById('tmHdrTask'); if(t) t.textContent=num(tasks);
+  const a=document.getElementById('tmHdrAlert'); if(a) a.textContent=num(alerts);
+  const s=document.getElementById('tmHdrScore'); if(s) s.textContent=score!==null?num(score)+'٪':'—';
+  const sub=document.getElementById('tmSokoPanelSub');
+  if(sub) sub.textContent=(tm.teamName||'')+(members.length?` · ${num(members.length)} نفر`:'');
+}
+
+(function(){
+  const _origSetTab = window.tmSetSokoTab;
+  window.tmSetSokoTab = function(tab) {
+    _origSetTab && _origSetTab(tab);
+    tmRenderSidebar(tab);
+    _tmUpdateHdrKpi();
+    _tmSbActiveFilter = 'all';
+  };
+  const _origSync = window.tmSyncBackground;
+  if (_origSync) {
+    window.tmSyncBackground = async function() {
+      await _origSync.apply(this, arguments);
+      _tmUpdateHdrKpi();
+      tmRenderSidebar(tm.sokoTab || 'status');
+    };
+  }
+})();
+/* ════ End Soko Desktop Sidebar ════ */
+
+}
 </script>
+<!-- Sheet: Task Thread — مدیر -->
+<div class="sheet" id="shTaskThread">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div class="sh-ttl" id="mgThreadTitle">گفتگو</div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div id="mgThreadMeta" style="display:flex;align-items:center;gap:var(--sp2);padding:var(--sp2) 0 var(--sp3);direction:rtl;flex-wrap:wrap"></div>
+  </div>
+  <div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)">
+    <div id="mgThreadNote" style="display:none;background:var(--ambm);border:1px solid rgba(217,119,6,.2);border-radius:var(--r2);padding:var(--sp3)">
+      <div style="font-size:var(--fs-2xs);color:var(--amber);font-weight:700;margin-bottom:4px">📋 یادداشت کارمند</div>
+      <div class="mg-note-text" style="font-size:var(--fs-xs);color:var(--t1);direction:rtl"></div>
+    </div>
+    <div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2);text-align:right">گفتگو</div>
+      <div class="ttd-thread tm-mgr-view" id="mgThreadMsgs"></div>
+      <div style="display:flex;gap:var(--sp2);align-items:flex-end;padding-top:var(--sp2);border-top:1px solid var(--b2);margin-top:var(--sp2)">
+        <textarea class="ttd-reply-inp" rows="1" placeholder="پاسخ بده..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();_mgSendComment()}"></textarea>
+        <button class="ttd-reply-send" onclick="_mgSendComment()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
