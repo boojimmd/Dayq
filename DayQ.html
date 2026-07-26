@@ -16772,6 +16772,8 @@ async function tmDoDirectLogin() {
     tmApplyUI();
     tmSyncBackground();
     toast_(svgIco('check'), 'وارد تیم ' + data.teamName + ' شدی');
+    // auto-register push subscription
+    setTimeout(_tmAutoRegisterPush, 1500);
   } catch(e) {
     const msg = e.message.includes('PIN') ? 'PIN اشتباهه'
       : e.message.includes('نامعتبر') ? 'کد تیم نامعتبره'
@@ -17519,6 +17521,9 @@ async function tmLoadReport(period) {
   try { tm.inbox = JSON.parse(get(TM_SK.inbox) || '[]'); } catch(e){}
   try { tm.snapshot = JSON.parse(get(TM_SK.snap) || 'null'); } catch(e){}
 })();
+// auto push بعد از load state
+if(tm.token) setTimeout(_tmAutoRegisterPush, 1000);
+
 
 // ═══ NOTIF_CLICK از Service Worker ═══
 navigator.serviceWorker && navigator.serviceWorker.addEventListener('message', e => {
@@ -17535,6 +17540,36 @@ navigator.serviceWorker && navigator.serviceWorker.addEventListener('message', e
     _applyShare && _applyShare(e.data.title, e.data.text, e.data.url);
   }
 });
+
+/* ════ Auto Push Registration — بعد از login تیم ════ */
+async function _tmAutoRegisterPush() {
+  // فقط اگه قبلاً permission داده شده
+  if (Notification.permission !== 'granted') return;
+  if (!tm.token) return;
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      // سعی کن re-subscribe کنی (بدون popup)
+      const vapidKey = document.querySelector('meta[name=vapid-key]')?.content
+        || (typeof VAPID_PUBLIC_KEY !== 'undefined' ? VAPID_PUBLIC_KEY : null);
+      if (!vapidKey) return;
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: _urlB64ToUint8Array(vapidKey)
+      });
+    }
+    // ثبت در team Worker
+    const workerUrl = (tm.workerUrl || cfg.pushWorkerUrl || '').trim().replace(/\/+$/, '');
+    if (!workerUrl) return;
+    await fetch(workerUrl + '/team/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-DayQ-Token': tm.token },
+      body: JSON.stringify(sub.toJSON())
+    });
+  } catch(e) { /* silent */ }
+}
+/* ════ End Auto Push ════ */
 
 boot();
 
