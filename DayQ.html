@@ -4112,18 +4112,31 @@ select.fi{
 
 .ttd-thread{display:flex;flex-direction:column;gap:var(--sp2);min-height:40px;max-height:220px;overflow-y:auto;scrollbar-width:none;padding:var(--sp2) 0;}.ttd-thread::-webkit-scrollbar{display:none;}.ttd-bubble{max-width:78%;padding:var(--sp2) var(--sp3);font-size:var(--fs-xs);line-height:1.5;direction:rtl;word-break:break-word;}.ttd-bubble.from-member{align-self:flex-end;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2) var(--r2) 4px var(--r2);color:var(--t1);}.ttd-bubble.from-manager{align-self:flex-start;background:var(--bluem);border:1px solid rgba(59,130,246,.15);border-radius:var(--r2) var(--r2) var(--r2) 4px;color:var(--blue);}.ttd-bubble-meta{font-size:var(--fs-2xs);color:var(--t3);margin-top:3px;}.ttd-reply-inp{flex:1;min-height:36px;max-height:90px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:8px var(--sp3);font-family:var(--f);font-size:var(--fs-xs);color:var(--t1);direction:rtl;resize:none;outline:none;}.ttd-reply-inp:focus{border-color:var(--t3);}.ttd-reply-inp::placeholder{color:var(--t4);}.ttd-reply-send{width:36px;height:36px;flex-shrink:0;background:var(--a);color:var(--bg1);border:none;border-radius:var(--r2);cursor:pointer;display:flex;align-items:center;justify-content:center;}.ttd-reply-send:active{transform:scale(.94);}.tm-mgr-view .from-member{align-self:flex-start;border-radius:var(--r2) var(--r2) var(--r2) 4px;background:var(--bg2);border:1px solid var(--b1);color:var(--t1);}.tm-mgr-view .from-manager{align-self:flex-end;border-radius:var(--r2) var(--r2) 4px var(--r2);background:var(--bluem);border:1px solid rgba(59,130,246,.15);color:var(--blue);}.tm-thread-empty{text-align:center;padding:var(--sp4) 0;color:var(--t3);font-size:var(--fs-xs);}
 
-/* ════ Calendar Desktop Grid Fix ════ */
+/* ════ Calendar Desktop Grid Fix v2 ════ */
 @media(min-width:900px){
-  /* ستون راست (1fr): header + تمام محتوای calendar */
+  /* grid با دو ردیف صریح */
+  #pageCalendar.page.active {
+    grid-template-rows:auto 1fr !important;
+    min-height:100svh;
+  }
+  /* ردیف راست — header و تقویم اصلی */
   #pageCalendar.page.active > .cal-page        { grid-column:1; grid-row:1; }
   #pageCalendar.page.active > .cal-list-view   { grid-column:1; grid-row:2; }
   #pageCalendar.page.active > .week-view       { grid-column:1; grid-row:2; }
   #pageCalendar.page.active > #monthViewWrap   { grid-column:1; grid-row:2; }
-  #pageCalendar.page.active > .cal-selected-day{ grid-column:1; grid-row:3; }
-  /* ستون چپ (280px): day panel — همه ردیف‌ها */
-  #pageCalendar #calDayPanelDesktop { grid-column:2 !important; grid-row:1 !important; }
+  #pageCalendar.page.active > .cal-selected-day{ grid-column:1; grid-row:2; }
+  /* sidebar — چپ، هر دو ردیف */
+  #pageCalendar #calDayPanelDesktop {
+    grid-column:2 !important;
+    grid-row:1/3 !important;
+    align-self:stretch !important;
+    height:auto !important;
+    min-height:100svh;
+    position:sticky !important;
+    top:0 !important;
+  }
 }
-/* ════ End Calendar Grid Fix ════ */
+/* ════ End Calendar Grid Fix v2 ════ */
 </style>
 </head>
 <body>
