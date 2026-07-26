@@ -17503,7 +17503,7 @@ async function _tmAutoRegisterPush(){
   }catch(e){}
 }
 if('serviceWorker' in navigator){navigator.serviceWorker.addEventListener('message',function(e){
-  if(e.data&&e.data.type==='NOTIF_CLICK'&&tm.role==='manager'&&tm.code){setTimeout(function(){tmOpenSoko&&tmOpenSoko();setTimeout(function(){openSheet&&openSheet('shTmPending');},400);},300);}
+  if(e.data&&e.data.type==='NOTIF_CLICK'&&tm.role==='manager'&&tm.code){setTimeout(function(){tmOpenSoko&&tmOpenSoko();setTimeout(function(){tmOpenPendingSheet&&tmOpenPendingSheet();},400);},300);}
   if(e.data&&e.data.type==='SHARE_TARGET'){_applyShare&&_applyShare(e.data.title,e.data.text,e.data.url);}
 });}
 
