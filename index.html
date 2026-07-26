@@ -9450,13 +9450,17 @@ async function initPush(){
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify(subPayload)
     });
-    // اگه تیم Worker جداست، اونجا هم ثبت کن
-    if (tm.workerUrl && tm.workerUrl !== cfg.pushWorkerUrl && tm.token) {
-      fetch(tm.workerUrl.replace(/\/$/,'')+'/member/subscribe', {
-        method:'POST',
-        headers:{'Content-Type':'application/json','X-DayQ-Token':tm.token},
-        body: JSON.stringify({ subscription: sub.toJSON(), memberUuid: tm.uuid })
-      }).catch(()=>{});
+    // ثبت در team Worker با token (برای push تسک)
+    if (tm.token && (tm.workerUrl || cfg.pushWorkerUrl)) {
+      const teamWorker = (tm.workerUrl || cfg.pushWorkerUrl).trim().replace(/\/+$/, '');
+      fetch(teamWorker + '/team/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-DayQ-Token': tm.token
+        },
+        body: JSON.stringify(sub.toJSON())
+      }).catch(() => {});
     }
     toast_(svgIco('check'),'Push فعال شد ✓');
     _syncRemindersToServer();
