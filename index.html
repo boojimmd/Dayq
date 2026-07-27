@@ -14343,6 +14343,18 @@ async function tmSyncBackground() {
       tmRenderInbox();
     } else if (tm.role === 'manager') {
       const data = await tmAPI('GET', '/team/snapshot');
+      // تسک‌های هر عضو رو fetch کن (موازی)
+      if (data && data.members) {
+        await Promise.all(data.members
+          .filter(m => !m.isManager && m.status !== 'removed')
+          .map(async m => {
+            try {
+              const r = await tmAPI('GET', '/task/member?uuid=' + m.uuid);
+              m.tasks = (r.tasks || []).filter(t => !t.deleted);
+            } catch(e2) { m.tasks = []; }
+          })
+        );
+      }
       tm.snapshot = data;
       localStorage.setItem(TM_SK.snap, JSON.stringify(data));
       tmUpdateSokoCard();
