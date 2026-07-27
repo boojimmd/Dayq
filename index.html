@@ -12217,11 +12217,12 @@ function checkRecurringTasks(){
   const todayK = mrTodayKey();
   const recurTasks = tasks.filter(t => t.recur && t.recur !== 'none' && t.recurBase);
   recurTasks.forEach(t => {
-    // check if today's instance exists
-    const instanceExists = tasks.some(x =>
-      x.recurParentId === t.id && x.deadline === todayK
+    // ── اگه instance انجام‌نشده‌ای از این تسک وجود داره، نساز ──
+    const hasActiveInstance = tasks.some(x =>
+      x.recurParentId === t.id && !x.done && x.status !== 'done'
     );
-    if(instanceExists) return;
+    if(hasActiveInstance) return;
+
     // check if today matches the recurrence
     const base = t.recurBase;
     const [by,bm,bd] = base.split('-').map(Number);
@@ -12241,7 +12242,7 @@ function checkRecurringTasks(){
         status: 'todo',
         done: false,
         recurParentId: t.id,
-        recur: 'none', // instance has no recurrence
+        recur: 'none',
         recurBase: null,
       };
       tasks.push(newTask);
