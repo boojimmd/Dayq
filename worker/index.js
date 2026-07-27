@@ -1286,7 +1286,32 @@ export default {
       return jsonRes({ pending }, 200, cors);
     }
 
-    return new Response('DayQ Worker v3 — Personal + Team', { headers: cors });
+    
+    // ── تسک‌های یه عضو (مدیر) ──
+    if (path === '/task/member' && req.method === 'GET') {
+      const token = req.headers.get('X-DayQ-Token');
+      const session = await validateSession(token, env);
+      if (!session || session.role !== 'manager')
+        return errRes('دسترسی نامعتبر', 403, cors);
+
+      const memberUuid = url.searchParams.get('uuid');
+      if (!memberUuid) return errRes('uuid اجباریه', 400, cors);
+
+      const { teamCode } = session;
+      const inboxRaw = await env.DAYQ_KV.get(`team:${teamCode}:inbox:${memberUuid}`);
+      const inbox = inboxRaw ? JSON.parse(inboxRaw) : [];
+      const tasks = [];
+      for (const taskId of inbox) {
+        const taskRaw = await env.DAYQ_KV.get(`team:${teamCode}:task:${taskId}`);
+        if (taskRaw) {
+          const t = JSON.parse(taskRaw);
+          if (!t.deleted) tasks.push(t);
+        }
+      }
+      return jsonRes({ tasks }, 200, cors);
+    }
+
+return new Response('DayQ Worker v3 — Personal + Team', { headers: cors });
   },
 
   // ── Scheduled: یادآورها + stale task alert ──
