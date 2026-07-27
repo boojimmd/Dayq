@@ -15999,16 +15999,19 @@ let _calMarkerTimer = null;
 
 
 // ── Approve / Reject Join Request ────────────────────────────
-async function tmApproveJoin(memberUuid, action) {
-  try {
-    await tmAPI('POST', '/team/approve', { memberUuid, action });
-    const msg = action === 'approve' ? 'عضو تأیید شد ✅' : 'درخواست رد شد';
-    toast_(svgIco('check'), msg);
+async function tmApproveJoin(memberUuid,action){
+  try{
+    await tmAPI('POST','/team/approve',{memberUuid,action});
+    const msg=action==='approve'?'عضو تأیید شد ✅':'درخواست رد شد';
+    toast_(svgIco('check'),msg);
+    // بقیه درخواست‌ها رو نشون بده — پنجره رو نبند
+    const fresh=await tmAPI('GET','/team/pending');
+    tmRenderPendingList(fresh.pending||[]);
+    if(!fresh.pending||!fresh.pending.length)closeAll();
     tmCheckPending();
     tmSyncBackground();
-    closeAll();
-  } catch(e) {
-    toast_(svgIco('flag'), 'خطا: ' + e.message);
+  }catch(e){
+    toast_(svgIco('flag'),'خطا: '+e.message);
   }
 }
 
