@@ -17515,6 +17515,11 @@ setTimeout(function tmLoadState(){
     _tmUXRefresh&&_tmUXRefresh();
     setTimeout(tmSyncBackground,800);
     setTimeout(_tmAutoRegisterPush,1500);
+  } else if(tm.uuid&&tm.code&&!tm.token){
+    // تأیید شده ولی نیاز به login دارد
+    setTimeout(function(){
+      toast_(svgIco('flag'),'به تیم اضافه شدی — برای دریافت تسک‌ها وارد شو');
+    },1200);
   }
 },0);
 async function _tmAutoRegisterPush(){
@@ -21800,6 +21805,15 @@ function tmOpenMemberTasks(uuid) {
   const noteEl = document.getElementById('mgThreadNote');
   if (noteEl) noteEl.style.display = 'none';
   openSheet('shTaskThread');
+}
+
+
+function tmOpenDirectLogin(preCode){
+  openSheet('shTmDirectLogin');
+  var c=document.getElementById('tmDLCode');
+  if(c&&preCode)c.value=preCode;
+  var p=document.getElementById('tmDLPin');
+  if(p)setTimeout(function(){p.focus();},350);
 }
 </script>
 <div class="sheet" id="shTaskThread"><div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl" id="mgThreadTitle">گفتگو</div><button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div><div id="mgThreadMeta" style="display:flex;align-items:center;gap:var(--sp2);padding:var(--sp2) 0 var(--sp3);direction:rtl;flex-wrap:wrap"></div></div><div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)"><div id="mgThreadNote" style="display:none;background:var(--ambm);border:1px solid rgba(217,119,6,.2);border-radius:var(--r2);padding:var(--sp3)"><div style="font-size:var(--fs-2xs);color:var(--amber);font-weight:700;margin-bottom:4px">📋 یادداشت</div><div class="mg-note-text" style="font-size:var(--fs-xs);color:var(--t1);direction:rtl"></div></div><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2);text-align:right">گفتگو</div><div class="ttd-thread tm-mgr-view" id="mgThreadMsgs"></div><div style="display:flex;gap:var(--sp2);align-items:flex-end;padding-top:var(--sp2);border-top:1px solid var(--b2);margin-top:var(--sp2)"><textarea class="ttd-reply-inp" rows="1" placeholder="پاسخ بده..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();_mgSendComment()}"></textarea><button class="ttd-reply-send" onclick="_mgSendComment()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button></div></div></div></div>
