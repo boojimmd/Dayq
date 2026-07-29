@@ -4141,6 +4141,12 @@ select.fi{
 /* ── تعطیل رسمی: سلول قرمز کمرنگ ── */
 .cal-day.is-holiday { background:color-mix(in srgb,var(--red) 6%,var(--bg1)); }
 .cal-day.is-holiday .cal-day-num { color:var(--red); font-weight:700; }
+
+
+/* ── جمعه: تعطیل هفتگی ── */
+.cal-day.is-friday .cal-day-num { color:var(--red); }
+.cal-day.is-friday:not(.is-holiday) { background:color-mix(in srgb,var(--red) 4%,var(--bg1)); }
+.cal-weekday:last-child { color:var(--red) !important; }
 </style>
 </head>
 <body>
@@ -10525,6 +10531,9 @@ function renderCal(){
     const holiday=IR_HOLIDAYS[dateKey];
     const holEl=holiday?`<div class="cal-day-holiday">${esc(holiday.split('،')[0])}</div>`:'';
     if(holiday)dayEl.classList.add('is-holiday'); else dayEl.classList.remove('is-holiday');
+    // جمعه = col 6
+    const dayCol=(startDow+d-1)%7;
+    if(dayCol===6){dayEl.classList.add('is-friday');}else{dayEl.classList.remove('is-friday');}
     dayEl.innerHTML=`<div class="cal-day-num">${num(d)}</div>${holEl}${dotsEl}<div class="cal-day-evts">${chips}${moreEl}</div>`;
     dayEl.onclick=()=>calSelectDay(dateKey,d);
     daysEl.appendChild(dayEl);
