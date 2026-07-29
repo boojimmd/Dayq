@@ -3917,7 +3917,7 @@ select.fi{
   border:1px solid var(--b1); background:var(--bg2); color:var(--t1);
   font-size:var(--fs-xs); font-weight:600; font-family:var(--f);
   cursor:pointer;
-  transition:all 150ms var(--ease-out);
+  transition:background 150ms var(--ease-out),transform 150ms var(--ease-out),opacity 150ms var(--ease-out);
 }
 .tm-member-chip.active { 
   background:var(--bluem); color:var(--blue);
@@ -3941,7 +3941,7 @@ select.fi{
 .tm-pri-chip {
   flex:1; height:34px; border-radius:var(--r2); border:1px solid var(--b1);
   font-size:var(--fs-xs); font-weight:700; font-family:var(--f); cursor:pointer;
-  transition:all 120ms var(--ease-out); opacity:.5;
+  transition:background 120ms var(--ease-out),transform 120ms var(--ease-out),opacity 120ms var(--ease-out); opacity:.5;
 }
 .tm-pri-chip.active { opacity:1; transform:scale(1.04); }
 
@@ -4001,7 +4001,7 @@ select.fi{
   flex:1; height:36px; border-radius:var(--r2); border:1px solid var(--b1);
   background:var(--bg2); color:var(--t2);
   font-size:var(--fs-xs); font-weight:600; font-family:var(--f); cursor:pointer;
-  transition:all 150ms var(--ease-out);
+  transition:background 150ms var(--ease-out),transform 150ms var(--ease-out),opacity 150ms var(--ease-out);
 }
 .tm-status-btn.active { background:var(--t1); color:var(--bg1); border-color:var(--t1); }
 .tm-status-btn:active { transform:scale(0.97); }
@@ -4103,7 +4103,7 @@ select.fi{
 .tm-sb-filter:hover{ background:var(--bg2); }
 .tm-sb-filter.active{ background:var(--bg2);color:var(--t1);font-weight:700; }
 .tm-sb-divider { height:1px;background:var(--b1);margin:var(--sp2) 0; }
-.tm-sb-btn { display:flex;align-items:center;justify-content:center;gap:6px;height:36px;width:100%;border-radius:var(--r2);border:1px dashed var(--b1);background:none;color:var(--t2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;transition:all 120ms ease; }
+.tm-sb-btn { display:flex;align-items:center;justify-content:center;gap:6px;height:36px;width:100%;border-radius:var(--r2);border:1px dashed var(--b1);background:none;color:var(--t2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;transition:background 120ms ease,transform 120ms ease,opacity 120ms ease; }
 .tm-sb-btn:hover{ background:var(--bg2);color:var(--t1); }
 /* ════ End Soko Desktop ════ */
 
