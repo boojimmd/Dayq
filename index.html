@@ -290,7 +290,7 @@ input,textarea{user-select:text;-webkit-user-select:text;}
 .qcap-inp::placeholder{color:var(--t3);}
 .qcap-inp.has-project{border-color:var(--blue)!important;}
 .qcap-inp.has-label{border-color:var(--purple)!important;}
-.qcap-go{width:28px;height:28px;border-radius:var(--r1);background:var(--a);display:flex;align-items:center;justify-content:center;flex-shrink:0;opacity:0;transition:var(--dur-fast) var(--ease-out);pointer-events:none;}
+.qcap-go{width:36px;height:36px;border-radius:var(--r1);background:var(--a);display:flex;align-items:center;justify-content:center;flex-shrink:0;opacity:0;transition:var(--dur-fast) var(--ease-out);pointer-events:none;}
 .qcap:focus-within .qcap-go{opacity:1;pointer-events:all;}
 .qcap-go svg{width:13px;height:13px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;}
 [data-theme="dark"] .qcap-go svg{stroke:#080c10;}
@@ -3226,7 +3226,7 @@ select.fi{
   display:flex;align-items:center;justify-content:center;
   cursor:pointer;
   color:var(--t2);
-  font-size:16px;
+  font-size:var(--fs-md);
   flex-shrink:0;
 }
 
@@ -3410,7 +3410,7 @@ select.fi{
 .tm-modal-sheet{
   width:100%;max-width:430px;
   background:var(--bg1);
-  border-radius:24px 24px 0 0;
+  border-radius:var(--r4) var(--r4) 0 0;
   padding:0 0 env(safe-area-inset-bottom,0px);
   max-height:90dvh;
   overflow-y:auto;
@@ -3421,7 +3421,7 @@ select.fi{
 .tm-modal-handle{width:36px;height:4px;background:var(--bg3);border-radius:99px;margin:10px auto 0;}
 .tm-modal-hdr{padding:12px 18px 10px;border-bottom:1px solid var(--b2);display:flex;align-items:center;justify-content:space-between;}
 .tm-modal-ttl{font-size:var(--fs-md);font-weight:700;color:var(--t1);}
-.tm-modal-x{width:28px;height:28px;border-radius:var(--r1);background:var(--bg2);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t2);font-size:14px;}
+.tm-modal-x{width:28px;height:28px;border-radius:var(--r1);background:var(--bg2);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--t2);font-size:var(--fs-sm);}
 .tm-modal-body{padding:16px 18px 24px;display:flex;flex-direction:column;gap:14px;}
 @media(min-width:900px){
   .tm-modal{align-items:center;}
@@ -3511,7 +3511,7 @@ select.fi{
   border:1px solid var(--b1);
   display:flex;align-items:center;justify-content:center;
   cursor:pointer;color:var(--t2);
-  font-size:15px;flex-shrink:0;
+  font-size:var(--fs-sm);flex-shrink:0;
 }
 .tm-panel-titles{flex:1;text-align:center;}
 .tm-panel-title{font-size:var(--fs-lg);font-weight:800;color:var(--t1);}
@@ -3564,7 +3564,7 @@ select.fi{
   background:var(--bg2);
   border:1px solid var(--b1);
   display:flex;align-items:center;justify-content:center;
-  cursor:pointer;color:var(--t2);font-size:14px;
+  cursor:pointer;color:var(--t2);font-size:var(--fs-sm);
 }
 
 /* تسک تیمی در detail — action bar */
@@ -3806,7 +3806,7 @@ select.fi{
 
 /* badge «از مدیر» — smaller, subtle */
 .tm-badge {
-  font-size: 10px !important;
+  font-size:var(--fs-2xs) !important;
   font-weight: 600 !important;
   padding: 1px 6px !important;
   opacity: .8;
@@ -3857,7 +3857,7 @@ select.fi{
   border:1px solid var(--b1);
   background:var(--bg2);
   color:var(--t2);
-  font-size:12px;font-weight:600;font-family:var(--f);
+  font-size:var(--fs-xs);font-weight:600;font-family:var(--f);
   cursor:pointer;
   transition:transform 120ms var(--ease-out),background 120ms var(--ease-std);
 }
@@ -3867,7 +3867,7 @@ select.fi{
 }
 .tm-nlp-chip{
   display:inline-flex;align-items:center;gap:4px;
-  font-size:11px;font-weight:700;
+  font-size:var(--fs-2xs);font-weight:700;
   padding:3px 8px;border-radius:var(--r5);
 }
 .tm-member-chip.active{
@@ -3929,7 +3929,7 @@ select.fi{
 .tm-dl-chip {
   height:30px; padding:0 12px; border-radius:var(--r5);
   border:1px solid var(--b1); background:var(--bg2); color:var(--t2);
-  font-size:12px; font-weight:600; font-family:var(--f); cursor:pointer;
+  font-size:var(--fs-xs); font-weight:600; font-family:var(--f); cursor:pointer;
   transition:transform 120ms var(--ease-out), background 120ms var(--ease-std);
 }
 .tm-dl-chip:active { transform:scale(0.95); }
@@ -3991,7 +3991,7 @@ select.fi{
 /* NLP preview chips */
 .tm-nlp-chip {
   display:inline-flex; align-items:center; gap:4px;
-  font-size:11px; font-weight:700;
+  font-size:var(--fs-2xs); font-weight:700;
   padding:3px 8px; border-radius:var(--r5);
 }
 
@@ -4095,10 +4095,10 @@ select.fi{
   .tm-tab-pane { padding:0; }
 }
 .tm-sb-section { margin-bottom:var(--sp3); }
-.tm-sb-lbl { font-size:10px;font-weight:700;color:var(--t3);letter-spacing:.06em;margin-bottom:var(--sp2);text-align:right; }
+.tm-sb-lbl { font-size:var(--fs-2xs);font-weight:700;color:var(--t3);letter-spacing:.06em;margin-bottom:var(--sp2);text-align:right; }
 .tm-sb-kpi { display:flex;align-items:center;justify-content:space-between;background:var(--bg1);border:1px solid var(--b2);border-radius:var(--r2);padding:var(--sp2) var(--sp3);margin-bottom:6px; }
 .tm-sb-kpi-val { font-size:var(--fs-md);font-weight:800;font-variant-numeric:tabular-nums; }
-.tm-sb-kpi-lbl { font-size:10px;color:var(--t3); }
+.tm-sb-kpi-lbl { font-size:var(--fs-2xs);color:var(--t3); }
 .tm-sb-filter { display:flex;align-items:center;justify-content:space-between;height:34px;padding:0 var(--sp3);border-radius:var(--r2);border:none;background:none;color:var(--t2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;width:100%;text-align:right;transition:background 120ms ease; }
 .tm-sb-filter:hover{ background:var(--bg2); }
 .tm-sb-filter.active{ background:var(--bg2);color:var(--t1);font-weight:700; }
@@ -4149,6 +4149,28 @@ select.fi{
 .cal-day.is-friday .cal-day-num { color:var(--red); }
 .cal-day.is-friday:not(.is-holiday) { background:color-mix(in srgb,var(--red) 4%,var(--bg1)); }
 .cal-weekday:last-child { color:var(--red) !important; }
+
+
+/* ════ Soko: focus-visible (keyboard nav) ════ */
+.tm-panel-action-btn:focus-visible,
+.tm-tab:focus-visible,
+.tm-btn:focus-visible,
+.tm-status-opt:focus-visible,
+.tm-sb-filter:focus-visible,
+.tm-sb-btn:focus-visible,
+.tm-modal-x:focus-visible,
+.tm-panel-close:focus-visible,
+.ttd-reply-send:focus-visible {
+  outline: 2px solid var(--a);
+  outline-offset: 2px;
+}
+.tm-member-opt:focus-visible,
+.tm-pri-opt:focus-visible {
+  outline: 2px solid var(--a);
+  outline-offset: 2px;
+  border-radius: var(--r2);
+}
+/* ════ End Soko focus ════ */
 </style>
 </head>
 <body>
@@ -17765,10 +17787,10 @@ boot();
     </div>
   </div>
   <div class="sh-body tm-join-body">
-    <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نام تیم</div><input id="tmCreateName" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3);font-size:var(--fs-md)" placeholder="مثال: دکتر عبیدی — تیم فروش" type="text"/></div>
+    <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نام تیم</div><input id="tmCreateName" required class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3);font-size:var(--fs-md)" placeholder="مثال: دکتر عبیدی — تیم فروش" type="text"/></div>
     <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نام شما</div><input id="tmCreateMgrName" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" placeholder="نام کامل" type="text"/></div>
     <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">سمت (اختیاری)</div><input id="tmCreateMgrRole" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" placeholder="مدیر فروش" type="text"/></div>
-    <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">PIN مدیر (۴ رقم)</div><input id="tmCreatePin" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/></div>
+    <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">PIN مدیر (۴ رقم)</div><input id="tmCreatePin" required class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/></div>
     <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">تأیید PIN</div><input id="tmCreatePin2" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/></div>
     <div id="tmCreateErr" style="font-size:var(--fs-xs);color:var(--red);text-align:center;min-height:16px"></div>
     <button id="tmCreateBtn" onclick="tmDoCreate()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--t1);color:var(--bg1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:none;cursor:pointer;margin-top:auto">ساخت تیم</button>
@@ -17810,10 +17832,10 @@ boot();
   </div>
   <div class="sh-body">
     <div id="tmJoinForm" class="tm-join-body">
-      <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">کد دعوت</div><input id="tmJoinCode" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3);font-family:var(--mono);font-size:var(--fs-md);text-transform:uppercase;letter-spacing:.1em" placeholder="DQ-XXXXXXX" type="text"/></div>
-      <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نام شما</div><input id="tmJoinName" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" placeholder="نام کامل" type="text"/></div>
+      <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">کد دعوت</div><input id="tmJoinCode" required class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3);font-family:var(--mono);font-size:var(--fs-md);text-transform:uppercase;letter-spacing:.1em" placeholder="DQ-XXXXXXX" type="text"/></div>
+      <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">نام شما</div><input id="tmJoinName" required class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" placeholder="نام کامل" type="text"/></div>
       <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">سمت</div><input id="tmJoinRole" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" placeholder="کارشناس فروش" type="text"/></div>
-      <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">PIN شخصی (۴ رقم)</div><input id="tmJoinPin" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/><div style="font-size:var(--fs-2xs);color:var(--t3);margin-top:4px">برای بازیابی در دستگاه جدید</div></div>
+      <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">PIN شخصی (۴ رقم)</div><input id="tmJoinPin" required class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/><div style="font-size:var(--fs-2xs);color:var(--t3);margin-top:4px">برای بازیابی در دستگاه جدید</div></div>
       <div id="tmJoinErr" style="font-size:var(--fs-xs);color:var(--red);text-align:center;min-height:16px"></div>
       <button id="tmJoinBtn" onclick="tmDoJoin()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--t1);color:var(--bg1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:none;cursor:pointer;margin-top:auto">ارسال درخواست</button>
     </div>
@@ -17909,7 +17931,7 @@ boot();
         <button class="tm-btn tm-pri-opt" data-pri="urgent" onclick="tmSelectPriority(this,'urgent')" style="color:var(--red)">🔴 فوری</button>
       </div>
     </div>
-<div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">عنوان تسک</div><input id="tmAssignTitle" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" placeholder="عنوان..." type="text"/></div>
+<div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">عنوان تسک</div><input id="tmAssignTitle" required class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" placeholder="عنوان..." type="text"/></div>
     <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">ددلاین <span style="color:var(--red)">*</span></div><input id="tmAssignDeadline" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3);font-family:var(--mono)" placeholder="1404-05-15" type="text"/></div>
     <div id="tmAssignErr" style="font-size:var(--fs-xs);color:var(--red);min-height:16px"></div>
         <div style="display:flex;align-items:center;justify-content:space-between;padding:var(--sp2) 0;border-top:1px solid var(--b1)">
