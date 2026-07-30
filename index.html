@@ -16836,8 +16836,8 @@ async function tmDoDirectLogin() {
   const code = (document.getElementById('tmDLCode')?.value||'').trim().toUpperCase();
   const pin  = (document.getElementById('tmDLPin')?.value||'').trim();
   const errEl = document.getElementById('tmDLErr');
-  if (!code) { alert('کد تیم را وارد کن'); return; }
-  if (!pin || pin.length < 4) { alert('PIN را وارد کن (۴ رقم)'); return; }
+  if (!code) { if(errEl) errEl.textContent='کد تیم را وارد کن'; return; }
+  if (!pin || pin.length < 4) { if(errEl) errEl.textContent='PIN را وارد کن (۴ رقم)'; return; }
   const workerUrl = tm.workerUrl || localStorage.getItem('dayq_team_worker') || cfg.pushWorkerUrl;
   if (!workerUrl) { alert('آدرس Worker پیدا نشد\nتم.وورکر: ' + tm.workerUrl); return; }
   tm.workerUrl = workerUrl;
@@ -16845,7 +16845,9 @@ async function tmDoDirectLogin() {
   if(btn) btn.disabled = true;
   if(errEl) errEl.textContent = '';
   try {
-    const res = await tmAPI('POST', '/team/login', { teamCode: code, pin }, false);
+    // uuid از localStorage — جلوگیری از PIN collision با مدیر
+    const storedUuid = localStorage.getItem('dayq_team_uuid') || null;
+    const res = await tmAPI('POST', '/team/login', { teamCode: code, pin, uuid: storedUuid }, false);
     // ذخیره همه state
     tm.token      = res.token;
     tm.role       = res.role;
@@ -16863,16 +16865,14 @@ async function tmDoDirectLogin() {
     localStorage.setItem(TM_SK.name,   res.teamName||'');
     localStorage.setItem(TM_SK.mname,  res.name||'');
     localStorage.setItem(TM_SK.mrole,  res.memberRole||'');
-    closeAll();
     tmInit();
-    const roleLabel = res.role==='manager' ? 'مدیر' : 'عضو';
-    toast_(svgIco('check'), `✅ ${roleLabel} — ${res.teamName||code}`);
-    // sync بلافاصله
-    setTimeout(tmSyncBackground,1500);
     _tmUXRefresh && _tmUXRefresh();
+    closeAll();
+    const roleLabel = res.role==='manager' ? 'مدیر' : 'عضو';
+    toast_(svgIco('check'), '✅ ' + roleLabel + ' — ' + (res.teamName||code));
+    setTimeout(tmSyncBackground, 1500);
   } catch(e) {
-    alert('خطا: ' + e.message);
-    if(errEl) errEl.textContent = e.message;
+    if(errEl) errEl.textContent = e.message==='PIN نادرست' ? 'PIN اشتباه است' : e.message;
   } finally {
     if(btn) btn.disabled = false;
   }
