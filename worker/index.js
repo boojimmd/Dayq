@@ -1287,28 +1287,24 @@ export default {
     }
 
     
-    // ── تسک‌های یه عضو (مدیر) ──
-    if (path === '/task/member' && req.method === 'GET') {
+    // ── Push notify — اپ درخواست میده ──
+    if (path === '/task/notify' && req.method === 'POST') {
       const token = req.headers.get('X-DayQ-Token');
       const session = await validateSession(token, env);
       if (!session || session.role !== 'manager')
         return errRes('دسترسی نامعتبر', 403, cors);
-
-      const memberUuid = url.searchParams.get('uuid');
-      if (!memberUuid) return errRes('uuid اجباریه', 400, cors);
-
+      const { to, title, body } = await req.json();
       const { teamCode } = session;
-      const inboxRaw = await env.DAYQ_KV.get(`team:${teamCode}:inbox:${memberUuid}`);
-      const inbox = inboxRaw ? JSON.parse(inboxRaw) : [];
-      const tasks = [];
-      for (const taskId of inbox) {
-        const taskRaw = await env.DAYQ_KV.get(`team:${teamCode}:task:${taskId}`);
-        if (taskRaw) {
-          const t = JSON.parse(taskRaw);
-          if (!t.deleted) tasks.push(t);
-        }
-      }
-      return jsonRes({ tasks }, 200, cors);
+      const metaRaw = await env.DAYQ_KV.get(`team:${teamCode}:meta`);
+      if (!metaRaw) return errRes('تیم یافت نشد', 404, cors);
+      const meta = JSON.parse(metaRaw);
+      const targets = to === 'all'
+        ? meta.members.filter(m => !m.isManager).map(m => m.uuid)
+        : [to];
+      await Promise.all(targets.map(uuid =>
+        pushToMember(teamCode, uuid, { title, body, data: { type: 'task_notify' } }, env)
+      ));
+      return jsonRes({ ok: true, sent: targets.length }, 200, cors);
     }
 
 return new Response('DayQ Worker v3 — Personal + Team', { headers: cors });
