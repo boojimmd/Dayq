@@ -576,12 +576,16 @@ export default {
     if (path === '/team/login' && req.method === 'POST') {
       const allowed = await checkRateLimit(ip, env);
       if (!allowed) return errRes('تعداد تلاش بیش از حد', 429, cors);
-      const { teamCode, pin } = await req.json();
+      const { teamCode, pin, uuid: loginUuid } = await req.json();
       if (!teamCode || !pin) return errRes('کد تیم و PIN اجباریه', 400, cors);
       const metaRaw = await env.DAYQ_KV.get("team:"+teamCode+":meta");
       if (!metaRaw) return errRes('کد تیم نامعتبره', 404, cors);
       const meta = JSON.parse(metaRaw);
-      for (const m of meta.members) {
+      // اگه uuid اومد، فقط همون عضو چک بشه (جلوگیری از PIN collision)
+      const membersToCheck = loginUuid
+        ? meta.members.filter(m => m.uuid === loginUuid)
+        : meta.members;
+      for (const m of membersToCheck) {
         if (m.status === "removed") continue;
         const memberRaw = await env.DAYQ_KV.get("team:"+teamCode+":member:"+m.uuid);
         if (!memberRaw) continue;
