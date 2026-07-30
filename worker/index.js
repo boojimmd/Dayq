@@ -1315,7 +1315,42 @@ export default {
       return jsonRes({ ok: true, sent: targets.length }, 200, cors);
     }
 
-return new Response('DayQ Worker v3 — Personal + Team', { headers: cors });
+    // ── DEBUG: check member ──
+    if (path === '/debug/member' && req.method === 'POST') {
+      const { teamCode, uuid } = await req.json();
+      const memberRaw = await env.DAYQ_KV.get(`team:${teamCode}:member:${uuid}`);
+      if (!memberRaw) return jsonRes({ found: false, msg: 'member record not found' }, 200, cors);
+      const member = JSON.parse(memberRaw);
+      return jsonRes({
+        found: true,
+        name: member.name,
+        isManager: member.isManager,
+        status: member.status,
+        hasPinHash: !!member.pinHash,
+        hasSalt: !!member.salt,
+        saltLen: (member.salt||'').length,
+      }, 200, cors);
+    }
+
+    // ── DEBUG: list all members ──
+    if (path === '/debug/members' && req.method === 'POST') {
+      const { teamCode } = await req.json();
+      const metaRaw = await env.DAYQ_KV.get(`team:${teamCode}:meta`);
+      if (!metaRaw) return jsonRes({ error: 'team not found' }, 404, cors);
+      const meta = JSON.parse(metaRaw);
+      const result = [];
+      for (const m of meta.members) {
+        const raw = await env.DAYQ_KV.get(`team:${teamCode}:member:${m.uuid}`);
+        const rec = raw ? JSON.parse(raw) : null;
+        result.push({
+          uuid: m.uuid, name: m.name, isManager: m.isManager, status: m.status,
+          hasRecord: !!rec, hasPinHash: !!(rec?.pinHash), hasSalt: !!(rec?.salt)
+        });
+      }
+      return jsonRes({ members: result, pendingUuids: meta.pendingUuids }, 200, cors);
+    }
+
+    return new Response('DayQ Worker v3 — Personal + Team', { headers: cors });
   },
 
   // ── Scheduled: یادآورها + stale task alert ──
