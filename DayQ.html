@@ -16838,8 +16838,8 @@ async function tmDoDirectLogin() {
   const errEl = document.getElementById('tmDLErr');
   if (!code) { if(errEl) errEl.textContent='کد تیم را وارد کن'; return; }
   if (!/^\d{4}$/.test(pin)) { if(errEl) errEl.textContent='PIN باید ۴ رقم باشد'; return; }
-  const workerUrl = cfg.pushWorkerUrl;
-  if (!workerUrl) { if(errEl) errEl.textContent='اول Worker تنظیم کن'; return; }
+  const workerUrl = tm.workerUrl || cfg.pushWorkerUrl || localStorage.getItem(TM_SK.worker);
+  if (!workerUrl) { if(errEl) errEl.textContent='آدرس Worker پیدا نشد'; return; }
   tm.workerUrl = workerUrl;
   const btn = document.getElementById('tmDLBtn');
   if(btn) btn.disabled = true;
