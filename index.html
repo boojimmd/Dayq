@@ -16805,12 +16805,17 @@ window.addEventListener('load', () => {
 
 
 /* ════ Direct Login — ورود با کد+PIN ════ */
-function tmOpenDirectLogin() {
-  tmCloseModal();
-  document.getElementById('tmDLCode').value = '';
-  document.getElementById('tmDLPin').value = '';
-  document.getElementById('tmDLErr').textContent = '';
-  tmModal('tmModalDirectLogin', true);
+function tmOpenDirectLogin(preCode) {
+  closeAll();
+  setTimeout(function() {
+    var c = document.getElementById('tmDLCode');
+    var p = document.getElementById('tmDLPin');
+    var e = document.getElementById('tmDLErr');
+    if(c) c.value = preCode || '';
+    if(p) { p.value = ''; setTimeout(function(){p.focus();}, 350); }
+    if(e) e.textContent = '';
+    openSheet('shTmDirectLogin');
+  }, 100);
 }
 
 async function tmDoDirectLogin() {
@@ -17853,7 +17858,7 @@ boot();
     <!-- گزینه سوم: ورود مجدد / دستگاه جدید -->
     <div style="text-align:center;padding-top:var(--sp2);border-top:1px solid var(--b2)">
       <div style="font-size:var(--fs-2xs);color:var(--t3);margin-bottom:var(--sp2)">قبلاً عضو تیمی؟</div>
-      <button onclick="tmOpenDirectLogin();closeAll()" style="height:40px;padding:0 var(--sp4);border-radius:var(--r5);background:transparent;color:var(--a);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:1px solid var(--ag);cursor:pointer">🔑 ورود با کد و PIN</button>
+      <button onclick="tmOpenDirectLogin()" style="height:40px;padding:0 var(--sp4);border-radius:var(--r5);background:transparent;color:var(--a);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:1px solid var(--ag);cursor:pointer">🔑 ورود با کد و PIN</button>
     </div>
   </div>
 </div>
