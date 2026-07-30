@@ -14802,6 +14802,7 @@ function tmRenderSokoStatus() {
   }
 
   // ── جمع‌آوری همه تسک‌های فعال از همه اعضا ──
+  _tmUpdateSokoSummary();
   const today = mrTodayKey();
   const allTasks = [];
   members.forEach(m => {
@@ -14838,14 +14839,14 @@ function tmRenderSokoStatus() {
   // ── render یک گروه ──
   const group = (title, color, icon, tasks, emptyMsg) => {
     if (!tasks.length && !emptyMsg) return '';
-    return `<div style="margin-bottom:var(--sp3)">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:var(--sp2) var(--sp3);margin-bottom:2px">
-        <div style="display:flex;align-items:center;gap:6px">
-          <span style="font-size:var(--fs-xs);font-weight:700;color:${color}">${icon} ${title}</span>
-          ${tasks.length ? `<span style="background:${color};color:#fff;font-size:9px;font-weight:700;border-radius:var(--r5);padding:1px 7px;opacity:.85">${tasks.length}</span>` : ''}
-        </div>
+    const alphaColor = color==='var(--red)'?'rgba(229,62,90,.18)':color==='var(--amber)'?'rgba(217,119,6,.18)':color==='var(--blue)'?'rgba(37,99,235,.15)':'rgba(0,0,0,.08)';
+    const bgColor = color==='var(--red)'?'rgba(229,62,90,.04)':color==='var(--amber)'?'rgba(217,119,6,.04)':'transparent';
+    return `<div style="margin-bottom:var(--sp2);border-radius:var(--r2);overflow:hidden;border:1px solid ${alphaColor};background:${bgColor}">
+      <div style="display:flex;align-items:center;gap:6px;padding:8px var(--sp3)">
+        <span style="font-size:var(--fs-xs);font-weight:700;color:${color}">${icon} ${title}</span>
+        ${tasks.length ? `<span style="background:${color};color:#fff;font-size:9px;font-weight:800;border-radius:var(--r5);padding:1px 7px">${num(tasks.length)}</span>` : ''}
       </div>
-      <div style="background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r2);overflow:hidden">
+      <div style="background:var(--bg1);border-top:1px solid ${alphaColor}">
         ${tasks.length ? tasks.map(taskRow).join('') : `<div style="padding:var(--sp3);text-align:center;color:var(--t3);font-size:var(--fs-xs)">${emptyMsg}</div>`}
       </div>
     </div>`;
@@ -14870,8 +14871,8 @@ function tmRenderSokoStatus() {
   el.innerHTML = `<div style="padding:var(--sp3) var(--sp4)">
     <!-- اعضا compact -->
     <div style="display:flex;gap:var(--sp2);flex-wrap:wrap;margin-bottom:var(--sp4);padding-bottom:var(--sp3);border-bottom:1px solid var(--b2)">${memberPills}</div>
-    <!-- assign سریع -->
-    <button onclick="tmAssignTask('')" style="width:100%;height:40px;background:var(--am);color:var(--a);border:1px solid var(--ag);border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer;margin-bottom:var(--sp4)">+ ارسال تسک جدید</button>
+    <!-- Fix: assign = primary action -->
+    <button onclick="tmAssignTask('')" style="width:100%;height:48px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-md);font-weight:800;font-family:var(--f);cursor:pointer;margin-bottom:var(--sp4);box-shadow:0 2px 12px var(--ag)">✚ ارسال تسک</button>
     ${noTasks
       ? `<div style="text-align:center;padding:var(--sp5);color:var(--t3);font-size:var(--fs-sm)">همه تسک‌ها تموم شدن 🎉</div>`
       : `${group('دیر شده', 'var(--red)', '🔴', overdue, '')}
@@ -17626,6 +17627,23 @@ function tmHumanDeadline(dl) {
 }
 /* ════ End Deadline Humanizer ════ */
 
+function _tmUpdateSokoSummary(){
+  var el=document.getElementById('tmSokoSummary');
+  if(!el||!tm.snapshot)return;
+  var today=mrTodayKey();
+  var all=[];
+  (tm.snapshot.members||[]).filter(function(m){return !m.isManager&&m.status!=='removed';}).forEach(function(m){(m.tasks||[]).filter(function(t){return !t.deleted&&t.status!=='done';}).forEach(function(t){all.push(t);});});
+  if(!all.length){el.textContent='همه تسک‌ها انجام شده ✅';return;}
+  var od=all.filter(function(t){return t.deadline&&t.deadline<today;}).length;
+  var dt=all.filter(function(t){return t.deadline===today;}).length;
+  var rest=all.length-od-dt;
+  var parts=[];
+  if(od)parts.push('🔴 '+num(od)+' دیر');
+  if(dt)parts.push('⚡ '+num(dt)+' امروز');
+  if(rest>0)parts.push(num(rest)+' دیگه');
+  el.innerHTML=parts.length?parts.join(' · '):'تسک فعالی نیست';
+}
+
 boot();
 
 </script>
@@ -18009,40 +18027,22 @@ boot();
     <!-- Header جدید — RTL -->
     <div class="tm-panel-hdr">
       <div class="tm-panel-toprow">
-        <!-- close -->
         <button class="tm-panel-close" onclick="tmCloseSoko()">✕</button>
-        <!-- عنوان وسط -->
-        <div style="flex:1;text-align:center;min-width:0;padding:0 var(--sp3)">
-          <div style="font-size:var(--fs-md);font-weight:800;color:var(--t1)">سکو</div>
-          <div id="tmSokoPanelSub" style="font-size:var(--fs-xs);color:var(--t3)">تیم</div>
-          </div>
-        <!-- KPI + actions -->
-        <div style="display:flex;align-items:center;gap:var(--sp3);flex-shrink:0">
-          <div id="tmHdrKpi" style="display:none;align-items:center;gap:var(--sp3)">
-            <div style="text-align:center">
-              <div id="tmHdrTask" style="font-size:var(--fs-md);font-weight:800;color:var(--t1);font-variant-numeric:tabular-nums">۰</div>
-              <div style="font-size:9px;color:var(--t3)">تسک</div>
-              </div>
-            <div style="text-align:center">
-              <div id="tmHdrAlert" style="font-size:var(--fs-md);font-weight:800;color:var(--red);font-variant-numeric:tabular-nums">۰</div>
-              <div style="font-size:9px;color:var(--t3)">مشکل</div>
-              </div>
-            <div style="text-align:center">
-              <div id="tmHdrScore" style="font-size:var(--fs-md);font-weight:800;color:var(--a);font-variant-numeric:tabular-nums">—</div>
-              <div style="font-size:9px;color:var(--t3)">موفقیت</div>
-              </div>
-            <div style="width:1px;height:28px;background:var(--b1)"></div>
-            </div>
-          <button class="tm-panel-action-btn" onclick="tmOpenAnnouncement()">📢</button>
-          <button class="tm-panel-action-btn primary" onclick="tmAssignTask()">+ تسک</button>
-          </div>
+        <div style="flex:1;min-width:0;padding:0 var(--sp3)">
+          <div style="font-size:var(--fs-xs);font-weight:700;color:var(--t1)">سکو تیم</div>
+          <div id="tmSokoSummary" style="font-size:var(--fs-2xs);color:var(--t3);margin-top:1px">در حال بارگذاری...</div>
         </div>
-      <div class="tm-tabs">
-        <div class="tm-tab active" data-tab="status"   onclick="tmSetSokoTab('status')">وضعیت</div>
-        <div class="tm-tab"        data-tab="projects" onclick="tmSetSokoTab('projects')">پروژه‌ها</div>
-        <div class="tm-tab"        data-tab="report"   onclick="tmSetSokoTab('report')">گزارش</div>
+        <div style="display:flex;align-items:center;gap:var(--sp2);flex-shrink:0">
+          <button class="tm-panel-action-btn" onclick="tmOpenAnnouncement()" title="اعلان">📢</button>
+          <div id="tmPendingBadge" style="display:none;background:var(--red);color:#fff;font-size:9px;font-weight:700;border-radius:var(--r5);padding:2px 7px;cursor:pointer" onclick="tmOpenPendingSheet()">درخواست</div>
         </div>
       </div>
+      <div class="tm-tabs">
+        <div class="tm-tab active" data-tab="status" onclick="tmSetSokoTab('status')" style="font-weight:700">وضعیت</div>
+        <div class="tm-tab" data-tab="report" onclick="tmSetSokoTab('report')" style="opacity:.6">گزارش</div>
+        <div class="tm-tab" data-tab="projects" onclick="tmSetSokoTab('projects')" style="opacity:.6">پروژه‌ها</div>
+      </div>
+    </div>
 
     <div class="tm-tab-pane" data-pane="status" id="tmSokoStatusContent"></div>
     <div class="tm-tab-pane" data-pane="projects" style="display:none" id="tmSokoProjectsContent">
