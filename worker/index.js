@@ -581,10 +581,14 @@ export default {
       const metaRaw = await env.DAYQ_KV.get("team:"+teamCode+":meta");
       if (!metaRaw) return errRes('کد تیم نامعتبره', 404, cors);
       const meta = JSON.parse(metaRaw);
-      // اگه uuid اومد، فقط همون عضو چک بشه (جلوگیری از PIN collision)
+      // اگه uuid اومد: فقط همون چک بشه
+      // اگه نیومد: اول members (غیرمدیر)، بعد مدیر — جلوگیری از PIN collision
       const membersToCheck = loginUuid
         ? meta.members.filter(m => m.uuid === loginUuid)
-        : meta.members;
+        : [
+            ...meta.members.filter(m => !m.isManager && m.status !== 'removed'),
+            ...meta.members.filter(m => m.isManager)
+          ];
       for (const m of membersToCheck) {
         if (m.status === "removed") continue;
         const memberRaw = await env.DAYQ_KV.get("team:"+teamCode+":member:"+m.uuid);
