@@ -18356,31 +18356,6 @@ boot();
 <!-- ════ End Team Modals ════ -->
 
 <!-- Direct Login Modal — ورود با کد تیم + PIN -->
-<div class="tm-modal" id="tmModalDirectLogin">
-  <div class="tm-modal-sheet">
-    <div class="tm-modal-handle"></div>
-    <div class="tm-modal-hdr">
-      <button class="tm-modal-x" onclick="tmCloseModal()">✕</button>
-      <span class="tm-modal-ttl">ورود به تیم</span>
-    </div>
-    <div class="tm-modal-body">
-      <div style="background:var(--bluem);border:1px solid rgba(59,130,246,.2);border-radius:var(--r2);padding:var(--sp3);margin-bottom:2px">
-        <div style="font-size:var(--fs-xs);color:var(--blue);font-weight:600">اگه قبلاً در دستگاه دیگه‌ای عضو یا مدیر تیمی</div>
-        <div style="font-size:var(--fs-xs);color:var(--t2);margin-top:2px">فقط کد تیم و PIN رو وارد کن</div>
-      </div>
-      <div>
-        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">کد تیم</div>
-        <input id="tmDLCode" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-md);font-family:var(--mono);color:var(--t1);text-transform:uppercase;letter-spacing:.1em" placeholder="DQ-XXXXXXX" type="text"/>
-      </div>
-      <div>
-        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">PIN</div>
-        <input id="tmDLPin" style="width:100%;padding:10px 14px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-lg);font-family:var(--f);color:var(--t1);letter-spacing:.3em;text-align:center" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/>
-      </div>
-      <div id="tmDLErr" style="font-size:var(--fs-xs);color:var(--red);min-height:16px;text-align:center"></div>
-      <button id="tmDLBtn" onclick="tmDoDirectLogin()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">ورود</button>
-    </div>
-  </div>
-</div>
 
 <!-- Sheet: Team Task Detail — کارمند -->
 <div class="sheet" id="shTeamTaskDetail">
