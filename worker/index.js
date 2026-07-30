@@ -764,23 +764,26 @@ export default {
 
       await env.DAYQ_KV.put(`team:${teamCode}:task:${taskId}`, JSON.stringify(task));
 
-      // push به مدیر اگه وضعیت تغییر کرد
+      // push به مدیر — همیشه اگه note نوشته یا status تغییر کرد
+      const memberName = (await env.DAYQ_KV.get(`team:${teamCode}:member:${uuid}`)
+        .then(r => r ? JSON.parse(r).name : 'کارمند').catch(() => 'کارمند'));
+
       if (status && status !== oldStatus) {
-        const emoji = status === 'done' ? '✅' : status === 'blocked' ? '🔴' : '⏳';
+        const emoji = status === 'done' ? '✅' : status === 'blocked' ? '🚫' : '🔄';
+        const statusLabel = status === 'done' ? 'تکمیل شد' : status === 'blocked' ? 'متوقف شده' : 'در حال انجام';
+        const noteText = memberNote || blockedNote || '';
         await pushToManager(teamCode, {
-          title: 'DayQ — آپدیت تسک',
-          body: `${emoji} ${task.title}`,
+          title: `${emoji} ${memberName} — ${task.title}`,
+          body: noteText ? `${statusLabel}: ${noteText}` : statusLabel,
           data: { type: 'task_update', taskId, teamCode, status }
         }, env);
-
-        // اگه منتظرم → push فوری به مدیر
-        if (status === 'waiting') {
-          await pushToManager(teamCode, {
-            title: 'DayQ — منتظرم ⏳',
-            body: `${task.title}: ${blockedNote || memberNote || ''}`,
-            data: { type: 'waiting', taskId, teamCode }
-          }, env);
-        }
+      } else if (memberNote && memberNote !== task.memberNote) {
+        // فقط یادداشت تغییر کرد
+        await pushToManager(teamCode, {
+          title: `💬 ${memberName} — ${task.title}`,
+          body: memberNote,
+          data: { type: 'task_note', taskId, teamCode }
+        }, env);
       }
 
       await addToLog(teamCode, {
