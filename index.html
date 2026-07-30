@@ -5352,8 +5352,8 @@ select.fi{
       <div>
         <div class="f-lbl">وضعیت</div>
         <div class="status-row">
-          <button class="stp todo-s sel-status" data-st="todo" onclick="selStatus('todo',this)"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="5" r="4"/></svg>باید</button>
-          <button class="stp doing-s" data-st="doing" onclick="selStatus('doing',this)"><svg viewBox="0 0 10 10" fill="var(--amber)"><circle cx="5" cy="5" r="4"/></svg>درحال</button>
+          <button class="stp todo-s sel-status" data-st="todo" onclick="selStatus('todo',this)"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="5" r="4"/></svg>شروع نشده</button>
+          <button class="stp doing-s" data-st="doing" onclick="selStatus('doing',this)"><svg viewBox="0 0 10 10" fill="var(--amber)"><circle cx="5" cy="5" r="4"/></svg>در حال انجام</button>
           <button class="stp done-ss" data-st="done" onclick="selStatus('done',this)"><svg viewBox="0 0 12 12" fill="none" stroke="var(--a)" stroke-width="2.5" stroke-linecap="round"><polyline points="1.5 6 4.5 9 10.5 3"/></svg>انجام شد</button>
         </div>
       </div>
@@ -6301,7 +6301,7 @@ function _renderTriageList(){
       <div class="triage-task">${esc(t.text)}</div>
       <div class="triage-meta">اولویت فعلی: ${priLabels[t.priority]||'—'}</div>
       <div class="triage-actions">
-        <button class="triage-btn done" onclick="triageMarkDone('${t.id}')">✓ انجام شد</button>
+        <button class="triage-btn done" onclick="triageMarkDone('${t.id}')">تکمیل شد ✓</button>
         <button class="triage-btn tmrw" onclick="triageMoveTomorrow('${t.id}')">فردا</button>
         <button class="triage-btn drop" onclick="triageDrop('${t.id}')">ولش کن</button>
       </div>
@@ -14478,7 +14478,7 @@ function tmRenderInbox() {
   if (!el) return;
   const active = tm.inbox.filter(t => !t.deleted && t.status !== 'done');
   if (!active.length) {
-    el.innerHTML = '<div style="padding:var(--sp4);text-align:center"><div style="font-size:1.5rem;margin-bottom:8px">✅</div><div style="font-size:var(--fs-xs);color:var(--t3)">تسک فعالی نداری</div></div>';
+    el.innerHTML = '<div style="padding:var(--sp4);text-align:center"><div style="font-size:1.5rem;margin-bottom:8px">✅</div><div style="font-size:var(--fs-xs);color:var(--t3)">تسک جدیدی نداری</div></div>';
     document.getElementById('tmInboxCount').textContent = '';
     return;
   }
@@ -14488,7 +14488,7 @@ function tmRenderInbox() {
     const priColor = t.priority==='urgent'?'var(--red)':t.priority==='high'?'var(--red)':t.priority==='med'?'var(--amber)':'var(--t4)';
     const priLabel = t.priority==='urgent'?'فوری':t.priority==='high'?'مهم':t.priority==='med'?'متوسط':'عادی';
     const priDot = `<span style="width:6px;height:6px;border-radius:50%;background:${priColor};display:inline-block;flex-shrink:0;margin-top:2px"></span>`;
-    const statusLabel = t.status==='pending'?'باید':t.status==='in_progress'?'درحال':t.status==='blocked'?'🚫 مشکل':'✅';
+    const statusLabel = t.status==='pending'?'شروع نشده':t.status==='in_progress'?'در حال انجام':t.status==='blocked'?'🚫 متوقف':'✅';
     const statusColor = t.status==='blocked'?'var(--red)':t.status==='done'?'var(--a)':'var(--t3)';
     return `<div class="tc tm-task" onclick="openTeamTaskDetail('${t.id}')" style="margin-bottom:var(--sp2)">
       <div class="tc-body" style="display:flex;align-items:flex-start;gap:var(--sp2)">
@@ -14505,7 +14505,7 @@ function tmRenderInbox() {
     </div>`;
   }).join('');
   if (active.length > 3) {
-    el.innerHTML += `<div onclick="tmOpenSoko()" style="text-align:center;font-size:var(--fs-xs);color:var(--blue);padding:var(--sp2);cursor:pointer">+ ${active.length-3} تسک دیگه ←</div>`;
+    el.innerHTML += `<div onclick="tmOpenSoko()" style="text-align:center;font-size:var(--fs-xs);color:var(--blue);padding:var(--sp2);cursor:pointer">مشاهده همه تسک‌ها ←</div>`;
   }
 }
 
@@ -15546,7 +15546,7 @@ function tmExtendDeadline(taskId) {
             <div class="triage-actions">
               <button class="triage-btn done" onclick="tmUpdateTaskStatus('done');closeAll()">✓ انجام شد</button>
               <button class="triage-btn tmrw" onclick="tmUpdateTaskStatus('in_progress')">⏳ درحالم</button>
-              <button class="triage-btn drp" onclick="tmUpdateTaskStatus('blocked')">🚫 مشکل</button>
+              <button class="triage-btn drp" onclick="tmUpdateTaskStatus('blocked')">متوقف شده 🚫</button>
             </div>
           </div>`).join('')}
       </div>`;
@@ -17372,7 +17372,7 @@ async function _ttdSave() {
     }
     closeAll();
     tmApplyUI();
-    toast_(svgIco('check'), status === 'done' ? 'تسک تموم شد ✅' : 'وضعیت آپدیت شد');
+    toast_(svgIco('check'), status === 'done' ? 'تسک تموم شد ✅' : 'ذخیره شد');
   } catch(e) {
     errEl.textContent = e.message;
   } finally {
@@ -17634,8 +17634,18 @@ async function _tmAutoRegisterPush(){
   }catch(e){}
 }
 if('serviceWorker' in navigator){navigator.serviceWorker.addEventListener('message',function(e){
-  if(e.data&&e.data.type==='NOTIF_CLICK'&&tm.role==='manager'&&tm.code){setTimeout(function(){tmOpenSoko&&tmOpenSoko();setTimeout(function(){tmOpenPendingSheet&&tmOpenPendingSheet();},400);},300);}
-  if(e.data&&e.data.type==='SHARE_TARGET'){_applyShare&&_applyShare(e.data.title,e.data.text,e.data.url);}
+  var nd=e.data;
+  // sync فوری بعد از هر push
+  if(nd&&nd.type&&['task_update','task_note','join_request','approved'].indexOf(nd.type)>-1){
+    setTimeout(function(){tmSyncBackground&&tmSyncBackground();},500);
+  }
+  if(nd&&nd.type==='NOTIF_CLICK'&&tm.role==='manager'&&tm.code){
+    setTimeout(function(){tmOpenSoko&&tmOpenSoko();
+      if(nd.data&&nd.data.type==='join_request'){setTimeout(function(){tmOpenPendingSheet&&tmOpenPendingSheet();},400);}
+      else if(nd.data&&nd.data.taskId){setTimeout(function(){tmOpenTaskThread&&tmOpenTaskThread(nd.data.taskId);},400);}
+    },300);
+  }
+  if(nd&&nd.type==='SHARE_TARGET'){_applyShare&&_applyShare(nd.title,nd.text,nd.url);}
 });}
 
 /* ════ Soko Deadline Humanizer ════ */
