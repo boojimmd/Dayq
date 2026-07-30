@@ -16801,48 +16801,47 @@ function tmOpenDirectLogin() {
 }
 
 async function tmDoDirectLogin() {
-  const code = document.getElementById('tmDLCode').value.trim().toUpperCase();
-  const pin  = document.getElementById('tmDLPin').value.trim();
+  const code = (document.getElementById('tmDLCode')?.value||'').trim().toUpperCase();
+  const pin  = (document.getElementById('tmDLPin')?.value||'').trim();
   const errEl = document.getElementById('tmDLErr');
-  if (!code) { errEl.textContent = 'کد تیم رو وارد کن'; return; }
-  if (!/^\d{4}$/.test(pin)) { errEl.textContent = 'PIN باید ۴ رقم باشد'; return; }
-
-  const base = (cfg.pushWorkerUrl||'').trim().replace(/\/+$/, '');
-  if (!base) { errEl.textContent = 'ابتدا Worker Push رو در اتصال تنظیم کن'; return; }
-
+  if (!code) { if(errEl) errEl.textContent='کد تیم را وارد کن'; return; }
+  if (!/^\d{4}$/.test(pin)) { if(errEl) errEl.textContent='PIN باید ۴ رقم باشد'; return; }
+  const workerUrl = cfg.pushWorkerUrl;
+  if (!workerUrl) { if(errEl) errEl.textContent='اول Worker تنظیم کن'; return; }
+  tm.workerUrl = workerUrl;
   const btn = document.getElementById('tmDLBtn');
-  btn.disabled = true; btn.textContent = 'در حال ورود...';
-
+  if(btn) btn.disabled = true;
+  if(errEl) errEl.textContent = '';
   try {
-    const res = await fetch(base + '/team/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ teamCode: code, pin })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'خطا');
-
+    const res = await tmAPI('POST', '/team/login', { teamCode: code, pin }, false);
+    // ذخیره همه state
+    tm.token      = res.token;
+    tm.role       = res.role;
+    tm.uuid       = res.uuid;
     tm.code       = code;
-    tm.uuid       = data.uuid;
-    tm.role       = data.role;
-    tm.token      = data.token;
-    tm.workerUrl  = data.workerUrl || base;
-    tm.teamName   = data.teamName;
-    tm.memberName = data.name;
-    tm.memberRole = data.memberRole;
-    tmSaveState();
-    tmCloseModal();
-    tmApplyUI();
-    tmSyncBackground();
-    toast_(svgIco('check'), 'وارد تیم ' + data.teamName + ' شدی');
+    tm.workerUrl  = workerUrl;
+    tm.teamName   = res.teamName   || '';
+    tm.memberName = res.name       || '';
+    tm.memberRole = res.memberRole || '';
+    localStorage.setItem(TM_SK.token,  res.token);
+    localStorage.setItem(TM_SK.role,   res.role);
+    localStorage.setItem(TM_SK.uuid,   res.uuid);
+    localStorage.setItem(TM_SK.code,   code);
+    localStorage.setItem(TM_SK.worker, workerUrl);
+    localStorage.setItem(TM_SK.name,   res.teamName||'');
+    localStorage.setItem(TM_SK.mname,  res.name||'');
+    localStorage.setItem(TM_SK.mrole,  res.memberRole||'');
+    closeAll();
+    tmInit();
+    const roleLabel = res.role==='manager' ? 'مدیر' : 'عضو';
+    toast_(svgIco('check'), `✅ ${roleLabel} — ${res.teamName||code}`);
+    // sync بلافاصله
+    setTimeout(tmSyncBackground, 500);
+    _tmUXRefresh && _tmUXRefresh();
   } catch(e) {
-    const msg = e.message.includes('PIN') ? 'PIN اشتباهه'
-      : e.message.includes('نامعتبر') ? 'کد تیم نامعتبره'
-      : e.message.includes('pattern') || e.message.includes('fetch') ? 'آدرس Worker رو چک کن'
-      : e.message;
-    errEl.textContent = msg;
+    if(errEl) errEl.textContent = e.message==='PIN نادرست' ? 'PIN اشتباه است' : e.message;
   } finally {
-    btn.disabled = false; btn.textContent = 'ورود';
+    if(btn) btn.disabled = false;
   }
 }
 /* ════ End Direct Login ════ */
@@ -17838,6 +17837,11 @@ boot();
   <div class="sh-body" style="gap:var(--sp3)">
     <button onclick="tmOpenCreate();closeAll()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--t1);color:var(--bg1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:none;cursor:pointer">+ ایجاد تیم جدید</button>
     <button onclick="tmOpenJoin();closeAll()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--bg2);color:var(--t1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:1px solid var(--b1);cursor:pointer">پیوستن با کد دعوت</button>
+    <!-- گزینه سوم: ورود مجدد / دستگاه جدید -->
+    <div style="text-align:center;padding-top:var(--sp2);border-top:1px solid var(--b2)">
+      <div style="font-size:var(--fs-2xs);color:var(--t3);margin-bottom:var(--sp2)">قبلاً عضو تیمی؟</div>
+      <button onclick="tmOpenDirectLogin();closeAll()" style="height:40px;padding:0 var(--sp4);border-radius:var(--r5);background:transparent;color:var(--a);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:1px solid var(--ag);cursor:pointer">🔑 ورود با کد و PIN</button>
+    </div>
   </div>
 </div>
 
