@@ -14690,7 +14690,7 @@ function tmOpenTeamSettings() {
           ? '<div style="background:rgba(217,119,6,.08);border:1px solid rgba(217,119,6,.25);border-radius:var(--r2);padding:var(--sp3);margin-bottom:var(--sp3);text-align:center">' +
               '<div style="font-size:var(--fs-xs);color:var(--amber);font-weight:700;margin-bottom:6px">⚠️ هنوز وارد نشدی</div>' +
               '<div style="font-size:var(--fs-2xs);color:var(--t3);margin-bottom:var(--sp3)">برای دیدن تسک‌ها باید با PIN وارد بشی</div>' +
-              '<button style="width:100%;height:44px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer" onclick="closeAll();setTimeout(function(){tmOpenDirectLogin();},150)">🔑 ورود با کد و PIN</button>' +
+              '<button style="width:100%;height:44px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer" onclick="closeAll();setTimeout(function(){tmOpenDirectLogin(tm.code);},150)">🔑 ورود با کد و PIN</button>' +
             '</div>'
           : '')) +
       '<button class="tm-btn danger" style="width:100%;justify-content:center;margin-top:var(--sp2);direction:rtl" onclick="tmLeaveTeam()">ترک تیم</button>';
