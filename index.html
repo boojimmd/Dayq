@@ -16836,10 +16836,10 @@ async function tmDoDirectLogin() {
   const code = (document.getElementById('tmDLCode')?.value||'').trim().toUpperCase();
   const pin  = (document.getElementById('tmDLPin')?.value||'').trim();
   const errEl = document.getElementById('tmDLErr');
-  if (!code) { if(errEl) errEl.textContent='کد تیم را وارد کن'; return; }
-  if (!/^\d{4}$/.test(pin)) { if(errEl) errEl.textContent='PIN باید ۴ رقم باشد'; return; }
-  const workerUrl = tm.workerUrl || cfg.pushWorkerUrl || localStorage.getItem(TM_SK.worker);
-  if (!workerUrl) { if(errEl) errEl.textContent='آدرس Worker پیدا نشد'; return; }
+  if (!code) { alert('کد تیم را وارد کن'); return; }
+  if (!pin || pin.length < 4) { alert('PIN را وارد کن (۴ رقم)'); return; }
+  const workerUrl = tm.workerUrl || localStorage.getItem('dayq_team_worker') || cfg.pushWorkerUrl;
+  if (!workerUrl) { alert('آدرس Worker پیدا نشد\nتم.وورکر: ' + tm.workerUrl); return; }
   tm.workerUrl = workerUrl;
   const btn = document.getElementById('tmDLBtn');
   if(btn) btn.disabled = true;
@@ -16871,7 +16871,8 @@ async function tmDoDirectLogin() {
     setTimeout(tmSyncBackground,1500);
     _tmUXRefresh && _tmUXRefresh();
   } catch(e) {
-    if(errEl) errEl.textContent = e.message==='PIN نادرست' ? 'PIN اشتباه است' : e.message;
+    alert('خطا: ' + e.message);
+    if(errEl) errEl.textContent = e.message;
   } finally {
     if(btn) btn.disabled = false;
   }
