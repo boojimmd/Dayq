@@ -14304,7 +14304,7 @@ async function tmInit() {
     tmSyncBackground();
     // هر ۲ دقیقه sync
     if (tm._syncTimer) clearInterval(tm._syncTimer);
-    tm._syncTimer = setInterval(tmSyncBackground, 120000);
+    tm._syncTimer = setInterval(function(){if(document.visibilityState!=='hidden')tmSyncBackground();},120000);
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden) tmSyncBackground();
     });
@@ -14372,55 +14372,65 @@ function tmUpdateSokoCard() {
 }
 
 // ── Background Sync ────────────────────────────────────────────
-async function tmSyncBackground() {
-  if (!tm.code || !tm.token) return;
-  try {
-    if (tm.role === 'member') {
-      const data = await tmAPI('GET', '/task/inbox');
-      tm.inbox = data.tasks || [];
-      localStorage.setItem(TM_SK.inbox, JSON.stringify(tm.inbox));
+let _syncRunning=false;
+async function tmSyncBackground(){
+  if(!tm.code||!tm.token)return;
+  if(_syncRunning)return;
+  _syncRunning=true;
+  try{
+    if(tm.role==='member'){
+      var data=await tmAPI('GET','/task/inbox');
+      tm.inbox=data.tasks||[];
+      localStorage.setItem(TM_SK.inbox,JSON.stringify(tm.inbox));
       tmRenderInbox();
-    } else if (tm.role === 'manager') {
-      const data = await tmAPI('GET', '/team/snapshot');
-      // تسک‌های هر عضو رو fetch کن (موازی)
-      if (data && data.members) {
+    }else if(tm.role==='manager'){
+      var data=await tmAPI('GET','/team/snapshot');
+      var sokoOpen=document.getElementById('tmSokoPanel')?.classList.contains('open');
+      if(data&&data.members&&sokoOpen){
         await Promise.all(data.members
-          .filter(m => !m.isManager && m.status !== 'removed')
-          .map(async m => {
-            try {
-              const r = await tmAPI('GET', '/task/member?uuid=' + m.uuid);
-              m.tasks = (r.tasks || []).filter(t => !t.deleted);
-            } catch(e2) { m.tasks = []; }
+          .filter(function(m){return !m.isManager&&m.status!=='removed';})
+          .map(async function(m){
+            try{
+              var r=await tmAPI('GET','/task/member?uuid='+m.uuid);
+              m.tasks=(r.tasks||[]).filter(function(t){return !t.deleted;});
+            }catch(e2){m.tasks=m.tasks||[];}
           })
         );
       }
-      tm.snapshot = data;
-      localStorage.setItem(TM_SK.snap, JSON.stringify(data));
+      var prevCount=tm.snapshot?tm.snapshot.members.reduce(function(a,m){return a+m.activeTasks;},0):-1;
+      var newCount=data.members?data.members.reduce(function(a,m){return a+m.activeTasks;},0):0;
+      var changed=prevCount!==newCount;
+      tm.snapshot=data;
+      localStorage.setItem(TM_SK.snap,JSON.stringify(data));
       tmUpdateSokoCard();
-      tmRenderTodaySection();
-      // آپدیت status view اگه سکو باز باشه
-      if (tm.sokoTab === 'status' || !tm.sokoTab) tmRenderSokoStatus();
-      if (tm.sokoTab === 'report') { tmRenderSokoReport(); }
+      if(changed||sokoOpen){
+        tmRenderTodaySection();
+        if(tm.sokoTab==='status'||!tm.sokoTab)tmRenderSokoStatus();
+        if(tm.sokoTab==='report')tmRenderSokoReport();
+      }
     }
-    // رویدادهای تیمی (هر دو نقش)
-    const calData = await tmAPI('GET', '/team/calendar');
-    tm.events = calData.events || [];
-    tm.announcements = calData.announcements || [];
-    localStorage.setItem(TM_SK.events, JSON.stringify(tm.events));
-    localStorage.setItem(TM_SK.annos, JSON.stringify(tm.announcements));
-  } catch(e) {
-    console.log('tmSync error:', e.message);
-    // نشون بدن که sync fail شد
-    const sokoEl = document.getElementById('tmSokoStatusContent');
-    if (sokoEl && !tm.snapshot) {
-      const msg = e.message === 'no_worker' ? 'Worker تنظیم نشده' :
-                  e.message?.includes('401') || e.message?.includes('403') ? 'نشست منقضی شده — دوباره وارد شو' :
-                  'خطا در اتصال به Worker';
-      sokoEl.innerHTML = `<div style="padding:var(--sp4);text-align:center">
-        <div style="font-size:var(--fs-sm);color:var(--red);margin-bottom:var(--sp2)">⚠️ ${msg}</div>
-        <button onclick="tmSyncBackground()" class="tm-btn" style="margin:0 auto">🔄 تلاش مجدد</button>
-      </div>`;
+    if(!tmSyncBackground._n)tmSyncBackground._n=0;
+    tmSyncBackground._n++;
+    if(tmSyncBackground._n%5===1){
+      try{
+        var cal=await tmAPI('GET','/team/calendar');
+        tm.events=cal.events||[];
+        tm.announcements=cal.announcements||[];
+        localStorage.setItem(TM_SK.events,JSON.stringify(tm.events));
+        localStorage.setItem(TM_SK.annos,JSON.stringify(tm.announcements));
+      }catch(ec){}
     }
+  }catch(e){
+    console.log('tmSync error:',e.message);
+    var sokoEl=document.getElementById('tmSokoStatusContent');
+    if(sokoEl&&!tm.snapshot){
+      var msg=e.message==='no_worker'?'Worker تنظیم نشده':
+        (e.message&&(e.message.indexOf('401')>-1||e.message.indexOf('403')>-1))?'نشست منقضی شده':
+        'خطا در اتصال';
+      sokoEl.innerHTML='<div style="padding:var(--sp4);text-align:center"><div style="color:var(--red);font-size:var(--fs-sm);margin-bottom:var(--sp2)">'+msg+'</div><button onclick="tmSyncBackground()" class="tm-btn" style="margin:0 auto">تلاش مجدد</button></div>';
+    }
+  }finally{
+    _syncRunning=false;
   }
 }
 
@@ -15076,7 +15086,7 @@ async function tmUpdateTaskStatus(newStatus) {
     tmRenderInbox();
     toast_(svgIco('check'), newStatus==='done'?'✅ تموم شد!':newStatus==='blocked'?'🚫 مشکل گزارش شد':'آپدیت شد');
     // sync مجدد
-    setTimeout(tmSyncBackground, 500);
+    setTimeout(tmSyncBackground,1500);
   } catch(e) {
     toast_(svgIco('flag'), 'خطا: ' + e.message);
   }
@@ -16836,7 +16846,7 @@ async function tmDoDirectLogin() {
     const roleLabel = res.role==='manager' ? 'مدیر' : 'عضو';
     toast_(svgIco('check'), `✅ ${roleLabel} — ${res.teamName||code}`);
     // sync بلافاصله
-    setTimeout(tmSyncBackground, 500);
+    setTimeout(tmSyncBackground,1500);
     _tmUXRefresh && _tmUXRefresh();
   } catch(e) {
     if(errEl) errEl.textContent = e.message==='PIN نادرست' ? 'PIN اشتباه است' : e.message;
@@ -17583,7 +17593,7 @@ setTimeout(function tmLoadState(){
   try{tm.snapshot=JSON.parse(g(TM_SK.snap)||'null');}catch(e){tm.snapshot=null;}
   if(tm.token&&tm.workerUrl){
     _tmUXRefresh&&_tmUXRefresh();
-    setTimeout(tmSyncBackground,800);
+    setTimeout(tmSyncBackground,2000);
     setTimeout(_tmAutoRegisterPush,1500);
   } else if(tm.uuid&&tm.code&&!tm.token){
     // تأیید شده ولی نیاز به login دارد
