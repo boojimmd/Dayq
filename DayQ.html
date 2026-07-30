@@ -14781,6 +14781,7 @@ function tmSetSokoTab(tab) {
 function tmRenderSokoStatus() {
   const el = document.getElementById('tmSokoStatusContent');
   if (!el) return;
+
   if (!tm.snapshot) {
     el.innerHTML = `<div style="padding:var(--sp5)">
       <div class="tm-skeleton" style="height:80px;border-radius:var(--r3);margin-bottom:var(--sp2)"></div>
@@ -14789,93 +14790,97 @@ function tmRenderSokoStatus() {
     return;
   }
 
-  // فیلتر: فقط اعضا (نه مدیر)
-  const allMembers = tm.snapshot.members || [];
-  const members = allMembers.filter(m => !m.isManager && m.role !== 'manager');
-
+  const members = (tm.snapshot.members || []).filter(m => !m.isManager && m.status !== 'removed');
   if (!members.length) {
     el.innerHTML = `<div style="text-align:center;padding:var(--sp6)">
       <div style="font-size:2rem;margin-bottom:var(--sp3)">👥</div>
       <div style="font-size:var(--fs-sm);color:var(--t2);font-weight:600">هنوز عضوی نداری</div>
       <div style="font-size:var(--fs-xs);color:var(--t3);margin-top:var(--sp2)">کد دعوت رو به تیمت بده</div>
-      <button style="margin-top:var(--sp3);height:36px;padding:0 16px;border-radius:var(--r5);border:none;background:var(--a);color:var(--bg1);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer" onclick="tmShareCode()">📤 اشتراک کد</button>
+      <button onclick="tmCopyCode()" style="margin-top:var(--sp3);height:36px;padding:0 var(--sp4);background:var(--a);color:#fff;border:none;border-radius:var(--r5);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer">📋 کپی کد</button>
     </div>`;
     return;
   }
 
-  // alert members
-  const alertMembers = members.filter(m => m.alert !== 'ok');
-  const okMembers    = members.filter(m => m.alert === 'ok');
+  // ── جمع‌آوری همه تسک‌های فعال از همه اعضا ──
+  const today = mrTodayKey();
+  const allTasks = [];
+  members.forEach(m => {
+    (m.tasks || []).filter(t => !t.deleted && t.status !== 'done').forEach(t => {
+      allTasks.push({ ...t, memberName: m.name, memberUuid: m.uuid });
+    });
+  });
 
-  const memberCard = (m) => {
-    const isBlocked = m.alert === 'blocked';
-    const isStale   = m.alert === 'stale';
-    const borderColor = isBlocked ? 'rgba(229,62,90,.3)' : isStale ? 'rgba(217,119,6,.3)' : 'var(--b2)';
-    const dotColor    = isBlocked ? 'var(--red)' : isStale ? 'var(--amber)' : 'var(--a)';
-    const alertLabel  = isBlocked ? '🚫 مشکل دارد' : isStale ? '⏳ بی‌تحرکی' : '';
-    const tasks = m.activeTasks || 0;
-    const done  = m.doneTasks  || 0;
-    const total = tasks + done;
-    const pct   = total > 0 ? Math.round(done/total*100) : 0;
-    // تعداد overdue از task list
-    const today = mrTodayKey();
-    const memberTasks = (m.tasks || []).filter(t => !t.deleted && t.status !== 'done');
-    const overdue = memberTasks.filter(t => t.deadline && t.deadline < today).length;
-    const overdueHtml = overdue > 0
-      ? `<span style="background:var(--red);color:#fff;font-size:9px;font-weight:700;border-radius:var(--r5);padding:1px 6px;margin-right:4px">${num(overdue)} دیر</span>`
-      : '';
+  // ── گروه‌بندی بر اساس urgency ──
+  const overdue  = allTasks.filter(t => t.deadline && t.deadline < today)
+                           .sort((a,b) => a.deadline.localeCompare(b.deadline));
+  const dueToday = allTasks.filter(t => t.deadline === today);
+  const thisWeek = allTasks.filter(t => t.deadline && t.deadline > today && _jalToDays(...t.deadline.split('-').map(Number)) - _jalToDays(...today.split('-').map(Number)) <= 7)
+                           .sort((a,b) => a.deadline.localeCompare(b.deadline));
+  const later    = allTasks.filter(t => !t.deadline || (_jalToDays(...t.deadline.split('-').map(Number)) - _jalToDays(...today.split('-').map(Number)) > 7));
+  const blocked  = allTasks.filter(t => t.status === 'blocked');
 
-    return `<div style="background:var(--bg1);border:1px solid ${borderColor};border-radius:var(--r3);padding:var(--sp3) var(--sp4);margin-bottom:var(--sp2)">
-      <!-- header: RTL — اسم+dot سمت راست، آمار سمت چپ -->
-      <div style="display:flex;align-items:center;gap:var(--sp3)">
-        <!-- آمار سمت چپ -->
-        <button onclick="tmAssignTask('${m.uuid}')"
-          style="height:30px;padding:0 12px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--bg2);color:var(--t2);font-size:11px;font-weight:600;font-family:var(--f);cursor:pointer;flex-shrink:0">
-          + تسک
-        </button>
-        <div style="text-align:center;min-width:36px;flex-shrink:0">
-          <div style="font-size:var(--fs-md);font-weight:800;color:var(--t1);font-variant-numeric:tabular-nums">${num(tasks)}</div>
-          <div style="font-size:9px;color:var(--t3)">تسک</div>
-        </div>
-        <!-- spacer -->
-        <div style="flex:1"></div>
-        <!-- اسم + dot + overdue — سمت راست (RTL) -->
-        <div style="text-align:right">
-          <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;margin-bottom:2px">
-            ${overdueHtml}
-            <span style="font-size:var(--fs-sm);font-weight:700;color:var(--t1)">${esc(m.name)}</span>
-            <span style="width:8px;height:8px;border-radius:50%;background:${dotColor};flex-shrink:0;display:inline-block"></span>
-          </div>
-          <div style="font-size:var(--fs-xs);color:var(--t3)">${esc(m.role||'عضو تیم')}</div>
-          ${alertLabel ? `<div style="font-size:10px;color:${dotColor};margin-top:2px">${alertLabel}</div>` : ''}
-        </div>
+  // ── render یک تسک ──
+  const taskRow = t => {
+    const priColor = t.priority==='urgent'||t.priority==='high' ? 'var(--red)' : t.priority==='med' ? 'var(--amber)' : 'var(--b1)';
+    const isBlocked = t.status === 'blocked';
+    return `<div onclick="tmOpenTaskThread('${t.id}')"
+      style="display:flex;align-items:center;gap:var(--sp3);padding:10px var(--sp3);border-bottom:1px solid var(--b2);cursor:pointer;transition:background var(--dur-fast)">
+      <span style="width:6px;height:6px;border-radius:50%;background:${priColor};flex-shrink:0"></span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:var(--fs-sm);font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t.title)}</div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-top:2px">${esc(t.memberName)}${isBlocked ? ' · <span style="color:var(--red)">🚫 مشکل</span>' : ''}</div>
       </div>
-      <!-- workload bar -->
-      ${total > 0 ? `
-      <div style="margin-top:10px">
-        <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-          <span style="font-size:10px;color:var(--t3)">${num(pct)}٪ تکمیل</span>
-          <span style="font-size:10px;color:var(--t3)">${num(done)} از ${num(total)}</span>
-        </div>
-        <div style="height:4px;background:var(--bg3);border-radius:var(--r5);overflow:hidden">
-          <div style="height:100%;border-radius:var(--r5);background:${dotColor};transform:scaleX(${pct/100});transform-origin:right;transition:transform 600ms cubic-bezier(0.23,1,0.32,1)"></div>
-        </div>
-      </div>` : ''}
+      <div style="font-size:var(--fs-xs);text-align:left;flex-shrink:0">${t.deadline ? tmHumanDeadline(t.deadline) : ''}</div>
+      <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="var(--t4)" stroke-width="2" stroke-linecap="round" style="flex-shrink:0"><polyline points="15 18 9 12 15 6"/></svg>
     </div>`;
   };
 
-  // ساختار: alert ها اول، بقیه بعد
-  let inner = '';
-  if (alertMembers.length) {
-    inner += `<div style="font-size:var(--fs-xs);color:var(--red);font-weight:700;margin-bottom:var(--sp2);text-align:right">🔴 نیاز به توجه (${alertMembers.length})</div>`;
-    inner += alertMembers.map(memberCard).join('');
-  }
-  if (okMembers.length) {
-    if (alertMembers.length) inner += `<div style="font-size:var(--fs-xs);color:var(--t3);margin:var(--sp3) 0 var(--sp2);text-align:right">همه اعضا</div>`;
-    inner += okMembers.map(memberCard).join('');
-  }
+  // ── render یک گروه ──
+  const group = (title, color, icon, tasks, emptyMsg) => {
+    if (!tasks.length && !emptyMsg) return '';
+    return `<div style="margin-bottom:var(--sp3)">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:var(--sp2) var(--sp3);margin-bottom:2px">
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:var(--fs-xs);font-weight:700;color:${color}">${icon} ${title}</span>
+          ${tasks.length ? `<span style="background:${color};color:#fff;font-size:9px;font-weight:700;border-radius:var(--r5);padding:1px 7px;opacity:.85">${tasks.length}</span>` : ''}
+        </div>
+      </div>
+      <div style="background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r2);overflow:hidden">
+        ${tasks.length ? tasks.map(taskRow).join('') : `<div style="padding:var(--sp3);text-align:center;color:var(--t3);font-size:var(--fs-xs)">${emptyMsg}</div>`}
+      </div>
+    </div>`;
+  };
 
-  el.innerHTML = `<div style="padding:var(--sp3) var(--sp4)">${inner}</div>`;
+  // ── خلاصه اعضا (compact) ──
+  const memberPills = members.map(m => {
+    const tasks = m.activeTasks || 0;
+    const memberTasksArr = (m.tasks || []).filter(t => !t.deleted && t.status !== 'done');
+    const od = memberTasksArr.filter(t => t.deadline && t.deadline < today).length;
+    const dotColor = od > 0 ? 'var(--red)' : m.alert === 'blocked' ? 'var(--red)' : m.alert === 'stale' ? 'var(--amber)' : 'var(--a)';
+    return `<div onclick="tmOpenMemberTasks('${m.uuid}')" style="display:flex;align-items:center;gap:6px;background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r5);padding:6px 12px;cursor:pointer;flex-shrink:0">
+      <span style="width:7px;height:7px;border-radius:50%;background:${dotColor}"></span>
+      <span style="font-size:var(--fs-xs);font-weight:600;color:var(--t1)">${esc(m.name)}</span>
+      <span style="font-size:var(--fs-2xs);color:var(--t3)">${num(tasks)}</span>
+      ${od > 0 ? `<span style="background:var(--red);color:#fff;font-size:8px;font-weight:700;border-radius:var(--r5);padding:1px 5px">${num(od)}</span>` : ''}
+    </div>`;
+  }).join('');
+
+  const noTasks = !allTasks.length;
+
+  el.innerHTML = `<div style="padding:var(--sp3) var(--sp4)">
+    <!-- اعضا compact -->
+    <div style="display:flex;gap:var(--sp2);flex-wrap:wrap;margin-bottom:var(--sp4);padding-bottom:var(--sp3);border-bottom:1px solid var(--b2)">${memberPills}</div>
+    <!-- assign سریع -->
+    <button onclick="tmAssignTask('')" style="width:100%;height:40px;background:var(--am);color:var(--a);border:1px solid var(--ag);border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer;margin-bottom:var(--sp4)">+ ارسال تسک جدید</button>
+    ${noTasks
+      ? `<div style="text-align:center;padding:var(--sp5);color:var(--t3);font-size:var(--fs-sm)">همه تسک‌ها تموم شدن 🎉</div>`
+      : `${group('دیر شده', 'var(--red)', '🔴', overdue, '')}
+         ${group('امروز', 'var(--amber)', '⚡', dueToday, 'برای امروز تسکی نیست')}
+         ${group('این هفته', 'var(--blue)', '📅', thisWeek, '')}
+         ${later.length ? group('بعداً', 'var(--t3)', '·', later, '') : ''}
+         ${blocked.length ? group('مشکل دارن', 'var(--red)', '🚫', blocked, '') : ''}`
+    }
+  </div>`;
 }
 
 function tmRenderSokoReport() {
