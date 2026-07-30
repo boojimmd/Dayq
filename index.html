@@ -14303,8 +14303,9 @@ async function tmInit() {
   // اگه تیم داره، UI رو آپدیت کن
   if (tm.code && tm.token) {
     tmApplyUI();
-    // sync در پس‌زمینه
-    tmSyncBackground();
+    // sync + push register در پس‌زمینه
+    setTimeout(tmSyncBackground, 800);
+    setTimeout(_tmAutoRegisterPush, 1500);
     // هر ۲ دقیقه sync
     if (tm._syncTimer) clearInterval(tm._syncTimer);
     tm._syncTimer = setInterval(function(){if(document.visibilityState!=='hidden')tmSyncBackground();},120000);
@@ -16853,8 +16854,9 @@ async function tmDoDirectLogin() {
     tmInit();
     const roleLabel = res.role==='manager' ? 'مدیر' : 'عضو';
     toast_(svgIco('check'), `✅ ${roleLabel} — ${res.teamName||code}`);
-    // sync بلافاصله
-    setTimeout(tmSyncBackground,1500);
+    // sync + push register بلافاصله
+    setTimeout(tmSyncBackground, 800);
+    setTimeout(_tmAutoRegisterPush, 1500);
     _tmUXRefresh && _tmUXRefresh();
   } catch(e) {
     if(errEl) errEl.textContent = e.message==='PIN نادرست' ? 'PIN اشتباه است' : e.message;
