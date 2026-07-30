@@ -4541,17 +4541,20 @@ select.fi{
 
   
   <!-- ════ از مدیر (کارمند) ════ -->
-  <div id="tmInboxSection" style="display:none;padding:0 var(--sp4);margin-top:var(--sp1)">
-    <div class="tm-divider"></div>
-    <div class="tm-section-hdr">
-      <span onclick="tmOpenSoko()" style="font-size:var(--fs-xs);color:var(--blue);cursor:pointer">مشاهده همه ←</span>
-      <div class="tm-section-lbl">
-        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-        از مدیر
-        <span class="tm-count-badge" id="tmInboxCount" style="display:none"></span>
+  <div id="tmInboxSection" style="display:none;padding:0 var(--sp4);margin-top:var(--sp3)">
+    <div style="background:var(--am);border:1px solid var(--ag);border-radius:var(--r3);overflow:hidden">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px var(--sp4)">
+        <span onclick="tmOpenSoko()" style="font-size:var(--fs-2xs);color:var(--a);cursor:pointer;font-weight:600">مشاهده همه ←</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--a)" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          <span style="font-size:var(--fs-sm);font-weight:700;color:var(--a)">تسک‌های من</span>
+          <span class="tm-count-badge" id="tmInboxCount" style="display:none;background:var(--a)"></span>
+        </div>
+      </div>
+      <div style="background:var(--bg1);border-top:1px solid var(--ag)">
+        <div id="tmInboxList"></div>
       </div>
     </div>
-    <div id="tmInboxList"></div>
   </div>
   <!-- ════ end از مدیر ════ -->
 
@@ -14475,7 +14478,7 @@ function tmRenderInbox() {
   if (!el) return;
   const active = tm.inbox.filter(t => !t.deleted && t.status !== 'done');
   if (!active.length) {
-    el.innerHTML = '<div style="padding:var(--sp3);text-align:center;color:var(--t3);font-size:var(--fs-xs)">تسک تیمی نداری</div>';
+    el.innerHTML = '<div style="padding:var(--sp4);text-align:center"><div style="font-size:1.5rem;margin-bottom:8px">✅</div><div style="font-size:var(--fs-xs);color:var(--t3)">تسک فعالی نداری</div></div>';
     document.getElementById('tmInboxCount').textContent = '';
     return;
   }
@@ -17917,15 +17920,35 @@ boot();
       <div id="tmJoinErr" style="font-size:var(--fs-xs);color:var(--red);text-align:center;min-height:16px"></div>
       <button id="tmJoinBtn" onclick="tmDoJoin()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--t1);color:var(--bg1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:none;cursor:pointer;margin-top:auto">ارسال درخواست</button>
     </div>
-    <div id="tmJoinSuccess" style="display:none;text-align:center;padding:var(--sp5)">
-      <div style="font-size:2.5rem;margin-bottom:var(--sp3)">⏳</div>
-      <div style="font-size:var(--fs-lg);font-weight:700;margin-bottom:var(--sp2)">درخواست ارسال شد</div>
-      <div style="font-size:var(--fs-sm);color:var(--t2);margin-bottom:var(--sp4)">منتظر تأیید مدیر هستی — به محض تأیید اعلان می‌گیری</div>
-      <div style="background:var(--bg2);border-radius:var(--r2);padding:var(--sp3);margin-bottom:var(--sp4)">
-        <div style="font-size:var(--fs-2xs);color:var(--t3);margin-bottom:4px">کد تیم</div>
+    <div id="tmJoinSuccess" style="display:none;padding:var(--sp4)">
+      <div style="text-align:center;padding:var(--sp4) 0">
+        <div style="font-size:2.5rem;margin-bottom:var(--sp3)">⏳</div>
+        <div style="font-size:var(--fs-lg);font-weight:700;margin-bottom:var(--sp2)">درخواست ارسال شد</div>
+        <div style="font-size:var(--fs-sm);color:var(--t2)">منتظر تأیید مدیر هستی</div>
+      </div>
+      <!-- راهنمای گام‌به‌گام -->
+      <div style="background:var(--bg2);border-radius:var(--r3);padding:var(--sp4);margin:var(--sp4) 0">
+        <div style="font-size:var(--fs-xs);font-weight:700;color:var(--t1);margin-bottom:var(--sp3);text-align:right">بعد از تأیید چیکار کنی؟</div>
+        <div style="display:flex;flex-direction:column;gap:var(--sp3)">
+          <div style="display:flex;align-items:flex-start;gap:var(--sp3)">
+            <span style="width:22px;height:22px;border-radius:50%;background:var(--a);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">۱</span>
+            <div style="font-size:var(--fs-xs);color:var(--t2);line-height:1.6">اعلان تأیید میگیری از DayQ</div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:var(--sp3)">
+            <span style="width:22px;height:22px;border-radius:50%;background:var(--a);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">۲</span>
+            <div style="font-size:var(--fs-xs);color:var(--t2);line-height:1.6">برگرد اینجا — <b style="color:var(--t1)">ورود با کد و PIN</b> رو بزن</div>
+          </div>
+          <div style="display:flex;align-items:flex-start;gap:var(--sp3)">
+            <span style="width:22px;height:22px;border-radius:50%;background:var(--a);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0">۳</span>
+            <div style="font-size:var(--fs-xs);color:var(--t2);line-height:1.6">تسک‌هایی که مدیر بهت میده در <b style="color:var(--t1)">صفحه خانه</b> نشون داده میشه</div>
+          </div>
+        </div>
+      </div>
+      <div style="background:var(--bg2);border-radius:var(--r2);padding:var(--sp3);margin-bottom:var(--sp3);text-align:center">
+        <div style="font-size:var(--fs-2xs);color:var(--t3);margin-bottom:4px">کد تیم (یادت بمونه)</div>
         <div id="tmJoinTeamCode" style="font-family:var(--mono);font-weight:700;font-size:var(--fs-lg)">—</div>
       </div>
-      <button onclick="closeAll()" style="width:100%;height:44px;border-radius:var(--r2);background:var(--bg2);color:var(--t1);font-size:var(--fs-sm);font-family:var(--f);border:1px solid var(--b1);cursor:pointer">بازگشت به DayQ</button>
+      <button onclick="closeAll()" style="width:100%;height:44px;border-radius:var(--r2);background:var(--bg2);color:var(--t1);font-size:var(--fs-sm);font-family:var(--f);border:1px solid var(--b1);cursor:pointer">بازگشت — بعداً وارد میشم</button>
     </div>
   </div>
 </div>
