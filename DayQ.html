@@ -5771,7 +5771,44 @@ select.fi{
 <!-- TOAST -->
 <div class="toast" id="toast"><span class="t-ico" id="tIco"></span><span id="tMsg"></span></div>
 
-<script>
+<script>function tmOpenTaskThread(taskId){
+  var members=(tm.snapshot&&tm.snapshot.members)||[],allTasks=[];
+  members.forEach(function(m){(m.tasks||[]).forEach(function(t){allTasks.push(Object.assign({},t,{memberName:m.name}));});});
+  var task=allTasks.find(function(t){return t.id===taskId;})||(tm.inbox||[]).find(function(t){return t.id===taskId;});
+  if(!task)return;
+  _mgThreadTaskId=taskId;
+  var ttl=document.getElementById('mgThreadTitle');
+  if(ttl)ttl.textContent=task.title||'گفتگو';
+  var meta=document.getElementById('mgThreadMeta');
+  if(meta){
+    var ST={pending:'شروع نشده',in_progress:'در حال انجام',done:'تکمیل شد',blocked:'متوقف',in_review:'برای بررسی'};
+    var priL={urgent:'🔴 فوری',high:'⚡ مهم',med:'🟡 متوسط',normal:''}[task.priority]||'';
+    var today=mrTodayKey();
+    var dlC=task.deadline&&task.deadline<today?'var(--red)':'var(--t3)';
+    var dlL=task.deadline?(' · '+tmHumanDeadline(task.deadline)):'';
+    var html2='<span style="font-size:var(--fs-xs);font-weight:700;color:var(--t1)">'+esc(task.memberName||'')+'</span>'+
+      '<span style="font-size:var(--fs-xs);color:var(--t3)"> · '+(ST[task.status]||task.status)+'</span>'+
+      (priL?'<span style="font-size:var(--fs-xs);color:var(--t3)"> · '+priL+'</span>':'')+
+      (dlL?'<span style="font-size:var(--fs-xs);color:'+dlC+'">'+dlL+'</span>':'');
+    meta.innerHTML=html2;
+  }
+  var actEl=document.getElementById('mgThreadActions');
+  if(actEl){
+    actEl.style.display='flex';
+    if(task.status==='in_review'){
+      actEl.innerHTML='<button onclick="_tmApproveTask(\''+taskId+'\')" style="flex:1;height:40px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer">تأیید ✅</button>'+
+        '<button onclick="_tmReturnTask(\''+taskId+'\')" style="flex:1;height:40px;background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer">↩️ برگشت</button>';
+    }else{
+      actEl.innerHTML='<button onclick="tmExtendDeadline(\''+taskId+'\')" style="height:36px;padding:0 var(--sp3);background:var(--bg2);color:var(--t2);border:1px solid var(--b1);border-radius:var(--r5);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">📅 تمدید ددلاین</button>';
+    }
+  }
+  var nel=document.getElementById('mgThreadNote');
+  if(nel&&task.memberNote){nel.style.display='';var nt=nel.querySelector('.mg-note-text');if(nt)nt.textContent=task.memberNote;}
+  else if(nel)nel.style.display='none';
+  var tel=document.getElementById('mgThreadMsgs');
+  if(tel)_renderThread(task.comments||[],'manager',tel);
+  openSheet('shTaskThread');
+}
 
 /* ══ ICON LIBRARY ══ */
 const ICONS=[
@@ -14995,8 +15032,14 @@ async function tmDoAssign() {
   const priChip = document.querySelector('.tm-pri-chip.active');
   const priority = priChip ? priChip.dataset.pri : 'normal';
 
+  const isBroadcast = document.getElementById('tmBroadcastToggle')?.checked;
+  const needsVerify = document.getElementById('tmNeedsVerifyToggle')?.checked;
   try {
-    await tmAPI('POST', '/task/assign', { title, description:desc, deadline, assignedTo, priority });
+    if(isBroadcast){
+      await tmAPI('POST','/task/broadcast',{title,description:desc,deadline,priority});
+    } else {
+      await tmAPI('POST', '/task/assign', { title, description:desc, deadline, assignedTo, priority, needsVerify });
+    }
     closeAll();
     toast_(svgIco('check'), 'تسک ارسال شد');
     _tmTryPushToMember(assignedTo,title,false);
@@ -17823,6 +17866,14 @@ function _tmConfirmSheet(title,body,okLabel,okColor){
 
 function tmNewProject(){toast_(svgIco('flag'),'قابلیت پروژه در نسخه بعدی اضافه میشه');}
 
+function tmDlShortcut(days){
+  var p=mrTodayKey().split('-').map(Number),d=p[2]+days,mo=p[1],y=p[0];
+  var dim=[0,31,31,31,31,31,31,30,30,30,30,30,29];
+  while(d>dim[mo]){d-=dim[mo];mo++;if(mo>12){mo=1;y++;}}
+  var nd=y+'-'+(mo<10?'0'+mo:mo)+'-'+(d<10?'0'+d:d);
+  var inp=document.getElementById('tmAssignDeadline');if(inp)inp.value=nd;
+}
+
 boot();
 
 </script>
@@ -18194,13 +18245,29 @@ boot();
         <div>
       <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">اولویت</div>
       <div style="display:flex;gap:var(--sp2)">
-        <button class="tm-btn tm-pri-opt active" data-pri="normal" onclick="tmSelectPriority(this,'normal')">عادی</button>
-        <button class="tm-btn tm-pri-opt" data-pri="high" onclick="tmSelectPriority(this,'high')" style="color:var(--amber)">⚡ مهم</button>
-        <button class="tm-btn tm-pri-opt" data-pri="urgent" onclick="tmSelectPriority(this,'urgent')" style="color:var(--red)">🔴 فوری</button>
+        <button class="tm-btn tm-pri-chip active" data-pri="normal" onclick="tmSelectPriority(this,'normal')">عادی</button>
+        <button class="tm-btn tm-pri-chip" data-pri="high" onclick="tmSelectPriority(this,'high')" style="color:var(--amber)">⚡ مهم</button>
+        <button class="tm-btn tm-pri-chip" data-pri="urgent" onclick="tmSelectPriority(this,'urgent')" style="color:var(--red)">🔴 فوری</button>
       </div>
     </div>
-<div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">عنوان تسک</div><input id="tmAssignTitle" required class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" placeholder="عنوان..." type="text"/></div>
-    <div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">ددلاین <span style="color:var(--red)">*</span></div><input id="tmAssignDeadline" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3);font-family:var(--mono)" placeholder="1404-05-15" type="text"/></div>
+<div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">عنوان تسک <span style="color:var(--red)">*</span></div>
+      <input id="tmAssignTitle" required class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" placeholder="عنوان تسک را بنویس..." type="text"/>
+    </div>
+    <div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">توضیح (اختیاری)</div>
+      <textarea id="tmAssignDesc" rows="2" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3);resize:none;font-family:var(--f);font-size:var(--fs-xs)" placeholder="جزئیات بیشتر..."></textarea>
+    </div>
+    <div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px">ددلاین <span style="color:var(--red)">*</span></div>
+      <div style="display:flex;gap:var(--sp2);margin-bottom:6px">
+        <button type="button" onclick="tmDlShortcut(1)" style="flex:1;height:32px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--bg2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">فردا</button>
+        <button type="button" onclick="tmDlShortcut(3)" style="flex:1;height:32px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--bg2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">۳ روز</button>
+        <button type="button" onclick="tmDlShortcut(7)" style="flex:1;height:32px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--bg2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">هفته دیگه</button>
+        <button type="button" onclick="tmDlShortcut(14)" style="flex:1;height:32px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--bg2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">۲ هفته</button>
+      </div>
+      <input id="tmAssignDeadline" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3);font-family:var(--mono);text-align:center;direction:ltr" placeholder="1404-05-15" type="text"/>
+    </div>
     <div id="tmAssignErr" style="font-size:var(--fs-xs);color:var(--red);min-height:16px"></div>
         <div style="display:flex;align-items:center;justify-content:space-between;padding:var(--sp2) 0;border-top:1px solid var(--b1)">
       <label style="display:flex;align-items:center;gap:var(--sp2);cursor:pointer">
@@ -18244,7 +18311,7 @@ boot();
       <div class="tm-tabs">
         <div class="tm-tab active" data-tab="status" onclick="tmSetSokoTab('status')" style="font-weight:700">وضعیت</div>
         <div class="tm-tab" data-tab="report" onclick="tmSetSokoTab('report')" style="opacity:.6">گزارش</div>
-        <div class="tm-tab" data-tab="projects" onclick="tmSetSokoTab('projects')" style="opacity:.6">پروژه‌ها</div>
+        <div class="tm-tab" data-tab="projects" onclick="tmSetSokoTab('projects')" style="opacity:.6">📊 آمار</div>
       </div>
     </div>
 
