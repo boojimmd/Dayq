@@ -14488,7 +14488,7 @@ function tmRenderInbox() {
     const priColor = t.priority==='urgent'?'var(--red)':t.priority==='high'?'var(--red)':t.priority==='med'?'var(--amber)':'var(--t4)';
     const priLabel = t.priority==='urgent'?'فوری':t.priority==='high'?'مهم':t.priority==='med'?'متوسط':'عادی';
     const priDot = `<span style="width:6px;height:6px;border-radius:50%;background:${priColor};display:inline-block;flex-shrink:0;margin-top:2px"></span>`;
-    const statusLabel = t.status==='pending'?'شروع نشده':t.status==='in_progress'?'در حال انجام':t.status==='blocked'?'🚫 متوقف':'✅';
+    const statusLabel = t.status==='pending'?'شروع نشده':t.status==='in_progress'?'در حال انجام':t.status==='in_review'?'⏳ برای بررسی':t.status==='blocked'?'🚫 متوقف':'✅';
     const statusColor = t.status==='blocked'?'var(--red)':t.status==='done'?'var(--a)':'var(--t3)';
     return `<div class="tc tm-task" onclick="openTeamTaskDetail('${t.id}')" style="margin-bottom:var(--sp2)">
       <div class="tc-body" style="display:flex;align-items:flex-start;gap:var(--sp2)">
@@ -14839,7 +14839,8 @@ function tmRenderSokoStatus() {
   });
 
   // ── گروه‌بندی بر اساس urgency ──
-  const overdue  = allTasks.filter(t => t.deadline && t.deadline < today)
+  const inReview=allTasks.filter(function(t){return t.status==='in_review';});
+  const overdue  = allTasks.filter(function(t){return t.status!=='in_review'&&t.deadline&&t.deadline<today;})
                            .sort((a,b) => a.deadline.localeCompare(b.deadline));
   const dueToday = allTasks.filter(t => t.deadline === today);
   const thisWeek = allTasks.filter(t => t.deadline && t.deadline > today && _jalToDays(...t.deadline.split('-').map(Number)) - _jalToDays(...today.split('-').map(Number)) <= 7)
@@ -14902,7 +14903,8 @@ function tmRenderSokoStatus() {
     <button onclick="tmAssignTask('')" style="width:100%;height:48px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-md);font-weight:800;font-family:var(--f);cursor:pointer;margin-bottom:var(--sp4);box-shadow:0 2px 12px var(--ag)">✚ ارسال تسک</button>
     ${noTasks
       ? `<div style="text-align:center;padding:var(--sp5);color:var(--t3);font-size:var(--fs-sm)">همه تسک‌ها تموم شدن 🎉</div>`
-      : `${group('دیر شده', 'var(--red)', '🔴', overdue, '')}
+      : `${inReview.length?reviewGroup(inReview):''}
+         ${group('دیر شده', 'var(--red)', '🔴', overdue, '')}
          ${group('امروز', 'var(--amber)', '⚡', dueToday, 'برای امروز تسکی نیست')}
          ${group('این هفته', 'var(--blue)', '📅', thisWeek, '')}
          ${later.length ? group('بعداً', 'var(--t3)', '·', later, '') : ''}
@@ -17686,6 +17688,56 @@ function _tmUpdateSokoSummary(){
   el.innerHTML=parts.length?parts.join(' · '):'تسک فعالی نیست';
 }
 
+async function _ttdSubmitForReview(){
+  var taskId=document.getElementById('ttdBody')?.dataset.taskId;
+  if(!taskId){var tb=document.getElementById('ttdNote');taskId=tb?.dataset?.taskId;}
+  if(!taskId)return toast_(svgIco('flag'),'خطا: تسک یافت نشد');
+  var note=(document.getElementById('ttdNote')?.value||'').trim();
+  var btn=document.getElementById('ttdSubmitBtn');
+  if(btn)btn.disabled=true;
+  try{
+    await tmAPI('PUT','/task/update',{taskId,status:'in_review',memberNote:note});
+    var banner=document.getElementById('ttdReviewBanner');
+    var statusBtns=document.getElementById('ttdStatusBtns');
+    var submitBtn=document.getElementById('ttdSubmitBtn');
+    var saveBtn=document.getElementById('ttdSaveBtn');
+    if(banner)banner.style.display='';
+    if(statusBtns)statusBtns.style.display='none';
+    if(submitBtn)submitBtn.style.display='none';
+    if(saveBtn)saveBtn.style.display='none';
+    toast_(svgIco('check'),'📤 برای بررسی ارسال شد — مدیر اطلاع پیدا کرد');
+    setTimeout(tmSyncBackground,1500);
+  }catch(e){toast_(svgIco('flag'),e.message);}
+  finally{if(btn)btn.disabled=false;}
+}
+
+function reviewTaskRow(t){
+  return '<div style="display:flex;align-items:center;gap:var(--sp3);padding:10px var(--sp3);border-bottom:1px solid rgba(99,102,241,.1);cursor:pointer" onclick="tmOpenTaskThread(\''+t.id+'\')">'+
+    '<div style="flex:1;min-width:0"><div style="font-size:var(--fs-sm);font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(t.title)+'</div>'+
+    '<div style="font-size:var(--fs-xs);color:var(--t3);margin-top:2px">'+esc(t.memberName||'')+(t.memberNote?(' · '+esc(t.memberNote.slice(0,30))):'')+'</div></div>'+
+    '<div style="display:flex;gap:6px;flex-shrink:0">'+
+    '<button onclick="event.stopPropagation();_tmApproveTask(\''+t.id+'\')" style="height:32px;padding:0 10px;background:var(--a);color:#fff;border:none;border-radius:var(--r5);font-size:var(--fs-2xs);font-weight:700;font-family:var(--f);cursor:pointer">تأیید ✅</button>'+
+    '<button onclick="event.stopPropagation();_tmReturnTask(\''+t.id+'\')" style="height:32px;padding:0 10px;background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r5);font-size:var(--fs-2xs);font-weight:700;font-family:var(--f);cursor:pointer">↩️ برگشت</button>'+
+    '</div></div>';
+}
+function reviewGroup(tasks){
+  return '<div style="margin-bottom:var(--sp2);border-radius:var(--r2);overflow:hidden;border:1px solid rgba(99,102,241,.25);background:rgba(99,102,241,.04)">'+
+    '<div style="display:flex;align-items:center;gap:6px;padding:8px var(--sp3)">'+
+    '<span style="font-size:var(--fs-xs);font-weight:700;color:#6366f1">🔍 برای بررسی</span>'+
+    '<span style="background:#6366f1;color:#fff;font-size:9px;font-weight:800;border-radius:var(--r5);padding:1px 7px">'+num(tasks.length)+'</span></div>'+
+    '<div style="background:var(--bg1);border-top:1px solid rgba(99,102,241,.15)">'+tasks.map(reviewTaskRow).join('')+'</div></div>';
+}
+async function _tmApproveTask(taskId){
+  try{await tmAPI('PUT','/task/update',{taskId,status:'done'});toast_(svgIco('check'),'✅ تأیید شد');setTimeout(tmSyncBackground,500);}
+  catch(e){toast_(svgIco('flag'),e.message);}
+}
+async function _tmReturnTask(taskId){
+  var note=prompt('یادداشت برای برگشت:','');
+  if(note===null)return;
+  try{await tmAPI('PUT','/task/update',{taskId,status:'in_progress',memberNote:note});toast_(svgIco('check'),'↩️ برگشت داده شد');setTimeout(tmSyncBackground,500);}
+  catch(e){toast_(svgIco('flag'),e.message);}
+}
+
 boot();
 
 </script>
@@ -18396,11 +18448,16 @@ boot();
     <!-- وضعیت -->
     <div>
       <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:8px">وضعیت</div>
+      <!-- وضعیت in_review: read-only banner -->
+      <div id="ttdReviewBanner" style="display:none;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:var(--r2);padding:var(--sp3);text-align:center">
+        <div style="font-size:var(--fs-sm);font-weight:700;color:#6366f1">⏳ منتظر تأیید مدیر</div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-top:4px">مدیر تسک رو بررسی میکنه</div>
+      </div>
+      <!-- دکمه‌های عادی -->
       <div style="display:flex;gap:6px" id="ttdStatusBtns">
-        <button onclick="_ttdSetStatus('pending')"   class="ttd-st-btn" data-st="pending"   style="flex:1;height:36px;border-radius:var(--r2);border:1px solid var(--b1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">باید</button>
-        <button onclick="_ttdSetStatus('in_progress')" class="ttd-st-btn" data-st="in_progress" style="flex:1;height:36px;border-radius:var(--r2);border:1px solid var(--b1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">درحال</button>
-        <button onclick="_ttdSetStatus('done')"      class="ttd-st-btn" data-st="done"      style="flex:1;height:36px;border-radius:var(--r2);border:1px solid var(--b1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">✓ انجام شد</button>
-        <button onclick="_ttdSetStatus('blocked')"   class="ttd-st-btn" data-st="blocked"   style="flex:1;height:36px;border-radius:var(--r2);border:1px solid rgba(248,81,73,.3);color:var(--red);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">🚫 مشکل</button>
+        <button onclick="_ttdSetStatus('pending')"    class="ttd-st-btn" data-st="pending"    style="flex:1;height:36px;border-radius:var(--r2);border:1px solid var(--b1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">شروع نشده</button>
+        <button onclick="_ttdSetStatus('in_progress')" class="ttd-st-btn" data-st="in_progress" style="flex:1;height:36px;border-radius:var(--r2);border:1px solid var(--b1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">در انجام</button>
+        <button onclick="_ttdSetStatus('blocked')"    class="ttd-st-btn" data-st="blocked"    style="flex:1;height:36px;border-radius:var(--r2);border:1px solid rgba(229,62,90,.3);color:var(--red);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">متوقف 🚫</button>
       </div>
     </div>
 
@@ -18420,7 +18477,10 @@ boot();
 
     <div id="ttdErr" style="font-size:var(--fs-xs);color:var(--red);min-height:14px;text-align:center"></div>
     <div id="ttdCommentSection" style="margin-bottom:var(--sp3)"><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2);text-align:right">پیام با مدیر</div><div class="ttd-thread" id="ttdThreadMsgs"></div><div style="display:flex;gap:var(--sp2);align-items:flex-end;padding-top:var(--sp2);border-top:1px solid var(--b2);margin-top:var(--sp2)"><textarea class="ttd-reply-inp" rows="1" placeholder="پیام بنویس..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();_ttdSendComment()}"></textarea><button class="ttd-reply-send" onclick="_ttdSendComment()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button></div></div>
-    <button id="ttdSaveBtn" onclick="_ttdSave()" style="width:100%;height:46px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">ذخیره وضعیت</button>
+    <div style="display:flex;gap:var(--sp2)">
+      <button id="ttdSaveBtn" onclick="_ttdSave()" style="flex:1;height:46px;background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">ذخیره</button>
+      <button id="ttdSubmitBtn" onclick="_ttdSubmitForReview()" style="flex:2;height:46px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">📤 ارسال برای بررسی</button>
+    </div>
   </div>
 </div>
 
