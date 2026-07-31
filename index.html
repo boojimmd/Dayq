@@ -17349,8 +17349,11 @@ async function _ttdSave() {
   const errEl = document.getElementById('ttdErr');
   const btn = document.getElementById('ttdSaveBtn');
 
-  if (status === 'blocked' && !note) {
-    errEl.textContent = 'لطفاً مشکل رو توضیح بده تا مدیر بتونه کمک کنه';
+  var _bCr=document.querySelector('input[name="blockedReason"]:checked');
+  var _bRt=_bCr&&_bCr.value!=='other'?_bCr.value:'';
+  var blockedFinalNote=_bRt?(_bRt+(note?': '+note:'')):note;
+  if (status === 'blocked' && !blockedFinalNote) {
+    errEl.textContent = 'دلیل توقف رو انتخاب کن یا توضیح بنویس';
     return;
   }
 
@@ -17359,12 +17362,12 @@ async function _ttdSave() {
     await tmAPI('PUT', '/task/update', {
       taskId: _ttdTaskId,
       status,
-      memberNote: note,
+      memberNote: status==='blocked'?blockedFinalNote:note,
     });
     // آپدیت local inbox
     if (tm.inbox) {
       const t = tm.inbox.find(x => x.id === _ttdTaskId);
-      if (t) { t.status = status; t.memberNote = note; }
+      if (t) { t.status = status; t.memberNote = note; if(typeof seenAt!=='undefined')t.seenAt=Date.now(); }
     }
     closeAll();
     tmApplyUI();
@@ -18518,11 +18521,21 @@ boot();
       </div>
     </div>
 
+    <!-- متوقف — دلیل انتخاب -->
+    <div id="ttdBlockedSection" style="display:none;background:rgba(229,62,90,.05);border:1px solid rgba(229,62,90,.2);border-radius:var(--r2);padding:var(--sp3)">
+      <div style="font-size:var(--fs-xs);font-weight:700;color:var(--red);margin-bottom:var(--sp2)">🚫 چرا متوقف شده؟</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <label style="display:flex;align-items:center;gap:var(--sp2);font-size:var(--fs-xs);cursor:pointer"><input type="radio" name="blockedReason" value="منتظر اطلاعات از مدیر هستم"> منتظر اطلاعات از مدیر</label>
+        <label style="display:flex;align-items:center;gap:var(--sp2);font-size:var(--fs-xs);cursor:pointer"><input type="radio" name="blockedReason" value="نیاز به تأیید دارم"> نیاز به تأیید دارم</label>
+        <label style="display:flex;align-items:center;gap:var(--sp2);font-size:var(--fs-xs);cursor:pointer"><input type="radio" name="blockedReason" value="ابزار یا دسترسی ندارم"> ابزار یا دسترسی ندارم</label>
+        <label style="display:flex;align-items:center;gap:var(--sp2);font-size:var(--fs-xs);cursor:pointer"><input type="radio" name="blockedReason" value="other"> توضیح دیگه</label>
+      </div>
+    </div>
     <!-- یادداشت برای مدیر -->
     <div>
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px">یادداشت برای مدیر (اختیاری)</div>
-      <textarea id="ttdNote" rows="3"
-        placeholder="توضیح بده — مثلاً: منتظر تأیید مدیر مالی هستم"
+      <div id="ttdNoteLabel" style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px">یادداشت برای مدیر (اختیاری)</div>
+      <textarea id="ttdNote" rows="2"
+        placeholder="توضیح بده..."
         style="width:100%;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 12px;font-size:var(--fs-xs);font-family:var(--f);color:var(--t1);direction:rtl;resize:none;outline:none"></textarea>
     </div>
 
