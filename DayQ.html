@@ -15503,15 +15503,10 @@ tmDoAssign = async function() {
 // ── Deadline Extend Modal ─────────────────────────────────────
 let _sokoExtendTaskId = null;
 
-function tmExtendDeadline(taskId) {
-  _sokoExtendTaskId = taskId;
-  // ساده‌ترین رویکرد: prompt
-  const newDl = prompt('ددلاین جدید (مثلاً ۱۴۰۴-۰۶-۱۵):');
-  if (!newDl) return;
-  tmAPI('PUT', '/task/update', { taskId, deadline: newDl }).then(() => {
-    toast_(svgIco('check'), 'ددلاین تمدید شد');
-    tmSyncBackground();
-  }).catch(e => toast_(svgIco('flag'), e.message));
+function tmExtendDeadline(tid){
+  var allT=[];(tm.snapshot&&tm.snapshot.members||[]).forEach(function(m){(m.tasks||[]).forEach(function(t){allT.push(t);});});
+  var task=allT.find(function(t){return t.id===tid;})||{};
+  _tmDeadlineSheet&&_tmDeadlineSheet(tid,task.title||'تسک',task.deadline||'');
 }
 
 // ── Triage Integration برای تسک‌های تیمی ─────────────────────
