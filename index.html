@@ -14998,9 +14998,10 @@ function tmRenderSokoStatus() {
     });
   });
 
-  // ── گروه‌بندی بر اساس urgency ──
-  const inReview=allTasks.filter(function(t){return t.status==='in_review';});
-  const overdue  = allTasks.filter(function(t){return t.status!=='in_review'&&t.deadline&&t.deadline<today;})
+  // ── filter + گروه‌بندی بر اساس urgency ──
+  var fT=_sbf==='all'?allTasks:allTasks.filter(function(t){return t.memberUuid===_sbf;});
+  const inReview=fT.filter(function(t){return t.status==='in_review';});
+  const overdue  = fT.filter(function(t){return t.status!=='in_review'&&t.deadline&&t.deadline<today;})
                            .sort((a,b) => a.deadline.localeCompare(b.deadline));
   const dueToday = fT.filter(t => t.deadline === today);
   const thisWeek = fT.filter(t => t.deadline && t.deadline > today && _jalToDays(...t.deadline.split('-').map(Number)) - _jalToDays(...today.split('-').map(Number)) <= 7)
