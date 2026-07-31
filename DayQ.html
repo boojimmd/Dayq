@@ -11142,12 +11142,12 @@ function ctxCyclePriority(){
 }
 function ctxDelete(){
   if(!_ctxTaskId)return;
-  const id=_ctxTaskId;_ctxHide();
-  if(!confirm('این کار حذف بشه؟'))return;
+  const id=_ctxTaskId; const prev=tasks.find(t=>t.id===id); const title=prev?.title||'کار';
+  _ctxHide();
   tasks=tasks.filter(t=>t.id!==id);
   saveAll();renderTasks();
   if(_dpTaskId===id) dpClose();
-  toast_(svgIco('flag'),'حذف شد');
+  toast_(svgIco('check'),'«'+title+'» حذف شد',5000,function(){if(prev){tasks.push(prev);saveAll();renderTasks();toast_(svgIco('check'),'بازگردانی شد');}});
 }
 
 /* ══ ME DASHBOARD ══ */
@@ -11485,11 +11485,11 @@ function dpToggleDone(){
 }
 
 function dpDelete(){
-  if(!_dpTaskId) return;
-  if(!confirm('این کار حذف بشه؟')) return;
-  tasks=tasks.filter(t=>t.id!==_dpTaskId);
-  saveAll(); renderTasks(); dpClose();
-  toast_(svgIco('flag'),'حذف شد');
+  if(!_dpTaskId)return;
+  var id=_dpTaskId; var prev=tasks.find(function(t){return t.id===id;}); var title=prev&&prev.title?prev.title:'کار';
+  tasks=tasks.filter(function(t){return t.id!==id;});
+  saveAll();renderTasks();dpClose();
+  toast_(svgIco('check'),'«'+title+'» حذف شد',5000,function(){if(prev){tasks.push(prev);saveAll();renderTasks();toast_(svgIco('check'),'بازگردانی شد');}});
 }
 
 function dpSaveNoteDebounced(){
@@ -11615,11 +11615,11 @@ function dpToggleDone(){
 }
 
 function dpDelete(){
-  if(!_dpTaskId) return;
-  if(!confirm('این کار حذف بشه؟')) return;
-  tasks=tasks.filter(t=>t.id!==_dpTaskId);
-  saveAll(); renderTasks(); dpClose();
-  toast_(svgIco('flag'),'حذف شد');
+  if(!_dpTaskId)return;
+  var id=_dpTaskId; var prev=tasks.find(function(t){return t.id===id;}); var title=prev&&prev.title?prev.title:'کار';
+  tasks=tasks.filter(function(t){return t.id!==id;});
+  saveAll();renderTasks();dpClose();
+  toast_(svgIco('check'),'«'+title+'» حذف شد',5000,function(){if(prev){tasks.push(prev);saveAll();renderTasks();toast_(svgIco('check'),'بازگردانی شد');}});
 }
 
 function dpSaveNoteDebounced(){
