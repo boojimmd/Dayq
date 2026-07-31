@@ -14490,19 +14490,7 @@ function tmRenderInbox() {
     const priDot = `<span style="width:6px;height:6px;border-radius:50%;background:${priColor};display:inline-block;flex-shrink:0;margin-top:2px"></span>`;
     const statusLabel = t.status==='pending'?'شروع نشده':t.status==='in_progress'?'در حال انجام':t.status==='in_review'?'⏳ برای بررسی':t.status==='blocked'?'🚫 متوقف':'✅';
     const statusColor = t.status==='blocked'?'var(--red)':t.status==='done'?'var(--a)':'var(--t3)';
-    return `<div class="tc tm-task" onclick="openTeamTaskDetail('${t.id}')" style="margin-bottom:var(--sp2)">
-      <div class="tc-body" style="display:flex;align-items:flex-start;gap:var(--sp2)">
-        ${priDot}
-        <div style="flex:1;min-width:0">
-          <div style="font-size:var(--fs-sm);font-weight:600;color:var(--t1);margin-bottom:3px">${esc(t.title)}</div>
-          <div style="display:flex;align-items:center;gap:var(--sp2);flex-wrap:wrap">
-            ${t.deadline?`<span style="font-size:var(--fs-xs)">${tmHumanDeadline(t.deadline)}</span>`:''}
-            <span style="font-size:var(--fs-2xs);color:${statusColor};font-weight:600">${statusLabel}</span>
-          </div>
-        </div>
-        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--t4)" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:2px"><polyline points="15 18 9 12 15 6"/></svg>
-      </div>
-    </div>`;
+    var _qb=t.status==='pending'?`<button onclick="event.stopPropagation();_ttdQuickStatus('${t.id}','in_progress')" style="height:26px;padding:0 10px;border-radius:var(--r5);border:1px solid var(--b1);background:transparent;font-size:10px;font-weight:600;font-family:var(--f);color:var(--t2);cursor:pointer">▶ شروع</button>`:t.status==='in_progress'?`<button onclick="event.stopPropagation();_ttdQuickStatus('${t.id}','in_review')" style="height:26px;padding:0 10px;border-radius:var(--r5);border:none;background:var(--a);color:#fff;font-size:10px;font-weight:700;font-family:var(--f);cursor:pointer">📤 بررسی</button>`:''; return `<div class="tc tm-task" onclick="openTeamTaskDetail('${t.id}')" style="margin-bottom:var(--sp2)"><div class="tc-body"><div style="display:flex;align-items:flex-start;gap:var(--sp2)">${priDot}<div style="flex:1;min-width:0"><div style="font-size:var(--fs-sm);font-weight:600;color:var(--t1);margin-bottom:3px">${esc(t.title)}</div><div style="display:flex;align-items:center;gap:var(--sp2)">${t.deadline?`<span style="font-size:var(--fs-xs)">${tmHumanDeadline(t.deadline)}</span>`:''}<span style="font-size:var(--fs-2xs);color:${statusColor};font-weight:600">${statusLabel}</span></div></div><span style="font-size:9px;color:${t.seenAt?'var(--a)':'var(--t4)'}">${t.seenAt?'✓':'○'}</span></div>${_qb?`<div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--b2)">${_qb}</div>`:''}</div></div>`;
   }).join('');
   if (active.length > 3) {
     el.innerHTML += `<div onclick="tmOpenSoko()" style="text-align:center;font-size:var(--fs-xs);color:var(--blue);padding:var(--sp2);cursor:pointer">مشاهده همه تسک‌ها ←</div>`;
@@ -17325,10 +17313,11 @@ function openTeamTaskDetail(taskId) {
 
   document.getElementById('ttdErr').textContent = '';
   openSheet('shTeamTaskDetail');
+  setTimeout(function(){_ttdMarkSeen(taskId);},800);
   setTimeout(function(){_ttdRefreshThread&&_ttdRefreshThread();},80);
 }
 
-function _ttdSetStatus(st) {
+function _ttdSetStatus(st){_ttdUpdateBlockedUI(st);
   document.querySelectorAll('.ttd-st-btn').forEach(btn => {
     const active = btn.dataset.st === st;
     btn.style.background = active ? 'var(--t1)' : 'var(--bg2)';
@@ -17737,6 +17726,10 @@ async function _tmReturnTask(taskId){
   try{await tmAPI('PUT','/task/update',{taskId,status:'in_progress',memberNote:note});toast_(svgIco('check'),'↩️ برگشت داده شد');setTimeout(tmSyncBackground,500);}
   catch(e){toast_(svgIco('flag'),e.message);}
 }
+
+function _ttdUpdateBlockedUI(s){var bs=document.getElementById('ttdBlockedSection');var nl=document.getElementById('ttdNoteLabel');if(bs)bs.style.display=s==='blocked'?'':'none';if(nl)nl.textContent=s==='blocked'?'توضیح بیشتر':'یادداشت برای مدیر';}
+async function _ttdMarkSeen(tid){if(!tid||!tm.token)return;try{await tmAPI('PUT','/task/update',{taskId:tid,seenAt:Date.now()});}catch(e){}}
+async function _ttdQuickStatus(tid,st){try{await tmAPI('PUT','/task/update',{taskId:tid,status:st});toast_(svgIco('check'),st==='in_progress'?'▶ شروع شد':'📤 ارسال شد');setTimeout(tmSyncBackground,800);}catch(e){toast_(svgIco('flag'),e.message);}}
 
 boot();
 
