@@ -14938,16 +14938,24 @@ function tmRenderSokoStatus() {
 
   // ── خلاصه اعضا (compact) ──
   const memberPills = members.map(m => {
-    const tasks = m.activeTasks || 0;
-    const memberTasksArr = (m.tasks || []).filter(t => !t.deleted && t.status !== 'done');
-    const od = memberTasksArr.filter(t => t.deadline && t.deadline < today).length;
-    const dotColor = od > 0 ? 'var(--red)' : m.alert === 'blocked' ? 'var(--red)' : m.alert === 'stale' ? 'var(--amber)' : 'var(--a)';
-    return `<div onclick="tmOpenMemberTasks('${m.uuid}')" style="display:flex;align-items:center;gap:6px;background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r5);padding:6px 12px;cursor:pointer;flex-shrink:0">
-      <span style="width:7px;height:7px;border-radius:50%;background:${dotColor}"></span>
-      <span style="font-size:var(--fs-xs);font-weight:600;color:var(--t1)">${esc(m.name)}</span>
-      <span style="font-size:var(--fs-2xs);color:var(--t3)">${num(tasks)}</span>
-      ${od > 0 ? `<span style="background:var(--red);color:#fff;font-size:8px;font-weight:700;border-radius:var(--r5);padding:1px 5px">${num(od)}</span>` : ''}
-    </div>`;
+    const arr=(m.tasks||[]).filter(t=>!t.deleted&&t.status!=='done');
+    const od=arr.filter(t=>t.deadline&&t.deadline<today).length;
+    const dt=arr.filter(t=>t.deadline===today).length;
+    const blk=arr.filter(t=>t.status==='blocked').length;
+    const rev=arr.filter(t=>t.status==='in_review').length;
+    const total=m.activeTasks||arr.length||0;
+    const dc=od>0||blk>0?'var(--red)':dt>0?'var(--amber)':rev>0?'#6366f1':total>0?'var(--a)':'var(--t4)';
+    const bc=od>0||blk>0?'rgba(229,62,90,.3)':dt>0?'rgba(217,119,6,.3)':'var(--b1)';
+    var bdg='';
+    if(od>0)bdg+='<span style="background:var(--red);color:#fff;font-size:8px;font-weight:700;border-radius:var(--r5);padding:1px 5px">'+num(od)+'🔴</span>';
+    else if(dt>0)bdg+='<span style="background:var(--amber);color:#fff;font-size:8px;font-weight:700;border-radius:var(--r5);padding:1px 5px">'+num(dt)+'⚡</span>';
+    if(rev>0)bdg+='<span style="background:#6366f1;color:#fff;font-size:8px;font-weight:700;border-radius:var(--r5);padding:1px 5px">⏳</span>';
+    if(blk>0)bdg+='<span style="background:var(--red);color:#fff;font-size:8px;font-weight:700;border-radius:var(--r5);padding:1px 5px">🚫</span>';
+    return '<div onclick="tmOpenMemberTasks(\''+m.uuid+'\')" style="display:flex;align-items:center;gap:6px;background:var(--bg1);border:1px solid '+bc+';border-radius:var(--r5);padding:6px 12px;cursor:pointer;flex-shrink:0">'+
+      '<span style="width:7px;height:7px;border-radius:50%;background:'+dc+'"></span>'+
+      '<span style="font-size:var(--fs-xs);font-weight:600;color:var(--t1)">'+esc(m.name)+'</span>'+
+      (total>0?'<span style="font-size:var(--fs-2xs);color:var(--t3)">'+num(total)+'</span>':'')+
+      bdg+'</div>';
   }).join('');
 
   const noTasks = !allTasks.length;
