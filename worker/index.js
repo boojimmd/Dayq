@@ -1378,6 +1378,51 @@ export default {
       return jsonRes({ members: result, pendingUuids: meta.pendingUuids }, 200, cors);
     }
 
+    // ── /task/member ──
+    if (path === '/task/member' && req.method === 'GET') {
+      const token = req.headers.get('X-DayQ-Token');
+      const session = await validateSession(token, env);
+      if (!session || session.role !== 'manager') return errRes('فقط مدیر', 403, cors);
+      const { teamCode } = session;
+      const memberUuid = url.searchParams.get('uuid');
+      if (!memberUuid) return errRes('uuid لازمه', 400, cors);
+      const keys = await env.DAYQ_KV.list({ prefix: `team:${teamCode}:task:` });
+      const tasks = [];
+      for (const key of keys.keys) {
+        const raw = await env.DAYQ_KV.get(key.name);
+        if (!raw) continue;
+        const t = JSON.parse(raw);
+        if (t.assignedTo === memberUuid && !t.deleted) tasks.push(t);
+      }
+      return jsonRes({ tasks }, 200, cors);
+    }
+
+    // ── /task/comment ──
+    if (path === '/task/comment' && req.method === 'POST') {
+      const token = req.headers.get('X-DayQ-Token');
+      const session = await validateSession(token, env);
+      if (!session) return errRes('دسترسی نامعتبر', 403, cors);
+      const { taskId, text } = await req.json();
+      const { teamCode, uuid, role } = session;
+      if (!taskId || !text?.trim()) return errRes('اطلاعات ناقص', 400, cors);
+      const taskRaw = await env.DAYQ_KV.get(`team:${teamCode}:task:${taskId}`);
+      if (!taskRaw) return errRes('تسک یافت نشد', 404, cors);
+      const task = JSON.parse(taskRaw);
+      if (role === 'member' && task.assignedTo !== uuid) return errRes('دسترسی نامعتبر', 403, cors);
+      if (!task.comments) task.comments = [];
+      const memberRaw = await env.DAYQ_KV.get(`team:${teamCode}:member:${uuid}`);
+      const memberName = memberRaw ? JSON.parse(memberRaw).name : (role === 'manager' ? 'مدیر' : 'کارمند');
+      const comment = { id: crypto.randomUUID(), text: text.trim(), by: uuid, name: memberName, role, at: Date.now() };
+      task.comments.push(comment);
+      await env.DAYQ_KV.put(`team:${teamCode}:task:${taskId}`, JSON.stringify(task));
+      if (role === 'member') {
+        await pushToManager(teamCode, { title: '💬 '+memberName+' — '+task.title, body: text.trim().slice(0,80), data: { type: 'task_note', taskId, teamCode } }, env);
+      } else {
+        await pushToMember(teamCode, task.assignedTo, { title: '💬 مدیر — '+task.title, body: text.trim().slice(0,80), data: { type: 'task_note', taskId, teamCode } }, env);
+      }
+      return jsonRes({ comment }, 200, cors);
+    }
+
     return new Response('DayQ Worker v3 — Personal + Team', { headers: cors });
   },
 
