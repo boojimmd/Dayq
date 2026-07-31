@@ -14786,11 +14786,18 @@ function tmOpenSoko() {
     document.body.style.top = '-' + (window.scrollY || 0) + 'px';
   }
   const tab = tm.sokoTab || 'status';
+  // loading state قبل از sync
+  const _sc = document.getElementById('tmSokoStatusContent');
+  if(_sc && tm.role === 'manager') {
+    _sc.innerHTML = '<div style="padding:var(--sp5);text-align:center"><div class="tm-skeleton" style="height:60px;border-radius:var(--r2);margin-bottom:var(--sp2)"></div><div class="tm-skeleton" style="height:60px;border-radius:var(--r2)"></div></div>';
+  }
   tmSetSokoTab(tab);
   if (typeof tmRenderSidebar === 'function') {
     tmRenderSidebar(tab);
     _tmUpdateHdrKpi && _tmUpdateHdrKpi();
   }
+  // force sync with member tasks
+  _syncRunning = false;
   tmSyncBackground();
 }
 
