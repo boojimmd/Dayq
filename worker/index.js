@@ -562,8 +562,8 @@ export default {
 
       // push به کارمند
       await pushToMember(teamCode, memberUuid, {
-        title: 'DayQ — خوش اومدی!',
-        body: `عضویت در تیم ${meta.teamName} تأیید شد`,
+        title: '✅ عضویت تأیید شد',
+        body: `به تیم ${meta.teamName} خوش اومدی — برای ورود کد و PIN بزن`,
         data: { type: 'approved', teamCode, workerUrl: url.origin }
       }, env);
 
@@ -744,7 +744,7 @@ export default {
       const session = await validateSession(token, env);
       if (!session) return errRes('دسترسی نامعتبر', 403, cors);
 
-      const { taskId, status, memberNote, blockedNote, checklistUpdates } = await req.json();
+      const { taskId, status, memberNote, blockedNote, checklistUpdates, seenAt, deadline } = await req.json();
       const { teamCode, uuid, role } = session;
 
       const taskRaw = await env.DAYQ_KV.get(`team:${teamCode}:task:${taskId}`);
@@ -763,6 +763,8 @@ export default {
       if (memberNote !== undefined) task.memberNote = memberNote;
       if (blockedNote !== undefined) task.blockedNote = blockedNote;
       if (checklistUpdates) task.checklist = checklistUpdates;
+      if (deadline) task.deadline = deadline;
+      if (seenAt) { task.seenAt = seenAt; task.seenBy = uuid; }
       task.lastActivityAt = Date.now();
 
       await env.DAYQ_KV.put(`team:${teamCode}:task:${taskId}`, JSON.stringify(task));
