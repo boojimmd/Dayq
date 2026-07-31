@@ -14477,28 +14477,48 @@ function tmRenderTodaySection() {
 }
 
 // ── «از مدیر» section (کارمند) ────────────────────────────────
-function tmRenderInbox() {
-  const el = document.getElementById('tmInboxList');
-  if (!el) return;
-  const active = tm.inbox.filter(t => !t.deleted && t.status !== 'done');
-  if (!active.length) {
-    el.innerHTML = '<div style="padding:var(--sp4);text-align:center"><div style="font-size:1.5rem;margin-bottom:8px">✅</div><div style="font-size:var(--fs-xs);color:var(--t3)">تسک جدیدی نداری</div></div>';
-    document.getElementById('tmInboxCount').textContent = '';
+function tmRenderInbox(){
+  var el=document.getElementById('tmInboxList');
+  if(!el)return;
+  var active=(tm.inbox||[]).filter(function(t){return !t.deleted&&t.status!=='done';});
+  var cntEl=document.getElementById('tmInboxCount');
+  if(!active.length){
+    el.innerHTML='<div style="padding:var(--sp4);text-align:center"><div style="font-size:1.5rem">✅</div><div style="font-size:var(--fs-xs);color:var(--t3);margin-top:6px">تسک فعالی نداری</div></div>';
+    if(cntEl)cntEl.style.display='none';
     return;
   }
-  document.getElementById('tmInboxCount').textContent = active.length;
-  el.innerHTML = active.slice(0,3).map(t => {
-    /* priority + status در کارت جدید مدیریت میشه */
-    const priColor = t.priority==='urgent'?'var(--red)':t.priority==='high'?'var(--red)':t.priority==='med'?'var(--amber)':'var(--t4)';
-    const priLabel = t.priority==='urgent'?'فوری':t.priority==='high'?'مهم':t.priority==='med'?'متوسط':'عادی';
-    const priDot = `<span style="width:6px;height:6px;border-radius:50%;background:${priColor};display:inline-block;flex-shrink:0;margin-top:2px"></span>`;
-    const statusLabel = t.status==='pending'?'شروع نشده':t.status==='in_progress'?'در حال انجام':t.status==='in_review'?'⏳ برای بررسی':t.status==='blocked'?'🚫 متوقف':'✅';
-    const statusColor = t.status==='blocked'?'var(--red)':t.status==='done'?'var(--a)':'var(--t3)';
-    var _qb=t.status==='pending'?`<button onclick="event.stopPropagation();_ttdQuickStatus('${t.id}','in_progress')" style="height:26px;padding:0 10px;border-radius:var(--r5);border:1px solid var(--b1);background:transparent;font-size:10px;font-weight:600;font-family:var(--f);color:var(--t2);cursor:pointer">▶ شروع</button>`:t.status==='in_progress'?`<button onclick="event.stopPropagation();_ttdQuickStatus('${t.id}','in_review')" style="height:26px;padding:0 10px;border-radius:var(--r5);border:none;background:var(--a);color:#fff;font-size:10px;font-weight:700;font-family:var(--f);cursor:pointer">📤 بررسی</button>`:''; return `<div class="tc tm-task" onclick="openTeamTaskDetail('${t.id}')" style="margin-bottom:var(--sp2)"><div class="tc-body"><div style="display:flex;align-items:flex-start;gap:var(--sp2)">${priDot}<div style="flex:1;min-width:0"><div style="font-size:var(--fs-sm);font-weight:600;color:var(--t1);margin-bottom:3px">${esc(t.title)}</div><div style="display:flex;align-items:center;gap:var(--sp2)">${t.deadline?`<span style="font-size:var(--fs-xs)">${tmHumanDeadline(t.deadline)}</span>`:''}<span style="font-size:var(--fs-2xs);color:${statusColor};font-weight:600">${statusLabel}</span></div></div><span style="font-size:9px;color:${t.seenAt?'var(--a)':'var(--t4)'}">${t.seenAt?'✓':'○'}</span></div>${_qb?`<div style="margin-top:6px;padding-top:6px;border-top:1px solid var(--b2)">${_qb}</div>`:''}</div></div>`;
+  if(cntEl){cntEl.style.display='';cntEl.textContent=active.length;}
+  var today=mrTodayKey();
+  var rows=active.slice(0,5).map(function(t){
+    var isOverdue=t.deadline&&t.deadline<today;
+    var isToday=t.deadline===today;
+    var dc=isOverdue?'var(--red)':isToday?'var(--amber)':'var(--t3)';
+    var pri=t.priority==='urgent'||t.priority==='high'?'var(--red)':t.priority==='med'?'var(--amber)':'var(--b1)';
+    var si=t.status==='in_progress'?'▶':t.status==='blocked'?'🚫':t.status==='in_review'?'⏳':'○';
+    var sc=t.status==='in_progress'?'var(--blue)':t.status==='blocked'?'var(--red)':t.status==='in_review'?'#6366f1':'var(--t4)';
+    var qa='';
+    if(t.status==='pending'){
+      qa='<button onclick="event.stopPropagation();_ttdQuickStatus(\''+t.id+'\',\'in_progress\')" style="height:26px;padding:0 8px;border-radius:var(--r5);border:1px solid var(--b1);background:transparent;font-size:10px;font-weight:600;font-family:var(--f);color:var(--t2);cursor:pointer">▶ شروع</button>';
+    }else if(t.status==='in_progress'){
+      qa='<button onclick="event.stopPropagation();_ttdQuickStatus(\''+t.id+'\',\'in_review\')" style="height:26px;padding:0 8px;border-radius:var(--r5);border:none;background:var(--a);color:#fff;font-size:10px;font-weight:700;font-family:var(--f);cursor:pointer">📤 بررسی</button>';
+    }
+    var seen=t.seenAt?'<span style="color:var(--a);font-size:9px">✓</span>':'<span style="color:var(--t4);font-size:9px">○</span>';
+    var dl=t.deadline?'<span style="font-size:var(--fs-2xs);color:'+dc+'">'+tmHumanDeadline(t.deadline)+'</span>':'';
+    return '<div onclick="openTeamTaskDetail(\''+t.id+'\')" style="display:flex;align-items:flex-start;gap:var(--sp2);padding:10px var(--sp3);border-bottom:1px solid var(--b2);cursor:pointer">'+
+      '<span style="width:7px;height:7px;border-radius:50%;background:'+pri+';margin-top:5px;flex-shrink:0"></span>'+
+      '<div style="flex:1;min-width:0">'+
+        '<div style="display:flex;align-items:center;justify-content:space-between">'+
+          '<div style="font-size:var(--fs-sm);font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1">'+esc(t.title)+'</div>'+
+          seen+
+        '</div>'+
+        '<div style="display:flex;align-items:center;gap:var(--sp2);margin-top:3px;flex-wrap:wrap">'+
+          '<span style="font-size:10px;color:'+sc+';font-weight:600">'+si+'</span>'+dl+
+          (qa?'<span style="margin-right:auto">'+qa+'</span>':'')+
+        '</div>'+
+      '</div></div>';
   }).join('');
-  if (active.length > 3) {
-    el.innerHTML += `<div onclick="tmOpenSoko()" style="text-align:center;font-size:var(--fs-xs);color:var(--blue);padding:var(--sp2);cursor:pointer">مشاهده همه تسک‌ها ←</div>`;
-  }
+  if(active.length>5){rows+='<div onclick="tmOpenSoko()" style="text-align:center;padding:var(--sp2);font-size:var(--fs-xs);color:var(--a);cursor:pointer">مشاهده همه '+active.length+' تسک ←</div>';}
+  el.innerHTML=rows;
 }
 
 // ── Collapse تیم امروز ─────────────────────────────────────────
