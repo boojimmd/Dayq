@@ -14406,6 +14406,7 @@ async function tmSyncBackground(){
       tm.snapshot=data;
       localStorage.setItem(TM_SK.snap,JSON.stringify(data));
       tmUpdateSokoCard();
+      tmCheckPending&&tmCheckPending();
       if(changed||sokoOpen){
         tmRenderTodaySection();
         if(tm.sokoTab==='status'||!tm.sokoTab)tmRenderSokoStatus();
