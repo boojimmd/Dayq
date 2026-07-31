@@ -17721,10 +17721,18 @@ async function _tmApproveTask(taskId){
   try{await tmAPI('PUT','/task/update',{taskId,status:'done'});toast_(svgIco('check'),'✅ تأیید شد');setTimeout(tmSyncBackground,500);}
   catch(e){toast_(svgIco('flag'),e.message);}
 }
-async function _tmReturnTask(taskId){
-  var note=prompt('یادداشت برای برگشت:','');
-  if(note===null)return;
-  try{await tmAPI('PUT','/task/update',{taskId,status:'in_progress',memberNote:note});toast_(svgIco('check'),'↩️ برگشت داده شد');setTimeout(tmSyncBackground,500);}
+function _tmReturnTask(tid){
+  var old=document.getElementById('shTmRet');if(old)old.remove();
+  var s=document.createElement('div');s.className='sheet';s.id='shTmRet';
+  var opts=['<button onclick="_tmRP(this)" data-v="کامل نشده" style="height:40px;border-radius:var(--r2);border:1px solid var(--b1);background:var(--bg2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;width:100%;text-align:right;padding:0 var(--sp3)">کامل نشده</button>',
+    '<button onclick="_tmRP(this)" data-v="نیاز به اصلاح" style="height:40px;border-radius:var(--r2);border:1px solid var(--b1);background:var(--bg2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;width:100%;text-align:right;padding:0 var(--sp3)">نیاز به اصلاح</button>'].join('');
+  s.innerHTML='<div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl">برگشت تسک</div><button class="sh-x" onclick="closeAll()">X</button></div></div><div class="sh-body" style="gap:var(--sp3)"><div style="display:flex;flex-direction:column;gap:6px">'+opts+'</div><textarea id="tmRetN" rows="2" placeholder="توضیح..." style="width:100%;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px;font-size:var(--fs-xs);font-family:var(--f);direction:rtl;resize:none;outline:none"></textarea><button onclick="_tmRtOk('+JSON.dumps(tid)+')" style="width:100%;height:46px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">برگشت بده</button></div>';
+  document.body.appendChild(s);openSheet('shTmRet');
+}
+function _tmRP(btn){var e=document.getElementById('tmRetN');if(e)e.value=btn.dataset.v||'';}
+async function _tmRtOk(tid){
+  var note=(document.getElementById('tmRetN')?document.getElementById('tmRetN').value:'').trim();
+  try{await tmAPI('PUT','/task/update',{taskId:tid,status:'in_progress',memberNote:note});closeAll();toast_(svgIco('check'),'برگشت داده شد');setTimeout(tmSyncBackground,500);}
   catch(e){toast_(svgIco('flag'),e.message);}
 }
 
