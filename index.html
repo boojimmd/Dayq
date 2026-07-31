@@ -13405,8 +13405,8 @@ const NLP_PRIORITY = {
   'فوری':     'high','خیلی فوری':'high','خیلی مهم':'high',
   'مهمه':     'high','مهم':      'high','ضروری':   'high',
   'اورژانسی': 'high','حتماً':    'high','حتما':    'high',
-  'باید':     'high','مهم‌ترین': 'high','اول':     'high',
-  'بدون تاخیر':'high','بی‌تاخیر':'high','باید':'high',
+  'شروع نشده':     'high','مهم‌ترین': 'high','اول':     'high',
+  'بدون تاخیر':'high','بی‌تاخیر':'high','شروع نشده':'high',
   'متوسط':   'med', 'معمولی':   'med', 'عادی':    'med',
   'نیمه مهم':'med', 'نسبتاً':   'med',
   'کم‌اهمیت':'low', 'کم اهمیت':'low', 'وقتی شد': 'low',
@@ -13940,7 +13940,7 @@ function nlpParse(raw){
   let foundPri = false;
   const priKeys = Object.keys(NLP_PRIORITY).sort((a,b)=>b.length-a.length);
   for(const kw of priKeys){
-    // word boundary check: avoid "باید" matching inside "نباید"
+    // word boundary check: avoid "شروع نشده" matching inside "نباید"
     const priRe = new RegExp('(^|[\\s،,])('+kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')(?=[\\s،,]|$)');
     if(priRe.test(n)){ result.priority=NLP_PRIORITY[kw]; result.detected.push('pri'); foundPri=true; break; }
   }
@@ -14020,7 +14020,7 @@ function nlpParse(raw){
     'بامداد','بعدازظهر','بعد از ظهر','غروب',
     'فوری','خیلی مهم','ضروری','اورژانسی','حتماً','حتما',
     'مهمه','کم‌اهمیت','بی‌اولویت','وقتی شد','هر وقت',
-    'حتماً','حتما','باید','نباید','یادم باشه','فراموش نکنم','یادت باشه','یادت نره','فراموشش نکن',
+    'حتماً','حتما','شروع نشده','نباید','یادم باشه','فراموش نکنم','یادت باشه','یادت نره','فراموشش نکن',
     'هر روز','روزانه','هر هفته','هفتگی','هر ماه','ماهانه',
     'هر شنبه','هر یکشنبه','هر دوشنبه','هر سه‌شنبه',
     'هر چهارشنبه','هر پنجشنبه','هر جمعه',
@@ -14425,7 +14425,8 @@ async function tmSyncBackground(){
       }catch(ec){}
     }
   }catch(e){
-    console.log('tmSync error:',e.message);
+    console.warn('tmSync:',e.message);
+    if(e.message&&e.message.indexOf('401')>-1)toast_(svgIco('flag'),'نشست منقضی — دوباره وارد شو');
     var sokoEl=document.getElementById('tmSokoStatusContent');
     if(sokoEl&&!tm.snapshot){
       var msg=e.message==='no_worker'?'Worker تنظیم نشده':
@@ -14454,7 +14455,7 @@ function tmRenderTodaySection() {
   });
   el.innerHTML = sorted.map(m => {
     const icon = m.alert==='blocked'?'🔴':m.alert==='stale'||m.alert==='overloaded'?'🟡':'🟢';
-    const note = m.alert==='blocked'?'مشکل دارم':m.alert==='stale'?'بدون آپدیت':m.alert==='overloaded'?'پر':m.activeTasks>0?`${m.activeTasks} تسک فعال`:'آزاد';
+    const note = m.alert==='blocked'?'متوقف شده':m.alert==='stale'?'بدون آپدیت':m.alert==='overloaded'?'پر':m.activeTasks>0?`${m.activeTasks} تسک فعال`:'آزاد';
     return `<div class="tm-member" onclick="tmOpenMemberDetail('${m.uuid}')">
       <div class="tm-member-info">
         <div class="tm-member-name">${m.name}</div>
@@ -14741,7 +14742,7 @@ function tmShareCode() {
 }
 
 async function tmLeaveTeam() {
-  if (!confirm('از تیم خارج بشی؟')) return;
+  if (!await _tmConfirmSheet('ترک تیم','همه اطلاعات تیم پاک میشه','ترک تیم','var(--red)')) return;
   try {
     await tmAPI('DELETE', '/team/session');
   } catch(e) {}
@@ -15084,7 +15085,7 @@ async function tmUpdateTaskStatus(newStatus) {
   const taskId = document.getElementById('tmDetailSheet')?.dataset.taskId;
   if (!taskId) return;
   const note = document.getElementById('tmDetailNote')?.value || '';
-  const blockedNote = newStatus === 'blocked' ? (prompt('یه خط توضیح بده (اختیاری):') || '') : '';
+  var _cr2=document.querySelector('input[name="blockedReason"]:checked');var _rt2=_cr2&&_cr2.value!=='other'?_cr2.value:'';var _nv2=(document.getElementById('ttdNote')||{value:''}).value.trim();const blockedNote=newStatus==='blocked'?(_rt2?_rt2+(_nv2?': '+_nv2:''):_nv2):'';
   try {
     await tmAPI('PUT', '/task/update', { taskId, status: newStatus, memberNote: note, blockedNote });
     const task = tm.inbox.find(t => t.id === taskId);
@@ -15172,7 +15173,7 @@ function tmInjectMorningDigest() {
   }
   bodyEl.innerHTML = alerts.map(m => {
     const icon = m.alert === 'blocked' ? '🔴' : '🟡';
-    const note = m.alert === 'blocked' ? 'مشکل دارم' : 'بدون آپدیت';
+    const note = m.alert === 'blocked' ? 'متوقف شده' : 'بدون آپدیت';
     return `<div style="display:flex;align-items:center;gap:var(--sp2);padding:2px 0">
       <span>${icon}</span>
       <span style="color:var(--t2)">${m.name} — ${note}</span>
@@ -15656,9 +15657,9 @@ function tmRenderTeamProjects() {
         </div>
         <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp2);margin-bottom:var(--sp3)">
           ${[
-            {l:'باید انجام بشه', v:byStatus.pending.length, c:'var(--t3)'},
-            {l:'درحال انجام', v:byStatus.in_progress.length, c:'var(--blue)'},
-            {l:'مشکل دارم', v:byStatus.blocked.length, c:'var(--red)'},
+            {l:'شروع نشده', v:byStatus.pending.length, c:'var(--t3)'},
+            {l:'در حال انجام', v:byStatus.in_progress.length, c:'var(--blue)'},
+            {l:'متوقف شده', v:byStatus.blocked.length, c:'var(--red)'},
             {l:'تموم شده', v:byStatus.done.length, c:'var(--a)'},
           ].map(s=>`<div style="background:var(--bg2);border-radius:var(--r2);padding:var(--sp2) var(--sp3);border:1px solid var(--b1)">
             <div style="font-size:var(--fs-lg);font-weight:800;color:${s.c}">${s.v}</div>
@@ -15799,7 +15800,7 @@ const _origDoAssignFull = tmDoAssign;
 tmDoAssign = async function() {
   const deadline = document.getElementById('tmAssignDeadline')?.value?.trim();
   if (deadline && tmCheckHolidayDeadline(deadline)) {
-    if (!confirm(`⚠️ ${deadline} یه روز تعطیله! ادامه بدم؟`)) return;
+    if (!await _tmConfirmSheet('روز تعطیل',deadline+' تعطیله. ادامه میدی؟','ادامه بده','var(--amber)')) return;
   }
   await _origDoAssignFull.apply(this, arguments);
 };
@@ -16349,7 +16350,7 @@ function tmDot(type) {
 }
 
 function tmStatusLabel(alert, activeTasks) {
-  if (alert === 'blocked') return { dot: tmDot('block'), text: 'مشکل دارم', color: 'var(--red)' };
+  if (alert === 'blocked') return { dot: tmDot('block'), text: 'متوقف شده', color: 'var(--red)' };
   if (alert === 'stale')   return { dot: tmDot('warn'),  text: 'بدون آپدیت', color: 'var(--amber)' };
   if (alert === 'overloaded') return { dot: tmDot('warn'), text: 'پر', color: 'var(--amber)' };
   if (activeTasks > 0)     return { dot: tmDot('ok'),    text: `${activeTasks} تسک`, color: 'var(--t2)' };
@@ -16484,11 +16485,11 @@ tmRenderInbox = function() {
     }
     el.innerHTML = active.slice(0,3).map(t => {
       const statusInfo = {
-        pending:     {color:'var(--t3)',  label:'باید انجام بشه'},
-        in_progress: {color:'var(--blue)',label:'درحال انجام'},
+        pending:     {color:'var(--t3)',  label:'شروع نشده'},
+        in_progress: {color:'var(--blue)',label:'در حال انجام'},
         blocked:     {color:'var(--red)', label:'مشکل'},
         waiting:     {color:'var(--amber)',label:'منتظرم'},
-        done:        {color:'var(--a)',   label:'انجام شد'},
+        done:        {color:'var(--a)',   label:'تکمیل شد'},
       };
       const st = statusInfo[t.status] || statusInfo.pending;
       const urgent = t.priority === 'urgent';
@@ -16830,7 +16831,7 @@ async function tmDoDirectLogin() {
   if (!code) { if(errEl) errEl.textContent='کد تیم را وارد کن'; return; }
   if (!pin || pin.length < 4) { if(errEl) errEl.textContent='PIN را وارد کن (۴ رقم)'; return; }
   const workerUrl = tm.workerUrl || localStorage.getItem('dayq_team_worker') || cfg.pushWorkerUrl;
-  if (!workerUrl) { alert('آدرس Worker پیدا نشد\nتم.وورکر: ' + tm.workerUrl); return; }
+  if (!workerUrl) { toast_(svgIco('flag'),'⚠️ Worker تنظیم نشده — تنظیمات → تیم کاری'); return; }
   tm.workerUrl = workerUrl;
   const btn = document.getElementById('tmDLBtn');
   if(btn) btn.disabled = true;
@@ -17228,11 +17229,11 @@ async function _tmToggleMemberTasks(uuid) {
       return;
     }
     const STATUS_MAP = {
-      pending:     { label:'باید',     color:'var(--t3)' },
-      in_progress: { label:'درحال',    color:'var(--blue)' },
+      pending:     { label:'شروع نشده',     color:'var(--t3)' },
+      in_progress: { label:'در حال انجام',    color:'var(--blue)' },
       waiting:     { label:'منتظرم',   color:'var(--amber)' },
       blocked:     { label:'مشکل',     color:'var(--red)' },
-      done:        { label:'انجام شد', color:'var(--a)' },
+      done:        { label:'تکمیل شد', color:'var(--a)' },
     };
     el.innerHTML = tasks.slice(0, 5).map(t => {
       const st = STATUS_MAP[t.status] || STATUS_MAP.pending;
@@ -17413,7 +17414,7 @@ function tmRenderProjectsSection() {
   });
 
   const STATUS_COLOR = { pending:'var(--t3)', in_progress:'var(--blue)', done:'var(--a)', blocked:'var(--red)', waiting:'var(--amber)' };
-  const STATUS_LABEL = { pending:'باید', in_progress:'درحال', done:'✓', blocked:'🚫', waiting:'منتظرم' };
+  const STATUS_LABEL = { pending:'شروع نشده', in_progress:'در حال انجام', done:'✓', blocked:'🚫', waiting:'منتظرم' };
 
   listEl.innerHTML = Object.entries(groups).map(([cat, tasks]) => {
     const done = tasks.filter(t => t.status === 'done').length;
@@ -17757,6 +17758,27 @@ function _tmTempPin(pin){
 function _tmCopyPin(p){
   if(navigator.clipboard)navigator.clipboard.writeText(p).then(function(){toast_(svgIco('check'),'کپی شد');}).catch(function(){toast_(svgIco('flag'),p);});
   else toast_(svgIco('flag'),p);
+}
+
+function _tmConfirmSheet(title,body,okLabel,okColor){
+  return new Promise(function(resolve){
+    var old=document.getElementById('shTmConfirm');if(old)old.remove();
+    var s=document.createElement('div');s.className='sheet';s.id='shTmConfirm';
+    s.innerHTML='<div class="sh-handle"></div>'+
+      '<div class="sh-body" style="gap:var(--sp4);padding-top:var(--sp4)">'+
+      '<div style="text-align:center;padding:var(--sp3) 0">'+
+      '<div style="font-size:var(--fs-md);font-weight:700;color:var(--t1);margin-bottom:var(--sp2)">'+esc(title)+'</div>'+
+      '<div style="font-size:var(--fs-xs);color:var(--t3)">'+esc(body)+'</div>'+
+      '</div>'+
+      '<div style="display:flex;gap:var(--sp2)">'+
+      '<button id="tmCfNo" style="flex:1;height:46px;background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-sm);font-weight:600;font-family:var(--f);cursor:pointer">انصراف</button>'+
+      '<button id="tmCfYes" style="flex:1;height:46px;background:'+(okColor||'var(--red)')+';color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">'+esc(okLabel)+'</button>'+
+      '</div></div>';
+    document.body.appendChild(s);
+    openSheet('shTmConfirm');
+    document.getElementById('tmCfYes').onclick=function(){closeAll();resolve(true);};
+    document.getElementById('tmCfNo').onclick=function(){closeAll();resolve(false);};
+  });
 }
 
 boot();
@@ -18945,11 +18967,11 @@ async function _tmToggleMemberTasks(uuid) {
       return;
     }
     const STATUS_MAP = {
-      pending:     { label:'باید',     color:'var(--t3)' },
-      in_progress: { label:'درحال',    color:'var(--blue)' },
+      pending:     { label:'شروع نشده',     color:'var(--t3)' },
+      in_progress: { label:'در حال انجام',    color:'var(--blue)' },
       waiting:     { label:'منتظرم',   color:'var(--amber)' },
       blocked:     { label:'مشکل',     color:'var(--red)' },
-      done:        { label:'انجام شد', color:'var(--a)' },
+      done:        { label:'تکمیل شد', color:'var(--a)' },
     };
     el.innerHTML = tasks.slice(0, 5).map(t => {
       const st = STATUS_MAP[t.status] || STATUS_MAP.pending;
@@ -19124,7 +19146,7 @@ function tmRenderProjectsSection() {
   });
 
   const STATUS_COLOR = { pending:'var(--t3)', in_progress:'var(--blue)', done:'var(--a)', blocked:'var(--red)', waiting:'var(--amber)' };
-  const STATUS_LABEL = { pending:'باید', in_progress:'درحال', done:'✓', blocked:'🚫', waiting:'منتظرم' };
+  const STATUS_LABEL = { pending:'شروع نشده', in_progress:'در حال انجام', done:'✓', blocked:'🚫', waiting:'منتظرم' };
 
   listEl.innerHTML = Object.entries(groups).map(([cat, tasks]) => {
     const done = tasks.filter(t => t.status === 'done').length;
@@ -19613,11 +19635,11 @@ async function _tmToggleMemberTasks(uuid) {
       return;
     }
     const STATUS_MAP = {
-      pending:     { label:'باید',     color:'var(--t3)' },
-      in_progress: { label:'درحال',    color:'var(--blue)' },
+      pending:     { label:'شروع نشده',     color:'var(--t3)' },
+      in_progress: { label:'در حال انجام',    color:'var(--blue)' },
       waiting:     { label:'منتظرم',   color:'var(--amber)' },
       blocked:     { label:'مشکل',     color:'var(--red)' },
-      done:        { label:'انجام شد', color:'var(--a)' },
+      done:        { label:'تکمیل شد', color:'var(--a)' },
     };
     el.innerHTML = tasks.slice(0, 5).map(t => {
       const st = STATUS_MAP[t.status] || STATUS_MAP.pending;
@@ -19792,7 +19814,7 @@ function tmRenderProjectsSection() {
   });
 
   const STATUS_COLOR = { pending:'var(--t3)', in_progress:'var(--blue)', done:'var(--a)', blocked:'var(--red)', waiting:'var(--amber)' };
-  const STATUS_LABEL = { pending:'باید', in_progress:'درحال', done:'✓', blocked:'🚫', waiting:'منتظرم' };
+  const STATUS_LABEL = { pending:'شروع نشده', in_progress:'در حال انجام', done:'✓', blocked:'🚫', waiting:'منتظرم' };
 
   listEl.innerHTML = Object.entries(groups).map(([cat, tasks]) => {
     const done = tasks.filter(t => t.status === 'done').length;
@@ -20242,7 +20264,7 @@ function tmRenderProjectsSection() {
   });
 
   const STATUS_COLOR = { pending:'var(--t3)', in_progress:'var(--blue)', done:'var(--a)', blocked:'var(--red)', waiting:'var(--amber)' };
-  const STATUS_LABEL = { pending:'باید', in_progress:'درحال', done:'✓', blocked:'🚫', waiting:'منتظرم' };
+  const STATUS_LABEL = { pending:'شروع نشده', in_progress:'در حال انجام', done:'✓', blocked:'🚫', waiting:'منتظرم' };
 
   listEl.innerHTML = Object.entries(groups).map(([cat, tasks]) => {
     const done = tasks.filter(t => t.status === 'done').length;
@@ -20715,11 +20737,11 @@ async function _tmToggleMemberTasks(uuid) {
       return;
     }
     const STATUS_MAP = {
-      pending:     { label:'باید',     color:'var(--t3)' },
-      in_progress: { label:'درحال',    color:'var(--blue)' },
+      pending:     { label:'شروع نشده',     color:'var(--t3)' },
+      in_progress: { label:'در حال انجام',    color:'var(--blue)' },
       waiting:     { label:'منتظرم',   color:'var(--amber)' },
       blocked:     { label:'مشکل',     color:'var(--red)' },
-      done:        { label:'انجام شد', color:'var(--a)' },
+      done:        { label:'تکمیل شد', color:'var(--a)' },
     };
     el.innerHTML = tasks.slice(0, 5).map(t => {
       const st = STATUS_MAP[t.status] || STATUS_MAP.pending;
@@ -20894,7 +20916,7 @@ function tmRenderProjectsSection() {
   });
 
   const STATUS_COLOR = { pending:'var(--t3)', in_progress:'var(--blue)', done:'var(--a)', blocked:'var(--red)', waiting:'var(--amber)' };
-  const STATUS_LABEL = { pending:'باید', in_progress:'درحال', done:'✓', blocked:'🚫', waiting:'منتظرم' };
+  const STATUS_LABEL = { pending:'شروع نشده', in_progress:'در حال انجام', done:'✓', blocked:'🚫', waiting:'منتظرم' };
 
   listEl.innerHTML = Object.entries(groups).map(([cat, tasks]) => {
     const done = tasks.filter(t => t.status === 'done').length;
@@ -21478,7 +21500,7 @@ function _tmSheetStatus(members, teamName) {
     ...members.map((m, i) => {
       const total = (m.activeTasks||0) + (m.doneTasks||0);
       const pct = total > 0 ? Math.round((m.doneTasks||0)/total*100) : 0;
-      const statusLabel = m.alert==='blocked' ? '🚫 مشکل' : m.alert==='stale' ? '⏳ بی‌تحرکی' : '✅ فعال';
+      const statusLabel = m.alert==='blocked' ? '🚫 متوقف' : m.alert==='stale' ? '⏳ بی‌تحرکی' : '✅ فعال';
       const rowStyle = m.alert==='blocked' ? 'red' : m.alert==='stale' ? 'amber' : (i%2===0 ? 'even' : 'odd');
       return [
         { v: i+1,                s:rowStyle, t:'n' },
@@ -21518,7 +21540,7 @@ function _tmSheetTasks(members, teamName) {
     ],
     ...(inbox.length ? inbox : allTasks).map((t, i) => {
       const priMap = { high:'🔴 فوری', med:'🟡 مهم', urgent:'🔴 فوری', low:'⚪ عادی' };
-      const stMap  = { pending:'باید', in_progress:'درحال', done:'✅ انجام شد', blocked:'🚫 مشکل', waiting:'منتظرم' };
+      const stMap  = { pending:'شروع نشده', in_progress:'در حال انجام', done:'✅ انجام شد', blocked:'🚫 متوقف', waiting:'منتظرم' };
       const rowStyle = t.status==='done' ? 'done' : t.status==='blocked' ? 'red' : i%2===0 ? 'even' : 'odd';
       return [
         { v:i+1,                                     s:rowStyle, t:'n' },
@@ -21996,7 +22018,7 @@ function _ttdRefreshThread(){var t=(tm.inbox||[]).find(function(t){return t.id==
 async function _ttdSendComment(){var inp=document.querySelector('#ttdCommentSection .ttd-reply-inp');if(!inp||!inp.value.trim()||!_ttdTaskId)return;var text=inp.value.trim(),btn=document.querySelector('#ttdCommentSection .ttd-reply-send');if(btn)btn.disabled=true;var task=(tm.inbox||[]).find(function(t){return t.id===_ttdTaskId;});try{await tmAPI('POST','/task/comment',{taskId:_ttdTaskId,text,from:'member'});}catch(e){}if(task){if(!task.comments)task.comments=[];task.comments.push({from:'member',text,ts:Date.now()});}inp.value='';inp.style.height='auto';_ttdRefreshThread();if(btn)btn.disabled=false;}
 function tmOpenTaskThread(taskId){var members=(tm.snapshot&&tm.snapshot.members)||[],allTasks=[];members.forEach(function(m){(m.tasks||[]).forEach(function(t){allTasks.push(Object.assign({},t,{memberName:m.name}));});});var task=allTasks.find(function(t){return t.id===taskId;})||(tm.inbox||[]).find(function(t){return t.id===taskId;});if(!task)return;_mgThreadTaskId=taskId;var ttl=document.getElementById('mgThreadTitle');if(ttl)ttl.textContent=task.title||'گفتگو';var meta=document.getElementById('mgThreadMeta');if(meta){var ST={pending:'شروع نشده',in_progress:'در حال انجام',done:'تکمیل شد ✓',blocked:'متوقف 🚫'};meta.innerHTML='<span style="font-size:var(--fs-xs);font-weight:700">'+esc(task.memberName||'')+'</span><span style="font-size:var(--fs-xs);color:var(--t3)">· '+(ST[task.status]||'')+'</span>';}var tel=document.getElementById('mgThreadMsgs');if(tel)_renderThread(task.comments||[],'manager',tel);var nel=document.getElementById('mgThreadNote');if(nel&&task.memberNote){nel.style.display='';var nt=nel.querySelector('.mg-note-text');if(nt)nt.textContent=task.memberNote;}else if(nel)nel.style.display='none';openSheet('shTaskThread');}
 async function _mgSendComment(){var inp=document.querySelector('#shTaskThread .ttd-reply-inp');if(!inp||!inp.value.trim()||!_mgThreadTaskId)return;var text=inp.value.trim(),btn=document.querySelector('#shTaskThread .ttd-reply-send');if(btn)btn.disabled=true;try{await tmAPI('POST','/task/comment',{taskId:_mgThreadTaskId,text,from:'manager'});}catch(e){}var members=(tm.snapshot&&tm.snapshot.members)||[];for(var i=0;i<members.length;i++){var t=(members[i].tasks||[]).find(function(t){return t.id===_mgThreadTaskId;});if(t){if(!t.comments)t.comments=[];t.comments.push({from:'manager',text,ts:Date.now()});break;}}inp.value='';inp.style.height='auto';var tel=document.getElementById('mgThreadMsgs'),task=null;for(var j=0;j<members.length;j++){task=(members[j].tasks||[]).find(function(t){return t.id===_mgThreadTaskId;});if(task)break;}if(tel&&task)_renderThread(task.comments||[],'manager',tel);if(btn)btn.disabled=false;}
-async function _tmMemberAction(uuid,action,val){if(action==='remove'){if(!confirm('عضو حذف بشه؟'))return;try{await tmAPI('POST','/member/remove',{memberUuid:uuid});toast_(svgIco('check'),'عضو حذف شد');await tmSyncBackground();tmRefreshInfoSheet();}catch(e){toast_(svgIco('x'),e.message);}}else if(action==='toggle'){try{await tmAPI('PUT','/member/status',{memberUuid:uuid,status:val?'active':'inactive'});await tmSyncBackground();tmRefreshInfoSheet();}catch(e){toast_(svgIco('x'),e.message);}}else if(action==='pin'){if(!confirm('PIN ریست بشه؟'))return;try{var d=await tmAPI('POST','/member/pin-reset',{memberUuid:uuid});_tmTempPin&&_tmTempPin(d.tempPin);}catch(e){toast_(svgIco('x'),e.message);}}else if(action==='thread'){tmOpenTaskThread(uuid);}}
+async function _tmMemberAction(uuid,action,val){if(action==='remove'){if(!await _tmConfirmSheet('حذف عضو','این عضو دیگه دسترسی نخواهد داشت','حذف','var(--red)'))return;try{await tmAPI('POST','/member/remove',{memberUuid:uuid});toast_(svgIco('check'),'عضو حذف شد');await tmSyncBackground();tmRefreshInfoSheet();}catch(e){toast_(svgIco('x'),e.message);}}else if(action==='toggle'){try{await tmAPI('PUT','/member/status',{memberUuid:uuid,status:val?'active':'inactive'});await tmSyncBackground();tmRefreshInfoSheet();}catch(e){toast_(svgIco('x'),e.message);}}else if(action==='pin'){if(!await _tmConfirmSheet('ریست PIN','یه PIN موقت ساخته میشه','ریست','var(--amber)'))return;try{var d=await tmAPI('POST','/member/pin-reset',{memberUuid:uuid});_tmTempPin&&_tmTempPin(d.tempPin);}catch(e){toast_(svgIco('x'),e.message);}}else if(action==='thread'){tmOpenTaskThread(uuid);}}
 
 
 // ── تابع باز کردن تسک‌های عضو در مدیر ──
