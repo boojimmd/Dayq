@@ -8571,6 +8571,8 @@ function closeAll(){
     document.body.style.position='';
     document.body.style.width='';
   }
+
+  ['shTmDl','shTmRet','shTmConfirm','shTmPin'].forEach(function(id){var e=document.getElementById(id);if(e)e.remove();});
 }
 
 /* ══ SETTINGS ══ */
@@ -14791,7 +14793,7 @@ function tmSetSokoTab(tab) {
   document.querySelectorAll('.tm-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
   document.querySelectorAll('.tm-tab-pane').forEach(p => p.style.display = p.dataset.pane === tab ? '' : 'none');
   if (tab === 'status')   tmRenderSokoStatus();
-  else if (tab === 'projects') tmRenderTeamProjects();
+  else if (tab === 'projects'){tmRenderTeamProjects();var _sp=document.getElementById('tmSokoProjectsContent');var _ps=document.getElementById('tmProjSection');if(_sp&&_ps)_sp.innerHTML=_ps.innerHTML;}
   else if (tab === 'report')  { tmRenderSokoReport(); tmRenderReport(); }
 }
 
@@ -17314,6 +17316,7 @@ function openTeamTaskDetail(taskId) {
   }
 
   document.getElementById('ttdErr').textContent = '';
+  var _tb2=document.getElementById('ttdBody');if(_tb2)_tb2.dataset.taskId=taskId;
   openSheet('shTeamTaskDetail');
   setTimeout(function(){_ttdMarkSeen(taskId);},800);
   setTimeout(function(){_ttdRefreshThread&&_ttdRefreshThread();},80);
@@ -17628,8 +17631,17 @@ async function _tmAutoRegisterPush(){
 }
 if('serviceWorker' in navigator){navigator.serviceWorker.addEventListener('message',function(e){
   var nd=e.data;
-  // sync فوری بعد از هر push
-  if(nd&&nd.type&&['task_update','task_note','join_request','approved'].indexOf(nd.type)>-1){
+  if(!nd||!nd.type)return;
+  // ── approved: راهنمایی login برای کارمند ──
+  if((nd.type==='approved'||(nd.data&&nd.data.type==='approved'))&&!tm.token){
+    setTimeout(function(){
+      toast_(svgIco('check'),'✅ عضویت تأیید شد! تیم کاری رو باز کن و وارد بشه');
+      tmOpenTeamSettings&&tmOpenTeamSettings();
+    },400);
+    return;
+  }
+  // ── sync فوری ──
+  if(['task_update','task_note','join_request','in_review','task_approved','task_returned'].indexOf(nd.type)>-1){
     setTimeout(function(){tmSyncBackground&&tmSyncBackground();},500);
   }
   if(nd&&nd.type==='NOTIF_CLICK'&&tm.role==='manager'&&tm.code){
@@ -17780,6 +17792,8 @@ function _tmConfirmSheet(title,body,okLabel,okColor){
     document.getElementById('tmCfNo').onclick=function(){closeAll();resolve(false);};
   });
 }
+
+function tmNewProject(){toast_(svgIco('flag'),'قابلیت پروژه در نسخه بعدی اضافه میشه');}
 
 boot();
 
