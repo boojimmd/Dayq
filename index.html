@@ -4187,6 +4187,49 @@ select.fi{
   border-radius: var(--r2);
 }
 /* ════ End Soko focus ════ */
+
+/* ════ Soko Panel Layout — 3 rules, no conflicts ════ */
+
+/* Rule A: base (mobile) */
+.tm-panel-body{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+.tm-panel-sidebar{
+  display:none;
+  width:200px;
+  flex-shrink:0;
+  border-right:1px solid var(--b1);
+  background:var(--bg0);
+  overflow-y:auto;
+  scrollbar-width:none;
+  direction:rtl;
+  flex-direction:column;
+}
+
+/* Rule B: desktop — show sidebar, switch to row */
+@media(min-width:900px){
+  .tm-panel-body{
+    flex-direction:row;
+    padding:0;
+  }
+  .tm-panel-sidebar{
+    display:flex;
+  }
+}
+
+/* Rule C: main content */
+.tm-panel-main{
+  flex:1;
+  overflow-y:auto;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  direction:rtl;
+}
+/* ════ End Soko Panel Layout ════ */
 </style>
 </head>
 <body>
