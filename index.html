@@ -4058,7 +4058,7 @@ select.fi{
     margin-right:auto;
     width:100%;
   }
-  .tm-panel-sidebar {
+  .tm-panel-sidebar { display:none;
     width:220px;
     flex-shrink:0;
     order:1;        /* RTL: order بالا = سمت چپ */
@@ -4072,6 +4072,10 @@ select.fi{
     scrollbar-width:none;
     direction:rtl;
   }
+@media (min-width:1024px){
+  .tm-panel-sidebar{ display:flex; flex-direction:column; }
+}
+
   #tmHdrKpi { display:flex !important; }
   /* هدر: border پایین + padding مناسب */
   /* Header الان داخل main هست — نه full-width */
