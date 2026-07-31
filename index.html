@@ -3258,7 +3258,12 @@ select.fi{
 }
 
 /* Tabs */
-.tm-panel-body{flex:1;overflow-y:auto;scrollbar-width:none;padding:var(--sp4);}
+.tm-panel-body{
+  flex:1;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
 
 .tm-tabs{display:flex;border-bottom:1px solid var(--b1);margin-top:var(--sp3);}
 .tm-tab{flex:1;text-align:center;font-size:var(--fs-xs);font-weight:600;padding:var(--sp2) 0;color:var(--t3);border-bottom:2px solid transparent;cursor:pointer;transition:color var(--dur-fast) var(--ease-std),border-color var(--dur-fast) var(--ease-std);}
@@ -4072,9 +4077,13 @@ select.fi{
     scrollbar-width:none;
     direction:rtl;
   }
+
 @media (min-width:1024px){
-  .tm-panel-sidebar{ display:flex; flex-direction:column; }
+  .tm-panel-body{ flex-direction:row; overflow:hidden; }
+  .tm-panel-sidebar{ display:flex !important; flex-direction:column; }
+  .tm-panel-main{ overflow-y:auto; }
 }
+
 
   #tmHdrKpi { display:flex !important; }
   /* هدر: border پایین + padding مناسب */
