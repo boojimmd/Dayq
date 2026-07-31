@@ -15503,10 +15503,13 @@ tmDoAssign = async function() {
 // ── Deadline Extend Modal ─────────────────────────────────────
 let _sokoExtendTaskId = null;
 
-function tmExtendDeadline(tid){
-  var allT=[];(tm.snapshot&&tm.snapshot.members||[]).forEach(function(m){(m.tasks||[]).forEach(function(t){allT.push(t);});});
+function tmExtendDeadline(tid,mu){
+  var allT=[];
+  (tm.snapshot&&tm.snapshot.members||[]).forEach(function(m2){
+    (m2.tasks||[]).forEach(function(t){allT.push(t);});
+  });
   var task=allT.find(function(t){return t.id===tid;})||{};
-  _tmDeadlineSheet&&_tmDeadlineSheet(tid,task.title||'تسک',task.deadline||'');
+  _tmDlSheet(tid,task.title||'',task.deadline||'');
 }
 
 // ── Triage Integration برای تسک‌های تیمی ─────────────────────
@@ -18550,6 +18553,46 @@ boot();
 </div>
 
 <script>
+
+
+function _tmDlSheet(tid,title,cur){
+  var od=document.getElementById('shTmDl');if(od)od.remove();
+  var s=document.createElement('div');s.className='sheet';s.id='shTmDl';
+  s.dataset.tid=tid;
+  var bs='flex:1;height:38px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--bg2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer';
+  s.innerHTML='<div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl">تمدید ددلاین</div><button class="sh-x" onclick="closeAll()">X</button></div></div>'+
+    '<div class="sh-body" style="gap:var(--sp3)">'+
+    '<div style="font-size:var(--fs-xs);color:var(--t3)">'+esc(title)+'</div>'+
+    '<div style="display:flex;gap:6px">'+
+    '<button data-days="1" onclick="_tmDlShortBtn(this)" style="'+bs+'">فردا</button>'+
+    '<button data-days="3" onclick="_tmDlShortBtn(this)" style="'+bs+'">3 روز</button>'+
+    '<button data-days="7" onclick="_tmDlShortBtn(this)" style="'+bs+'">هفته</button>'+
+    '</div>'+
+    '<input id="tmDlInp" value="'+cur+'" placeholder="1404-06-15" style="width:100%;padding:10px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:1.1rem;text-align:center;direction:ltr;outline:none"/>'+
+    '<div id="tmDlErr" style="color:var(--red);font-size:var(--fs-xs);text-align:center;min-height:14px"></div>'+
+    '<button onclick="_tmDlOkBtn()" style="width:100%;height:46px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">تایید</button></div>';
+  document.body.appendChild(s);openSheet('shTmDl');
+}
+function _tmDlShortBtn(btn){
+  var days=parseInt(btn.dataset.days)||1;
+  var p=mrTodayKey().split('-').map(Number),d=p[2]+days,mo=p[1],y=p[0];
+  var dim=[0,31,31,31,31,31,31,30,30,30,30,30,29];
+  while(d>dim[mo]){d-=dim[mo];mo++;if(mo>12){mo=1;y++;}}
+  var nd=y+'-'+(mo<10?'0'+mo:mo)+'-'+(d<10?'0'+d:d);
+  var inp=document.getElementById('tmDlInp');if(inp)inp.value=nd;
+  _tmDlOkBtn();
+}
+async function _tmDlOkBtn(){
+  var sh=document.getElementById('shTmDl'),tid=sh?sh.dataset.tid:'';
+  var inp=document.getElementById('tmDlInp'),err=document.getElementById('tmDlErr');
+  var dl=(inp?inp.value:'').trim();
+  if(!dl||dl.length<8){if(err)err.textContent='فرمت: 1404-06-15';return;}
+  try{
+    await tmAPI('PUT','/task/update',{taskId:tid,deadline:dl});
+    closeAll();toast_(svgIco('check'),'ددلاین تمدید شد');setTimeout(tmSyncBackground,800);
+  }catch(e){if(err)err.textContent=e.message;}
+}
+var _tmRetConfirm=_tmRtOk;
 
 /* ════ DayQ Soko — Team JS ════ */
 
