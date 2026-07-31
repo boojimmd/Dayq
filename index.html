@@ -4079,9 +4079,8 @@ select.fi{
   }
 
 @media (min-width:1024px){
-  .tm-panel-body{ flex-direction:row; overflow:hidden; }
-  .tm-panel-sidebar{ display:flex !important; flex-direction:column; }
-  .tm-panel-main{ overflow-y:auto; }
+  .tm-panel-body{ flex-direction:column; }
+  .tm-panel-sidebar{ display:none !important; }
 }
 
 
@@ -17770,17 +17769,26 @@ function _tmUpdateSokoSummary(){
   var el=document.getElementById('tmSokoSummary');
   if(!el||!tm.snapshot)return;
   var today=mrTodayKey();
+  var members=(tm.snapshot.members||[]).filter(function(m){return !m.isManager&&m.status!=='removed';});
   var all=[];
-  (tm.snapshot.members||[]).filter(function(m){return !m.isManager&&m.status!=='removed';}).forEach(function(m){(m.tasks||[]).filter(function(t){return !t.deleted&&t.status!=='done';}).forEach(function(t){all.push(t);});});
-  if(!all.length){el.textContent='همه تسک‌ها انجام شده ✅';return;}
+  members.forEach(function(m){(m.tasks||[]).filter(function(t){return !t.deleted&&t.status!=='done';}).forEach(function(t){all.push(t);});});
+  // KPI
+  var done=members.reduce(function(s,m){return s+(m.doneTasks||0);},0);
+  var total=all.length+done;
+  var score=total>0?Math.round(done/total*100):null;
   var od=all.filter(function(t){return t.deadline&&t.deadline<today;}).length;
   var dt=all.filter(function(t){return t.deadline===today;}).length;
-  var rest=all.length-od-dt;
+  var blk=all.filter(function(t){return t.status==='blocked';}).length;
+  var rev=all.filter(function(t){return t.status==='in_review';}).length;
+  if(!all.length&&done===0){el.textContent='هیچ تسک فعالی نیست';return;}
   var parts=[];
-  if(od)parts.push('🔴 '+num(od)+' دیر');
-  if(dt)parts.push('⚡ '+num(dt)+' امروز');
-  if(rest>0)parts.push(num(rest)+' دیگه');
-  el.innerHTML=parts.length?parts.join(' · '):'تسک فعالی نیست';
+  if(od)parts.push('<span style="color:var(--red)">🔴 '+num(od)+' دیر</span>');
+  if(dt&&!od)parts.push('<span style="color:var(--amber)">⚡ '+num(dt)+' امروز</span>');
+  if(rev)parts.push('<span style="color:#6366f1">⏳ '+num(rev)+' بررسی</span>');
+  if(blk)parts.push('<span style="color:var(--red)">🚫 '+num(blk)+'</span>');
+  if(!parts.length)parts.push(num(all.length)+' تسک فعال');
+  if(score!==null)parts.push('<span style="color:var(--a)">'+num(score)+'٪</span>');
+  el.innerHTML=parts.join(' · ');
 }
 
 async function _ttdSubmitForReview(){
