@@ -773,39 +773,34 @@ export default {
       const memberName = (await env.DAYQ_KV.get(`team:${teamCode}:member:${uuid}`)
         .then(r => r ? JSON.parse(r).name : 'کارمند').catch(() => 'کارمند'));
 
-      if (status && status !== oldStatus) {
-        // ── in_review: کارمند تسک رو برای بررسی فرستاد ──
+      const _pushWorthy = status && status !== oldStatus && !seenAt &&
+        (status === 'in_review' || status === 'blocked' ||
+         (role === 'manager' && (status === 'done' || status === 'in_progress')));
+      if (_pushWorthy) {
         if (status === 'in_review') {
-          const noteText = memberNote || '';
           await pushToManager(teamCode, {
-            title: `📤 ${memberName} — آماده بررسی`,
-            body: `${task.title}${noteText ? ': ' + noteText : ''}`,
+            title: '📤 ' + memberName + ' — آماده بررسی',
+            body: task.title + (memberNote ? ': ' + memberNote : ''),
             data: { type: 'in_review', taskId, teamCode }
           }, env);
-        }
-        // ── مدیر تأیید یا برگشت داد ──
-        else if (role === 'manager' && (status === 'done' || status === 'in_progress')) {
-          const isApproved = status === 'done';
-          await pushToMember(teamCode, task.assignedTo, {
-            title: isApproved ? `✅ تأیید شد — ${task.title}` : `↩️ برگشت داده شد — ${task.title}`,
-            body: isApproved ? 'مدیر تسک رو تأیید کرد' : (memberNote || 'ادامه بده'),
-            data: { type: isApproved ? 'task_approved' : 'task_returned', taskId, teamCode }
-          }, env);
-        }
-        // ── سایر status‌ها ──
-        else {
-          const emoji = status === 'blocked' ? '🚫' : '🔄';
-          const statusLabel = status === 'blocked' ? 'متوقف شده' : 'در حال انجام';
-          const noteText = memberNote || blockedNote || '';
+        } else if (status === 'blocked') {
+          const _nt = memberNote || blockedNote || '';
           await pushToManager(teamCode, {
-            title: `${emoji} ${memberName} — ${task.title}`,
-            body: noteText ? `${statusLabel}: ${noteText}` : statusLabel,
+            title: '🚫 ' + memberName + ' — ' + task.title,
+            body: _nt || 'متوقف شده',
             data: { type: 'task_update', taskId, teamCode, status }
           }, env);
+        } else if (role === 'manager') {
+          const _app = status === 'done';
+          await pushToMember(teamCode, task.assignedTo, {
+            title: (_app ? '✅ تأیید — ' : '↩️ برگشت — ') + task.title,
+            body: _app ? 'تأیید شد' : (memberNote || 'دوباره بررسی کن'),
+            data: { type: _app ? 'task_approved' : 'task_returned', taskId, teamCode }
+          }, env);
         }
-      } else if (memberNote && memberNote !== task.memberNote) {
+      } else if (!seenAt && memberNote && memberNote !== task.memberNote) {
         await pushToManager(teamCode, {
-          title: `💬 ${memberName} — ${task.title}`,
+          title: '💬 ' + memberName + ' — ' + task.title,
           body: memberNote,
           data: { type: 'task_note', taskId, teamCode }
         }, env);
