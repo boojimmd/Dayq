@@ -751,9 +751,12 @@ export default {
       if (!taskRaw) return errRes('تسک یافت نشد', 404, cors);
       const task = JSON.parse(taskRaw);
 
-      // کارمند فقط تسک خودش رو می‌تونه آپدیت کنه
+      // کارمند فقط تسک خودش، مدیر همه تسک‌ها
       if (role === 'member' && task.assignedTo !== uuid)
         return errRes('دسترسی نامعتبر', 403, cors);
+      // کارمند نمیتونه in_review رو از سمت مدیر تأیید کنه
+      if (role === 'member' && status === 'done' && task.status === 'in_review')
+        return errRes('فقط مدیر میتونه تأیید کنه', 403, cors);
 
       const oldStatus = task.status;
       if (status) task.status = status;
@@ -769,16 +772,36 @@ export default {
         .then(r => r ? JSON.parse(r).name : 'کارمند').catch(() => 'کارمند'));
 
       if (status && status !== oldStatus) {
-        const emoji = status === 'done' ? '✅' : status === 'blocked' ? '🚫' : '🔄';
-        const statusLabel = status === 'done' ? 'تکمیل شد' : status === 'blocked' ? 'متوقف شده' : 'در حال انجام';
-        const noteText = memberNote || blockedNote || '';
-        await pushToManager(teamCode, {
-          title: `${emoji} ${memberName} — ${task.title}`,
-          body: noteText ? `${statusLabel}: ${noteText}` : statusLabel,
-          data: { type: 'task_update', taskId, teamCode, status }
-        }, env);
+        // ── in_review: کارمند تسک رو برای بررسی فرستاد ──
+        if (status === 'in_review') {
+          const noteText = memberNote || '';
+          await pushToManager(teamCode, {
+            title: `📤 ${memberName} — آماده بررسی`,
+            body: `${task.title}${noteText ? ': ' + noteText : ''}`,
+            data: { type: 'in_review', taskId, teamCode }
+          }, env);
+        }
+        // ── مدیر تأیید یا برگشت داد ──
+        else if (role === 'manager' && (status === 'done' || status === 'in_progress')) {
+          const isApproved = status === 'done';
+          await pushToMember(teamCode, task.assignedTo, {
+            title: isApproved ? `✅ تأیید شد — ${task.title}` : `↩️ برگشت داده شد — ${task.title}`,
+            body: isApproved ? 'مدیر تسک رو تأیید کرد' : (memberNote || 'ادامه بده'),
+            data: { type: isApproved ? 'task_approved' : 'task_returned', taskId, teamCode }
+          }, env);
+        }
+        // ── سایر status‌ها ──
+        else {
+          const emoji = status === 'blocked' ? '🚫' : '🔄';
+          const statusLabel = status === 'blocked' ? 'متوقف شده' : 'در حال انجام';
+          const noteText = memberNote || blockedNote || '';
+          await pushToManager(teamCode, {
+            title: `${emoji} ${memberName} — ${task.title}`,
+            body: noteText ? `${statusLabel}: ${noteText}` : statusLabel,
+            data: { type: 'task_update', taskId, teamCode, status }
+          }, env);
+        }
       } else if (memberNote && memberNote !== task.memberNote) {
-        // فقط یادداشت تغییر کرد
         await pushToManager(teamCode, {
           title: `💬 ${memberName} — ${task.title}`,
           body: memberNote,
