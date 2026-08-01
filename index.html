@@ -14995,16 +14995,14 @@ function tmSetSokoTab(tab) {
     tmRenderSokoStatus();
     if (_sb) _tmSbStatus(_sb);
   } else if (tab === 'projects') {
-    tmRenderSokoProjects && tmRenderSokoProjects();
+    if (typeof tmRenderSokoProjects === 'function') tmRenderSokoProjects();
     if (_sb && typeof _tmSbProjects === 'function') _tmSbProjects(_sb);
     else if (_sb) _tmSbStatus(_sb);
   } else if (tab === 'report') {
-    tmRenderSokoReport && tmRenderSokoReport();
+    if (typeof tmRenderSokoReport === 'function') tmRenderSokoReport();
     if (_sb && typeof _tmSbReport === 'function') _tmSbReport(_sb);
     else if (_sb) _tmSbStatus(_sb);
   }
-}enderSokoProjects();}
-  else if (tab === 'report')  { tmRenderSokoReport(); tmRenderReport(); }
 }
 
 function tmRenderSokoStatus() {
