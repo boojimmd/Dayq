@@ -18780,59 +18780,9 @@ window.addEventListener('load', () => {
 
 
 /* ════ Direct Login — ورود با کد+PIN ════ */
-function tmOpenDirectLogin() {
-  tmCloseModal();
-  document.getElementById('tmDLCode').value = '';
-  document.getElementById('tmDLPin').value = '';
-  document.getElementById('tmDLErr').textContent = '';
-  tmModal('tmModalDirectLogin', true);
-}
 
-async function tmDoDirectLogin() {
-  const code = document.getElementById('tmDLCode').value.trim().toUpperCase();
-  const pin  = document.getElementById('tmDLPin').value.trim();
-  const errEl = document.getElementById('tmDLErr');
-  if (!code) { errEl.textContent = 'کد تیم رو وارد کن'; return; }
-  if (!/^\d{4}$/.test(pin)) { errEl.textContent = 'PIN باید ۴ رقم باشد'; return; }
 
-  const base = (cfg.pushWorkerUrl||'').trim().replace(/\/+$/, '');
-  if (!base) { errEl.textContent = 'ابتدا Worker Push رو در اتصال تنظیم کن'; return; }
 
-  const btn = document.getElementById('tmDLBtn');
-  btn.disabled = true; btn.textContent = 'در حال ورود...';
-
-  try {
-    const res = await fetch(base + '/team/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ teamCode: code, pin })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'خطا');
-
-    tm.code       = code;
-    tm.uuid       = data.uuid;
-    tm.role       = data.role;
-    tm.token      = data.token;
-    tm.workerUrl  = data.workerUrl || base;
-    tm.teamName   = data.teamName;
-    tm.memberName = data.name;
-    tm.memberRole = data.memberRole;
-    tmSaveState();
-    tmCloseModal();
-    tmApplyUI();
-    tmSyncBackground();
-    toast_(svgIco('check'), 'وارد تیم ' + data.teamName + ' شدی');
-  } catch(e) {
-    const msg = e.message.includes('PIN') ? 'PIN اشتباهه'
-      : e.message.includes('نامعتبر') ? 'کد تیم نامعتبره'
-      : e.message.includes('pattern') || e.message.includes('fetch') ? 'آدرس Worker رو چک کن'
-      : e.message;
-    errEl.textContent = msg;
-  } finally {
-    btn.disabled = false; btn.textContent = 'ورود';
-  }
-}
 /* ════ End Direct Login ════ */
 
 
@@ -18841,10 +18791,7 @@ async function tmDoDirectLogin() {
 // آپدیت سطر تیم در اتصال
 (function(){
   const _orig = tmApplyUI;
-  tmApplyUI = function() {
-    try { _orig.apply(this, arguments); } catch(e) {}
-    _tmUXRefresh();
-  };
+
 })();
 
 function _tmUXRefresh() {
@@ -18927,232 +18874,43 @@ tmUpdateSokoCard = function() {
 // let _tmAssignBroadcast = false; // already declared in script1
 
 // ── Deadline display helper (از nlpShowPreview الگو گرفته) ────
-function _tmFmtDeadline(dl) {
-  if (!dl) return null;
-  const [jy,jm,jd] = dl.split('-').map(Number);
-  const MONTHS = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
-  const today = mrTodayKey();
-  const [ty,tm,td] = today.split('-').map(Number);
-  const diff = _jalToDays(jy,jm,jd) - _jalToDays(ty,tm,td);
-  if (diff === 0) return { label:'امروز',  color:'var(--red)',   days: 0 };
-  if (diff === 1) return { label:'فردا',   color:'var(--amber)', days: 1 };
-  if (diff === 2) return { label:'پس‌فردا', color:'var(--amber)', days: 2 };
-  if (diff < 0)   return { label:`${Math.abs(diff)} روز پیش`, color:'var(--red)', days: diff };
-  if (diff <= 7)  return { label:`${num(jd)} ${MONTHS[jm-1]}`, color:'var(--a)', days: diff };
-  return { label:`${num(jd)} ${MONTHS[jm-1]}`, color:'var(--t2)', days: diff };
-}
+
 
 // ── Shortcut deadline calculator ───────────────────────────────
-function _tmDeadlineShortcut(text) {
-  const p = nlpParse(text);
-  return p ? p.deadline : null;
-}
+
 
 // ── Open Assign Modal (NLP version) ───────────────────────────
-tmAssignTask = function(preUuid = '') {
-  _tmAssignParsed = null;
-  _tmAssignMember = preUuid || '';
-  _tmAssignBroadcast = false;
 
-  // reset form
-  const inp = document.getElementById('tmANlpInp');
-  if (inp) { inp.value = ''; inp.style.height = 'auto'; }
-  const preview = document.getElementById('tmAPreview');
-  if (preview) preview.innerHTML = '';
-  const err = document.getElementById('tmAErr');
-  if (err) err.textContent = '';
-
-  // عضو پیش‌فرض
-  _tmUpdateAssignMemberChips();
-
-  tmModal('tmModalAssign', true);
-  setTimeout(() => { const i = document.getElementById('tmANlpInp'); if(i) i.focus(); }, 300);
-};
 
 // ── NLP input handler ─────────────────────────────────────────
-function _tmAssignNlpInput(val) {
-  _tmAssignParsed = val.trim().length > 2 ? nlpParse(val) : null;
-  _tmUpdateAssignPreview();
-  // auto-grow textarea
-  const inp = document.getElementById('tmANlpInp');
-  if (inp) { inp.style.height = 'auto'; inp.style.height = Math.min(inp.scrollHeight, 100) + 'px'; }
-}
+
 
 // ── Update preview chips ───────────────────────────────────────
-function _tmUpdateAssignPreview() {
-  const p = document.getElementById('tmAPreview');
-  if (!p) return;
-  if (!_tmAssignParsed) { p.innerHTML = ''; return; }
-  const chips = [];
-  if (_tmAssignParsed.deadline) {
-    const d = _tmFmtDeadline(_tmAssignParsed.deadline);
-    if (d) chips.push(`<span class="tm-nlp-chip" style="background:var(--am);color:var(--a)"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${d.label}</span>`);
-  }
-  const PRI_LABEL = { high:'فوری', med:'مهم', low:'عادی' };
-  const PRI_COLOR = { high:'var(--red)', med:'var(--amber)', low:'var(--t3)' };
-  if (_tmAssignParsed.detected.includes('pri')) {
-    const pri = _tmAssignParsed.priority;
-    chips.push(`<span class="tm-nlp-chip" style="background:${PRI_COLOR[pri]}22;color:${PRI_COLOR[pri]}">${PRI_LABEL[pri]||pri}</span>`);
-  }
-  p.innerHTML = chips.join('');
-}
+
 
 // ── Deadline shortcut chips ────────────────────────────────────
-function _tmSetDeadlineShortcut(text) {
-  const inp = document.getElementById('tmANlpInp');
-  if (!inp) return;
-  // اگه input خالیه، text رو بذار وگرنه deadline رو append کن
-  const current = inp.value.trim();
-  // حذف deadline قبلی از متن (اگه بود)
-  const cleaned = current.replace(/(فردا|پس‌فردا|این هفته|هفته دیگه|ماه دیگه|جمعه|پنجشنبه|شنبه|یکشنبه|دوشنبه|سه‌شنبه|چهارشنبه)(\s+)/g, '').trim();
-  inp.value = (cleaned ? cleaned + ' ' : '') + text;
-  inp.style.height = 'auto';
-  inp.style.height = Math.min(inp.scrollHeight, 100) + 'px';
-  _tmAssignNlpInput(inp.value);
-  inp.focus();
-}
+
 
 // ── Member chips update ────────────────────────────────────────
-function _tmUpdateAssignMemberChips() {
-  const el = document.getElementById('tmAMemberChips');
-  if (!el) return;
-  const members = tm.snapshot?.members?.filter(m => !m.isManager && m.status === 'active') || [];
-  if (!members.length) {
-    el.innerHTML = '<div style="color:var(--t3);font-size:var(--fs-xs)">هنوز عضوی تأیید نشده</div>';
-    return;
-  }
-  el.innerHTML = members.map(m => {
-    const active = _tmAssignMember === m.uuid;
-    const st = m.alert === 'blocked' ? 'block' : m.alert === 'stale' ? 'warn' : 'ok';
-    return `<button
-      class="tm-member-chip${active ? ' active' : ''}"
-      data-uuid="${m.uuid}"
-      onclick="_tmSelectMember('${m.uuid}')"
-      style="display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:var(--r5);border:1px solid ${active ? 'var(--blue)' : 'var(--b1)'};background:${active ? 'var(--bluem)' : 'var(--bg2)'};color:${active ? 'var(--blue)' : 'var(--t1)'};font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;transition:all 150ms ease">
-      ${tmDot(st)}<span>${esc(m.name)}</span>
-      ${m.activeTasks > 0 ? `<span style="font-size:var(--fs-2xs);opacity:.6">${m.activeTasks}</span>` : ''}
-    </button>`;
-  }).join('');
-}
 
-function _tmSelectMember(uuid) {
-  if (_tmAssignBroadcast) return;
-  _tmAssignMember = (_tmAssignMember === uuid) ? '' : uuid;
-  _tmUpdateAssignMemberChips();
-}
 
-function _tmToggleBroadcast() {
-  _tmAssignBroadcast = !_tmAssignBroadcast;
-  const btn = document.getElementById('tmABroadcastBtn');
-  if (btn) {
-    btn.style.background = _tmAssignBroadcast ? 'var(--bluem)' : 'var(--bg2)';
-    btn.style.color = _tmAssignBroadcast ? 'var(--blue)' : 'var(--t2)';
-    btn.style.borderColor = _tmAssignBroadcast ? 'rgba(59,130,246,.3)' : 'var(--b1)';
-    btn.textContent = _tmAssignBroadcast ? '📡 همه اعضا (فعال)' : '📡 ارسال به همه';
-  }
-  if (_tmAssignBroadcast) {
-    _tmAssignMember = '';
-    _tmUpdateAssignMemberChips();
-  }
-}
+
+
+
 
 // ── Priority override ─────────────────────────────────────────
 // let _tmAssignPriOverride = null; // already declared in script1
-function _tmSetPri(pri) {
-  _tmAssignPriOverride = (_tmAssignPriOverride === pri) ? null : pri;
-  document.querySelectorAll('.tm-pri-chip').forEach(c => {
-    const active = c.dataset.pri === _tmAssignPriOverride;
-    c.style.opacity = active ? '1' : '.5';
-    c.style.transform = active ? 'scale(1.05)' : 'scale(1)';
-  });
-}
+
 
 // ── Submit ────────────────────────────────────────────────────
-tmDoAssign = async function() {
-  const inp = document.getElementById('tmANlpInp');
-  const errEl = document.getElementById('tmAErr');
-  const rawText = inp?.value?.trim() || '';
-  const parsed = rawText.length > 1 ? (nlpParse(rawText) || {}) : {};
-  const title = parsed.cleanText || rawText;
-  const deadline = parsed.deadline || '';
-  const priority = _tmAssignPriOverride || parsed.priority || 'high';
 
-  if (!title) { errEl.textContent = 'عنوان تسک رو بنویس'; return; }
-  if (!deadline) { errEl.textContent = 'ددلاین رو مشخص کن — مثال: فردا، جمعه، هفته دیگه'; return; }
-  if (!_tmAssignBroadcast && !_tmAssignMember) {
-    errEl.textContent = 'یه عضو انتخاب کن یا «ارسال به همه» رو بزن';
-    return;
-  }
 
-  const btn = document.getElementById('tmASubmitBtn');
-  if (btn) { btn.disabled = true; btn.textContent = 'در حال ارسال...'; }
-  errEl.textContent = '';
 
-  try {
-    const endpoint = _tmAssignBroadcast ? '/task/broadcast' : '/task/assign';
-    const body = { title, deadline, priority, category: parsed.cat || '' };
-    if (!_tmAssignBroadcast) body.assignedTo = _tmAssignMember;
-
-    const res = await tmAPI('POST', endpoint, body);
-    tmCloseModal();
-    _tmAssignPriOverride = null;
-    toast_(svgIco('check'), _tmAssignBroadcast
-      ? `تسک به همه اعضا ارسال شد`
-      : `تسک به ${_tmMemberName(_tmAssignMember)} ارسال شد`);
-    tmSyncBackground();
-  } catch(e) {
-    errEl.textContent = e.message;
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'ارسال تسک'; }
-  }
-};
-
-function _tmMemberName(uuid) {
-  const m = (tm.snapshot?.members||[]).find(x => x.uuid === uuid);
-  return m ? m.name : 'عضو';
-}
 
 // ── Projects tab — task list واقعی ────────────────────────────
 
 // ── Toggle member tasks expand ─────────────────────────────────
-async function _tmToggleMemberTasks(uuid) {
-  const el = document.getElementById(`tmMemberTasks_${uuid}`);
-  const arrow = document.getElementById(`tmProjArrow_${uuid}`);
-  if (!el) return;
 
-  const isOpen = el.style.display !== 'none';
-  el.style.display = isOpen ? 'none' : 'block';
-  if (arrow) arrow.style.transform = isOpen ? 'rotate(-90deg)' : 'rotate(0deg)';
-  if (isOpen) return;
-
-  // fetch tasks
-  try {
-    const data = await tmAPI('GET', `/task/inbox?member=${uuid}`);
-    const tasks = (data.tasks || []).filter(t => !t.deleted);
-    if (!tasks.length) {
-      el.innerHTML = '<div style="font-size:var(--fs-xs);color:var(--t3);padding:var(--sp2) 0">تسک فعالی ندارد</div>';
-      return;
-    }
-    const STATUS_MAP = {
-      pending:     { label:'شروع نشده',     color:'var(--t3)' },
-      in_progress: { label:'در حال انجام',    color:'var(--blue)' },
-      waiting:     { label:'منتظرم',   color:'var(--amber)' },
-      blocked:     { label:'مشکل',     color:'var(--red)' },
-      done:        { label:'تکمیل شد', color:'var(--a)' },
-    };
-    el.innerHTML = tasks.slice(0, 5).map(t => {
-      const st = STATUS_MAP[t.status] || STATUS_MAP.pending;
-      const over = t.deadline && t.deadline < mrTodayKey() && t.status !== 'done';
-      return `<div style="display:flex;align-items:center;gap:var(--sp2);padding:6px 0;border-bottom:1px solid var(--b2)">
-        <span style="font-size:var(--fs-2xs);font-weight:700;color:${st.color};flex-shrink:0">${st.label}</span>
-        <span style="font-size:var(--fs-xs);color:var(--t1);flex:1;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t.title)}</span>
-        ${t.deadline ? `<span style="font-size:var(--fs-2xs);color:${over?'var(--red)':'var(--t3)'};flex-shrink:0">${t.deadline.slice(5)}</span>` : ''}
-      </div>`;
-    }).join('') + (tasks.length > 5 ? `<div style="font-size:var(--fs-2xs);color:var(--t3);text-align:center;padding-top:4px">+${tasks.length-5} تسک دیگه</div>` : '');
-  } catch(e) {
-    el.innerHTML = `<div style="font-size:var(--fs-xs);color:var(--red)">${e.message}</div>`;
-  }
-}
 
 /* ════ End NLP Assign ════ */
 
@@ -19218,124 +18976,20 @@ function openTeamTaskDetail(taskId) {
   openSheet('shTeamTaskDetail');
 }
 
-function _ttdSetStatus(st) {
-  document.querySelectorAll('.ttd-st-btn').forEach(btn => {
-    const active = btn.dataset.st === st;
-    btn.style.background = active ? 'var(--t1)' : 'var(--bg2)';
-    btn.style.color = active ? 'var(--bg1)' : 'var(--t2)';
-    btn.style.borderColor = active ? 'var(--t1)' : 'var(--b1)';
-  });
-  // اگه blocked شد، note رو focus کن
-  if (st === 'blocked') {
-    setTimeout(() => {
-      const n = document.getElementById('ttdNote');
-      if (n && !n.value) {
-        n.placeholder = 'مشکل رو توضیح بده — مدیر باید بدونه';
-        n.focus();
-      }
-    }, 200);
-  }
-}
 
-async function _ttdSave() {
-  if (!_ttdTaskId) return;
-  const activeBtn = document.querySelector('.ttd-st-btn[style*="var(--bg1)"]');
-  const status = activeBtn?.dataset.st || 'in_progress';
-  const note = document.getElementById('ttdNote')?.value.trim() || '';
-  const errEl = document.getElementById('ttdErr');
-  const btn = document.getElementById('ttdSaveBtn');
 
-  if (status === 'blocked' && !note) {
-    errEl.textContent = 'لطفاً مشکل رو توضیح بده تا مدیر بتونه کمک کنه';
-    return;
-  }
 
-  btn.disabled = true; btn.textContent = 'در حال ذخیره...';
-  try {
-    await tmAPI('PUT', '/task/update', {
-      taskId: _ttdTaskId,
-      status,
-      memberNote: note,
-    });
-    // آپدیت local inbox
-    if (tm.inbox) {
-      const t = tm.inbox.find(x => x.id === _ttdTaskId);
-      if (t) { t.status = status; t.memberNote = note; }
-    }
-    closeAll();
-    tmApplyUI();
-    toast_(svgIco('check'), status === 'done' ? 'تسک تموم شد ✅' : 'وضعیت آپدیت شد');
-  } catch(e) {
-    errEl.textContent = e.message;
-  } finally {
-    btn.disabled = false; btn.textContent = 'ذخیره وضعیت';
-  }
-}
 
 // hook کردن به task card های تیمی در home
 (function(){
   const _origRenderInbox = window.tmRenderInboxSection;
   if (_origRenderInbox) {
-    window.tmRenderInboxSection = function() {
-      _origRenderInbox.apply(this, arguments);
-      // اضافه کردن click handler به تسک‌های تیمی
-      setTimeout(() => {
-        document.querySelectorAll('.tm-task-card[data-team-task-id]').forEach(el => {
-          el.onclick = () => openTeamTaskDetail(el.dataset.teamTaskId);
-        });
-      }, 100);
-    };
+
   }
 })();
 
 // ── ۲. Team Projects در تب پروژه‌ها ─────────────────────
-function tmRenderProjectsSection() {
-  const el = document.getElementById('tmProjInProjects');
-  const listEl = document.getElementById('tmProjInProjectsList');
-  if (!el || !listEl) return;
 
-  const isMember = tm.role === 'member' && tm.code;
-  if (!isMember) { el.style.display = 'none'; return; }
-
-  el.style.display = '';
-  const inbox = (tm.inbox || []).filter(t => !t.deleted);
-  if (!inbox.length) {
-    listEl.innerHTML = '<div style="color:var(--t3);font-size:var(--fs-xs);text-align:center;padding:var(--sp3)">هنوز تسک تیمی نداری</div>';
-    return;
-  }
-
-  // گروه‌بندی بر اساس category
-  const groups = {};
-  inbox.forEach(t => {
-    const g = t.category || 'عمومی';
-    if (!groups[g]) groups[g] = [];
-    groups[g].push(t);
-  });
-
-  const STATUS_COLOR = { pending:'var(--t3)', in_progress:'var(--blue)', done:'var(--a)', blocked:'var(--red)', waiting:'var(--amber)' };
-  const STATUS_LABEL = { pending:'شروع نشده', in_progress:'در حال انجام', done:'✓', blocked:'🚫', waiting:'منتظرم' };
-
-  listEl.innerHTML = Object.entries(groups).map(([cat, tasks]) => {
-    const done = tasks.filter(t => t.status === 'done').length;
-    const pct = Math.round(done / tasks.length * 100);
-    return `<div style="background:var(--bluem);border:1px solid rgba(59,130,246,.2);border-radius:var(--r3);padding:var(--sp3);margin-bottom:var(--sp2)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp2)">
-        <span style="font-size:var(--fs-xs);color:var(--blue);font-weight:700">${pct}٪</span>
-        <span style="font-size:var(--fs-sm);font-weight:700;color:var(--t1)">👥 ${esc(cat)}</span>
-      </div>
-      <div style="height:3px;background:var(--bluem);border-radius:var(--r5);margin-bottom:var(--sp3);overflow:hidden">
-        <div style="height:100%;border-radius:var(--r5);background:var(--blue);transform:scaleX(${pct/100});transform-origin:right;transition:transform 600ms cubic-bezier(0.23,1,0.32,1)"></div>
-      </div>
-      ${tasks.slice(0,3).map(t =>
-        `<div onclick="openTeamTaskDetail('${t.id}')" style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bluem);cursor:pointer">
-          <span style="font-size:var(--fs-2xs);font-weight:700;color:${STATUS_COLOR[t.status]||'var(--t3)'}">${STATUS_LABEL[t.status]||''}</span>
-          <span style="font-size:var(--fs-xs);color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70%">${esc(t.title)}</span>
-        </div>`
-      ).join('')}
-      ${tasks.length > 3 ? `<div style="font-size:var(--fs-2xs);color:var(--t3);text-align:center;padding-top:4px">+${tasks.length-3} تسک دیگه</div>` : ''}
-    </div>`;
-  }).join('');
-}
 
 // hook به renderProjects
 (function(){
@@ -19373,11 +19027,7 @@ function _calSetFilter(f) {
 // نمایش فیلتر فقط اگه عضو تیم هستیم
 (function(){
   const _origApplyUI = window.tmApplyUI;
-  tmApplyUI = function() {
-    if (_origApplyUI) _origApplyUI.apply(this, arguments);
-    const filterEl = document.getElementById('calTeamFilter');
-    if (filterEl) filterEl.style.display = tm.code ? '' : 'none';
-  };
+
 })();
 
 // hook به renderCal برای اعمال filter
@@ -19436,77 +19086,9 @@ function _calSetFilter(f) {
 })();
 
 // ── ۵. سکو گزارش تب — render کامل ────────────────────────
-window.tmRenderReport = function() {
-  const el = document.getElementById('tmSokoReportContent');
-  if (!el) return;
-  if (!tm.snapshot) {
-    el.innerHTML = '<div style="padding:var(--sp5);text-align:center"><div class="tm-skeleton" style="height:60px;border-radius:var(--r2);margin-bottom:var(--sp2)"></div><div class="tm-skeleton" style="height:100px;border-radius:var(--r2)"></div></div>';
-    return;
-  }
-  const members = (tm.snapshot.members || []).filter(m => m.status === 'active');
-  const total = members.reduce((s, m) => s + (m.activeTasks||0), 0);
-  const done = members.reduce((s, m) => s + (m.doneTasks||0), 0);
-  const blocked = members.filter(m => m.alert === 'blocked').length;
-  const stale = members.filter(m => m.alert === 'stale').length;
 
-  el.innerHTML = `
-    <!-- آمار کلی -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--sp2);padding:var(--sp3) var(--sp4);border-bottom:1px solid var(--b2)">
-      ${[
-        {l:'تسک فعال', v:total, c:'var(--t1)'},
-        {l:'تمام‌شده', v:done,  c:'var(--a)'},
-        {l:'مشکل',   v:blocked, c:'var(--red)'},
-      ].map(s => `
-        <div style="text-align:center;background:var(--bg2);border-radius:var(--r2);padding:var(--sp3)">
-          <div style="font-size:var(--fs-lg);font-weight:800;color:${s.c};font-variant-numeric:tabular-nums">${s.v}</div>
-          <div style="font-size:var(--fs-2xs);color:var(--t3);margin-top:2px">${s.l}</div>
-        </div>`).join('')}
-    </div>
 
-    <!-- عملکرد اعضا -->
-    <div style="padding:var(--sp3) var(--sp4)">
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp3)">عملکرد این هفته</div>
-      ${members.length ? members.map(m => {
-        const mDone = m.doneTasks || 0;
-        const mTotal = (m.activeTasks||0) + mDone;
-        const score = mTotal > 0 ? Math.round(mDone / mTotal * 100) : 0;
-        const scoreColor = score >= 80 ? 'var(--a)' : score >= 50 ? 'var(--amber)' : 'var(--red)';
-        return `
-          <div style="background:var(--bg2);border-radius:var(--r2);padding:var(--sp3);margin-bottom:var(--sp2)">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp2)">
-              <div style="font-size:var(--fs-md);font-weight:800;color:${scoreColor};font-variant-numeric:tabular-nums">${score}٪</div>
-              <div style="text-align:right">
-                <div style="font-size:var(--fs-sm);font-weight:700;color:var(--t1)">${esc(m.name)}</div>
-                <div style="font-size:var(--fs-2xs);color:var(--t3)">${mDone} از ${mTotal} تسک</div>
-              </div>
-            </div>
-            <div style="height:4px;background:var(--bg3);border-radius:var(--r5);overflow:hidden">
-              <div style="height:100%;border-radius:var(--r5);background:${scoreColor};transform:scaleX(${score/100});transform-origin:right;transition:transform 600ms cubic-bezier(0.23,1,0.32,1)"></div>
-            </div>
-            ${m.alert !== 'ok' ? `<div style="font-size:var(--fs-2xs);margin-top:4px;color:${m.alert==='blocked'?'var(--red)':'var(--amber)'}">${m.alert==='blocked'?'🚫 مشکل دارد':'⏳ بی‌تحرکی'}</div>` : ''}
-          </div>`;
-      }).join('') : '<div style="color:var(--t3);font-size:var(--fs-xs);text-align:center;padding:var(--sp4)">عضوی ندارد</div>'}
-    </div>
 
-    <!-- toggle هفتگی / ماهانه -->
-    <div style="padding:0 var(--sp4) var(--sp5);display:flex;gap:var(--sp2);justify-content:center">
-      <button onclick="tmLoadReport('weekly')"  style="height:28px;padding:0 12px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--t1);color:var(--bg1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">هفتگی</button>
-      <button onclick="tmLoadReport('monthly')" style="height:28px;padding:0 12px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--bg2);color:var(--t2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">ماهانه</button>
-    </div>`;
-};
-
-async function tmLoadReport(period) {
-  try {
-    const data = await tmAPI('GET', `/report/${period}`);
-    if (data && data.members) {
-      // آپدیت snapshot
-      tm.snapshot = { ...tm.snapshot, members: data.members };
-      tmRenderReport();
-    }
-  } catch(e) {
-    console.warn('tmLoadReport:', e.message);
-  }
-}
 
 /* ════ End Missing Features ════ */
 
@@ -19515,17 +19097,7 @@ async function tmLoadReport(period) {
 (function(){
   const _origTmModal = window.tmModal;
   if (!_origTmModal) return;
-  window.tmModal = function(id, open) {
-    _origTmModal.apply(this, arguments);
-    if (open) {
-      setTimeout(() => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        const first = el.querySelector('input:not([disabled]), textarea:not([disabled])');
-        if (first) first.focus();
-      }, 320); // بعد از animation
-    }
-  };
+
 })();
 /* ════ End Focus Management ════ */
 /* ════════════════════════════════════════════════════════════════
@@ -19538,232 +19110,43 @@ _tmAssignMember = '';
 _tmAssignBroadcast = false;
 
 // ── Deadline display helper (از nlpShowPreview الگو گرفته) ────
-function _tmFmtDeadline(dl) {
-  if (!dl) return null;
-  const [jy,jm,jd] = dl.split('-').map(Number);
-  const MONTHS = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
-  const today = mrTodayKey();
-  const [ty,tm,td] = today.split('-').map(Number);
-  const diff = _jalToDays(jy,jm,jd) - _jalToDays(ty,tm,td);
-  if (diff === 0) return { label:'امروز',  color:'var(--red)',   days: 0 };
-  if (diff === 1) return { label:'فردا',   color:'var(--amber)', days: 1 };
-  if (diff === 2) return { label:'پس‌فردا', color:'var(--amber)', days: 2 };
-  if (diff < 0)   return { label:`${Math.abs(diff)} روز پیش`, color:'var(--red)', days: diff };
-  if (diff <= 7)  return { label:`${num(jd)} ${MONTHS[jm-1]}`, color:'var(--a)', days: diff };
-  return { label:`${num(jd)} ${MONTHS[jm-1]}`, color:'var(--t2)', days: diff };
-}
+
 
 // ── Shortcut deadline calculator ───────────────────────────────
-function _tmDeadlineShortcut(text) {
-  const p = nlpParse(text);
-  return p ? p.deadline : null;
-}
+
 
 // ── Open Assign Modal (NLP version) ───────────────────────────
-tmAssignTask = function(preUuid = '') {
-  _tmAssignParsed = null;
-  _tmAssignMember = preUuid || '';
-  _tmAssignBroadcast = false;
 
-  // reset form
-  const inp = document.getElementById('tmANlpInp');
-  if (inp) { inp.value = ''; inp.style.height = 'auto'; }
-  const preview = document.getElementById('tmAPreview');
-  if (preview) preview.innerHTML = '';
-  const err = document.getElementById('tmAErr');
-  if (err) err.textContent = '';
-
-  // عضو پیش‌فرض
-  _tmUpdateAssignMemberChips();
-
-  tmModal('tmModalAssign', true);
-  setTimeout(() => { const i = document.getElementById('tmANlpInp'); if(i) i.focus(); }, 300);
-};
 
 // ── NLP input handler ─────────────────────────────────────────
-function _tmAssignNlpInput(val) {
-  _tmAssignParsed = val.trim().length > 2 ? nlpParse(val) : null;
-  _tmUpdateAssignPreview();
-  // auto-grow textarea
-  const inp = document.getElementById('tmANlpInp');
-  if (inp) { inp.style.height = 'auto'; inp.style.height = Math.min(inp.scrollHeight, 100) + 'px'; }
-}
+
 
 // ── Update preview chips ───────────────────────────────────────
-function _tmUpdateAssignPreview() {
-  const p = document.getElementById('tmAPreview');
-  if (!p) return;
-  if (!_tmAssignParsed) { p.innerHTML = ''; return; }
-  const chips = [];
-  if (_tmAssignParsed.deadline) {
-    const d = _tmFmtDeadline(_tmAssignParsed.deadline);
-    if (d) chips.push(`<span class="tm-nlp-chip" style="background:rgba(0,184,122,.12);color:var(--a)"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${d.label}</span>`);
-  }
-  const PRI_LABEL = { high:'فوری', med:'مهم', low:'عادی' };
-  const PRI_COLOR = { high:'var(--red)', med:'var(--amber)', low:'var(--t3)' };
-  if (_tmAssignParsed.detected.includes('pri')) {
-    const pri = _tmAssignParsed.priority;
-    chips.push(`<span class="tm-nlp-chip" style="background:${PRI_COLOR[pri]}22;color:${PRI_COLOR[pri]}">${PRI_LABEL[pri]||pri}</span>`);
-  }
-  p.innerHTML = chips.join('');
-}
+
 
 // ── Deadline shortcut chips ────────────────────────────────────
-function _tmSetDeadlineShortcut(text) {
-  const inp = document.getElementById('tmANlpInp');
-  if (!inp) return;
-  // اگه input خالیه، text رو بذار وگرنه deadline رو append کن
-  const current = inp.value.trim();
-  // حذف deadline قبلی از متن (اگه بود)
-  const cleaned = current.replace(/(فردا|پس‌فردا|این هفته|هفته دیگه|ماه دیگه|جمعه|پنجشنبه|شنبه|یکشنبه|دوشنبه|سه‌شنبه|چهارشنبه)(\s+)/g, '').trim();
-  inp.value = (cleaned ? cleaned + ' ' : '') + text;
-  inp.style.height = 'auto';
-  inp.style.height = Math.min(inp.scrollHeight, 100) + 'px';
-  _tmAssignNlpInput(inp.value);
-  inp.focus();
-}
+
 
 // ── Member chips update ────────────────────────────────────────
-function _tmUpdateAssignMemberChips() {
-  const el = document.getElementById('tmAMemberChips');
-  if (!el) return;
-  const members = tm.snapshot?.members?.filter(m => !m.isManager && m.status === 'active') || [];
-  if (!members.length) {
-    el.innerHTML = '<div style="color:var(--t3);font-size:var(--fs-xs)">هنوز عضوی تأیید نشده</div>';
-    return;
-  }
-  el.innerHTML = members.map(m => {
-    const active = _tmAssignMember === m.uuid;
-    const st = m.alert === 'blocked' ? 'block' : m.alert === 'stale' ? 'warn' : 'ok';
-    return `<button
-      class="tm-member-chip${active ? ' active' : ''}"
-      data-uuid="${m.uuid}"
-      onclick="_tmSelectMember('${m.uuid}')"
-      style="display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:var(--r5);border:1px solid ${active ? 'var(--blue)' : 'var(--b1)'};background:${active ? 'var(--bluem)' : 'var(--bg2)'};color:${active ? 'var(--blue)' : 'var(--t1)'};font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;transition:all 150ms ease">
-      ${tmDot(st)}<span>${esc(m.name)}</span>
-      ${m.activeTasks > 0 ? `<span style="font-size:10px;opacity:.6">${m.activeTasks}</span>` : ''}
-    </button>`;
-  }).join('');
-}
 
-function _tmSelectMember(uuid) {
-  if (_tmAssignBroadcast) return;
-  _tmAssignMember = (_tmAssignMember === uuid) ? '' : uuid;
-  _tmUpdateAssignMemberChips();
-}
 
-function _tmToggleBroadcast() {
-  _tmAssignBroadcast = !_tmAssignBroadcast;
-  const btn = document.getElementById('tmABroadcastBtn');
-  if (btn) {
-    btn.style.background = _tmAssignBroadcast ? 'var(--bluem)' : 'var(--bg2)';
-    btn.style.color = _tmAssignBroadcast ? 'var(--blue)' : 'var(--t2)';
-    btn.style.borderColor = _tmAssignBroadcast ? 'rgba(59,130,246,.3)' : 'var(--b1)';
-    btn.textContent = _tmAssignBroadcast ? '📡 همه اعضا (فعال)' : '📡 ارسال به همه';
-  }
-  if (_tmAssignBroadcast) {
-    _tmAssignMember = '';
-    _tmUpdateAssignMemberChips();
-  }
-}
+
+
+
 
 // ── Priority override ─────────────────────────────────────────
 _tmAssignPriOverride = null;
-function _tmSetPri(pri) {
-  _tmAssignPriOverride = (_tmAssignPriOverride === pri) ? null : pri;
-  document.querySelectorAll('.tm-pri-chip').forEach(c => {
-    const active = c.dataset.pri === _tmAssignPriOverride;
-    c.style.opacity = active ? '1' : '.5';
-    c.style.transform = active ? 'scale(1.05)' : 'scale(1)';
-  });
-}
+
 
 // ── Submit ────────────────────────────────────────────────────
-tmDoAssign = async function() {
-  const inp = document.getElementById('tmANlpInp');
-  const errEl = document.getElementById('tmAErr');
-  const rawText = inp?.value?.trim() || '';
-  const parsed = rawText.length > 1 ? (nlpParse(rawText) || {}) : {};
-  const title = parsed.cleanText || rawText;
-  const deadline = parsed.deadline || '';
-  const priority = _tmAssignPriOverride || parsed.priority || 'high';
 
-  if (!title) { errEl.textContent = 'عنوان تسک رو بنویس'; return; }
-  if (!deadline) { errEl.textContent = 'ددلاین رو مشخص کن — مثال: فردا، جمعه، هفته دیگه'; return; }
-  if (!_tmAssignBroadcast && !_tmAssignMember) {
-    errEl.textContent = 'یه عضو انتخاب کن یا «ارسال به همه» رو بزن';
-    return;
-  }
 
-  const btn = document.getElementById('tmASubmitBtn');
-  if (btn) { btn.disabled = true; btn.textContent = 'در حال ارسال...'; }
-  errEl.textContent = '';
 
-  try {
-    const endpoint = _tmAssignBroadcast ? '/task/broadcast' : '/task/assign';
-    const body = { title, deadline, priority, category: parsed.cat || '' };
-    if (!_tmAssignBroadcast) body.assignedTo = _tmAssignMember;
-
-    const res = await tmAPI('POST', endpoint, body);
-    tmCloseModal();
-    _tmAssignPriOverride = null;
-    toast_(svgIco('check'), _tmAssignBroadcast
-      ? `تسک به همه اعضا ارسال شد`
-      : `تسک به ${_tmMemberName(_tmAssignMember)} ارسال شد`);
-    tmSyncBackground();
-  } catch(e) {
-    errEl.textContent = e.message;
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'ارسال تسک'; }
-  }
-};
-
-function _tmMemberName(uuid) {
-  const m = (tm.snapshot?.members||[]).find(x => x.uuid === uuid);
-  return m ? m.name : 'عضو';
-}
 
 // ── Projects tab — task list واقعی ────────────────────────────
 
 // ── Toggle member tasks expand ─────────────────────────────────
-async function _tmToggleMemberTasks(uuid) {
-  const el = document.getElementById(`tmMemberTasks_${uuid}`);
-  const arrow = document.getElementById(`tmProjArrow_${uuid}`);
-  if (!el) return;
 
-  const isOpen = el.style.display !== 'none';
-  el.style.display = isOpen ? 'none' : 'block';
-  if (arrow) arrow.style.transform = isOpen ? 'rotate(-90deg)' : 'rotate(0deg)';
-  if (isOpen) return;
-
-  // fetch tasks
-  try {
-    const data = await tmAPI('GET', `/task/inbox?member=${uuid}`);
-    const tasks = (data.tasks || []).filter(t => !t.deleted);
-    if (!tasks.length) {
-      el.innerHTML = '<div style="font-size:var(--fs-xs);color:var(--t3);padding:var(--sp2) 0">تسک فعالی ندارد</div>';
-      return;
-    }
-    const STATUS_MAP = {
-      pending:     { label:'شروع نشده',     color:'var(--t3)' },
-      in_progress: { label:'در حال انجام',    color:'var(--blue)' },
-      waiting:     { label:'منتظرم',   color:'var(--amber)' },
-      blocked:     { label:'مشکل',     color:'var(--red)' },
-      done:        { label:'تکمیل شد', color:'var(--a)' },
-    };
-    el.innerHTML = tasks.slice(0, 5).map(t => {
-      const st = STATUS_MAP[t.status] || STATUS_MAP.pending;
-      const over = t.deadline && t.deadline < mrTodayKey() && t.status !== 'done';
-      return `<div style="display:flex;align-items:center;gap:var(--sp2);padding:6px 0;border-bottom:1px solid var(--b2)">
-        <span style="font-size:10px;font-weight:700;color:${st.color};flex-shrink:0">${st.label}</span>
-        <span style="font-size:var(--fs-xs);color:var(--t1);flex:1;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t.title)}</span>
-        ${t.deadline ? `<span style="font-size:10px;color:${over?'var(--red)':'var(--t3)'};flex-shrink:0">${t.deadline.slice(5)}</span>` : ''}
-      </div>`;
-    }).join('') + (tasks.length > 5 ? `<div style="font-size:10px;color:var(--t3);text-align:center;padding-top:4px">+${tasks.length-5} تسک دیگه</div>` : '');
-  } catch(e) {
-    el.innerHTML = `<div style="font-size:var(--fs-xs);color:var(--red)">${e.message}</div>`;
-  }
-}
 
 /* ════ End NLP Assign ════ */
 
@@ -19829,124 +19212,20 @@ function openTeamTaskDetail(taskId) {
   openSheet('shTeamTaskDetail');
 }
 
-function _ttdSetStatus(st) {
-  document.querySelectorAll('.ttd-st-btn').forEach(btn => {
-    const active = btn.dataset.st === st;
-    btn.style.background = active ? 'var(--t1)' : 'var(--bg2)';
-    btn.style.color = active ? 'var(--bg1)' : 'var(--t2)';
-    btn.style.borderColor = active ? 'var(--t1)' : 'var(--b1)';
-  });
-  // اگه blocked شد، note رو focus کن
-  if (st === 'blocked') {
-    setTimeout(() => {
-      const n = document.getElementById('ttdNote');
-      if (n && !n.value) {
-        n.placeholder = 'مشکل رو توضیح بده — مدیر باید بدونه';
-        n.focus();
-      }
-    }, 200);
-  }
-}
 
-async function _ttdSave() {
-  if (!_ttdTaskId) return;
-  const activeBtn = document.querySelector('.ttd-st-btn[style*="var(--bg1)"]');
-  const status = activeBtn?.dataset.st || 'in_progress';
-  const note = document.getElementById('ttdNote')?.value.trim() || '';
-  const errEl = document.getElementById('ttdErr');
-  const btn = document.getElementById('ttdSaveBtn');
 
-  if (status === 'blocked' && !note) {
-    errEl.textContent = 'لطفاً مشکل رو توضیح بده تا مدیر بتونه کمک کنه';
-    return;
-  }
 
-  btn.disabled = true; btn.textContent = 'در حال ذخیره...';
-  try {
-    await tmAPI('PUT', '/task/update', {
-      taskId: _ttdTaskId,
-      status,
-      memberNote: note,
-    });
-    // آپدیت local inbox
-    if (tm.inbox) {
-      const t = tm.inbox.find(x => x.id === _ttdTaskId);
-      if (t) { t.status = status; t.memberNote = note; }
-    }
-    closeAll();
-    tmApplyUI();
-    toast_(svgIco('check'), status === 'done' ? 'تسک تموم شد ✅' : 'وضعیت آپدیت شد');
-  } catch(e) {
-    errEl.textContent = e.message;
-  } finally {
-    btn.disabled = false; btn.textContent = 'ذخیره وضعیت';
-  }
-}
 
 // hook کردن به task card های تیمی در home
 (function(){
   const _origRenderInbox = window.tmRenderInboxSection;
   if (_origRenderInbox) {
-    window.tmRenderInboxSection = function() {
-      _origRenderInbox.apply(this, arguments);
-      // اضافه کردن click handler به تسک‌های تیمی
-      setTimeout(() => {
-        document.querySelectorAll('.tm-task-card[data-team-task-id]').forEach(el => {
-          el.onclick = () => openTeamTaskDetail(el.dataset.teamTaskId);
-        });
-      }, 100);
-    };
+
   }
 })();
 
 // ── ۲. Team Projects در تب پروژه‌ها ─────────────────────
-function tmRenderProjectsSection() {
-  const el = document.getElementById('tmProjInProjects');
-  const listEl = document.getElementById('tmProjInProjectsList');
-  if (!el || !listEl) return;
 
-  const isMember = tm.role === 'member' && tm.code;
-  if (!isMember) { el.style.display = 'none'; return; }
-
-  el.style.display = '';
-  const inbox = (tm.inbox || []).filter(t => !t.deleted);
-  if (!inbox.length) {
-    listEl.innerHTML = '<div style="color:var(--t3);font-size:var(--fs-xs);text-align:center;padding:var(--sp3)">هنوز تسک تیمی نداری</div>';
-    return;
-  }
-
-  // گروه‌بندی بر اساس category
-  const groups = {};
-  inbox.forEach(t => {
-    const g = t.category || 'عمومی';
-    if (!groups[g]) groups[g] = [];
-    groups[g].push(t);
-  });
-
-  const STATUS_COLOR = { pending:'var(--t3)', in_progress:'var(--blue)', done:'var(--a)', blocked:'var(--red)', waiting:'var(--amber)' };
-  const STATUS_LABEL = { pending:'شروع نشده', in_progress:'در حال انجام', done:'✓', blocked:'🚫', waiting:'منتظرم' };
-
-  listEl.innerHTML = Object.entries(groups).map(([cat, tasks]) => {
-    const done = tasks.filter(t => t.status === 'done').length;
-    const pct = Math.round(done / tasks.length * 100);
-    return `<div style="background:var(--bluem);border:1px solid rgba(59,130,246,.2);border-radius:var(--r3);padding:var(--sp3);margin-bottom:var(--sp2)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp2)">
-        <span style="font-size:var(--fs-xs);color:var(--blue);font-weight:700">${pct}٪</span>
-        <span style="font-size:var(--fs-sm);font-weight:700;color:var(--t1)">👥 ${esc(cat)}</span>
-      </div>
-      <div style="height:3px;background:rgba(59,130,246,.15);border-radius:var(--r5);margin-bottom:var(--sp3);overflow:hidden">
-        <div style="height:100%;border-radius:var(--r5);background:var(--blue);transform:scaleX(${pct/100});transform-origin:right;transition:transform 600ms cubic-bezier(0.23,1,0.32,1)"></div>
-      </div>
-      ${tasks.slice(0,3).map(t =>
-        `<div onclick="openTeamTaskDetail('${t.id}')" style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(59,130,246,.1);cursor:pointer">
-          <span style="font-size:10px;font-weight:700;color:${STATUS_COLOR[t.status]||'var(--t3)'}">${STATUS_LABEL[t.status]||''}</span>
-          <span style="font-size:var(--fs-xs);color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70%">${esc(t.title)}</span>
-        </div>`
-      ).join('')}
-      ${tasks.length > 3 ? `<div style="font-size:10px;color:var(--t3);text-align:center;padding-top:4px">+${tasks.length-3} تسک دیگه</div>` : ''}
-    </div>`;
-  }).join('');
-}
 
 // hook به renderProjects
 (function(){
@@ -20047,77 +19326,9 @@ function _calSetFilter(f) {
 })();
 
 // ── ۵. سکو گزارش تب — render کامل ────────────────────────
-window.tmRenderReport = function() {
-  const el = document.getElementById('tmSokoReportContent');
-  if (!el) return;
-  if (!tm.snapshot) {
-    el.innerHTML = '<div style="padding:var(--sp5);text-align:center"><div class="tm-skeleton" style="height:60px;border-radius:var(--r2);margin-bottom:var(--sp2)"></div><div class="tm-skeleton" style="height:100px;border-radius:var(--r2)"></div></div>';
-    return;
-  }
-  const members = (tm.snapshot.members || []).filter(m => m.status === 'active');
-  const total = members.reduce((s, m) => s + (m.activeTasks||0), 0);
-  const done = members.reduce((s, m) => s + (m.doneTasks||0), 0);
-  const blocked = members.filter(m => m.alert === 'blocked').length;
-  const stale = members.filter(m => m.alert === 'stale').length;
 
-  el.innerHTML = `
-    <!-- آمار کلی -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--sp2);padding:var(--sp3) var(--sp4);border-bottom:1px solid var(--b2)">
-      ${[
-        {l:'تسک فعال', v:total, c:'var(--t1)'},
-        {l:'تمام‌شده', v:done,  c:'var(--a)'},
-        {l:'مشکل',   v:blocked, c:'var(--red)'},
-      ].map(s => `
-        <div style="text-align:center;background:var(--bg2);border-radius:var(--r2);padding:var(--sp3)">
-          <div style="font-size:var(--fs-lg);font-weight:800;color:${s.c};font-variant-numeric:tabular-nums">${s.v}</div>
-          <div style="font-size:10px;color:var(--t3);margin-top:2px">${s.l}</div>
-        </div>`).join('')}
-    </div>
 
-    <!-- عملکرد اعضا -->
-    <div style="padding:var(--sp3) var(--sp4)">
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp3)">عملکرد این هفته</div>
-      ${members.length ? members.map(m => {
-        const mDone = m.doneTasks || 0;
-        const mTotal = (m.activeTasks||0) + mDone;
-        const score = mTotal > 0 ? Math.round(mDone / mTotal * 100) : 0;
-        const scoreColor = score >= 80 ? 'var(--a)' : score >= 50 ? 'var(--amber)' : 'var(--red)';
-        return `
-          <div style="background:var(--bg2);border-radius:var(--r2);padding:var(--sp3);margin-bottom:var(--sp2)">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp2)">
-              <div style="font-size:var(--fs-md);font-weight:800;color:${scoreColor};font-variant-numeric:tabular-nums">${score}٪</div>
-              <div style="text-align:right">
-                <div style="font-size:var(--fs-sm);font-weight:700;color:var(--t1)">${esc(m.name)}</div>
-                <div style="font-size:10px;color:var(--t3)">${mDone} از ${mTotal} تسک</div>
-              </div>
-            </div>
-            <div style="height:4px;background:var(--bg3);border-radius:var(--r5);overflow:hidden">
-              <div style="height:100%;border-radius:var(--r5);background:${scoreColor};transform:scaleX(${score/100});transform-origin:right;transition:transform 600ms cubic-bezier(0.23,1,0.32,1)"></div>
-            </div>
-            ${m.alert !== 'ok' ? `<div style="font-size:10px;margin-top:4px;color:${m.alert==='blocked'?'var(--red)':'var(--amber)'}">${m.alert==='blocked'?'🚫 مشکل دارد':'⏳ بی‌تحرکی'}</div>` : ''}
-          </div>`;
-      }).join('') : '<div style="color:var(--t3);font-size:var(--fs-xs);text-align:center;padding:var(--sp4)">عضوی ندارد</div>'}
-    </div>
 
-    <!-- toggle هفتگی / ماهانه -->
-    <div style="padding:0 var(--sp4) var(--sp5);display:flex;gap:var(--sp2);justify-content:center">
-      <button onclick="tmLoadReport('weekly')"  style="height:28px;padding:0 12px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--t1);color:var(--bg1);font-size:11px;font-weight:600;font-family:var(--f);cursor:pointer">هفتگی</button>
-      <button onclick="tmLoadReport('monthly')" style="height:28px;padding:0 12px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--bg2);color:var(--t2);font-size:11px;font-weight:600;font-family:var(--f);cursor:pointer">ماهانه</button>
-    </div>`;
-};
-
-async function tmLoadReport(period) {
-  try {
-    const data = await tmAPI('GET', `/report/${period}`);
-    if (data && data.members) {
-      // آپدیت snapshot
-      tm.snapshot = { ...tm.snapshot, members: data.members };
-      tmRenderReport();
-    }
-  } catch(e) {
-    console.warn('tmLoadReport:', e.message);
-  }
-}
 
 /* ════ End Missing Features ════ */
 
@@ -20125,96 +19336,14 @@ async function tmLoadReport(period) {
 /* ════ Bug Fixes — Assign Modal ════ */
 
 // Fix 1: member filter — exclude self + manager
-function _tmUpdateAssignMemberChips() {
-  const el = document.getElementById('tmAMemberChips');
-  if (!el) return;
-  const members = (tm.snapshot?.members || []).filter(m =>
-    m.uuid !== tm.uuid &&
-    !m.isManager &&
-    m.role !== 'manager' &&
-    (m.status === 'active' || m.status === 'approved')
-  );
-  if (!members.length) {
-    el.innerHTML = '<div style="color:var(--t3);font-size:var(--fs-xs)">هنوز عضو فعالی نداری</div>';
-    return;
-  }
-  el.innerHTML = members.map(m => {
-    const active = _tmAssignMember === m.uuid;
-    const st = m.alert === 'blocked' ? 'block' : m.alert === 'stale' ? 'warn' : 'ok';
-    return `<button
-      class="tm-member-chip${active ? ' active' : ''}"
-      data-uuid="${m.uuid}"
-      onclick="_tmSelectMember('${m.uuid}')"
-    >${tmDot(st)}<span>${esc(m.name)}</span></button>`;
-  }).join('');
-}
+
 
 // Fix 2: state reset کامل
 const _origTmAssignTask = window.tmAssignTask;
-window.tmAssignTask = function(preUuid = '') {
-  _tmAssignParsed = null;
-  _tmAssignMember = preUuid || '';
-  _tmAssignBroadcast = false;
-  _tmAssignPriOverride = null;
 
-  // reset inputs
-  const inp = document.getElementById('tmANlpInp');
-  if (inp) { inp.value = ''; inp.style.height = 'auto'; }
-  const preview = document.getElementById('tmAPreview');
-  if (preview) preview.innerHTML = '';
-  const err = document.getElementById('tmAErr');
-  if (err) err.textContent = '';
-  const hint = document.getElementById('tmADlHint');
-  if (hint) hint.textContent = '';
-
-  // reset priority chips
-  document.querySelectorAll('.tm-pri-chip').forEach(c => {
-    c.style.opacity = '.5';
-    c.style.transform = '';
-  });
-
-  // reset broadcast btn
-  const broadBtn = document.getElementById('tmABroadcastBtn');
-  if (broadBtn) {
-    broadBtn.style.background = 'var(--bg2)';
-    broadBtn.style.color = 'var(--t2)';
-    broadBtn.style.borderColor = 'var(--b1)';
-    broadBtn.textContent = '📡 ارسال به همه';
-  }
-
-  _tmUpdateAssignMemberChips();
-  tmModal('tmModalAssign', true);
-  setTimeout(() => { const i = document.getElementById('tmANlpInp'); if(i) i.focus(); }, 300);
-};
 
 // Fix 3: NLP preview با deadline hint
-function _tmUpdateAssignPreview() {
-  const p = document.getElementById('tmAPreview');
-  const hint = document.getElementById('tmADlHint');
-  if (!p) return;
-  if (!_tmAssignParsed || !((_tmAssignParsed.detected||[]).length)) {
-    p.innerHTML = '';
-    if (hint) hint.textContent = '';
-    return;
-  }
-  const chips = [];
-  if (_tmAssignParsed.deadline) {
-    const d = _tmFmtDeadline(_tmAssignParsed.deadline);
-    if (d) {
-      chips.push(`<span class="tm-nlp-chip" style="background:var(--am);color:var(--a)">📅 ${d.label}</span>`);
-      if (hint) {
-        const [jy,jm,jd] = _tmAssignParsed.deadline.split('-');
-        hint.textContent = num(jd) + '/' + num(jm) + '/' + num(jy);
-      }
-    }
-  } else if (hint) hint.textContent = '';
-  const PRI = { high:['🔴 فوری','var(--red)'], med:['🟡 مهم','var(--amber)'], low:['⚪ عادی','var(--t3)'] };
-  if ((_tmAssignParsed.detected||[]).includes('pri') && _tmAssignParsed.priority) {
-    const [lbl, col] = PRI[_tmAssignParsed.priority] || [_tmAssignParsed.priority,'var(--t2)'];
-    chips.push(`<span class="tm-nlp-chip" style="background:${col}22;color:${col}">${lbl}</span>`);
-  }
-  p.innerHTML = chips.join('');
-}
+
 /* ════ End Bug Fixes ════ */
 
 
@@ -20222,15 +19351,7 @@ function _tmUpdateAssignPreview() {
 (function(){
   const _origTmM = window.tmModal;
   if (!_origTmM) return;
-  window.tmModal = function(id, open) {
-    _origTmM.apply(this, arguments);
-    if (open) setTimeout(() => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      const first = el.querySelector('input:not([disabled]),textarea:not([disabled])');
-      if (first) first.focus();
-    }, 320);
-  };
+
 })();
 /* ════ End Focus Management ════ */
 
@@ -20238,27 +19359,7 @@ function _tmUpdateAssignPreview() {
 
 
 /* ════ Submit Validation ════ */
-function _tmValidateSubmit() {
-  const btn = document.getElementById('tmASubmitBtn');
-  if (!btn) return;
-  const inp = document.getElementById('tmANlpInp');
-  const hasText = inp && inp.value.trim().length > 0;
-  const hasMember = _tmAssignMember || _tmAssignBroadcast;
-  
-  if (!hasText) {
-    btn.disabled = true;
-    btn.textContent = 'عنوان تسک رو بنویس';
-    btn.style.opacity = '.45';
-  } else if (!hasMember) {
-    btn.disabled = true;
-    btn.textContent = 'یه عضو انتخاب کن';
-    btn.style.opacity = '.45';
-  } else {
-    btn.disabled = false;
-    btn.textContent = 'ارسال تسک';
-    btn.style.opacity = '1';
-  }
-}
+
 /* ════ End Submit Validation ════ */
 
 /* ════ DayQ Soko — Team JS ════ */
@@ -20288,13 +19389,7 @@ window.addEventListener('load', () => {
 
 
 /* ════ Direct Login — ورود با کد+PIN ════ */
-function tmOpenDirectLogin() {
-  tmCloseModal();
-  document.getElementById('tmDLCode').value = '';
-  document.getElementById('tmDLPin').value = '';
-  document.getElementById('tmDLErr').textContent = '';
-  tmModal('tmModalDirectLogin', true);
-}
+
 
 async function tmDoDirectLogin() {
   const code = document.getElementById('tmDLCode').value.trim().toUpperCase();
@@ -20350,53 +19445,7 @@ async function tmDoDirectLogin() {
 
 
 // ── ۲. Team Projects در تب پروژه‌ها ─────────────────────
-function tmRenderProjectsSection() {
-  const el = document.getElementById('tmProjInProjects');
-  const listEl = document.getElementById('tmProjInProjectsList');
-  if (!el || !listEl) return;
 
-  const isMember = tm.role === 'member' && tm.code;
-  if (!isMember) { el.style.display = 'none'; return; }
-
-  el.style.display = '';
-  const inbox = (tm.inbox || []).filter(t => !t.deleted);
-  if (!inbox.length) {
-    listEl.innerHTML = '<div style="color:var(--t3);font-size:var(--fs-xs);text-align:center;padding:var(--sp3)">هنوز تسک تیمی نداری</div>';
-    return;
-  }
-
-  // گروه‌بندی بر اساس category
-  const groups = {};
-  inbox.forEach(t => {
-    const g = t.category || 'عمومی';
-    if (!groups[g]) groups[g] = [];
-    groups[g].push(t);
-  });
-
-  const STATUS_COLOR = { pending:'var(--t3)', in_progress:'var(--blue)', done:'var(--a)', blocked:'var(--red)', waiting:'var(--amber)' };
-  const STATUS_LABEL = { pending:'شروع نشده', in_progress:'در حال انجام', done:'✓', blocked:'🚫', waiting:'منتظرم' };
-
-  listEl.innerHTML = Object.entries(groups).map(([cat, tasks]) => {
-    const done = tasks.filter(t => t.status === 'done').length;
-    const pct = Math.round(done / tasks.length * 100);
-    return `<div style="background:var(--bluem);border:1px solid rgba(59,130,246,.2);border-radius:var(--r3);padding:var(--sp3);margin-bottom:var(--sp2)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp2)">
-        <span style="font-size:var(--fs-xs);color:var(--blue);font-weight:700">${pct}٪</span>
-        <span style="font-size:var(--fs-sm);font-weight:700;color:var(--t1)">👥 ${esc(cat)}</span>
-      </div>
-      <div style="height:3px;background:var(--bluem);border-radius:var(--r5);margin-bottom:var(--sp3);overflow:hidden">
-        <div style="height:100%;border-radius:var(--r5);background:var(--blue);transform:scaleX(${pct/100});transform-origin:right;transition:transform 600ms cubic-bezier(0.23,1,0.32,1)"></div>
-      </div>
-      ${tasks.slice(0,3).map(t =>
-        `<div onclick="openTeamTaskDetail('${t.id}')" style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--bluem);cursor:pointer">
-          <span style="font-size:var(--fs-2xs);font-weight:700;color:${STATUS_COLOR[t.status]||'var(--t3)'}">${STATUS_LABEL[t.status]||''}</span>
-          <span style="font-size:var(--fs-xs);color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70%">${esc(t.title)}</span>
-        </div>`
-      ).join('')}
-      ${tasks.length > 3 ? `<div style="font-size:var(--fs-2xs);color:var(--t3);text-align:center;padding-top:4px">+${tasks.length-3} تسک دیگه</div>` : ''}
-    </div>`;
-  }).join('');
-}
 
 // hook به renderProjects
 (function(){
@@ -20474,77 +19523,9 @@ function _calSetFilter(f) {
 })();
 
 // ── ۵. سکو گزارش تب — render کامل ────────────────────────
-window.tmRenderReport = function() {
-  const el = document.getElementById('tmSokoReportContent');
-  if (!el) return;
-  if (!tm.snapshot) {
-    el.innerHTML = '<div style="padding:var(--sp5);text-align:center"><div class="tm-skeleton" style="height:60px;border-radius:var(--r2);margin-bottom:var(--sp2)"></div><div class="tm-skeleton" style="height:100px;border-radius:var(--r2)"></div></div>';
-    return;
-  }
-  const members = (tm.snapshot.members || []).filter(m => m.status === 'active');
-  const total = members.reduce((s, m) => s + (m.activeTasks||0), 0);
-  const done = members.reduce((s, m) => s + (m.doneTasks||0), 0);
-  const blocked = members.filter(m => m.alert === 'blocked').length;
-  const stale = members.filter(m => m.alert === 'stale').length;
 
-  el.innerHTML = `<div style='direction:rtl;text-align:right'>
-    <!-- آمار کلی -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--sp2);padding:var(--sp3) var(--sp4);border-bottom:1px solid var(--b2)">
-      ${[
-        {l:'تسک فعال', v:total, c:'var(--t1)'},
-        {l:'تمام‌شده', v:done,  c:'var(--a)'},
-        {l:'مشکل',   v:blocked, c:'var(--red)'},
-      ].map(s => `
-        <div style="text-align:center;background:var(--bg2);border-radius:var(--r2);padding:var(--sp3)">
-          <div style="font-size:var(--fs-lg);font-weight:800;color:${s.c};font-variant-numeric:tabular-nums">${s.v}</div>
-          <div style="font-size:var(--fs-2xs);color:var(--t3);margin-top:2px">${s.l}</div>
-        </div>`).join('')}
-    </div>
 
-    <!-- عملکرد اعضا -->
-    <div style="padding:var(--sp3) var(--sp4)">
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp3)">عملکرد این هفته</div>
-      ${members.length ? members.map(m => {
-        const mDone = m.doneTasks || 0;
-        const mTotal = (m.activeTasks||0) + mDone;
-        const score = mTotal > 0 ? Math.round(mDone / mTotal * 100) : 0;
-        const scoreColor = score >= 80 ? 'var(--a)' : score >= 50 ? 'var(--amber)' : 'var(--red)';
-        return `
-          <div style="background:var(--bg2);border-radius:var(--r2);padding:var(--sp3);margin-bottom:var(--sp2)">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp2)">
-              <div style="font-size:var(--fs-md);font-weight:800;color:${scoreColor};font-variant-numeric:tabular-nums">${score}٪</div>
-              <div style="text-align:right">
-                <div style="font-size:var(--fs-sm);font-weight:700;color:var(--t1)">${esc(m.name)}</div>
-                <div style="font-size:var(--fs-2xs);color:var(--t3)">${mDone} از ${mTotal} تسک</div>
-              </div>
-            </div>
-            <div style="height:4px;background:var(--bg3);border-radius:var(--r5);overflow:hidden">
-              <div style="height:100%;border-radius:var(--r5);background:${scoreColor};transform:scaleX(${score/100});transform-origin:right;transition:transform 600ms cubic-bezier(0.23,1,0.32,1)"></div>
-            </div>
-            ${m.alert !== 'ok' ? `<div style="font-size:var(--fs-2xs);margin-top:4px;color:${m.alert==='blocked'?'var(--red)':'var(--amber)'}">${m.alert==='blocked'?'🚫 مشکل دارد':'⏳ بی‌تحرکی'}</div>` : ''}
-          </div>`;
-      }).join('') : '<div style="color:var(--t3);font-size:var(--fs-xs);text-align:center;padding:var(--sp4)">عضوی ندارد</div>'}
-    </div>
 
-    <!-- toggle هفتگی / ماهانه -->
-    <div style="padding:0 var(--sp4) var(--sp5);display:flex;gap:var(--sp2);justify-content:center">
-      <button onclick="tmLoadReport('weekly')"  style="height:28px;padding:0 12px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--t1);color:var(--bg1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">هفتگی</button>
-      <button onclick="tmLoadReport('monthly')" style="height:28px;padding:0 12px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--bg2);color:var(--t2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">ماهانه</button>
-    </div>`;
-};
-
-async function tmLoadReport(period) {
-  try {
-    const data = await tmAPI('GET', `/report/${period}`);
-    if (data && data.members) {
-      // آپدیت snapshot
-      tm.snapshot = { ...tm.snapshot, members: data.members };
-      tmRenderReport();
-    }
-  } catch(e) {
-    console.warn('tmLoadReport:', e.message);
-  }
-}
 
 /* ════ End Missing Features ════ */
 
@@ -20553,17 +19534,7 @@ async function tmLoadReport(period) {
 (function(){
   const _origTmModal = window.tmModal;
   if (!_origTmModal) return;
-  window.tmModal = function(id, open) {
-    _origTmModal.apply(this, arguments);
-    if (open) {
-      setTimeout(() => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        const first = el.querySelector('input:not([disabled]), textarea:not([disabled])');
-        if (first) first.focus();
-      }, 320); // بعد از animation
-    }
-  };
+
 })();
 /* ════ End Focus Management ════ */
 /* ════════════════════════════════════════════════════════════════
@@ -20598,25 +19569,7 @@ function _tmDeadlineShortcut(text) {
 }
 
 // ── Open Assign Modal (NLP version) ───────────────────────────
-tmAssignTask = function(preUuid = '') {
-  _tmAssignParsed = null;
-  _tmAssignMember = preUuid || '';
-  _tmAssignBroadcast = false;
 
-  // reset form
-  const inp = document.getElementById('tmANlpInp');
-  if (inp) { inp.value = ''; inp.style.height = 'auto'; }
-  const preview = document.getElementById('tmAPreview');
-  if (preview) preview.innerHTML = '';
-  const err = document.getElementById('tmAErr');
-  if (err) err.textContent = '';
-
-  // عضو پیش‌فرض
-  _tmUpdateAssignMemberChips();
-
-  tmModal('tmModalAssign', true);
-  setTimeout(() => { const i = document.getElementById('tmANlpInp'); if(i) i.focus(); }, 300);
-};
 
 // ── NLP input handler ─────────────────────────────────────────
 function _tmAssignNlpInput(val) {
@@ -20628,23 +19581,7 @@ function _tmAssignNlpInput(val) {
 }
 
 // ── Update preview chips ───────────────────────────────────────
-function _tmUpdateAssignPreview() {
-  const p = document.getElementById('tmAPreview');
-  if (!p) return;
-  if (!_tmAssignParsed) { p.innerHTML = ''; return; }
-  const chips = [];
-  if (_tmAssignParsed.deadline) {
-    const d = _tmFmtDeadline(_tmAssignParsed.deadline);
-    if (d) chips.push(`<span class="tm-nlp-chip" style="background:rgba(0,184,122,.12);color:var(--a)"><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${d.label}</span>`);
-  }
-  const PRI_LABEL = { high:'فوری', med:'مهم', low:'عادی' };
-  const PRI_COLOR = { high:'var(--red)', med:'var(--amber)', low:'var(--t3)' };
-  if (_tmAssignParsed.detected.includes('pri')) {
-    const pri = _tmAssignParsed.priority;
-    chips.push(`<span class="tm-nlp-chip" style="background:${PRI_COLOR[pri]}22;color:${PRI_COLOR[pri]}">${PRI_LABEL[pri]||pri}</span>`);
-  }
-  p.innerHTML = chips.join('');
-}
+
 
 // ── Deadline shortcut chips ────────────────────────────────────
 function _tmSetDeadlineShortcut(text) {
@@ -20662,32 +19599,7 @@ function _tmSetDeadlineShortcut(text) {
 }
 
 // ── Member chips update ────────────────────────────────────────
-function _tmUpdateAssignMemberChips() {
-  const el = document.getElementById('tmAMemberChips');
-  if (!el) return;
-  const members = (tm.snapshot?.members || []).filter(m =>
-    m.uuid !== tm.uuid &&
-    !m.isManager &&
-    m.role !== 'manager' &&
-    (m.status === 'active' || m.status === 'approved')
-  );
-  if (!members.length) {
-    el.innerHTML = '<div style="color:var(--t3);font-size:var(--fs-xs)">هنوز عضوی تأیید نشده</div>';
-    return;
-  }
-  el.innerHTML = members.map(m => {
-    const active = _tmAssignMember === m.uuid;
-    const st = m.alert === 'blocked' ? 'block' : m.alert === 'stale' ? 'warn' : 'ok';
-    return `<button
-      class="tm-member-chip${active ? ' active' : ''}"
-      data-uuid="${m.uuid}"
-      onclick="_tmSelectMember('${m.uuid}')"
-      style="display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:var(--r5);border:1px solid ${active ? 'var(--blue)' : 'var(--b1)'};background:${active ? 'var(--bluem)' : 'var(--bg2)'};color:${active ? 'var(--blue)' : 'var(--t1)'};font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;transition:all 150ms ease">
-      ${tmDot(st)}<span>${esc(m.name)}</span>
-      ${m.activeTasks > 0 ? `<span style="font-size:10px;opacity:.6">${m.activeTasks}</span>` : ''}
-    </button>`;
-  }).join('');
-}
+
 
 function _tmSelectMember(uuid) {
   if (_tmAssignBroadcast) return;
@@ -21281,16 +20193,7 @@ function _tmUpdateAssignPreview() {
 
 // ── Status filter ───────────────────────────────────────────
 let _tmSbActiveFilter = 'all';
-function _tmSbFilter(f) {
-  _tmSbActiveFilter = f;
-  // highlight active
-  ['All','Blocked','Stale','Ok'].forEach(k => {
-    const btn = document.getElementById('sbf' + k);
-    if (btn) btn.classList.toggle('active', k.toLowerCase() === f);
-  });
-  // re-render status با filter
-  _tmRenderStatusFiltered(f);
-}
+
 
 function _tmRenderStatusFiltered(f) {
   const el = document.getElementById('tmSokoStatusContent');
@@ -21374,11 +20277,7 @@ function _tmSetReportPeriod(p) {
     // همچنین بعد از snapshot
   const _origSync = window.tmSyncBackground;
   if (_origSync) {
-    window.tmSyncBackground = async function() {
-      await _origSync.apply(this, arguments);
-      _tmUpdateHdrKpi();
-      tmRenderSidebar(tm.sokoTab || 'status');
-    };
+
   }
 })();
 
