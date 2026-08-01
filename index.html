@@ -17963,6 +17963,39 @@ function tmDlShortcut(days){
   var inp=document.getElementById('tmAssignDeadline');if(inp)inp.value=nd;
 }
 
+
+function _tmSbProjects(sb){
+  if(!sb)return;
+  var members=(tm.snapshot&&tm.snapshot.members||[]).filter(function(m){return !m.isManager;});
+  var h='<div style="padding:12px;overflow-y:auto;flex:1">';
+  h+='<div style="font-size:11px;font-weight:700;color:var(--t3);padding:4px 0 8px">اعضا</div>';
+  members.forEach(function(m){
+    h+='<div onclick="tmAssignTask(\'"+m.uuid+"\')" style="padding:8px 12px;border-radius:6px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;margin:2px 0">'+
+      '<span style="font-size:13px;font-weight:600;color:var(--t1)">'+esc(m.name)+'</span>'+
+      '<span style="font-size:11px;color:var(--t3)">'+num(m.activeTasks||0)+' تسک</span>'+
+    '</div>';
+  });
+  if(!members.length)h+='<div style="color:var(--t3);font-size:13px;text-align:center;padding:20px">عضوی نداری</div>';
+  h+='</div><div style="padding:12px;border-top:1px solid var(--b1);flex-shrink:0">'+
+    '<button onclick="tmAssignTask()" style="width:100%;height:38px;background:var(--a);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;font-family:var(--f);cursor:pointer">✚ ارسال تسک</button></div>';
+  sb.innerHTML=h;
+}
+
+function _tmSbReport(sb){
+  if(!sb)return;
+  var period=window._tmReportPeriod||'weekly';
+  function btn(p,label){
+    var on=period===p;
+    return '<button onclick="window._tmReportPeriod=\''+p+'\';if(typeof tmRenderSokoReport===\'function\')tmRenderSokoReport();var _s=document.getElementById(\'tmPanelSidebar\');if(_s)_tmSbReport(_s);" style="width:100%;height:36px;border-radius:6px;border:1px solid '+(on?'var(--ag)':'var(--b1)')+';background:'+(on?'var(--am)':'transparent')+';font-size:13px;font-weight:'+(on?'700':'400')+';font-family:var(--f);color:var(--t1);cursor:pointer;margin-bottom:4px;text-align:right;padding:0 12px">'+label+'</button>';
+  }
+  var h='<div style="padding:12px;overflow-y:auto;flex:1">';
+  h+='<div style="font-size:11px;font-weight:700;color:var(--t3);padding:4px 0 8px">بازه زمانی</div>';
+  h+=btn('weekly','این هفته');
+  h+=btn('monthly','این ماه');
+  h+=btn('prev_month','ماه گذشته');
+  h+='</div>';
+  sb.innerHTML=h;
+}
 boot();
 
 </script>
