@@ -22065,12 +22065,7 @@ function _tmUpdateHdrKpi() {
 
 (function(){
   const _origSetTab = window.tmSetSokoTab;
-  window.tmSetSokoTab = function(tab) {
-    _origSetTab && _origSetTab(tab);
-    tmRenderSidebar(tab);
-    _tmUpdateHdrKpi();
-    _tmSbActiveFilter = 'all';
-  };
+;
   const _origSync = window.tmSyncBackground;
   if (_origSync) {
     window.tmSyncBackground = async function() {
