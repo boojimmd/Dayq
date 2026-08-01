@@ -5819,6 +5819,10 @@ select.fi{
 
 <script>function _tmSbStatus(sb){
   if(!sb)return;
+  if(!tm.snapshot||!tm.snapshot.members){
+    sb.innerHTML='<div style="padding:var(--sp4);text-align:center;color:var(--t3);font-size:var(--fs-xs)">در حال بارگذاری...</div>';
+    return;
+  }
   var today=mrTodayKey();
   var members=(tm.snapshot&&tm.snapshot.members||[]).filter(function(m){return !m.isManager&&m.status!=='removed';});
   var na=[],ok=[];
@@ -14567,6 +14571,9 @@ async function tmSyncBackground(){
   }finally{
     _syncRunning=false;
   }
+  if(document.getElementById('tmSokoPanel')&&document.getElementById('tmSokoPanel').classList.contains('open')){
+    if(typeof tmRenderSidebar==='function')tmRenderSidebar(tm.sokoTab||'status');
+  }
 }
 
 // ── تیم امروز (مدیر) ──────────────────────────────────────────
@@ -14949,7 +14956,7 @@ function tmSetSokoTab(tab) {
   document.querySelectorAll('.tm-tab-pane').forEach(p => p.style.display = p.dataset.pane === tab ? '' : 'none');
   window._tmSokoFilter='all';
   if (tab === 'status') { tmRenderSokoStatus(); typeof tmRenderSidebar==='function'&&tmRenderSidebar(tab); }
-  else if (tab === 'projects'){tmRenderTeamProjects();var _sp=document.getElementById('tmSokoProjectsContent');var _ps=document.getElementById('tmProjSection');if(_sp&&_ps)_sp.innerHTML=_ps.innerHTML;}
+  else if (tab === 'projects'){tmRenderTeamProjects();var _sp=document.getElementById('tmSokoProjectsContent');var _ps=document.getElementById('tmProjSection');if(_sp&&_ps)_sp.innerHTML=_ps.innerHTML;else if(_sp)tmRenderSokoProjects&&tmRenderSokoProjects();}
   else if (tab === 'report')  { tmRenderSokoReport(); tmRenderReport(); }
 }
 
