@@ -18847,7 +18847,7 @@ window.addEventListener('load', () => {
 
 // آپدیت سطر تیم در اتصال
 (function(){
-  const _orig = tmApplyUI;
+  const _orig = (typeof tmApplyUI !== "undefined") ? tmApplyUI : null;
 
 })();
 
@@ -18914,7 +18914,7 @@ function _tmUXRefresh() {
 }
 
 // همچنین tmUpdateSokoCard رو آپدیت کن
-// const _origUpdateSokoCard = tmUpdateSokoCard; // already declared in script1
+// const _origUpdateSokoCard = (typeof tmUpdateSokoCard !== "undefined") ? tmUpdateSokoCard : null; // already declared in script1
 tmUpdateSokoCard = function() {
   try { _origUpdateSokoCard.apply(this, arguments); } catch(e) {}
   _tmUXRefresh();
@@ -19083,7 +19083,7 @@ function _calSetFilter(f) {
 
 // نمایش فیلتر فقط اگه عضو تیم هستیم
 (function(){
-  const _origApplyUI = window.tmApplyUI;
+  const _origApplyUI = (typeof tmApplyUI !== "undefined") ? tmApplyUI : null;
 
 })();
 
@@ -19319,7 +19319,7 @@ function _calSetFilter(f) {
 
 // نمایش فیلتر فقط اگه عضو تیم هستیم
 (function(){
-  const _origApplyUI = window.tmApplyUI;
+  const _origApplyUI = (typeof tmApplyUI !== "undefined") ? tmApplyUI : null;
   tmApplyUI = function() {
     if (_origApplyUI) _origApplyUI.apply(this, arguments);
     const filterEl = document.getElementById('calTeamFilter');
