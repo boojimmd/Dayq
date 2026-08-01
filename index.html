@@ -3768,15 +3768,8 @@ select.fi{
 }
 
 /* ── Tab pane switch — cross-fade ── */
-.tm-tab-pane{
-  /* transition نه keyframe — interruptible برای rapid tab switching */
-  opacity:0;
-  transition:opacity 160ms var(--ease-out);
-}
-.tm-tab-pane[style*="display: "]:not([style*="none"]),
-.tm-tab-pane:not([style*="display:none"]):not([style*="display: none"]){
-  opacity:1;
-}
+.tm-tab-pane{ transition:none; }
+
 
 /* ── prefers-reduced-motion ── */
 @media(prefers-reduced-motion:reduce){
@@ -3890,8 +3883,7 @@ select.fi{
 
 /* ════ Team Dark Mode ════ */
 [data-theme="dark"] .tm-modal-sheet,
-[data-theme="dark"] .tm-tab-pane,
-[data-theme="dark"] 
+[data-theme="dark"] [data-theme="dark"] 
 
 [data-theme="dark"] .tm-modal { background:rgba(0,0,0,.7); }
 [data-theme="dark"] .tm-modal-hdr { border-bottom-color:var(--b1); }
