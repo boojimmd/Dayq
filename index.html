@@ -16097,10 +16097,7 @@ function tmRenderSokoProjects() {
 
 // override tmSetSokoTab برای projects tab
 const _origSetSokoTab = tmSetSokoTab;
-tmSetSokoTab = function(tab) {
-  _origSetSokoTab.apply(this, arguments);
-  if (tab === 'projects') tmRenderSokoProjects();
-};
+
 
 // ── tmSyncBackground بهبود یافته ──────────────────────────────
 // بعد از sync، calendar markers هم آپدیت می‌شه
@@ -16535,78 +16532,7 @@ function tmStatusLabel(alert, activeTasks) {
 }
 
 // ── Redesign: tmRenderSokoStatus ─────────────────────────────
-const _origRenderSokoStatus = tmRenderSokoStatus;
-tmRenderSokoStatus = function() {
-  const el = document.getElementById('tmSokoStatusContent');
-  if (!el || !tm.snapshot) {
-    if (el) el.innerHTML = `<div style="padding:var(--sp4)">
-      <div class="tm-skeleton" style="height:52px;border-radius:var(--r3);margin-bottom:var(--sp2)"></div>
-      <div class="tm-skeleton" style="height:52px;border-radius:var(--r3);margin-bottom:var(--sp2)"></div>
-      <div class="tm-skeleton" style="height:52px;border-radius:var(--r3)"></div>
-    </div>`;
-    return;
-  }
-  const members = tm.snapshot.members || [];
-  if (!members.length) {
-    el.innerHTML = `
-      <div style="padding:var(--sp5) var(--sp4);text-align:center">
-        <div style="width:48px;height:48px;border-radius:var(--r3);background:var(--bg2);border:1px solid var(--b1);display:flex;align-items:center;justify-content:center;margin:0 auto var(--sp3)">${tmIco('users',22,'var(--t3)')}</div>
-        <div style="font-size:var(--fs-md);font-weight:700;color:var(--t2);margin-bottom:var(--sp2)">هنوز عضوی نداری</div>
-        <div style="font-size:var(--fs-sm);color:var(--t3);margin-bottom:var(--sp4)">کد دعوت رو با تیمت share کن</div>
-        <button onclick="tmShareCode()" style="height:40px;padding:0 var(--sp4);background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-sm);font-weight:600;font-family:var(--f);cursor:pointer;display:inline-flex;align-items:center;gap:var(--sp2)">${tmIco('send',14)} اشتراک کد</button>
-      </div>`;
-    return;
-  }
-
-  const alerts = members.filter(m => m.alert !== 'ok');
-
-  let alertHtml = '';
-  if (alerts.length) {
-    alertHtml = `
-      <div style="background:var(--redm);border:1px solid var(--redm);border-radius:var(--r3);padding:var(--sp3);margin-bottom:var(--sp4)">
-        <div style="display:flex;align-items:center;gap:var(--sp2);margin-bottom:var(--sp3)">
-          ${tmIco('warning',14,'var(--red)')}
-          <span style="font-size:var(--fs-xs);font-weight:700;color:var(--red)">نیاز به توجه</span>
-        </div>
-        ${alerts.map(m => {
-          const st = tmStatusLabel(m.alert, m.activeTasks);
-          return `<div style="background:var(--bg1);border-radius:var(--r2);padding:var(--sp3);margin-bottom:var(--sp2);border:1px solid var(--b1)">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp2)">
-              <div style="display:flex;align-items:center;gap:var(--sp2)">${st.dot}</div>
-              <div style="text-align:right">
-                <div style="font-size:var(--fs-sm);font-weight:700;color:var(--t1)">${esc(m.name)}</div>
-                <div style="font-size:var(--fs-xs);color:${st.color}">${st.text}</div>
-              </div>
-            </div>
-            <div style="display:flex;gap:var(--sp2)">
-              <button onclick="tmExtendDeadline(null,'${m.uuid}')" style="flex:1;height:32px;background:var(--bg2);color:var(--t2);border:1px solid var(--b1);border-radius:var(--r1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:4px">${tmIco('clock',12)} تمدید</button>
-              <button onclick="tmAssignTask('${m.uuid}')" style="flex:1;height:32px;background:var(--bluem);color:var(--blue);border:1px solid rgba(37,99,235,.2);border-radius:var(--r1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:4px">${tmIco('assign',12)} تسک</button>
-            </div>
-          </div>`;
-        }).join('')}
-      </div>`;
-  }
-
-  const okMembers = members.filter(m => m.alert === 'ok');
-  const membersHtml = okMembers.map(m => {
-    const st = tmStatusLabel(m.alert, m.activeTasks);
-    return `
-      <div style="background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r3);padding:var(--sp3) var(--sp4);margin-bottom:var(--sp2);display:flex;align-items:center;gap:var(--sp3)">
-        <button onclick="tmAssignTask('${m.uuid}')" style="height:32px;padding:0 10px;background:var(--bg2);color:var(--t2);border:1px solid var(--b1);border-radius:var(--r1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;display:inline-flex;align-items:center;gap:4px;flex-shrink:0">${tmIco('plus',11)} تسک</button>
-        <div style="flex:1;min-width:0;text-align:right">
-          <div style="font-size:var(--fs-sm);font-weight:700;color:var(--t1)">${esc(m.name)}</div>
-          <div style="font-size:var(--fs-xs);color:var(--t3);margin-top:2px">${esc(m.role)}</div>
-        </div>
-        ${st.dot}
-      </div>`;
-  }).join('');
-
-  const labelHtml = okMembers.length
-    ? `<div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2);padding:0 2px">همه اعضا</div>`
-    : '';
-
-  el.innerHTML = alertHtml + labelHtml + membersHtml;
-};
+/* tmRenderSokoStatus old override removed */
 
 // ── Redesign: tmRenderTodaySection ───────────────────────────
 const _origRenderToday = tmRenderTodaySection;
