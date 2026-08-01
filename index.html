@@ -3258,16 +3258,9 @@ select.fi{
 }
 
 /* Tabs */
-.tm-panel-body{
-  flex:1;
-  overflow:hidden;
-  display:flex;
-  flex-direction:column;
-}
+
 @media(min-width:1024px){
-  .tm-panel-body{
-    flex-direction:row-reverse;
-  }
+  
 }
 
 .tm-tabs{display:flex;border-bottom:1px solid var(--b1);margin-top:var(--sp3);}
@@ -4173,20 +4166,12 @@ select.fi{
 /* ════ Soko Panel Layout — 3 rules, no conflicts ════ */
 
 /* Rule A: base (mobile) */
-.tm-panel-body{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-}
+
 
 
 /* Rule B: desktop — show sidebar, switch to row */
 @media(min-width:900px){
-  .tm-panel-body{
-    flex-direction:row;
-    padding:0;
-  }
+  
   
 }
 
@@ -4202,21 +4187,34 @@ select.fi{
 /* ════ End Soko Panel Layout ════ */
 
 /* ── Soko Sidebar ── */
+
+@media(min-width:900px){
+  
+  
+}
+
+/* ════ Soko Panel Layout — FINAL ════ */
+.tm-panel-body{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
 .tm-panel-sidebar{
   display:none;
-  width:200px;
+  width:220px;
   flex-shrink:0;
-  border-right:1px solid var(--b1);
+  border-left:1px solid var(--b1);
   background:var(--bg0);
   overflow-y:auto;
   scrollbar-width:none;
-  direction:rtl;
   flex-direction:column;
 }
 @media(min-width:900px){
-  .tm-panel-body{ display:flex; flex-direction:row; overflow:hidden; }
-  .tm-panel-sidebar{ display:flex; }
+  .tm-panel-body{ flex-direction:row !important; overflow:hidden !important; }
+  .tm-panel-sidebar{ display:flex !important; }
 }
+/* ════ End Soko Panel Layout ════ */
 </style>
 </head>
 <body>
