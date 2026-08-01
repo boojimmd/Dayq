@@ -21331,15 +21331,6 @@ function _tmUpdateAssignPreview() {
 /* ════ Soko Desktop Sidebar ════ */
 
 // ── Sidebar render per tab ──────────────────────────────────
-function tmRenderSidebar(tab) {
-  const sb = document.getElementById('tmPanelSidebar');
-  if (!sb) return;
-  // موبایل: sidebar مخفی میشه (CSS handles it)
-  if (tab === 'status')   _tmSbStatus(sb);
-  else if (tab === 'projects') _tmSbProjects(sb);
-  else if (tab === 'report')   _tmSbReport(sb);
-  else sb.innerHTML = '';
-}
 
 // ── Status sidebar ──────────────────────────────────────────
 /* removed duplicate _tmSbStatus */
@@ -21433,25 +21424,6 @@ function _tmSetReportPeriod(p) {
 }
 
 // ── Header KPI آپدیت ────────────────────────────────────────
-function _tmUpdateHdrKpi() {
-  if (!tm.snapshot) return;
-  const members = (tm.snapshot.members||[]).filter(m => !m.isManager && m.role !== 'manager');
-  const tasks  = members.reduce((s,m)=>s+(m.activeTasks||0),0);
-  const alerts = members.filter(m=>m.alert==='blocked').length;
-  const done   = members.reduce((s,m)=>s+(m.doneTasks||0),0);
-  const score  = (tasks+done)>0 ? Math.round(done/(tasks+done)*100) : null;
-
-  const taskEl  = document.getElementById('tmHdrTask');
-  const alertEl = document.getElementById('tmHdrAlert');
-  const scoreEl = document.getElementById('tmHdrScore');
-  if (taskEl)  taskEl.textContent  = num(tasks);
-  if (alertEl) alertEl.textContent = num(alerts);
-  if (scoreEl) scoreEl.textContent = score !== null ? num(score)+'٪' : '—';
-
-  // نام تیم
-  const sub = document.getElementById('tmSokoPanelSub');
-  if (sub) sub.textContent = (tm.teamName || '') + (members.length ? ` · ${num(members.length)} نفر` : '');
-}
 
 // ── Hook tmSetSokoTab ───────────────────────────────────────
 (function(){
@@ -21978,25 +21950,7 @@ function _tmSbFilter(f) {
   tm.snapshot.members = orig;
 }
 
-function _tmSbProjects(sb) {
-  sb.innerHTML = `
-    <div class="tm-sb-section">
-      <div class="tm-sb-lbl">پروژه‌ها</div>
-      <button class="tm-sb-btn" onclick="tmNewProject&&tmNewProject()">
-        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        پروژه جدید
-      </button>
-    </div>`;
-}
 
-function _tmSbReport(sb) {
-  sb.innerHTML = `
-    <div class="tm-sb-section">
-      <div class="tm-sb-lbl">بازه زمانی</div>
-      <button class="tm-sb-filter active" onclick="">این هفته</button>
-      <button class="tm-sb-filter" onclick="">این ماه</button>
-    </div>`;
-}
 
 function _tmUpdateHdrKpi() {
   if (!tm.snapshot) return;
