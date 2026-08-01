@@ -14579,8 +14579,9 @@ async function tmSyncBackground(){
   }finally{
     _syncRunning=false;
   }
-  if(document.getElementById('tmSokoPanel')&&document.getElementById('tmSokoPanel').classList.contains('open')){
-    if(typeof tmRenderSidebar==='function')tmRenderSidebar(tm.sokoTab||'status');
+  if(document.getElementById('tmSokoPanel')?.classList.contains('open')){
+    var _sb2=document.getElementById('tmPanelSidebar');
+    if(_sb2&&typeof _tmSbStatus==='function')_tmSbStatus(_sb2);
   }
 }
 
@@ -14963,7 +14964,7 @@ function tmSetSokoTab(tab) {
   document.querySelectorAll('.tm-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
   document.querySelectorAll('.tm-tab-pane').forEach(p => p.style.display = p.dataset.pane === tab ? '' : 'none');
   window._tmSokoFilter='all';
-  if (tab === 'status') { tmRenderSokoStatus(); typeof tmRenderSidebar==='function'&&tmRenderSidebar(tab); }
+  if (tab === 'status') { tmRenderSokoStatus(); var _sbEl=document.getElementById('tmPanelSidebar'); if(_sbEl&&typeof _tmSbStatus==='function')_tmSbStatus(_sbEl); }
   else if (tab === 'projects'){tmRenderTeamProjects();var _sp=document.getElementById('tmSokoProjectsContent');var _ps=document.getElementById('tmProjSection');if(_sp&&_ps)_sp.innerHTML=_ps.innerHTML;else if(_sp)tmRenderSokoProjects&&tmRenderSokoProjects();}
   else if (tab === 'report')  { tmRenderSokoReport(); tmRenderReport(); }
 }
