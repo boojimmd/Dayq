@@ -21513,61 +21513,7 @@ function tmRenderSidebar(tab) {
 }
 
 // ── Status sidebar ──────────────────────────────────────────
-function _tmSbStatus(sb) {
-  const members = (tm.snapshot?.members || []).filter(m => !m.isManager && m.role !== 'manager');
-  const total   = members.reduce((s, m) => s + (m.activeTasks||0), 0);
-  const alerts  = members.filter(m => m.alert === 'blocked').length;
-  const done    = members.reduce((s, m) => s + (m.doneTasks||0), 0);
-  const score   = (total + done) > 0 ? Math.round(done / (total + done) * 100) : null;
-
-  sb.innerHTML = `
-    <!-- KPI -->
-    <div class="tm-sb-section">
-      <div class="tm-sb-lbl">آمار تیم</div>
-      <div class="tm-sb-kpi">
-        <span class="tm-sb-kpi-lbl">تسک فعال</span>
-        <span class="tm-sb-kpi-val" style="color:var(--t1)">${num(total)}</span>
-      </div>
-      <div class="tm-sb-kpi">
-        <span class="tm-sb-kpi-lbl">مشکل</span>
-        <span class="tm-sb-kpi-val" style="color:${alerts > 0 ? 'var(--red)' : 'var(--t3)'}">${num(alerts)}</span>
-      </div>
-      <div class="tm-sb-kpi">
-        <span class="tm-sb-kpi-lbl">موفقیت</span>
-        <span class="tm-sb-kpi-val" style="color:var(--a)">${score !== null ? num(score) + '٪' : '—'}</span>
-      </div>
-    </div>
-
-    <div class="tm-sb-divider"></div>
-
-    <!-- فیلترها -->
-    <div class="tm-sb-section">
-      <div class="tm-sb-lbl">نمایش</div>
-      <button class="tm-sb-filter active" id="sbfAll" onclick="_tmSbFilter('all')">
-        <span>همه اعضا</span><span>${num(members.length)}</span>
-      </button>
-      ${alerts > 0 ? `
-      <button class="tm-sb-filter" id="sbfBlocked" onclick="_tmSbFilter('blocked')">
-        <span>🚫 مشکل</span><span style="color:var(--red)">${num(alerts)}</span>
-      </button>` : ''}
-      ${members.filter(m=>m.alert==='stale').length > 0 ? `
-      <button class="tm-sb-filter" id="sbfStale" onclick="_tmSbFilter('stale')">
-        <span>⏳ بی‌تحرکی</span><span style="color:var(--amber)">${num(members.filter(m=>m.alert==='stale').length)}</span>
-      </button>` : ''}
-      <button class="tm-sb-filter" id="sbfOk" onclick="_tmSbFilter('ok')">
-        <span>✅ فعال</span><span style="color:var(--a)">${num(members.filter(m=>m.alert==='ok').length)}</span>
-      </button>
-    </div>
-
-    <div class="tm-sb-divider"></div>
-
-    <!-- action -->
-    <button class="tm-sb-btn" onclick="tmAssignTask()">
-      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      تسک جدید
-    </button>
-  `;
-}
+/* removed duplicate _tmSbStatus */
 
 // ── Status filter ───────────────────────────────────────────
 let _tmSbActiveFilter = 'all';
@@ -22192,33 +22138,7 @@ function tmRenderSidebar(tab) {
   else sb.innerHTML = '';
 }
 
-function _tmSbStatus(sb) {
-  const members = (tm.snapshot?.members || []).filter(m => !m.isManager && m.role !== 'manager');
-  const total = members.reduce((s,m)=>s+(m.activeTasks||0),0);
-  const alerts = members.filter(m=>m.alert==='blocked').length;
-  const done = members.reduce((s,m)=>s+(m.doneTasks||0),0);
-  const score = (total+done)>0 ? Math.round(done/(total+done)*100) : null;
-  sb.innerHTML = `
-    <div class="tm-sb-section">
-      <div class="tm-sb-lbl">آمار تیم</div>
-      <div class="tm-sb-kpi"><span class="tm-sb-kpi-lbl">تسک فعال</span><span class="tm-sb-kpi-val" style="color:var(--t1)">${num(total)}</span></div>
-      <div class="tm-sb-kpi"><span class="tm-sb-kpi-lbl">مشکل</span><span class="tm-sb-kpi-val" style="color:${alerts>0?'var(--red)':'var(--t3)'}">${num(alerts)}</span></div>
-      <div class="tm-sb-kpi"><span class="tm-sb-kpi-lbl">موفقیت</span><span class="tm-sb-kpi-val" style="color:var(--a)">${score!==null?num(score)+'٪':'—'}</span></div>
-    </div>
-    <div class="tm-sb-divider"></div>
-    <div class="tm-sb-section">
-      <div class="tm-sb-lbl">نمایش</div>
-      <button class="tm-sb-filter active" id="sbfAll" onclick="_tmSbFilter('all')"><span>همه اعضا</span><span>${num(members.length)}</span></button>
-      ${alerts>0?`<button class="tm-sb-filter" id="sbfBlocked" onclick="_tmSbFilter('blocked')"><span>🚫 مشکل</span><span style="color:var(--red)">${num(alerts)}</span></button>`:''}
-      <button class="tm-sb-filter" id="sbfOk" onclick="_tmSbFilter('ok')"><span>✅ فعال</span><span style="color:var(--a)">${num(members.filter(m=>m.alert==='ok').length)}</span></button>
-    </div>
-    <div class="tm-sb-divider"></div>
-    <button class="tm-sb-btn" onclick="tmAssignTask()">
-      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      تسک جدید
-    </button>
-  `;
-}
+/* removed duplicate _tmSbStatus */
 
 function _tmSbFilter(f) {
   _tmSbActiveFilter = f;
