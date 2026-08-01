@@ -20769,63 +20769,7 @@ function _tmMemberName(uuid) {
 }
 
 // ── Projects tab — task list واقعی ────────────────────────────
-tmRenderTeamProjects = function() {
-  const el = document.getElementById('tmSokoProjContent');
-  if (!el) return;
-  if (!tm.snapshot) {
-    el.innerHTML = `<div style="padding:var(--sp5);text-align:center"><div class="tm-skeleton" style="height:60px;border-radius:var(--r2);margin-bottom:var(--sp2)"></div><div class="tm-skeleton" style="height:60px;border-radius:var(--r2)"></div></div>`;
-    return;
-  }
-  const members = (tm.snapshot.members || []).filter(m => m.status === 'active');
-  if (!members.length) {
-    el.innerHTML = `<div style="padding:var(--sp5);text-align:center;color:var(--t3)">هنوز عضوی تأیید نشده</div>`;
-    return;
-  }
 
-  el.innerHTML = members.map(m => {
-    const st = tmStatusLabel(m.alert, m.activeTasks);
-    const barWidth = Math.min(100, (m.activeTasks / Math.max(...members.map(x=>x.activeTasks), 1)) * 100);
-    return `
-    <div class="tm-proj-member" style="padding:var(--sp3) var(--sp4);border-bottom:1px solid var(--b2)">
-      <div style="display:flex;align-items:center;gap:var(--sp3);cursor:pointer" onclick="_tmToggleMemberTasks('${m.uuid}')">
-        <div style="flex:1;min-width:0;text-align:right">
-          <div style="display:flex;align-items:center;gap:var(--sp2);justify-content:flex-end">
-            ${st.dot}
-            <span style="font-size:var(--fs-sm);font-weight:700;color:var(--t1)">${esc(m.name)}</span>
-          </div>
-          <div style="font-size:var(--fs-xs);color:var(--t3);margin-top:3px">${esc(m.role)}</div>
-        </div>
-        <div style="text-align:center;min-width:40px">
-          <div style="font-size:var(--fs-lg);font-weight:800;color:${st.color};font-variant-numeric:tabular-nums">${m.activeTasks}</div>
-          <div style="font-size:10px;color:var(--t3)">تسک</div>
-        </div>
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="var(--t3)" stroke-width="2.5" stroke-linecap="round" id="tmProjArrow_${m.uuid}" style="transform:rotate(-90deg);transition:transform 200ms ease"><polyline points="9 18 15 12 9 6"/></svg>
-      </div>
-
-      <!-- workload bar -->
-      ${m.activeTasks > 0 ? `
-      <div style="margin-top:8px;height:3px;background:var(--bg3);border-radius:var(--r5);overflow:hidden">
-        <div style="height:100%;border-radius:var(--r5);background:${m.alert==='blocked'?'var(--red)':m.alert==='stale'?'var(--amber)':'var(--blue)'};transform:scaleX(${barWidth/100});transform-origin:right;transition:transform 600ms cubic-bezier(0.23,1,0.32,1)"></div>
-      </div>` : ''}
-
-      <!-- task list (collapsed by default) -->
-      <div id="tmMemberTasks_${m.uuid}" style="display:none;margin-top:var(--sp3)">
-        <div class="tm-skeleton" style="height:14px;border-radius:4px;width:50%;margin-bottom:var(--sp2)"></div>
-      </div>
-
-      <!-- action buttons -->
-      <div style="display:flex;gap:var(--sp2);margin-top:var(--sp2)">
-        <button onclick="tmAssignTask('${m.uuid}')" style="height:28px;padding:0 10px;border-radius:var(--r1);background:var(--bg2);border:1px solid var(--b1);color:var(--t2);font-size:11px;font-weight:600;font-family:var(--f);cursor:pointer;display:inline-flex;align-items:center;gap:4px">
-          ${tmIco('plus',11)} تسک
-        </button>
-        ${m.alert !== 'ok' ? `
-        <button onclick="tmExtendDeadline(null,'${m.uuid}')" style="height:28px;padding:0 10px;border-radius:var(--r1);background:var(--ambm);border:1px solid rgba(217,119,6,.2);color:var(--amber);font-size:11px;font-weight:600;font-family:var(--f);cursor:pointer">
-          تمدید
-        </button>` : ''}
-      </div>
-    </div>`;
-  }).join('');
-};
 
 // ── Toggle member tasks expand ─────────────────────────────────
 async function _tmToggleMemberTasks(uuid) {
