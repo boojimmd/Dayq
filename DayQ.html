@@ -5819,6 +5819,7 @@ select.fi{
   if(!sb)return;
   var snap=tm.snapshot;
   var members=snap&&snap.members?snap.members.filter(function(m){return !m.isManager&&m.status!=='removed';}):[];
+  var debug='snap:'+(snap?'OK':'null')+' members:'+members.length;
   var today=mrTodayKey();
   var cur=window._tmSokoFilter||'all';
   var na=[],ok=[];
@@ -5836,33 +5837,38 @@ select.fi{
     var on=cur===d.uuid;
     return '<div onclick="_tmSbSel(\''+d.uuid+'\')" style="padding:8px 12px;border-radius:6px;cursor:pointer;margin:2px 0;background:'+(on?'var(--am)':'transparent')+'">'+
       '<div style="display:flex;align-items:center;gap:8px">'+
-        '<span>'+badge+'</span>'+
-        '<span style="font-size:13px;font-weight:600;color:var(--t1)">'+esc(d.name)+'</span>'+
+        '<span style="font-size:16px">'+badge+'</span>'+
+        '<span style="font-size:14px;font-weight:700;color:var(--t1)">'+esc(d.name)+'</span>'+
       '</div>'+
-      '<div style="font-size:11px;color:var(--t3);margin-top:2px;padding-right:22px">'+sub+'</div>'+
+      '<div style="font-size:12px;color:var(--t3);margin-top:3px;padding-right:24px">'+sub+'</div>'+
     '</div>';
   }
-  var h='<div style="padding:12px;overflow-y:auto;flex:1">';
-  h+='<div onclick="_tmSbSel(\'all\')" style="padding:8px 12px;border-radius:6px;cursor:pointer;margin-bottom:12px;background:'+(cur==='all'?'var(--am)':'transparent')+'">'+
-    '<span style="font-size:13px;font-weight:700;color:var(--t1)">👥 همه تیم</span>'+
+  var h='<div style="font-size:10px;color:#999;padding:4px 12px;border-bottom:1px solid var(--b2);margin-bottom:8px">'+debug+'</div>';
+  h+='<div style="padding:0 12px;overflow-y:auto;flex:1">';
+  h+='<div onclick="_tmSbSel(\'all\')" style="padding:10px 12px;border-radius:8px;cursor:pointer;margin-bottom:8px;background:'+(cur==='all'?'var(--am)':'transparent')+'">'+
+    '<span style="font-size:14px;font-weight:700;color:var(--t1)">👥 همه تیم</span>'+
+    '<span style="font-size:11px;color:var(--t3);margin-right:6px"> '+members.length+' نفر</span>'+
   '</div>';
   if(na.length){
-    h+='<div style="font-size:10px;font-weight:700;color:var(--red);padding:4px 12px">⚠️ نیاز به توجه</div>';
+    h+='<div style="font-size:11px;font-weight:700;color:var(--red);padding:4px 0 6px">⚠️ نیاز به توجه</div>';
     h+=na.map(mRow).join('');
     h+='<hr style="border:none;border-top:1px solid var(--b1);margin:8px 0">';
   }
-  if(ok.length){
-    h+='<div style="font-size:10px;font-weight:700;color:var(--t3);padding:4px 12px">سالم</div>';
-    h+=ok.map(mRow).join('');
-  }
+  h+=ok.map(mRow).join('');
   if(!members.length){
-    h+='<div style="font-size:11px;color:var(--t3);text-align:center;padding:20px 12px">'+(snap?'عضوی نداری':'در حال بارگذاری...')+'</div>';
+    h+='<div style="font-size:13px;color:var(--t2);font-weight:600;text-align:center;padding:20px 0">'+(snap?'عضوی نداری':'بارگذاری...')+'</div>';
   }
   h+='</div>';
   h+='<div style="padding:12px;border-top:1px solid var(--b1);flex-shrink:0">'+
-    '<button onclick="tmAssignTask()" style="width:100%;height:36px;background:var(--a);color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;font-family:var(--f);cursor:pointer">✚ ارسال تسک</button>'+
+    '<button onclick="tmAssignTask()" style="width:100%;height:38px;background:var(--a);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;font-family:var(--f);cursor:pointer">✚ ارسال تسک</button>'+
   '</div>';
   sb.innerHTML=h;
+}
+function _tmSbSel(uuid){
+  window._tmSokoFilter=uuid;
+  var sb=document.getElementById('tmPanelSidebar');
+  if(sb)_tmSbStatus(sb);
+  tmRenderSokoStatus();
 }
 function _tmSbSel(uuid){
   window._tmSokoFilter=uuid;
