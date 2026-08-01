@@ -5819,46 +5819,67 @@ select.fi{
 
 <script>function _tmSbStatus(sb){
   if(!sb)return;
-  if(!tm.snapshot||!tm.snapshot.members){
-    sb.innerHTML='<div style="padding:var(--sp4);text-align:center;color:var(--t3);font-size:var(--fs-xs)">در حال بارگذاری...</div>';
+  var snap=tm.snapshot;
+  if(!snap||!snap.members||!snap.members.length){
+    sb.innerHTML='<div style="padding:var(--sp4);text-align:center"><div style="font-size:var(--fs-xs);color:var(--t3)">در حال بارگذاری...</div></div>';
     return;
   }
   var today=mrTodayKey();
-  var members=(tm.snapshot&&tm.snapshot.members||[]).filter(function(m){return !m.isManager&&m.status!=='removed';});
+  var cur=window._tmSokoFilter||'all';
+  var members=snap.members.filter(function(m){return !m.isManager&&m.status!=='removed';});
   var na=[],ok=[];
   members.forEach(function(m){
     var tasks=(m.tasks||[]).filter(function(t){return !t.deleted&&t.status!=='done';});
     var od=tasks.filter(function(t){return t.deadline&&t.deadline<today;}).length;
     var bl=tasks.filter(function(t){return t.status==='blocked';}).length;
     var rv=tasks.filter(function(t){return t.status==='in_review';}).length;
-    var info={uuid:m.uuid,name:m.name,total:tasks.length,od:od,bl:bl,rv:rv};
+    var total=m.activeTasks||tasks.length||0;
+    var info={uuid:m.uuid,name:m.name,total:total,od:od,bl:bl,rv:rv};
     if(od>0||bl>0||rv>0)na.push(info);else ok.push(info);
   });
-  var cur=window._tmSokoFilter||'all';
   function mRow(d){
     var badge=d.bl>0?'🚫':d.od>0?'🔴':d.rv>0?'⏳':'✅';
-    var sub=d.bl>0?'متوقف':d.od>0?num(d.od)+' دیر':d.rv>0?'منتظر تأیید':num(d.total)+' تسک';
+    var sub=d.bl>0?'متوقف':d.od>0?num(d.od)+' دیر':d.rv>0?'بررسی':d.total>0?num(d.total)+' تسک':'بدون تسک';
     var on=cur===d.uuid;
-    return '<div onclick="_tmSbSel(\''+d.uuid+'\')" style="padding:var(--sp2) var(--sp3);border-radius:var(--r2);cursor:pointer;margin-bottom:2px;background:'+(on?'var(--am)':'transparent')+';border:1px solid '+(on?'var(--ag)':'transparent')+'">'+
-      '<div style="display:flex;align-items:center;gap:6px"><span>'+badge+'</span><span style="font-size:var(--fs-xs);font-weight:600;color:var(--t1);flex:1">'+esc(d.name)+'</span></div>'+
-      '<div style="font-size:var(--fs-2xs);color:var(--t3);margin-top:2px;padding-right:18px">'+sub+'</div></div>';
+    return '<div onclick="_tmSbSel(\''+d.uuid+'\')" style="padding:8px var(--sp3);border-radius:var(--r2);cursor:pointer;background:'+(on?'var(--am)':'transparent')+';margin-bottom:2px">'+
+      '<div style="display:flex;align-items:center;gap:6px">'+
+        '<span style="font-size:14px">'+badge+'</span>'+
+        '<span style="font-size:var(--fs-sm);font-weight:600;color:var(--t1)">'+esc(d.name)+'</span>'+
+      '</div>'+
+      '<div style="font-size:var(--fs-xs);color:var(--t3);margin-top:2px;padding-right:20px">'+sub+'</div>'+
+    '</div>';
   }
   var allOn=cur==='all';
-  var h='<div style="padding:var(--sp3);display:flex;flex-direction:column;gap:2px">';
-  h+='<div onclick="_tmSbSel(\'all\')" style="padding:var(--sp2) var(--sp3);border-radius:var(--r2);cursor:pointer;margin-bottom:var(--sp2);background:'+(allOn?'var(--am)':'transparent')+';border:1px solid '+(allOn?'var(--ag)':'transparent')+'">'+
-    '<span style="font-size:var(--fs-xs);font-weight:700;color:var(--t1)">👥 همه تیم</span></div>';
+  var h='<div style="padding:var(--sp3);flex:1;overflow-y:auto">';
+  h+='<div onclick="_tmSbSel(\'all\')" style="padding:8px var(--sp3);border-radius:var(--r2);cursor:pointer;background:'+(allOn?'var(--am)':'transparent')+';margin-bottom:var(--sp3)">'+
+    '<span style="font-size:var(--fs-sm);font-weight:700;color:var(--t1)">👥 همه تیم</span>'+
+    (members.length>0?'<span style="font-size:var(--fs-xs);color:var(--t3);margin-right:6px"> '+members.length+' نفر</span>':'')+
+  '</div>';
   if(na.length){
-    h+='<div style="font-size:var(--fs-2xs);font-weight:700;color:var(--red);padding:var(--sp2) var(--sp3) 2px">⚠️ نیاز به توجه ('+na.length+')</div>';
+    h+='<div style="font-size:var(--fs-2xs);font-weight:700;color:var(--red);padding:4px var(--sp3);letter-spacing:.03em">⚠️ نیاز به توجه</div>';
     h+=na.map(mRow).join('');
     h+='<div style="height:1px;background:var(--b1);margin:var(--sp2) 0"></div>';
   }
   if(ok.length){
-    h+='<div style="font-size:var(--fs-2xs);font-weight:700;color:var(--t3);padding:var(--sp2) var(--sp3) 2px">سالم ('+ok.length+')</div>';
+    h+='<div style="font-size:var(--fs-2xs);font-weight:700;color:var(--t3);padding:4px var(--sp3);letter-spacing:.03em">سالم</div>';
     h+=ok.map(mRow).join('');
   }
-  h+='</div><div style="padding:var(--sp3);border-top:1px solid var(--b1)">'+
-    '<button onclick="tmAssignTask()" style="width:100%;height:36px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer">✚ ارسال تسک</button></div>';
+  if(!na.length&&!ok.length){
+    h+='<div style="padding:var(--sp4);text-align:center;color:var(--t3);font-size:var(--fs-xs)">عضوی نداری</div>';
+  }
+  h+='</div>';
+  h+='<div style="padding:var(--sp3);border-top:1px solid var(--b1);flex-shrink:0">'+
+    '<button onclick="tmAssignTask()" style="width:100%;height:36px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer">✚ ارسال تسک</button>'+
+  '</div>';
+  sb.style.display='flex';
+  sb.style.flexDirection='column';
   sb.innerHTML=h;
+}
+function _tmSbSel(uuid){
+  window._tmSokoFilter=uuid;
+  var sb=document.getElementById('tmPanelSidebar');
+  if(sb)_tmSbStatus(sb);
+  tmRenderSokoStatus();
 }
 function _tmSbSel(uuid){
   window._tmSokoFilter=uuid;
