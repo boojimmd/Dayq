@@ -18808,7 +18808,7 @@ async function _tmDlOkBtn(){
     closeAll();toast_(svgIco('check'),'ددلاین تمدید شد');setTimeout(tmSyncBackground,800);
   }catch(e){if(err)err.textContent=e.message;}
 }
-var _tmRetConfirm=_tmRtOk;
+var _tmRetConfirm=function(){return typeof _tmRtOk==="function"?_tmRtOk.apply(this,arguments):void 0;};
 
 /* ════ DayQ Soko — Team JS ════ */
 
