@@ -4215,6 +4215,158 @@ select.fi{
   .tm-panel-sidebar{ display:flex !important; }
 }
 /* ════ End Soko Panel Layout ════ */
+
+
+/* ════════════════════════════════════════════════════════
+   Emil Kowalski + ibelick — Soko UI Polish
+   Applied: 2026-08-02
+   ════════════════════════════════════════════════════════ */
+
+/* ── 1. Tab :active — respond on pointer-down ── */
+.tm-tab:active {
+  opacity: .65;
+  transform: scale(0.96);
+  transition: transform 80ms var(--ease-out), opacity 80ms;
+}
+
+/* ── 2. Urgency group headers ── */
+.tm-urg-hdr {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px var(--sp4) 4px;
+  font-size: var(--fs-2xs);
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--t3);
+  margin-top: var(--sp3);
+}
+.tm-urg-hdr:first-child { margin-top: 0; }
+.tm-urg-hdr .tm-urg-count {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--t2);
+  background: var(--bg2);
+  border-radius: var(--r5);
+  padding: 1px 7px;
+  margin-right: auto;
+}
+
+/* ── 3. Urgency task rows — stagger fadeUp ── */
+@keyframes tmUrgFadeUp {
+  from { opacity:0; transform:translateY(8px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.tm-urg-row {
+  animation: tmUrgFadeUp 220ms var(--ease-out) both;
+}
+/* stagger: nth-child کار نمیکنه روی همه — از JS style بذار */
+
+/* ── 4. Sidebar — material depth (Emil §12) ── */
+.tm-panel-sidebar {
+  background: rgba(var(--bg0-rgb, 255,255,255), .92) !important;
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border-right: 1px solid rgba(var(--b1-rgb, 0,0,0), .08);
+}
+[data-theme="dark"] .tm-panel-sidebar {
+  background: rgba(18,18,20,.88) !important;
+  border-right-color: rgba(255,255,255,.06);
+}
+
+/* ── 5. Assign NLP input — focus state ── */
+.tm-assign-nlp:focus,
+[id*="tmAssignNlp"]:focus,
+[id*="tmAnlp"]:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--a);
+  border-color: var(--a);
+  transition: box-shadow 150ms var(--ease-out), border-color 150ms;
+}
+
+/* ── 6. Thread messages — slide+fade ── */
+@keyframes tmMsgIn {
+  from { opacity:0; transform:translateY(6px) scale(0.98); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+.tm-comment {
+  animation: tmMsgIn 200ms var(--ease-out) both;
+}
+.tm-comment:nth-child(2) { animation-delay: 30ms; }
+.tm-comment:nth-child(3) { animation-delay: 60ms; }
+.tm-comment:nth-child(4) { animation-delay: 90ms; }
+.tm-comment:nth-child(5) { animation-delay: 120ms; }
+
+/* ── 7. KPI numbers — smooth update ── */
+.tm-hdr-kpi,
+[class*="tm-hdr"] [class*="num"],
+[id*="tmHdr"] {
+  transition: color 300ms var(--ease-out), opacity 200ms;
+}
+
+/* ── 8. Labels — letter-spacing (Emil §15) ── */
+.tm-sb-lbl,
+.tm-panel-hdr-title,
+.tm-section-lbl,
+.tm-urg-hdr {
+  letter-spacing: .04em;
+}
+/* large display KPI numbers — tighter */
+.tm-hdr-big,
+.tm-kpi-num {
+  letter-spacing: -0.01em;
+}
+
+/* ── 9. Sidebar member rows — hover + stagger ── */
+@keyframes tmSbMemberIn {
+  from { opacity:0; transform:translateX(6px); }
+  to   { opacity:1; transform:translateX(0); }
+}
+.tm-panel-sidebar [onclick] {
+  transition: background 120ms var(--ease-out);
+  border-radius: var(--r2);
+}
+.tm-panel-sidebar [onclick]:active {
+  transform: scale(0.97);
+  transition: transform 80ms var(--ease-out);
+}
+
+/* ── 10. Panel header — translucent material (Emil §12) ── */
+.tm-panel-hdr {
+  background: rgba(var(--bg0-rgb, 255,255,255), .88);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(var(--b1-rgb, 0,0,0), .06);
+}
+[data-theme="dark"] .tm-panel-hdr {
+  background: rgba(18,18,20,.82);
+  border-bottom-color: rgba(255,255,255,.04);
+}
+
+/* ── 11. Assign sheet — NLP chips stagger ── */
+@keyframes tmChipIn {
+  from { opacity:0; transform:scale(0.88); }
+  to   { opacity:1; transform:scale(1); }
+}
+.tm-nlp-chip, .tm-member-chip {
+  animation: tmChipIn 180ms var(--ease-out) both;
+}
+
+/* ── prefers-reduced-motion override ── */
+@media (prefers-reduced-motion: reduce) {
+  .tm-urg-row, .tm-comment, .tm-nlp-chip, .tm-member-chip,
+  .tm-panel-sidebar, .tm-panel-hdr {
+    animation: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    transition: none !important;
+  }
+}
+
+/* ════ End Emil Kowalski + ibelick Polish ════ */
 </style>
 </head>
 <body>
