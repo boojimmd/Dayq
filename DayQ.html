@@ -4417,6 +4417,35 @@ select.fi{
   flex-shrink: 0;
 }
 
+
+/* quick actions در urgency task row */
+.tm-task-row { position: relative; }
+.tm-task-quick {
+  display: none;
+  position: absolute;
+  left: var(--sp3);
+  bottom: 6px;
+  gap: 4px;
+}
+.tm-task-row:hover .tm-task-quick,
+.tm-task-row:focus-within .tm-task-quick {
+  display: flex;
+}
+.tm-task-quick button {
+  height: 24px;
+  padding: 0 8px;
+  background: var(--bg2);
+  color: var(--t2);
+  border: 1px solid var(--b2);
+  border-radius: var(--r2);
+  font-size: 10px;
+  font-weight: 600;
+  font-family: var(--f);
+  cursor: pointer;
+  transition: opacity 120ms;
+}
+.tm-task-quick button:active { opacity: .7; transform: scale(0.97); }
+
 </style>
 </head>
 <body>
@@ -15263,7 +15292,7 @@ function tmRenderSokoStatus() {
   const taskRow = (t, taskIdx=0) => {
     const priColor = t.priority==='urgent'||t.priority==='high' ? 'var(--red)' : t.priority==='med' ? 'var(--amber)' : 'var(--b1)';
     const isBlocked = t.status === 'blocked';
-    return `<div onclick="tmOpenTaskThread('${t.id}')" class="tm-urg-row"
+    return `<div onclick="tmOpenTaskThread('${t.id}')" class="tm-task-row tm-urg-row"
       style="display:flex;align-items:center;gap:var(--sp3);padding:10px var(--sp3);border-bottom:1px solid var(--b2);cursor:pointer;transition:background var(--dur-fast);animation-delay:${Math.min(taskIdx*40,300)}ms">
       <span style="width:6px;height:6px;border-radius:50%;background:${priColor};flex-shrink:0"></span>
       <div style="flex:1;min-width:0">
