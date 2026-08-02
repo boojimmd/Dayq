@@ -6071,6 +6071,13 @@ function _tmSbSel(uuid){
   var sb=document.getElementById('tmPanelSidebar');
   if(sb&&typeof _tmSbStatus==='function')_tmSbStatus(sb);
   tmRenderSokoStatus();
+  var chip=document.getElementById('tmSokoFilterChip');
+  if(!chip)return;
+  if(!uuid||uuid==='all'){chip.innerHTML='';return;}
+  var mems=(tm.snapshot&&tm.snapshot.members)||[];
+  var mem=mems.find(function(m){return m.uuid===uuid;});
+  var nm=mem?esc(mem.name):uuid;
+  chip.innerHTML='<button onclick="_tmSbSel(' + "'" + 'all' + "'" + ')" style="display:inline-flex;align-items:center;gap:4px;background:var(--am);color:var(--ag);border:1px solid var(--ag);border-radius:var(--r5);padding:3px 10px;font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer">' + nm + ' &#xD7;</button>';
 }
 function _tmSbSel(uuid){
   window._tmSokoFilter=uuid;
@@ -15312,7 +15319,7 @@ function tmRenderSokoStatus() {
     <!-- اعضا compact -->
     <div style="display:flex;gap:var(--sp2);flex-wrap:wrap;margin-bottom:var(--sp4);padding-bottom:var(--sp3);border-bottom:1px solid var(--b2)">${memberPills}</div>
     <!-- Fix: assign = primary action -->
-    <button onclick="tmAssignTask('')" style="width:100%;height:48px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-md);font-weight:800;font-family:var(--f);cursor:pointer;margin-bottom:var(--sp4);box-shadow:0 2px 12px var(--ag)">✚ ارسال تسک</button>
+    <button onclick="tmAssignTask('')" style="width:100%;height:42px;background:var(--a);color:#fff;border:none;border-radius:var(--r3);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">&#x271A; ارسال تسک به تیم</button><div id="tmSokoFilterChip" style="margin-top:6px;min-height:20px"></div>
     ${noTasks
       ? `<div style="text-align:center;padding:var(--sp5);color:var(--t3);font-size:var(--fs-sm)">همه تسک‌ها تموم شدن 🎉</div>`
       : `${inReview.length?reviewGroup(inReview):''}
