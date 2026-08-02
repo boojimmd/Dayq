@@ -4373,6 +4373,13 @@ select.fi{
 .tm-modal-sheet [class*="title"], .tm-modal-sheet [class*="ttl"] {
   text-wrap: balance;
 }
+
+/* sidebar LEFT position */
+@media(min-width:900px){
+  .tm-panel-sidebar{ order:2; border-right:none; border-left:1px solid var(--b1); }
+  .tm-panel-main{ order:1; }
+}
+
 </style>
 </head>
 <body>
@@ -14715,7 +14722,7 @@ async function tmSyncBackground(){
     }else if(tm.role==='manager'){
       var data=await tmAPI('GET','/team/snapshot');
       var sokoOpen=document.getElementById('tmSokoPanel')?.classList.contains('open');
-      if(data&&data.members&&sokoOpen){
+      if(data&&data.members){
         await Promise.all(data.members
           .filter(function(m){return !m.isManager&&m.status!=='removed';})
           .map(async function(m){
