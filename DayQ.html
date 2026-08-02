@@ -4380,6 +4380,43 @@ select.fi{
   .tm-panel-main{ order:1; }
 }
 
+
+/* ══ Fix 1: sticky header, scrollable content ══ */
+.tm-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.tm-panel-hdr {
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.tm-panel-body {
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+.tm-panel-main {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  min-height: 0;
+  overscroll-behavior: contain;
+}
+.tm-tab-pane {
+  min-height: 0;
+}
+/* ══ Fix 2: tab bar sticky within panel ══ */
+.tm-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--bg0);
+  flex-shrink: 0;
+}
+
 </style>
 </head>
 <body>
@@ -5512,7 +5549,7 @@ select.fi{
         <option value="prep">آماده‌سازی</option>
         <option value="visit">بازدید</option>
         <option value="meeting">جلسه</option>
-        <option value="report">گزارش</option>
+        <option value="report">تاریخچه</option>
         <option value="followup">پیگیری</option>
         <option value="email">پیام</option>
         <option value="call">تماس تلفنی</option>
@@ -5559,7 +5596,7 @@ select.fi{
     <!-- advanced section -->
     <div class="qa-advanced" id="qaAdvanced">
       <div>
-        <div class="f-lbl">وضعیت</div>
+        <div class="f-lbl">تیم</div>
         <div class="status-row">
           <button class="stp todo-s sel-status" data-st="todo" onclick="selStatus('todo',this)"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="5" r="4"/></svg>شروع نشده</button>
           <button class="stp doing-s" data-st="doing" onclick="selStatus('doing',this)"><svg viewBox="0 0 10 10" fill="var(--amber)"><circle cx="5" cy="5" r="4"/></svg>در حال انجام</button>
@@ -5928,7 +5965,7 @@ select.fi{
         <option value="prep">آماده‌سازی</option>
         <option value="visit">بازدید</option>
         <option value="meeting">جلسه</option>
-        <option value="report">گزارش</option>
+        <option value="report">تاریخچه</option>
         <option value="followup">پیگیری</option>
         <option value="email">پیام</option>
         <option value="call">تماس تلفنی</option>
@@ -18485,7 +18522,7 @@ boot();
   </div>
   <div class="sh-body" style="gap:var(--sp3)">
     <div>
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2)">وضعیت</div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2)">تیم</div>
       <div class="tm-status-row">
         <button class="tm-status-opt" data-status="pending" onclick="tmUpdateTaskStatus('pending')">باید</button>
         <button class="tm-status-opt" data-status="in_progress" onclick="tmUpdateTaskStatus('in_progress')">درحال</button>
@@ -18596,15 +18633,14 @@ boot();
         </div>
       </div>
       <div class="tm-tabs">
-        <div class="tm-tab active" data-tab="status" onclick="tmSetSokoTab('status')" style="font-weight:700">وضعیت</div>
-        <div class="tm-tab" data-tab="report" onclick="tmSetSokoTab('report')" style="opacity:.6">گزارش</div>
-        <div class="tm-tab" data-tab="projects" onclick="tmSetSokoTab('projects')" style="opacity:.6">📊 آمار</div>
+        <div class="tm-tab active" data-tab="status" onclick="tmSetSokoTab('status')" style="font-weight:700">تیم</div>
+        <div class="tm-tab" data-tab="report" onclick="tmSetSokoTab('report')" style="opacity:.6">تاریخچه</div>
+        
       </div>
     </div>
 
     <div class="tm-tab-pane" data-pane="status" id="tmSokoStatusContent"></div>
-    <div class="tm-tab-pane" data-pane="projects" style="display:none" id="tmSokoProjectsContent">
-      <div style="text-align:center;padding:var(--sp5);color:var(--t3);font-size:var(--fs-sm)">پروژه‌های تیمی در Step 2 اضافه می‌شن</div>
+    <div class="tm-tab-pane" data-pane="projects" style="display:none" id="tmSokoProjectsContent"></div>
     </div>
     <div class="tm-tab-pane" data-pane="report" style="display:none" id="tmSokoReportContent"></div>
     </div>
@@ -18886,7 +18922,7 @@ boot();
 
     <!-- وضعیت -->
     <div>
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:8px">وضعیت</div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:8px">تیم</div>
       <!-- وضعیت in_review: read-only banner -->
       <div id="ttdReviewBanner" style="display:none;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:var(--r2);padding:var(--sp3);text-align:center">
         <div style="font-size:var(--fs-sm);font-weight:700;color:#6366f1">⏳ منتظر تأیید مدیر</div>
