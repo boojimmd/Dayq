@@ -3166,13 +3166,13 @@ select.fi{
 .tm-divider{height:1px;background:var(--b1);margin:var(--sp3) 0;}
 
 .tm-today-card{background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r3);margin-bottom:var(--sp3);overflow:hidden;}
-.tm-today-hdr{display:flex;align-items:center;justify-content:space-between;padding:var(--sp3) var(--sp4);border-bottom:1px solid var(--b2);cursor:pointer;transition:background var(--dur-fast) var(--ease-std);}
+.tm-today-hdr{display:flex;align-items:center;justify-content:space-between;padding:var(--sp3) var(--sp4);border-bottom:1px solid var(--b2);cursor:pointer;transition:opacity var(--dur-fast), opacity var(--dur-fast) var(--ease-std);}
 .tm-today-hdr:active{background:var(--bg2);}
 .tm-today-title{font-size:var(--fs-sm);font-weight:700;color:var(--t1);}
 .tm-today-body{padding:var(--sp2) var(--sp3);}
 .tm-today-body.collapsed{display:none;}
 
-.tm-member{display:flex;align-items:center;gap:var(--sp3);padding:var(--sp2) var(--sp3);border-radius:var(--r2);cursor:pointer;transition:background var(--dur-fast) var(--ease-std);border-bottom:1px solid var(--b2);}
+.tm-member{display:flex;align-items:center;gap:var(--sp3);padding:var(--sp2) var(--sp3);border-radius:var(--r2);cursor:pointer;transition:opacity var(--dur-fast), opacity var(--dur-fast) var(--ease-std);border-bottom:1px solid var(--b2);}
 .tm-member:last-child{border-bottom:none;}
 .tm-member:active{background:var(--bg2);}
 .tm-member-info{flex:1;min-width:0;}
@@ -3453,7 +3453,7 @@ select.fi{
   justify-content:space-between;
   padding:12px var(--sp4);
   cursor:pointer;
-  transition:background var(--dur-fast);
+  transition:background var(--dur-fast), opacity var(--dur-fast);
   border-bottom:1px solid var(--b2);
 }
 .tm-today-hdr:active{background:var(--bg2);}
@@ -3737,7 +3737,7 @@ select.fi{
   }
 }
 #tmInboxList [onclick]{
-  transition:background var(--dur-fast) var(--ease-std);
+  transition:background var(--dur-fast), opacity var(--dur-fast) var(--ease-std);
 }
 
 /* ── Inbox section — stagger ── */
@@ -4367,6 +4367,12 @@ select.fi{
 }
 
 /* ════ End Emil Kowalski + ibelick Polish ════ */
+
+/* ibelick: text-balance for headings */
+.tm-panel-hdr-title, .tm-urg-hdr, .tm-modal-sheet h3,
+.tm-modal-sheet [class*="title"], .tm-modal-sheet [class*="ttl"] {
+  text-wrap: balance;
+}
 </style>
 </head>
 <body>
