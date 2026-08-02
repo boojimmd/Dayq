@@ -15203,11 +15203,11 @@ function tmRenderSokoStatus() {
   const blocked  = fT.filter(t => t.status === 'blocked');
 
   // ── render یک تسک ──
-  const taskRow = t => {
+  const taskRow = (t, taskIdx=0) => {
     const priColor = t.priority==='urgent'||t.priority==='high' ? 'var(--red)' : t.priority==='med' ? 'var(--amber)' : 'var(--b1)';
     const isBlocked = t.status === 'blocked';
-    return `<div onclick="tmOpenTaskThread('${t.id}')"
-      style="display:flex;align-items:center;gap:var(--sp3);padding:10px var(--sp3);border-bottom:1px solid var(--b2);cursor:pointer;transition:background var(--dur-fast)">
+    return `<div onclick="tmOpenTaskThread('${t.id}')" class="tm-urg-row"
+      style="display:flex;align-items:center;gap:var(--sp3);padding:10px var(--sp3);border-bottom:1px solid var(--b2);cursor:pointer;transition:background var(--dur-fast);animation-delay:${Math.min(taskIdx*40,300)}ms">
       <span style="width:6px;height:6px;border-radius:50%;background:${priColor};flex-shrink:0"></span>
       <div style="flex:1;min-width:0">
         <div style="font-size:var(--fs-sm);font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t.title)}</div>
@@ -15225,11 +15225,11 @@ function tmRenderSokoStatus() {
     const bgColor = color==='var(--red)'?'rgba(229,62,90,.04)':color==='var(--amber)'?'rgba(217,119,6,.04)':'transparent';
     return `<div style="margin-bottom:var(--sp2);border-radius:var(--r2);overflow:hidden;border:1px solid ${alphaColor};background:${bgColor}">
       <div style="display:flex;align-items:center;gap:6px;padding:8px var(--sp3)">
-        <span style="font-size:var(--fs-xs);font-weight:700;color:${color}">${icon} ${title}</span>
+        <span style="font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:${color}">${icon} ${title}</span>
         ${tasks.length ? `<span style="background:${color};color:#fff;font-size:9px;font-weight:800;border-radius:var(--r5);padding:1px 7px">${num(tasks.length)}</span>` : ''}
       </div>
       <div style="background:var(--bg1);border-top:1px solid ${alphaColor}">
-        ${tasks.length ? tasks.map(taskRow).join('') : `<div style="padding:var(--sp3);text-align:center;color:var(--t3);font-size:var(--fs-xs)">${emptyMsg}</div>`}
+        ${tasks.length ? tasks.map((t,taskIdx)=>taskRow(t,taskIdx)).join('') : `<div style="padding:var(--sp3);text-align:center;color:var(--t3);font-size:var(--fs-xs)">${emptyMsg}</div>`}
       </div>
     </div>`;
   };
