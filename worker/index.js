@@ -1201,6 +1201,22 @@ export default {
       return jsonRes({ newCode, newToken }, 200, cors);
     }
 
+    // ── mark thread as read ──
+    if (path === '/task/read' && req.method === 'POST') {
+      const token = req.headers.get('X-DayQ-Token');
+      const session = await validateSession(token, env);
+      if (!session) return errRes('دسترسی نامعتبر', 403, cors);
+      const { taskId } = await req.json();
+      const { teamCode, uuid } = session;
+      const taskRaw = await env.DAYQ_KV.get(`team:${teamCode}:task:${taskId}`);
+      if (!taskRaw) return errRes('تسک یافت نشد', 404, cors);
+      const task = JSON.parse(taskRaw);
+      if (!task.readBy) task.readBy = {};
+      task.readBy[uuid] = Date.now();
+      await env.DAYQ_KV.put(`team:${teamCode}:task:${taskId}`, JSON.stringify(task));
+      return jsonRes({ ok: true }, 200, cors);
+    }
+
     // ── گزارش هفتگی ──
     if (path === '/report/weekly' && req.method === 'GET') {
       const token = req.headers.get('X-DayQ-Token');
