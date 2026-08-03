@@ -4446,6 +4446,53 @@ select.fi{
 }
 .tm-task-quick button:active { opacity: .7; transform: scale(0.97); }
 
+
+/* ══════════════════════════════════════════════
+   FINAL panel layout — overrides all conflicts
+   ══════════════════════════════════════════════ */
+
+/* Panel: flex column, full screen */
+#tmSokoPanel {
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+
+/* Header: NEVER sticky (overflow:hidden parent breaks sticky) */
+#tmSokoPanel > .tm-panel-hdr {
+  flex-shrink: 0 !important;
+  position: relative !important;  /* NOT sticky */
+  z-index: 2 !important;
+  min-height: auto !important;
+}
+
+/* Body: takes remaining height */
+#tmSokoPanel > .tm-panel-body {
+  flex: 1 !important;
+  overflow: hidden !important;
+  min-height: 0 !important;
+  display: flex !important;
+}
+
+/* Main: scrollable */
+#tmSokoPanel .tm-panel-main {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Panes: take full height of main */
+#tmSokoPanel .tm-tab-pane {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  min-height: 0 !important;
+}
+
+/* ══════════════════════════════════════════════ */
+
 </style>
 </head>
 <body>
