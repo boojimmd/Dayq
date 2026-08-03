@@ -11,7 +11,7 @@ self.addEventListener('push', (event) => {
       body: data.body || '',
       tag: data.tag || 'dayq-' + Date.now(),
       requireInteraction: true,
-      data: { url: data.url || APP_URL },
+      data: { url: data.url || APP_URL, extra: data.data || {} },
       icon: '/Dayq/icon-192.png',
     })
   );
@@ -28,7 +28,7 @@ self.addEventListener('notificationclick', (event) => {
       // اگر تب باز هست، focus کن
       for (const c of clients) {
         if (c.url.includes('/Dayq') && 'focus' in c) {
-          c.postMessage({ type: 'NOTIF_CLICK', url: targetUrl });
+          c.postMessage({ type: 'NOTIF_CLICK', url: targetUrl, data: event.notification.data?.extra || {} });
           return c.focus();
         }
       }
