@@ -15031,7 +15031,7 @@ function tmRenderInbox(){
       '<span style="width:7px;height:7px;border-radius:50%;background:'+pri+';margin-top:5px;flex-shrink:0"></span>'+
       '<div style="flex:1;min-width:0">'+
         '<div style="display:flex;align-items:center;justify-content:space-between">'+
-          '<div style="font-size:var(--fs-sm);font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1">'+esc(t.title)+'</div>'+
+          '<div style="font-size:var(--fs-sm);font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1">'+esc(t.title)+(t.comments&&t.comments.length>0&&t.comments[t.comments.length-1].from==='manager'&&(!t.lastReadAt||t.comments[t.comments.length-1].ts>t.lastReadAt)?'<span style="display:inline-block;width:7px;height:7px;background:var(--a);border-radius:50%;margin-right:4px;vertical-align:middle"></span>':'')+(t.comments&&t.comments.length>0?'<span style="font-size:9px;color:var(--t3);margin-right:4px">💬</span>':'')+'</div>'+
           seen+
         '</div>'+
         '<div style="display:flex;align-items:center;gap:var(--sp2);margin-top:3px;flex-wrap:wrap">'+
