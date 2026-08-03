@@ -4561,6 +4561,47 @@ select.fi{
 
 /* ══════════════════════════════════════════ */
 
+
+/* ── Thread chat styles ── */
+.ttd-thread { display:flex; flex-direction:column; gap:4px; padding:8px 0; }
+
+.ttd-day-div {
+  text-align:center; margin:12px 0 8px;
+  display:flex; align-items:center; gap:8px;
+}
+.ttd-day-div::before,.ttd-day-div::after {
+  content:''; flex:1; height:1px; background:var(--b2);
+}
+.ttd-day-div span {
+  font-size:var(--fs-2xs); color:var(--t3); white-space:nowrap;
+  background:var(--bg0); padding:0 8px;
+}
+
+.ttd-bubble { max-width:78%; display:flex; flex-direction:column; }
+.ttd-bubble.from-member {
+  align-self:flex-end;
+  background:var(--a); color:#fff;
+  border-radius:12px 12px 2px 12px;
+  padding:8px 10px 5px;
+}
+.ttd-bubble.from-manager {
+  align-self:flex-start;
+  background:var(--bg2); color:var(--t1);
+  border:1px solid var(--b1);
+  border-radius:12px 12px 12px 2px;
+  padding:8px 10px 5px;
+}
+.ttd-bubble-body { font-size:var(--fs-xs); line-height:1.5; direction:rtl; word-break:break-word; }
+.ttd-bubble-foot {
+  display:flex; align-items:center; justify-content:flex-end;
+  gap:4px; margin-top:3px;
+}
+.ttd-bubble-sender { font-size:9px; opacity:.7; }
+.ttd-bubble-time { font-size:9px; opacity:.7; white-space:nowrap; }
+.ttd-bubble.from-member .ttd-bubble-time { color:rgba(255,255,255,.75); }
+.ttd-bubble.from-manager .ttd-bubble-time { color:var(--t3); }
+.tm-thread-empty { text-align:center; padding:var(--sp4) 0; color:var(--t3); font-size:var(--fs-xs); }
+
 </style>
 </head>
 <body>
