@@ -4493,6 +4493,74 @@ select.fi{
 
 /* ══════════════════════════════════════════════ */
 
+
+/* ══════════════════════════════════════════
+   SOKO PANEL — FINAL OVERRIDE (no conflicts)
+   ══════════════════════════════════════════ */
+
+/* Panel خودش */
+#tmSokoPanel {
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  background: var(--bg0) !important;
+}
+
+/* Header: fixed height, never collapse */
+#tmSokoPanel > .tm-panel-hdr {
+  flex: 0 0 auto !important;
+  position: relative !important;
+  z-index: 2 !important;
+  background: var(--bg0) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Body: flex row, rest of height */
+#tmSokoPanel > .tm-panel-body {
+  flex: 1 1 0 !important;
+  overflow: hidden !important;
+  display: flex !important;
+  flex-direction: row !important;
+  min-height: 0 !important;
+}
+
+/* Main: flex:1 scroll */
+#tmSokoPanel .tm-panel-main {
+  flex: 1 1 0 !important;
+  overflow-y: auto !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  order: 1 !important;
+}
+
+/* Tab panes */
+#tmSokoPanel .tm-tab-pane {
+  flex: 1 1 0 !important;
+  overflow-y: auto !important;
+  min-height: 0 !important;
+}
+
+/* Sidebar: OPAQUE — no bleed-through */
+#tmSokoPanel .tm-panel-sidebar {
+  flex: 0 0 200px !important;
+  width: 200px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow-y: auto !important;
+  background: var(--bg1) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border-left: 1px solid var(--b1) !important;
+  border-right: none !important;
+  order: 2 !important;
+}
+
+/* ══════════════════════════════════════════ */
+
 </style>
 </head>
 <body>
