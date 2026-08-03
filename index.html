@@ -19133,9 +19133,8 @@ boot();
       </div>
       <!-- دکمه‌های عادی -->
       <div style="display:flex;gap:6px" id="ttdStatusBtns">
-        <button onclick="_ttdSetStatus('pending')"    class="ttd-st-btn" data-st="pending"    style="flex:1;height:36px;border-radius:var(--r2);border:1px solid var(--b1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">شروع نشده</button>
-        <button onclick="_ttdSetStatus('in_progress')" class="ttd-st-btn" data-st="in_progress" style="flex:1;height:36px;border-radius:var(--r2);border:1px solid var(--b1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">در انجام</button>
-        <button onclick="_ttdSetStatus('blocked')"    class="ttd-st-btn" data-st="blocked"    style="flex:1;height:36px;border-radius:var(--r2);border:1px solid rgba(229,62,90,.3);color:var(--red);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">متوقف 🚫</button>
+        <button onclick="_ttdSetStatus('in_progress')" class="ttd-st-btn" data-st="in_progress" style="flex:1;height:38px;border-radius:var(--r2);border:1px solid var(--b1);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">🔵 در انجام</button>
+        <button onclick="_ttdSetStatus('blocked')"    class="ttd-st-btn" data-st="blocked"    style="flex:1;height:38px;border-radius:var(--r2);border:1px solid rgba(229,62,90,.3);color:var(--red);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">🚫 متوقف</button>
       </div>
     </div>
 
@@ -19151,7 +19150,7 @@ boot();
     </div>
     <!-- یادداشت برای مدیر -->
     <div>
-      <div id="ttdNoteLabel" style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px">یادداشت برای مدیر (اختیاری)</div>
+      <div id="ttdNoteLabel" style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px">توضیح (با ذخیره ارسال میشه)</div>
       <textarea id="ttdNote" rows="2"
         placeholder="توضیح بده..."
         style="width:100%;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 12px;font-size:var(--fs-xs);font-family:var(--f);color:var(--t1);direction:rtl;resize:none;outline:none"></textarea>
@@ -19167,6 +19166,10 @@ boot();
     <div id="ttdCommentSection" style="margin-bottom:var(--sp3)"><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2);text-align:right">پیام با مدیر</div><div class="ttd-thread" id="ttdThreadMsgs"></div><div style="display:flex;gap:var(--sp2);align-items:flex-end;padding-top:var(--sp2);border-top:1px solid var(--b2);margin-top:var(--sp2)"><textarea class="ttd-reply-inp" rows="1" placeholder="پیام بنویس..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();_ttdSendComment()}"></textarea><button class="ttd-reply-send" onclick="_ttdSendComment()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button></div></div>
     <div style="display:flex;gap:var(--sp2)">
       <button id="ttdSaveBtn" onclick="_ttdSave()" style="flex:1;height:46px;background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">ذخیره</button>
+      <button id="ttdReviewBtn" onclick="_ttdSubmitForReview()"
+        style="width:100%;height:46px;margin-top:8px;background:var(--ag);color:#fff;border:none;border-radius:var(--r3);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:opacity 150ms">
+        ✅ ارسال برای بررسی مدیر
+      </button>
       <button id="ttdSubmitBtn" onclick="_ttdSubmitForReview()" style="flex:2;height:46px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">📤 ارسال برای بررسی</button>
     </div>
   </div>
