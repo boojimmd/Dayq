@@ -15385,7 +15385,7 @@ function tmRenderSokoReport() {
             <div style="font-size:var(--fs-sm);font-weight:600">${m.name}</div>
           </div>
           <div class="tm-score-bar"><div class="tm-score-fill${(m.score||0)>=80?'':((m.score||0))>=50?' mid':' low'}" style="transform:scaleX(${(m.score||0)/100})"></div></div>
-          <div style="font-size:var(--fs-2xs);color:var(--t3);margin-top:4px;text-align:left">${m.done||0}/${m.total||0}</div>
+          <div style="font-size:var(--fs-2xs);color:var(--t3);margin-top:4px;text-align:left">${m.done||0}/${m.assigned||0}</div>
         </div>`).join('')}`;
   }).catch(() => {
     el.innerHTML = '<div style="text-align:center;padding:var(--sp4);color:var(--red);font-size:var(--fs-sm)">خطا در بارگذاری گزارش</div>';
