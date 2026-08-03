@@ -17765,6 +17765,8 @@ function openTeamTaskDetail(taskId) {
   const t = tm.inbox ? tm.inbox.find(x => x.id === taskId) : null;
   if (!t) return;
   _ttdTaskId = taskId;
+  // mark as read
+  t.lastReadAt = Date.now();
 
   document.getElementById('ttdTitle').textContent = t.title || 'تسک تیمی';
 
@@ -18148,11 +18150,20 @@ if('serviceWorker' in navigator){navigator.serviceWorker.addEventListener('messa
   if(['task_update','task_note','join_request','in_review','task_approved','task_returned'].indexOf(nd.type)>-1){
     setTimeout(function(){tmSyncBackground&&tmSyncBackground();},500);
   }
-  if(nd&&nd.type==='NOTIF_CLICK'&&tm.role==='manager'&&tm.code){
-    setTimeout(function(){tmOpenSoko&&tmOpenSoko();
-      if(nd.data&&nd.data.type==='join_request'){setTimeout(function(){tmOpenPendingSheet&&tmOpenPendingSheet();},400);}
-      else if(nd.data&&nd.data.taskId){setTimeout(function(){tmOpenTaskThread&&tmOpenTaskThread(nd.data.taskId);},400);}
-    },300);
+  if(nd&&nd.type==='NOTIF_CLICK'){
+    if(tm.role==='manager'&&tm.code){
+      setTimeout(function(){tmOpenSoko&&tmOpenSoko();
+        if(nd.data&&nd.data.type==='join_request'){setTimeout(function(){tmOpenPendingSheet&&tmOpenPendingSheet();},400);}
+        else if(nd.data&&nd.data.taskId){setTimeout(function(){tmOpenTaskThread&&tmOpenTaskThread(nd.data.taskId);},400);}
+      },300);
+    } else if(tm.role==='member'&&nd.data&&nd.data.taskId){
+      var _notifTaskId=nd.data.taskId;
+      setTimeout(function(){
+        tmSyncBackground&&tmSyncBackground().then(function(){
+          openTeamTaskDetail&&openTeamTaskDetail(_notifTaskId);
+        }).catch(function(){openTeamTaskDetail&&openTeamTaskDetail(_notifTaskId);});
+      },300);
+    }
   }
   if(nd&&nd.type==='SHARE_TARGET'){_applyShare&&_applyShare(nd.title,nd.text,nd.url);}
 });}
