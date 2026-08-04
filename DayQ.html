@@ -6239,6 +6239,7 @@ function _tmSbSel(uuid){
   if(sb)_tmSbStatus(sb);
   tmRenderSokoStatus();
 }function tmOpenTaskThread(taskId){
+  var _b=document.createElement("div");_b.style.cssText="position:fixed;top:10px;right:10px;z-index:99999;background:orange;color:black;padding:8px;border-radius:6px;font-size:12px";_b.textContent="S1 called: "+taskId.slice(0,8);document.body.appendChild(_b);setTimeout(function(){_b.remove();},4000);
   var members=(tm.snapshot&&tm.snapshot.members)||[],allTasks=[];
   members.forEach(function(m){(m.tasks||[]).forEach(function(t){allTasks.push(Object.assign({},t,{memberName:m.name}));});});
   var task=allTasks.find(function(t){return t.id===taskId;})||(tm.inbox||[]).find(function(t){return t.id===taskId;});
