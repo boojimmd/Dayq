@@ -4638,6 +4638,15 @@ body.soko-open #ov {
 }
 body.soko-open #ov { z-index: 2050 !important; }
 
+
+/* sheets above Soko — CSS :has() approach (modern browsers) */
+body:has(#tmSokoPanel.open) .sheet {
+  z-index: 2100 !important;
+}
+body:has(#tmSokoPanel.open) #ov {
+  z-index: 2050 !important;
+}
+
 </style>
 </head>
 <body>
@@ -15397,6 +15406,7 @@ function tmOpenSoko() {
   const panel = document.getElementById('tmSokoPanel');
   if (!panel) return;
   panel.classList.add('open');
+  document.body.classList.add('soko-open');
   document.body.style.overflow = 'hidden';
   if (window.innerWidth < 900) {
     document.body.style.position = 'fixed';
@@ -15423,6 +15433,7 @@ function tmCloseSoko() {
   const panel = document.getElementById('tmSokoPanel');
   if (!panel) return;
   panel.classList.remove('open');
+  document.body.classList.remove('soko-open');
   if (window.innerWidth < 900) {
     const scrollY = document.body.style.top;
     document.body.style.position = '';
