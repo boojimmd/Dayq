@@ -15099,7 +15099,7 @@ function tmRenderInbox(){
     '</div>';
   }
   var today=mrTodayKey();
-  var rows=active.slice(0,5).map(function(t){
+  var rows=active.map(function(t){
     var isOverdue=t.deadline&&t.deadline<today;
     var isToday=t.deadline===today;
     var dc=isOverdue?'var(--red)':isToday?'var(--amber)':'var(--t3)';
@@ -15127,7 +15127,7 @@ function tmRenderInbox(){
         '</div>'+
       '</div></div>';
   }).join('');
-  if(active.length>5){rows+='<div onclick="tmOpenSoko()" style="text-align:center;padding:var(--sp2);font-size:var(--fs-xs);color:var(--a);cursor:pointer">مشاهده همه '+active.length+' تسک ←</div>';}
+
   el.innerHTML=bannerHtml+rows;
 }
 
