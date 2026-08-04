@@ -9030,6 +9030,7 @@ document.addEventListener('keydown',e=>{
 function openSheet(id){
   document.getElementById('ov').classList.add('open');
   const el=document.getElementById(id);
+  if(!el){console.warn('openSheet: element not found:',id);return;}
   el.classList.add('open');
   // iOS: prevent background scroll
   if(window.innerWidth<900){
