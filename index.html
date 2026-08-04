@@ -21429,6 +21429,32 @@ async function _tmTryPushToMember(memberUuid,taskTitle,broadcast){
 }
 "none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div><div id="mgThreadMeta" style="display:flex;align-items:center;gap:var(--sp2);padding:var(--sp2) 0 var(--sp3);direction:rtl;flex-wrap:wrap"></div></div><div id="mgThreadActions" style="display:none;padding:8px 16px;background:var(--bg1);border-bottom:1px solid var(--b2);display:flex;gap:8px;align-items:center"></div><div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)"><div id="mgThreadNote" style="display:none;background:var(--ambm);border:1px solid rgba(217,119,6,.2);border-radius:var(--r2);padding:var(--sp3)"><div style="font-size:var(--fs-2xs);color:var(--amber);font-weight:700;margin-bottom:4px">📋 یادداشت</div><div class="mg-note-text" style="font-size:var(--fs-xs);color:var(--t1);direction:rtl"></div></div><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2);text-align:right">گفتگو</div><div class="ttd-thread tm-mgr-view" id="mgThreadMsgs"></div><div style="display:flex;gap:var(--sp2);align-items:flex-end;padding-top:var(--sp2);border-top:1px solid var(--b2);margin-top:var(--sp2)"><textarea class="ttd-reply-inp" rows="1" placeholder="پاسخ بده..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();_mgSendComment()}"></textarea><button class="ttd-reply-send" onclick="_mgSendComment()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button></div></div></div></div>
 
+<div class="sheet" id="shTaskThread">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div class="sh-ttl" id="mgThreadTitle">گفتگو</div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div id="mgThreadMeta" style="font-size:var(--fs-xs);color:var(--t3);padding:4px 0 8px;direction:rtl"></div>
+  </div>
+  <div id="mgThreadActions" style="display:none;padding:8px 16px;background:var(--bg1);border-bottom:1px solid var(--b2);flex-direction:row;gap:8px;align-items:center"></div>
+  <div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)">
+    <div id="mgThreadNote" style="display:none;background:var(--ambm);border:1px solid rgba(217,119,6,.2);border-radius:var(--r2);padding:var(--sp3)">
+      <div style="font-size:var(--fs-2xs);color:var(--amber);font-weight:700;margin-bottom:4px">📋 یادداشت</div>
+      <div class="mg-note-text" style="font-size:var(--fs-xs);color:var(--t1);direction:rtl"></div>
+    </div>
+    <div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2);text-align:right">گفتگو</div>
+      <div class="ttd-thread tm-mgr-view" id="mgThreadMsgs"></div>
+      <div style="display:flex;gap:var(--sp2);align-items:flex-end;padding-top:var(--sp2);border-top:1px solid var(--b2);margin-top:var(--sp2)">
+        <textarea class="ttd-reply-inp" rows="1" placeholder="پاسخ بده..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();_mgSendComment()}"></textarea>
+        <button class="ttd-reply-send" onclick="_mgSendComment()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="sheet" id="shTmDirectLogin">
   <div class="sh-handle"></div>
   <div class="sh-head">
