@@ -19269,89 +19269,7 @@ function _tmDlSheet(tid,title,cur){
   var od=document.getElementById('shTmDl');if(od)od.remove();
   var s=document.createElement('div');s.className='sheet';s.id='shTmDl';
   s.dataset.tid=tid;
-  var bs='flex:1;height:38px;border-radius:var(--r5);border:1px sofunction openTeamTaskDetail(taskId){
-  var t=(tm.inbox||[]).find(function(x){return x.id===taskId;});
-  if(!t)return;
-  _ttdTaskId=taskId;
-  t.lastReadAt=Date.now();
-  var el_title=document.getElementById('ttdTitle');
-  if(el_title)el_title.textContent=t.title||'تسک تیمی';
-  var months=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
-  var dlLabel='';
-  if(t.deadline){
-    var parts=t.deadline.split('-').map(Number);
-    var today=mrTodayKey();
-    var tparts=today.split('-').map(Number);
-    var diff=_jalToDays(parts[0],parts[1],parts[2])-_jalToDays(tparts[0],tparts[1],tparts[2]);
-    dlLabel=diff===0?'امروز':diff===1?'فردا':diff<0?(Math.abs(diff)+' روز گذشته ⚠️'):(parts[2]+' '+months[parts[1]-1]);
-  }
-  var el_dl=document.getElementById('ttdDeadline');
-  if(el_dl)el_dl.textContent=dlLabel?('📅 '+dlLabel):'';
-  var mgName='مدیر';
-  if(tm.snapshot&&tm.snapshot.members){
-    var mgM=tm.snapshot.members.find(function(m){return m.isManager||m.role==='manager';});
-    if(mgM&&mgM.name)mgName=mgM.name;
-  }
-  var el_mg=document.getElementById('ttdManager');
-  if(el_mg)el_mg.textContent='از '+mgName;
-  var priMap={high:'🔴 فوری',med:'🟡 مهم',low:'⚪ عادی',urgent:'🔴 فوری'};
-  var el_pri=document.getElementById('ttdPriority');
-  if(el_pri)el_pri.textContent=priMap[t.priority]||'';
-  var el_db=document.getElementById('ttdDescBlock');
-  var el_desc=document.getElementById('ttdDesc');
-  if(el_db&&el_desc){
-    if(t.description){el_desc.textContent=t.description;el_db.style.display='';}
-    else el_db.style.display='none';
-  }
-  var status=t.status||'pending';
-  document.querySelectorAll('.ttd-st-btn').forEach(function(btn){
-    var active=btn.dataset.st===status;
-    btn.dataset.active=active?'1':'0';
-    btn.classList.toggle('active-st',active);
-    btn.style.background=active?'var(--t1)':'var(--bg2)';
-    btn.style.color=active?'var(--bg1)':'var(--t2)';
-    btn.style.borderColor=active?'var(--t1)':'var(--b1)';
-  });
-  if(typeof _ttdUpdateBlockedUI==='function')_ttdUpdateBlockedUI(status);
-  var el_note=document.getElementById('ttdNote');
-  if(el_note)el_note.value=t.memberNote||'';
-  var rvBanner=document.getElementById('ttdReviewBanner');
-  var rvBtn=document.getElementById('ttdReviewBtn');
-  var stBtns=document.getElementById('ttdStatusBtns');
-  var svBtn=document.getElementById('ttdSaveBtn');
-  if(status==='in_review'){
-    if(rvBanner)rvBanner.style.display='';
-    if(rvBtn)rvBtn.style.display='none';
-    if(stBtns)stBtns.style.display='none';
-    if(svBtn)svBtn.style.display='none';
-  }else{
-    if(rvBanner)rvBanner.style.display='none';
-    if(rvBtn)rvBtn.style.display='';
-    if(stBtns)stBtns.style.display='';
-    if(svBtn)svBtn.style.display='';
-  }
-  var el_cl=document.getElementById('ttdChecklist');
-  var el_cli=document.getElementById('ttdChecklistItems');
-  if(t.checklist&&t.checklist.length&&el_cl&&el_cli){
-    el_cl.style.display='';
-    el_cli.innerHTML=t.checklist.map(function(item){
-      return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--b2)">'+
-        '<div style="width:14px;height:14px;border-radius:3px;border:2px solid '+(item.done?'var(--t1)':'var(--b1)')+';background:'+(item.done?'var(--t1)':'transparent')+';flex-shrink:0;display:flex;align-items:center;justify-content:center">'+
-        (item.done?'<svg viewBox="0 0 12 12" width="8" height="8"><polyline points="2,6 5,9 10,3" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>':'')+
-        '</div>'+
-        '<span style="font-size:var(--fs-xs);color:'+(item.done?'var(--t3)':'var(--t1)')+';text-decoration:'+(item.done?'line-through':'none')+'">'+esc(item.text)+'</span></div>';
-    }).join('');
-  }else if(el_cl)el_cl.style.display='none';
-  var el_err=document.getElementById('ttdErr');
-  if(el_err)el_err.textContent='';
-  var el_body=document.getElementById('ttdBody');
-  if(el_body)el_body.dataset.taskId=taskId;
-  var el_thread=document.getElementById('ttdThreadMsgs');
-  if(el_thread&&typeof _renderThread==='function')_renderThread(t.comments||[],'member',el_thread,t);
-  openSheet('shTeamTaskDetail');
-  setTimeout(function(){if(typeof _ttdMarkSeen==='function')_ttdMarkSeen(taskId);},800);
-  setTimeout(function(){try{tmAPI('POST','/task/read',{taskId:taskId});}catch(e){}},1000);
-}
+  var bs='flex:1;height:38px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--bg2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer';
 
 
 
@@ -21362,42 +21280,6 @@ function _renderThread(c,role,el,taskObj){
   if(thr&&task&&typeof _renderThread==='function')_renderThread(task.comments||[],'member',thr,task);
   if(thr)thr.scrollTop=thr.scrollHeight;
   if(btn)btn.disabled=false;
-}function tmOpenTaskThread(taskId){
-  var members=(tm.snapshot&&tm.snapshot.members)||[],allTasks=[];
-  members.forEach(function(m){(m.tasks||[]).forEach(function(t){allTasks.push(Object.assign({},t,{memberName:m.name}));});});
-  var task=allTasks.find(function(t){return t.id===taskId;})||(tm.inbox||[]).find(function(t){return t.id===taskId;});
-  if(!task)return;
-  _mgThreadTaskId=taskId;
-  var ttl=document.getElementById('mgThreadTitle');
-  if(ttl)ttl.textContent=task.title||'گفتگو';
-  var meta=document.getElementById('mgThreadMeta');
-  if(meta){
-    var ST={pending:'شروع نشده',in_progress:'در حال انجام',done:'تکمیل شد ✓',blocked:'متوقف 🚫',in_review:'منتظر بررسی 🔍'};
-    var priL={urgent:'🔴 فوری',high:'⚡ مهم',med:'🟡 متوسط',normal:''}[task.priority]||'';
-    var dlC=task.deadline&&task.deadline<mrTodayKey()?'var(--red)':'var(--t3)';
-    var dlL=task.deadline?(' · '+tmHumanDeadline(task.deadline)):'';
-    meta.innerHTML='<span style="font-size:var(--fs-xs);font-weight:700;color:var(--t1)">'+esc(task.memberName||'')+'</span>'+
-      '<span style="font-size:var(--fs-xs);color:var(--t3)"> · '+(ST[task.status]||task.status)+'</span>'+
-      (priL?'<span style="font-size:var(--fs-xs);color:var(--t3)"> · '+priL+'</span>':'')+
-      (dlL?'<span style="font-size:var(--fs-xs);color:'+dlC+'">'+dlL+'</span>':'');
-  }
-  // action bar
-  var actEl=document.getElementById('mgThreadActions');
-  if(actEl){
-    actEl.style.display='flex';
-    if(task.status==='in_review'){
-      actEl.innerHTML='<button onclick="_tmApproveTask(''+taskId+'')" style="flex:1;height:40px;background:var(--ag);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer">تأیید ✅</button>'+
-        '<button onclick="_tmReturnTask(''+taskId+'')" style="flex:1;height:40px;background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer">↩ برگشت</button>';
-    }else{
-      actEl.innerHTML='<button onclick="tmExtendDeadline(''+taskId+'')" style="height:36px;padding:0 var(--sp3);background:var(--bg2);color:var(--t2);border:1px solid var(--b1);border-radius:var(--r5);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">📅 تمدید ددلاین</button>';
-    }
-  }
-  var nel=document.getElementById('mgThreadNote');
-  if(nel&&task.memberNote){nel.style.display='';var nt=nel.querySelector('.mg-note-text');if(nt)nt.textContent=task.memberNote;}
-  else if(nel)nel.style.display='none';
-  var tel=document.getElementById('mgThreadMsgs');
-  if(tel&&typeof _renderThread==='function')_renderThread(task.comments||[],'manager',tel,task);
-  openSheet('shTaskThread');
 }async function _mgSendComment(){
   var inp=document.querySelector('#shTaskThread .ttd-reply-inp');
   if(!inp||!inp.value.trim()||!_mgThreadTaskId)return;
