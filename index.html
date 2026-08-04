@@ -15094,7 +15094,7 @@ function tmRenderInbox(){
       '<span style="width:7px;height:7px;border-radius:50%;background:'+pri+';margin-top:5px;flex-shrink:0"></span>'+
       '<div style="flex:1;min-width:0">'+
         '<div style="display:flex;align-items:center;justify-content:space-between">'+
-          '<div style="font-size:var(--fs-sm);font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1">'+esc(t.title)+(t.comments&&t.comments.length>0&&t.comments[t.comments.length-1].from==='manager'&&(!t.lastReadAt||t.comments[t.comments.length-1].ts>t.lastReadAt)?'<span style="display:inline-block;width:7px;height:7px;background:var(--a);border-radius:50%;margin-right:4px;vertical-align:middle"></span>':'')+(t.comments&&t.comments.length>0?'<span style="font-size:9px;color:var(--t3);margin-right:4px">💬</span>':'')+'</div>'+
+          '<div style="font-size:var(--fs-sm);font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1">'+esc(t.title)+(t.comments&&t.comments.length>0&&t.comments[t.comments.length-1].from==='manager'&&(!t.lastReadAt||((t.comments[t.comments.length-1].ts||t.comments[t.comments.length-1].at||0)>t.lastReadAt))?'<span style="display:inline-block;width:7px;height:7px;background:var(--a);border-radius:50%;margin-right:4px;vertical-align:middle"></span>':'')+(t.comments&&t.comments.length>0?'<span style="font-size:9px;color:var(--t3);margin-right:4px">💬</span>':'')+'</div>'+
           seen+
         '</div>'+
         '<div style="display:flex;align-items:center;gap:var(--sp2);margin-top:3px;flex-wrap:wrap">'+
@@ -17824,70 +17824,113 @@ async function _tmToggleMemberTasks(uuid) {
 // ── ۱. Team Task Detail Panel ─────────────────────────────
 let _ttdTaskId = null;
 
-function openTeamTaskDetail(taskId) {
-  const t = tm.inbox ? tm.inbox.find(x => x.id === taskId) : null;
-  if (!t) return;
-  _ttdTaskId = taskId;
-  // mark as read
-  t.lastReadAt = Date.now();
+function openTeamTaskDetail(taskId){
+  var t=(tm.inbox||[]).find(function(x){return x.id===taskId;});
+  if(!t)return;
+  _ttdTaskId=taskId;
+  t.lastReadAt=Date.now();
 
-  document.getElementById('ttdTitle').textContent = t.title || 'تسک تیمی';
+  // عنوان
+  var el_title=document.getElementById('ttdTitle');
+  if(el_title)el_title.textContent=t.title||'تسک تیمی';
 
-  const months = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
-  let dlLabel = '';
-  if (t.deadline) {
-    const [jy,jm,jd] = t.deadline.split('-').map(Number);
-    const today = mrTodayKey();
-    const [ty,tm_,td] = today.split('-').map(Number);
-    const diff = _jalToDays(jy,jm,jd) - _jalToDays(ty,tm_,td);
-    dlLabel = diff === 0 ? 'امروز' : diff === 1 ? 'فردا' : diff < 0 ? `${Math.abs(diff)} روز گذشته ⚠️` : `${num(jd)} ${months[jm-1]}`;
+  // ددلاین
+  var months=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+  var dlLabel='';
+  if(t.deadline){
+    var parts=t.deadline.split('-').map(Number);
+    var today=mrTodayKey();
+    var tparts=today.split('-').map(Number);
+    var diff=_jalToDays(parts[0],parts[1],parts[2])-_jalToDays(tparts[0],tparts[1],tparts[2]);
+    dlLabel=diff===0?'امروز':diff===1?'فردا':diff<0?(Math.abs(diff)+' روز گذشته ⚠️'):(parts[2]+' '+months[parts[1]-1]);
   }
-  document.getElementById('ttdDeadline').textContent = dlLabel ? `📅 ${dlLabel}` : '';
-  document.getElementById('ttdManager').textContent = t.assignedBy ? `از ${t.assignedBy}` : 'از مدیر';
-  const priMap = { high:'🔴 فوری', med:'🟡 مهم', low:'⚪ عادی' };
-  // description
-  const _dBlock=document.getElementById('ttdDescBlock');
-  const _dEl=document.getElementById('ttdDesc');
-  if(_dBlock&&_dEl){if(task.description){_dEl.textContent=task.description;_dBlock.style.display='';}else{_dBlock.style.display='none';}}
-  document.getElementById('ttdPriority').textContent = priMap[t.priority] || '';
+  var el_dl=document.getElementById('ttdDeadline');
+  if(el_dl)el_dl.textContent=dlLabel?('📅 '+dlLabel):'';
 
-  // وضعیت
-  const status = t.status || 'pending';
-  document.querySelectorAll('.ttd-st-btn').forEach(btn => {
-    const active = btn.dataset.st === status;
-    btn.style.background = active ? 'var(--t1)' : 'var(--bg2)';
-    btn.style.color = active ? 'var(--bg1)' : 'var(--t2)';
-    btn.style.borderColor = active ? 'var(--t1)' : 'var(--b1)';
+  // نام مدیر — از snapshot
+  var mgName='مدیر';
+  if(tm.snapshot&&tm.snapshot.members){
+    var mgM=tm.snapshot.members.find(function(m){return m.isManager||m.role==='manager';});
+    if(mgM&&mgM.name)mgName=mgM.name;
+  }
+  var el_mg=document.getElementById('ttdManager');
+  if(el_mg)el_mg.textContent='از '+mgName;
+
+  // اولویت
+  var priMap={high:'🔴 فوری',med:'🟡 مهم',low:'⚪ عادی',urgent:'🔴 فوری'};
+  var el_pri=document.getElementById('ttdPriority');
+  if(el_pri)el_pri.textContent=priMap[t.priority]||'';
+
+  // توضیح
+  var el_db=document.getElementById('ttdDescBlock');
+  var el_desc=document.getElementById('ttdDesc');
+  if(el_db&&el_desc){
+    if(t.description){el_desc.textContent=t.description;el_db.style.display='';}
+    else el_db.style.display='none';
+  }
+
+  // وضعیت — هم style هم dataset
+  var status=t.status||'pending';
+  document.querySelectorAll('.ttd-st-btn').forEach(function(btn){
+    var active=btn.dataset.st===status;
+    btn.dataset.active=active?'1':'0';
+    btn.classList.toggle('active-st',active);
+    btn.style.background=active?'var(--t1)':'var(--bg2)';
+    btn.style.color=active?'var(--bg1)':'var(--t2)';
+    btn.style.borderColor=active?'var(--t1)':'var(--b1)';
   });
+  _ttdUpdateBlockedUI(status);
 
-  // یادداشت
-  const noteEl = document.getElementById('ttdNote');
-  if (noteEl) noteEl.value = t.memberNote || '';
+  // یادداشت قبلی
+  var el_note=document.getElementById('ttdNote');
+  if(el_note)el_note.value=t.memberNote||'';
+
+  // review banner و button
+  var rvBanner=document.getElementById('ttdReviewBanner');
+  var rvBtn=document.getElementById('ttdReviewBtn');
+  var stBtns=document.getElementById('ttdStatusBtns');
+  var svBtn=document.getElementById('ttdSaveBtn');
+  if(status==='in_review'){
+    if(rvBanner)rvBanner.style.display='';
+    if(rvBtn)rvBtn.style.display='none';
+    if(stBtns)stBtns.style.display='none';
+    if(svBtn)svBtn.style.display='none';
+  }else{
+    if(rvBanner)rvBanner.style.display='none';
+    if(rvBtn)rvBtn.style.display='';
+    if(stBtns)stBtns.style.display='';
+    if(svBtn)svBtn.style.display='';
+  }
 
   // checklist
-  const clEl = document.getElementById('ttdChecklist');
-  const clItems = document.getElementById('ttdChecklistItems');
-  if (t.checklist && t.checklist.length && clEl && clItems) {
-    clEl.style.display = '';
-    clItems.innerHTML = t.checklist.map(item =>
-      `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--b2)">
-        <div style="width:14px;height:14px;border-radius:3px;border:2px solid ${item.done ? 'var(--t1)' : 'var(--b1)'};background:${item.done ? 'var(--t1)' : 'transparent'};flex-shrink:0;display:flex;align-items:center;justify-content:center">
-          ${item.done ? '<svg viewBox="0 0 12 12" width="8" height="8"><polyline points="2,6 5,9 10,3" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>' : ''}
-        </div>
-        <span style="font-size:var(--fs-xs);color:${item.done ? 'var(--t3)' : 'var(--t1)'};text-decoration:${item.done ? 'line-through' : 'none'}">${esc(item.text)}</span>
-      </div>`
-    ).join('');
-  } else if (clEl) {
-    clEl.style.display = 'none';
+  var el_cl=document.getElementById('ttdChecklist');
+  var el_cli=document.getElementById('ttdChecklistItems');
+  if(t.checklist&&t.checklist.length&&el_cl&&el_cli){
+    el_cl.style.display='';
+    el_cli.innerHTML=t.checklist.map(function(item){
+      return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--b2)">'+
+        '<div style="width:14px;height:14px;border-radius:3px;border:2px solid '+(item.done?'var(--t1)':'var(--b1)')+';background:'+(item.done?'var(--t1)':'transparent')+';flex-shrink:0;display:flex;align-items:center;justify-content:center">'+
+        (item.done?'<svg viewBox="0 0 12 12" width="8" height="8"><polyline points="2,6 5,9 10,3" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>':'')+
+        '</div>'+
+        '<span style="font-size:var(--fs-xs);color:'+(item.done?'var(--t3)':'var(--t1)')+';text-decoration:'+(item.done?'line-through':'none')+'">'+esc(item.text)+'</span></div>';
+    }).join('');
+  }else if(el_cl)el_cl.style.display='none';
+
+  var el_err=document.getElementById('ttdErr');
+  if(el_err)el_err.textContent='';
+  var el_body=document.getElementById('ttdBody');
+  if(el_body)el_body.dataset.taskId=taskId;
+
+  // thread مستقیم render — نه timeout
+  var el_thread=document.getElementById('ttdThreadMsgs');
+  if(el_thread&&typeof _renderThread==='function'){
+    _renderThread(t.comments||[],'member',el_thread,t);
   }
 
-  document.getElementById('ttdErr').textContent = '';
-  var _tb2=document.getElementById('ttdBody');if(_tb2)_tb2.dataset.taskId=taskId;
   openSheet('shTeamTaskDetail');
   setTimeout(function(){_ttdMarkSeen(taskId);},800);
-  setTimeout(function(){_ttdRefreshThread&&_ttdRefreshThread();},80);
+  setTimeout(function(){try{tmAPI('POST','/task/read',{taskId:taskId});}catch(e){}},1000);
 }
-
 function _ttdSetStatus(st){_ttdUpdateBlockedUI(st);
   document.querySelectorAll('.ttd-st-btn').forEach(btn => {
     const active = btn.dataset.st === st;
@@ -17909,8 +17952,8 @@ function _ttdSetStatus(st){_ttdUpdateBlockedUI(st);
 
 async function _ttdSave() {
   if (!_ttdTaskId) return;
-  const activeBtn = document.querySelector('.ttd-st-btn[style*="var(--bg1)"]');
-  const status = activeBtn?.dataset.st || 'in_progress';
+  const activeBtn = document.querySelector('.ttd-st-btn.active-st') || document.querySelector('.ttd-st-btn[data-active="1"]');
+  const status = activeBtn ? activeBtn.dataset.st : (_ttdTaskId ? ((tm.inbox||[]).find(function(x){return x.id===_ttdTaskId;})||{}).status||'in_progress' : 'in_progress');
   const note = document.getElementById('ttdNote')?.value.trim() || '';
   const errEl = document.getElementById('ttdErr');
   const btn = document.getElementById('ttdSaveBtn');
@@ -17933,11 +17976,11 @@ async function _ttdSave() {
     // آپدیت local inbox
     if (tm.inbox) {
       const t = tm.inbox.find(x => x.id === _ttdTaskId);
-      if (t) { t.status = status; t.memberNote = note; if(typeof seenAt!=='undefined')t.seenAt=Date.now(); }
+      if (t) { t.status = status; t.memberNote = note; t.seenAt=Date.now(); }
     }
-    closeAll();
+    toast_(svgIco('check'),'وضعیت ذخیره شد');
     tmApplyUI();
-    toast_(svgIco('check'), status === 'done' ? 'تسک تموم شد ✅' : 'ذخیره شد');
+    setTimeout(tmSyncBackground,1500);
   } catch(e) {
     errEl.textContent = e.message;
   } finally {
@@ -18279,28 +18322,27 @@ function _tmUpdateSokoSummary(){
 }
 
 async function _ttdSubmitForReview(){
-  var taskId=document.getElementById('ttdBody')?.dataset.taskId;
-  if(!taskId){var tb=document.getElementById('ttdNote');taskId=tb?.dataset?.taskId;}
-  if(!taskId)return toast_(svgIco('flag'),'خطا: تسک یافت نشد');
+  var taskId=_ttdTaskId;
+  if(!taskId)return toast_(svgIco('flag'),'خطا: ابتدا تسک رو باز کن');
   var note=(document.getElementById('ttdNote')?.value||'').trim();
-  var btn=document.getElementById('ttdSubmitBtn');
+  var btn=document.getElementById('ttdReviewBtn');
   if(btn)btn.disabled=true;
   try{
     await tmAPI('PUT','/task/update',{taskId,status:'in_review',memberNote:note});
-    var banner=document.getElementById('ttdReviewBanner');
-    var statusBtns=document.getElementById('ttdStatusBtns');
-    var submitBtn=document.getElementById('ttdSubmitBtn');
-    var saveBtn=document.getElementById('ttdSaveBtn');
-    if(banner)banner.style.display='';
-    if(statusBtns)statusBtns.style.display='none';
-    if(submitBtn)submitBtn.style.display='none';
-    if(saveBtn)saveBtn.style.display='none';
-    toast_(svgIco('check'),'📤 برای بررسی ارسال شد — مدیر اطلاع پیدا کرد');
+    var t=(tm.inbox||[]).find(function(x){return x.id===taskId;});
+    if(t){t.status='in_review';t.memberNote=note;}
+    var rvBanner=document.getElementById('ttdReviewBanner');
+    var stBtns=document.getElementById('ttdStatusBtns');
+    var svBtn=document.getElementById('ttdSaveBtn');
+    if(rvBanner)rvBanner.style.display='';
+    if(stBtns)stBtns.style.display='none';
+    if(btn)btn.style.display='none';
+    if(svBtn)svBtn.style.display='none';
+    toast_(svgIco('check'),'📤 برای بررسی ارسال شد');
     setTimeout(tmSyncBackground,1500);
-  }catch(e){toast_(svgIco('flag'),e.message);}
+  }catch(e){toast_(svgIco('flag'),e.message||'خطا');}
   finally{if(btn)btn.disabled=false;}
 }
-
 function reviewTaskRow(t){
   return '<div style="display:flex;align-items:center;gap:var(--sp3);padding:10px var(--sp3);border-bottom:1px solid rgba(99,102,241,.1);cursor:pointer" onclick="tmOpenTaskThread(\''+t.id+'\')">'+
     '<div style="flex:1;min-width:0"><div style="font-size:var(--fs-sm);font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(t.title)+'</div>'+
