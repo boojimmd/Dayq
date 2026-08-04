@@ -4624,6 +4624,12 @@ select.fi{
 .ttd-bubble.is-own .ttd-tick { color: rgba(255,255,255,.7) !important; }
 .ttd-bubble.is-own .ttd-tick-read { color: #fff !important; opacity: 1 !important; }
 
+
+/* inbox unread message banner */
+#tmInboxMsgBanner {
+  animation: tmFadeUp 200ms var(--ease-out) both;
+}
+
 </style>
 </head>
 <body>
@@ -15074,6 +15080,24 @@ function tmRenderInbox(){
     return;
   }
   if(cntEl){cntEl.style.display='';cntEl.textContent=active.length;}
+  // پیام‌های خوانده‌نشده
+  var unreadTasks=active.filter(function(t){
+    if(!t.comments||!t.comments.length)return false;
+    var last=t.comments[t.comments.length-1];
+    var lastTs=last.ts||last.at||0;
+    var isFromManager=(last.from||last.role)==='manager';
+    return isFromManager&&(!t.lastReadAt||lastTs>t.lastReadAt);
+  });
+  var unreadCount=unreadTasks.length;
+  // banner
+  var bannerHtml='';
+  if(unreadCount>0){
+    bannerHtml='<div onclick="_openFirstUnread()" style="display:flex;align-items:center;gap:8px;padding:10px var(--sp3);background:rgba(var(--a-rgb,99,102,241),.08);border-bottom:1px solid rgba(var(--a-rgb,99,102,241),.15);cursor:pointer">'+
+      '<span style="font-size:1.1rem">💬</span>'+
+      '<span style="flex:1;font-size:var(--fs-xs);font-weight:700;color:var(--a)">'+unreadCount+' پیام جدید از مدیر</span>'+
+      '<span style="font-size:var(--fs-xs);color:var(--a)">←</span>'+
+    '</div>';
+  }
   var today=mrTodayKey();
   var rows=active.slice(0,5).map(function(t){
     var isOverdue=t.deadline&&t.deadline<today;
@@ -15104,7 +15128,7 @@ function tmRenderInbox(){
       '</div></div>';
   }).join('');
   if(active.length>5){rows+='<div onclick="tmOpenSoko()" style="text-align:center;padding:var(--sp2);font-size:var(--fs-xs);color:var(--a);cursor:pointer">مشاهده همه '+active.length+' تسک ←</div>';}
-  el.innerHTML=rows;
+  el.innerHTML=bannerHtml+rows;
 }
 
 // ── Collapse تیم امروز ─────────────────────────────────────────
