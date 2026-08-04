@@ -1213,6 +1213,13 @@ export default {
       const task = JSON.parse(taskRaw);
       if (!task.readBy) task.readBy = {};
       task.readBy[uuid] = Date.now();
+      if(body.status&&body.status!==oldStatus){
+        const lbls={done:'تسک تکمیل شد ✅',in_review:'برای بررسی ارسال شد 🔍',in_progress:'شروع به کار شد 🚀',blocked:'تسک متوقف شد 🚫'};
+        if(lbls[body.status]){
+          if(!task.comments)task.comments=[];
+          task.comments.push({id:crypto.randomUUID(),from:'system',text:lbls[body.status],at:Date.now()});
+        }
+      }
       await env.DAYQ_KV.put(`team:${teamCode}:task:${taskId}`, JSON.stringify(task));
       return jsonRes({ ok: true }, 200, cors);
     }
