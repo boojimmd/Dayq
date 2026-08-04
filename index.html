@@ -19227,64 +19227,35 @@ boot();
   </div>
 </div>
 <script>function tmOpenTaskThread(taskId){
+  // DEBUG
   var members=(tm.snapshot&&tm.snapshot.members)||[],allTasks=[];
   members.forEach(function(m){(m.tasks||[]).forEach(function(t){allTasks.push(Object.assign({},t,{memberName:m.name}));});});
   var task=allTasks.find(function(t){return t.id===taskId;})||(tm.inbox||[]).find(function(t){return t.id===taskId;});
+  
+  // test div — همیشه نشون بده تا بفهمیم function صدا زده میشه
+  var dbg=document.createElement('div');
+  dbg.style.cssText='position:fixed;top:10px;right:10px;z-index:99999;background:red;color:white;padding:10px;border-radius:8px;font-size:14px;direction:rtl';
+  dbg.textContent='called: '+(task?task.title:'NOT FOUND')+' ('+taskId.slice(0,8)+')';
+  document.body.appendChild(dbg);
+  setTimeout(function(){dbg.remove();},4000);
+  
   if(!task)return;
   _mgThreadTaskId=taskId;
   var existing=document.getElementById('shTaskThread');
   if(existing)existing.remove();
   var s=document.createElement('div');
   s.className='sheet';s.id='shTaskThread';
-  var ST={pending:'شروع نشده',in_progress:'در حال انجام',done:'تکمیل شد',blocked:'متوقف',in_review:'منتظر بررسی'};
-  var sLabel=ST[task.status]||task.status||'';
-  var mName=esc(task.memberName||'');
-  var isReview=task.status==='in_review';
-  var actEl=document.createElement('div');
-  actEl.style.cssText='display:flex;gap:8px;padding:8px 16px;background:var(--bg1);border-bottom:1px solid var(--b2)';
-  if(isReview){
-    var apB=document.createElement('button');
-    apB.textContent='تأیید ✅';
-    apB.style.cssText='flex:1;height:36px;background:var(--ag);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer';
-    apB.onclick=function(){_tmApproveTask(taskId);};
-    var rtB=document.createElement('button');
-    rtB.textContent='↩ برگشت';
-    rtB.style.cssText='flex:1;height:36px;background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer';
-    rtB.onclick=function(){_tmReturnTask(taskId);};
-    actEl.appendChild(apB);actEl.appendChild(rtB);
-  }else{
-    var dlB=document.createElement('button');
-    dlB.textContent='📅 تمدید';
-    dlB.style.cssText='height:34px;padding:0 12px;background:var(--bg2);color:var(--t2);border:1px solid var(--b1);border-radius:var(--r5);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer';
-    dlB.onclick=function(){tmExtendDeadline(taskId);};
-    actEl.appendChild(dlB);
-  }
-  var noteHtml=task.memberNote?('<div style="margin:8px 16px 0;background:var(--ambm);border:1px solid rgba(217,119,6,.2);border-radius:var(--r2);padding:10px"><div style="font-size:var(--fs-2xs);color:var(--amber);font-weight:700;margin-bottom:4px">یادداشت</div><div style="font-size:var(--fs-xs);color:var(--t1);direction:rtl">'+esc(task.memberNote)+'</div></div>'):'';
-  s.innerHTML=
-    '<div class="sh-handle"></div>'+
-    '<div class="sh-head"><div class="sh-tr">'+
-    '<div class="sh-ttl">'+esc(task.title||'گفتگو')+'</div>'+
-    '<button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>'+
-    '</div><div style="font-size:var(--fs-xs);color:var(--t3);padding:4px 0;direction:rtl">'+mName+' · '+sLabel+'</div></div>'+
-    noteHtml+
-    '<div class="sh-body" style="flex:1;display:flex;flex-direction:column">'+
-    '<div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2);text-align:right">گفتگو</div>'+
-    '<div class="ttd-thread tm-mgr-view" id="mgThreadMsgs" style="flex:1;min-height:120px;max-height:45vh;overflow-y:auto"></div>'+
-    '<div style="display:flex;gap:var(--sp2);align-items:flex-end;padding-top:var(--sp2);border-top:1px solid var(--b2);margin-top:var(--sp2)">'+
-    '<textarea class="ttd-reply-inp" rows="1" placeholder="پاسخ بده..." oninput="this.style.height=\'auto\';this.style.height=this.scrollHeight+\'px\'" onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();_mgSendComment()}"></textarea>'+
-    '<button class="ttd-reply-send" onclick="_mgSendComment()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>'+
-    '</div></div>';
-  s.insertBefore(actEl,s.querySelector('.sh-body'));
+  s.innerHTML='<div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl">'+esc(task.title||'گفتگو')+'</div><button class="sh-x" onclick="closeAll()">X</button></div></div><div class="sh-body" style="padding:16px"><div id="mgThreadMsgs" class="ttd-thread" style="min-height:100px"></div><textarea class="ttd-reply-inp" rows="2" placeholder="پاسخ بده..." style="width:100%;margin-top:8px"></textarea></div>';
   document.body.appendChild(s);
-  var tel=s.querySelector('#mgThreadMsgs');
-  if(tel&&typeof _renderThread==='function')_renderThread(task.comments||[],'manager',tel,task);
-  document.getElementById('ov').classList.add('open');
+  var ov=document.getElementById('ov');
+  if(ov){ov.classList.add('open');ov.style.zIndex='2050';}
   s.classList.add('open');
   s.style.zIndex='2100';
-  var ov=document.getElementById('ov');
-  if(ov)ov.style.zIndex='2050';
+  if(typeof _renderThread==='function'){
+    var tel=document.getElementById('mgThreadMsgs');
+    if(tel)_renderThread(task.comments||[],'manager',tel,task);
+  }
 }
-
 function _tmDlSheet(tid,title,cur){
   var od=document.getElementById('shTmDl');if(od)od.remove();
   var s=document.createElement('div');s.className='sheet';s.id='shTmDl';
@@ -21139,6 +21110,58 @@ function _renderThread(c,role,el,taskObj){
   if(btn)btn.disabled=false;
   setTimeout(tmSyncBackground,1500);
 }async function _tmMemberAction(uuid,action,val){if(action==='remove'){if(!await _tmConfirmSheet('حذف عضو','این عضو دیگه دسترسی نخواهد داشت','حذف','var(--red)'))return;try{await tmAPI('POST','/member/remove',{memberUuid:uuid});toast_(svgIco('check'),'عضو حذف شد');await tmSyncBackground();tmRefreshInfoSheet();}catch(e){toast_(svgIco('x'),e.message);}}else if(action==='toggle'){try{await tmAPI('PUT','/member/status',{memberUuid:uuid,status:val?'active':'inactive'});await tmSyncBackground();tmRefreshInfoSheet();}catch(e){toast_(svgIco('x'),e.message);}}else if(action==='pin'){if(!await _tmConfirmSheet('ریست PIN','یه PIN موقت ساخته میشه','ریست','var(--amber)'))return;try{var d=await tmAPI('POST','/member/pin-reset',{memberUuid:uuid});_tmTempPin&&_tmTempPin(d.tempPin);}catch(e){toast_(svgIco('x'),e.message);}}else if(action==='thread'){tmOpenTaskThread(uuid);}}
+
+
+// ── تابع باز کردن تسک‌های عضو در مدیر ──
+function tmOpenMemberTasks(uuid) {
+  const members = (tm.snapshot && tm.snapshot.members) || [];
+  const m = members.find(x => x.uuid === uuid);
+  if (!m) return;
+  const tasks = (m.tasks || []).filter(t => !t.deleted && t.status !== 'done');
+  if (!tasks.length) { toast_(svgIco('check'), 'این عضو تسک فعالی ندارد'); return; }
+  // نمایش در shTaskThread
+  _mgThreadTaskId = null;
+  const sheet = document.getElementById('shTaskThread');
+  if (!sheet) return;
+  const ttl = document.getElementById('mgThreadTitle');
+  if (ttl) ttl.textContent = 'تسک‌های ' + esc(m.name);
+  const meta = document.getElementById('mgThreadMeta');
+  if (meta) {
+    meta.innerHTML = tasks.map(t => {
+      const ST = {pending:'⏳ باید',in_progress:'🔵 درحال',blocked:'🔴 مشکل',done:'✅'};
+      return '<div style="display:flex;align-items:center;gap:var(--sp2);padding:var(--sp2) 0;border-bottom:1px solid var(--b2);width:100%;cursor:pointer" onclick="tmOpenTaskThread(\''+t.id+'\')">' +
+        '<span style="font-size:var(--fs-xs);flex:1">' + esc(t.title) + '</span>' +
+        '<span style="font-size:var(--fs-2xs);color:var(--t3)">' + (ST[t.status]||t.status) + '</span></div>';
+    }).join('');
+  }
+  const threadEl = document.getElementById('mgThreadMsgs');
+  if (threadEl) threadEl.innerHTML = '<div class="tm-thread-empty">برای گفتگو روی تسک کلیک کن</div>';
+  const noteEl = document.getElementById('mgThreadNote');
+  if (noteEl) noteEl.style.display = 'none';
+  openSheet('shTaskThread');
+}
+
+
+function tmOpenDirectLogin(preCode){
+  openSheet('shTmDirectLogin');
+  var c=document.getElementById('tmDLCode');
+  if(c&&preCode)c.value=preCode;
+  var p=document.getElementById('tmDLPin');
+  if(p)setTimeout(function(){p.focus();},350);
+}
+
+
+async function _tmTryPushToMember(memberUuid,taskTitle,broadcast){
+  try{
+    var w=(tm.workerUrl||cfg.pushWorkerUrl||'').trim().replace(/\/+$/,'');
+    if(!w||!tm.token)return;
+    await fetch(w+'/task/notify',{method:'POST',
+      headers:{'Content-Type':'application/json','X-DayQ-Token':tm.token},
+      body:JSON.stringify({to:broadcast?'all':memberUuid,title:'📋 تسک جدید',body:taskTitle})
+    });
+  }catch(e){}
+}
+wait tmAPI('PUT','/member/status',{memberUuid:uuid,status:val?'active':'inactive'});await tmSyncBackground();tmRefreshInfoSheet();}catch(e){toast_(svgIco('x'),e.message);}}else if(action==='pin'){if(!await _tmConfirmSheet('ریست PIN','یه PIN موقت ساخته میشه','ریست','var(--amber)'))return;try{var d=await tmAPI('POST','/member/pin-reset',{memberUuid:uuid});_tmTempPin&&_tmTempPin(d.tempPin);}catch(e){toast_(svgIco('x'),e.message);}}else if(action==='thread'){tmOpenTaskThread(uuid);}}
 
 
 // ── تابع باز کردن تسک‌های عضو در مدیر ──
