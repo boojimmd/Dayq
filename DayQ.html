@@ -19262,7 +19262,42 @@ boot();
   </div>
 </div>
 
-<script>
+<script>function tmOpenTaskThread(taskId){
+  var members=(tm.snapshot&&tm.snapshot.members)||[],allTasks=[];
+  members.forEach(function(m){(m.tasks||[]).forEach(function(t){allTasks.push(Object.assign({},t,{memberName:m.name}));});});
+  var task=allTasks.find(function(t){return t.id===taskId;})||(tm.inbox||[]).find(function(t){return t.id===taskId;});
+  if(!task)return;
+  _mgThreadTaskId=taskId;
+  var ttl=document.getElementById('mgThreadTitle');if(ttl)ttl.textContent=task.title||'گفتگو';
+  var meta=document.getElementById('mgThreadMeta');
+  if(meta){
+    var ST={pending:'شروع نشده',in_progress:'در حال انجام',done:'تکمیل شد',blocked:'متوقف',in_review:'منتظر بررسی'};
+    meta.innerHTML='<span style="font-size:var(--fs-xs);font-weight:700">'+esc(task.memberName||'')+'</span>'+
+    '<span style="font-size:var(--fs-xs);color:var(--t3)"> · '+(ST[task.status]||task.status)+'</span>';
+  }
+  var actEl=document.getElementById('mgThreadActions');
+  if(actEl){actEl.style.display='flex';actEl.innerHTML='';
+    if(task.status==='in_review'){
+      var apB=document.createElement('button');apB.textContent='تأیید ✅';
+      apB.style.cssText='flex:1;height:40px;background:var(--ag);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer';
+      apB.onclick=function(){_tmApproveTask(taskId);};
+      var rtB=document.createElement('button');rtB.textContent='↩ برگشت';
+      rtB.style.cssText='flex:1;height:40px;background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer';
+      rtB.onclick=function(){_tmReturnTask(taskId);};
+      actEl.appendChild(apB);actEl.appendChild(rtB);
+    }else{
+      var dlB=document.createElement('button');dlB.textContent='📅 تمدید ددلاین';
+      dlB.style.cssText='height:36px;padding:0 var(--sp3);background:var(--bg2);color:var(--t2);border:1px solid var(--b1);border-radius:var(--r5);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer';
+      dlB.onclick=function(){tmExtendDeadline(taskId);};actEl.appendChild(dlB);
+    }
+  }
+  var nel=document.getElementById('mgThreadNote');
+  if(nel&&task.memberNote){nel.style.display='';var nt=nel.querySelector('.mg-note-text');if(nt)nt.textContent=task.memberNote;}
+  else if(nel)nel.style.display='none';
+  var tel=document.getElementById('mgThreadMsgs');
+  if(tel&&typeof _renderThread==='function')_renderThread(task.comments||[],'manager',tel,task);
+  openSheet('shTaskThread');
+}
 
 
 function _tmDlSheet(tid,title,cur){
