@@ -19258,12 +19258,101 @@ boot();
         style="width:100%;height:46px;margin-top:8px;background:var(--ag);color:#fff;border:none;border-radius:var(--r3);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:opacity 150ms">
         ✅ ارسال برای بررسی مدیر
       </button>
-      <button id="ttdSubmitBtn" onclick="_ttdSubmitForReview()" style="flex:2;height:46px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">📤 ارسال برای بررسی</button>
     </div>
   </div>
 </div>
 
 <script>
+
+
+function _tmDlSheet(tid,title,cur){
+  var od=document.getElementById('shTmDl');if(od)od.remove();
+  var s=document.createElement('div');s.className='sheet';s.id='shTmDl';
+  s.dataset.tid=tid;
+  var bs='flex:1;height:38px;border-radius:var(--r5);border:1px sofunction openTeamTaskDetail(taskId){
+  var t=(tm.inbox||[]).find(function(x){return x.id===taskId;});
+  if(!t)return;
+  _ttdTaskId=taskId;
+  t.lastReadAt=Date.now();
+  var el_title=document.getElementById('ttdTitle');
+  if(el_title)el_title.textContent=t.title||'تسک تیمی';
+  var months=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+  var dlLabel='';
+  if(t.deadline){
+    var parts=t.deadline.split('-').map(Number);
+    var today=mrTodayKey();
+    var tparts=today.split('-').map(Number);
+    var diff=_jalToDays(parts[0],parts[1],parts[2])-_jalToDays(tparts[0],tparts[1],tparts[2]);
+    dlLabel=diff===0?'امروز':diff===1?'فردا':diff<0?(Math.abs(diff)+' روز گذشته ⚠️'):(parts[2]+' '+months[parts[1]-1]);
+  }
+  var el_dl=document.getElementById('ttdDeadline');
+  if(el_dl)el_dl.textContent=dlLabel?('📅 '+dlLabel):'';
+  var mgName='مدیر';
+  if(tm.snapshot&&tm.snapshot.members){
+    var mgM=tm.snapshot.members.find(function(m){return m.isManager||m.role==='manager';});
+    if(mgM&&mgM.name)mgName=mgM.name;
+  }
+  var el_mg=document.getElementById('ttdManager');
+  if(el_mg)el_mg.textContent='از '+mgName;
+  var priMap={high:'🔴 فوری',med:'🟡 مهم',low:'⚪ عادی',urgent:'🔴 فوری'};
+  var el_pri=document.getElementById('ttdPriority');
+  if(el_pri)el_pri.textContent=priMap[t.priority]||'';
+  var el_db=document.getElementById('ttdDescBlock');
+  var el_desc=document.getElementById('ttdDesc');
+  if(el_db&&el_desc){
+    if(t.description){el_desc.textContent=t.description;el_db.style.display='';}
+    else el_db.style.display='none';
+  }
+  var status=t.status||'pending';
+  document.querySelectorAll('.ttd-st-btn').forEach(function(btn){
+    var active=btn.dataset.st===status;
+    btn.dataset.active=active?'1':'0';
+    btn.classList.toggle('active-st',active);
+    btn.style.background=active?'var(--t1)':'var(--bg2)';
+    btn.style.color=active?'var(--bg1)':'var(--t2)';
+    btn.style.borderColor=active?'var(--t1)':'var(--b1)';
+  });
+  if(typeof _ttdUpdateBlockedUI==='function')_ttdUpdateBlockedUI(status);
+  var el_note=document.getElementById('ttdNote');
+  if(el_note)el_note.value=t.memberNote||'';
+  var rvBanner=document.getElementById('ttdReviewBanner');
+  var rvBtn=document.getElementById('ttdReviewBtn');
+  var stBtns=document.getElementById('ttdStatusBtns');
+  var svBtn=document.getElementById('ttdSaveBtn');
+  if(status==='in_review'){
+    if(rvBanner)rvBanner.style.display='';
+    if(rvBtn)rvBtn.style.display='none';
+    if(stBtns)stBtns.style.display='none';
+    if(svBtn)svBtn.style.display='none';
+  }else{
+    if(rvBanner)rvBanner.style.display='none';
+    if(rvBtn)rvBtn.style.display='';
+    if(stBtns)stBtns.style.display='';
+    if(svBtn)svBtn.style.display='';
+  }
+  var el_cl=document.getElementById('ttdChecklist');
+  var el_cli=document.getElementById('ttdChecklistItems');
+  if(t.checklist&&t.checklist.length&&el_cl&&el_cli){
+    el_cl.style.display='';
+    el_cli.innerHTML=t.checklist.map(function(item){
+      return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--b2)">'+
+        '<div style="width:14px;height:14px;border-radius:3px;border:2px solid '+(item.done?'var(--t1)':'var(--b1)')+';background:'+(item.done?'var(--t1)':'transparent')+';flex-shrink:0;display:flex;align-items:center;justify-content:center">'+
+        (item.done?'<svg viewBox="0 0 12 12" width="8" height="8"><polyline points="2,6 5,9 10,3" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>':'')+
+        '</div>'+
+        '<span style="font-size:var(--fs-xs);color:'+(item.done?'var(--t3)':'var(--t1)')+';text-decoration:'+(item.done?'line-through':'none')+'">'+esc(item.text)+'</span></div>';
+    }).join('');
+  }else if(el_cl)el_cl.style.display='none';
+  var el_err=document.getElementById('ttdErr');
+  if(el_err)el_err.textContent='';
+  var el_body=document.getElementById('ttdBody');
+  if(el_body)el_body.dataset.taskId=taskId;
+  var el_thread=document.getElementById('ttdThreadMsgs');
+  if(el_thread&&typeof _renderThread==='function')_renderThread(t.comments||[],'member',el_thread,t);
+  openSheet('shTeamTaskDetail');
+  setTimeout(function(){if(typeof _ttdMarkSeen==='function')_ttdMarkSeen(taskId);},800);
+  setTimeout(function(){try{tmAPI('POST','/task/read',{taskId:taskId});}catch(e){}},1000);
+}
+
 
 
 function _tmDlSheet(tid,title,cur){
@@ -19473,60 +19562,6 @@ tmUpdateSokoCard = function() {
 // ── ۱. Team Task Detail Panel ─────────────────────────────
 // let _ttdTaskId = null; // already declared in script1
 
-function openTeamTaskDetail(taskId) {
-  const t = tm.inbox ? tm.inbox.find(x => x.id === taskId) : null;
-  if (!t) return;
-  _ttdTaskId = taskId;
-
-  document.getElementById('ttdTitle').textContent = t.title || 'تسک تیمی';
-
-  const months = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
-  let dlLabel = '';
-  if (t.deadline) {
-    const [jy,jm,jd] = t.deadline.split('-').map(Number);
-    const today = mrTodayKey();
-    const [ty,tm_,td] = today.split('-').map(Number);
-    const diff = _jalToDays(jy,jm,jd) - _jalToDays(ty,tm_,td);
-    dlLabel = diff === 0 ? 'امروز' : diff === 1 ? 'فردا' : diff < 0 ? `${Math.abs(diff)} روز گذشته ⚠️` : `${num(jd)} ${months[jm-1]}`;
-  }
-  document.getElementById('ttdDeadline').textContent = dlLabel ? `📅 ${dlLabel}` : '';
-  document.getElementById('ttdManager').textContent = t.assignedBy ? `از ${t.assignedBy}` : 'از مدیر';
-  const priMap = { high:'🔴 فوری', med:'🟡 مهم', low:'⚪ عادی' };
-  document.getElementById('ttdPriority').textContent = priMap[t.priority] || '';
-
-  // وضعیت
-  const status = t.status || 'pending';
-  document.querySelectorAll('.ttd-st-btn').forEach(btn => {
-    const active = btn.dataset.st === status;
-    btn.style.background = active ? 'var(--t1)' : 'var(--bg2)';
-    btn.style.color = active ? 'var(--bg1)' : 'var(--t2)';
-    btn.style.borderColor = active ? 'var(--t1)' : 'var(--b1)';
-  });
-
-  // یادداشت
-  const noteEl = document.getElementById('ttdNote');
-  if (noteEl) noteEl.value = t.memberNote || '';
-
-  // checklist
-  const clEl = document.getElementById('ttdChecklist');
-  const clItems = document.getElementById('ttdChecklistItems');
-  if (t.checklist && t.checklist.length && clEl && clItems) {
-    clEl.style.display = '';
-    clItems.innerHTML = t.checklist.map(item =>
-      `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--b2)">
-        <div style="width:14px;height:14px;border-radius:3px;border:2px solid ${item.done ? 'var(--t1)' : 'var(--b1)'};background:${item.done ? 'var(--t1)' : 'transparent'};flex-shrink:0;display:flex;align-items:center;justify-content:center">
-          ${item.done ? '<svg viewBox="0 0 12 12" width="8" height="8"><polyline points="2,6 5,9 10,3" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>' : ''}
-        </div>
-        <span style="font-size:var(--fs-xs);color:${item.done ? 'var(--t3)' : 'var(--t1)'};text-decoration:${item.done ? 'line-through' : 'none'}">${esc(item.text)}</span>
-      </div>`
-    ).join('');
-  } else if (clEl) {
-    clEl.style.display = 'none';
-  }
-
-  document.getElementById('ttdErr').textContent = '';
-  openSheet('shTeamTaskDetail');
-}
 
 
 
@@ -19709,60 +19744,6 @@ _tmAssignPriOverride = null;
 // ── ۱. Team Task Detail Panel ─────────────────────────────
 _ttdTaskId = null;
 
-function openTeamTaskDetail(taskId) {
-  const t = tm.inbox ? tm.inbox.find(x => x.id === taskId) : null;
-  if (!t) return;
-  _ttdTaskId = taskId;
-
-  document.getElementById('ttdTitle').textContent = t.title || 'تسک تیمی';
-
-  const months = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
-  let dlLabel = '';
-  if (t.deadline) {
-    const [jy,jm,jd] = t.deadline.split('-').map(Number);
-    const today = mrTodayKey();
-    const [ty,tm_,td] = today.split('-').map(Number);
-    const diff = _jalToDays(jy,jm,jd) - _jalToDays(ty,tm_,td);
-    dlLabel = diff === 0 ? 'امروز' : diff === 1 ? 'فردا' : diff < 0 ? `${Math.abs(diff)} روز گذشته ⚠️` : `${num(jd)} ${months[jm-1]}`;
-  }
-  document.getElementById('ttdDeadline').textContent = dlLabel ? `📅 ${dlLabel}` : '';
-  document.getElementById('ttdManager').textContent = t.assignedBy ? `از ${t.assignedBy}` : 'از مدیر';
-  const priMap = { high:'🔴 فوری', med:'🟡 مهم', low:'⚪ عادی' };
-  document.getElementById('ttdPriority').textContent = priMap[t.priority] || '';
-
-  // وضعیت
-  const status = t.status || 'pending';
-  document.querySelectorAll('.ttd-st-btn').forEach(btn => {
-    const active = btn.dataset.st === status;
-    btn.style.background = active ? 'var(--t1)' : 'var(--bg2)';
-    btn.style.color = active ? 'var(--bg1)' : 'var(--t2)';
-    btn.style.borderColor = active ? 'var(--t1)' : 'var(--b1)';
-  });
-
-  // یادداشت
-  const noteEl = document.getElementById('ttdNote');
-  if (noteEl) noteEl.value = t.memberNote || '';
-
-  // checklist
-  const clEl = document.getElementById('ttdChecklist');
-  const clItems = document.getElementById('ttdChecklistItems');
-  if (t.checklist && t.checklist.length && clEl && clItems) {
-    clEl.style.display = '';
-    clItems.innerHTML = t.checklist.map(item =>
-      `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--b2)">
-        <div style="width:14px;height:14px;border-radius:3px;border:2px solid ${item.done ? 'var(--t1)' : 'var(--b1)'};background:${item.done ? 'var(--t1)' : 'transparent'};flex-shrink:0;display:flex;align-items:center;justify-content:center">
-          ${item.done ? '<svg viewBox="0 0 12 12" width="8" height="8"><polyline points="2,6 5,9 10,3" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>' : ''}
-        </div>
-        <span style="font-size:var(--fs-xs);color:${item.done ? 'var(--t3)' : 'var(--t1)'};text-decoration:${item.done ? 'line-through' : 'none'}">${esc(item.text)}</span>
-      </div>`
-    ).join('');
-  } else if (clEl) {
-    clEl.style.display = 'none';
-  }
-
-  document.getElementById('ttdErr').textContent = '';
-  openSheet('shTeamTaskDetail');
-}
 
 
 
@@ -20284,60 +20265,6 @@ async function _tmToggleMemberTasks(uuid) {
 // ── ۱. Team Task Detail Panel ─────────────────────────────
 _ttdTaskId = null;
 
-function openTeamTaskDetail(taskId) {
-  const t = tm.inbox ? tm.inbox.find(x => x.id === taskId) : null;
-  if (!t) return;
-  _ttdTaskId = taskId;
-
-  document.getElementById('ttdTitle').textContent = t.title || 'تسک تیمی';
-
-  const months = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
-  let dlLabel = '';
-  if (t.deadline) {
-    const [jy,jm,jd] = t.deadline.split('-').map(Number);
-    const today = mrTodayKey();
-    const [ty,tm_,td] = today.split('-').map(Number);
-    const diff = _jalToDays(jy,jm,jd) - _jalToDays(ty,tm_,td);
-    dlLabel = diff === 0 ? 'امروز' : diff === 1 ? 'فردا' : diff < 0 ? `${Math.abs(diff)} روز گذشته ⚠️` : `${num(jd)} ${months[jm-1]}`;
-  }
-  document.getElementById('ttdDeadline').textContent = dlLabel ? `📅 ${dlLabel}` : '';
-  document.getElementById('ttdManager').textContent = t.assignedBy ? `از ${t.assignedBy}` : 'از مدیر';
-  const priMap = { high:'🔴 فوری', med:'🟡 مهم', low:'⚪ عادی' };
-  document.getElementById('ttdPriority').textContent = priMap[t.priority] || '';
-
-  // وضعیت
-  const status = t.status || 'pending';
-  document.querySelectorAll('.ttd-st-btn').forEach(btn => {
-    const active = btn.dataset.st === status;
-    btn.style.background = active ? 'var(--t1)' : 'var(--bg2)';
-    btn.style.color = active ? 'var(--bg1)' : 'var(--t2)';
-    btn.style.borderColor = active ? 'var(--t1)' : 'var(--b1)';
-  });
-
-  // یادداشت
-  const noteEl = document.getElementById('ttdNote');
-  if (noteEl) noteEl.value = t.memberNote || '';
-
-  // checklist
-  const clEl = document.getElementById('ttdChecklist');
-  const clItems = document.getElementById('ttdChecklistItems');
-  if (t.checklist && t.checklist.length && clEl && clItems) {
-    clEl.style.display = '';
-    clItems.innerHTML = t.checklist.map(item =>
-      `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--b2)">
-        <div style="width:14px;height:14px;border-radius:3px;border:2px solid ${item.done ? 'var(--t1)' : 'var(--b1)'};background:${item.done ? 'var(--t1)' : 'transparent'};flex-shrink:0;display:flex;align-items:center;justify-content:center">
-          ${item.done ? '<svg viewBox="0 0 12 12" width="8" height="8"><polyline points="2,6 5,9 10,3" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>' : ''}
-        </div>
-        <span style="font-size:var(--fs-xs);color:${item.done ? 'var(--t3)' : 'var(--t1)'};text-decoration:${item.done ? 'line-through' : 'none'}">${esc(item.text)}</span>
-      </div>`
-    ).join('');
-  } else if (clEl) {
-    clEl.style.display = 'none';
-  }
-
-  document.getElementById('ttdErr').textContent = '';
-  openSheet('shTeamTaskDetail');
-}
 
 function _ttdSetStatus(st) {
   document.querySelectorAll('.ttd-st-btn').forEach(btn => {
@@ -20358,41 +20285,28 @@ function _ttdSetStatus(st) {
   }
 }
 
-async function _ttdSave() {
-  if (!_ttdTaskId) return;
-  const activeBtn = document.querySelector('.ttd-st-btn[style*="var(--bg1)"]');
-  const status = activeBtn?.dataset.st || 'in_progress';
-  const note = document.getElementById('ttdNote')?.value.trim() || '';
-  const errEl = document.getElementById('ttdErr');
-  const btn = document.getElementById('ttdSaveBtn');
-
-  if (status === 'blocked' && !note) {
-    errEl.textContent = 'لطفاً مشکل رو توضیح بده تا مدیر بتونه کمک کنه';
-    return;
-  }
-
-  btn.disabled = true; btn.textContent = 'در حال ذخیره...';
-  try {
-    await tmAPI('PUT', '/task/update', {
-      taskId: _ttdTaskId,
-      status,
-      memberNote: note,
-    });
-    // آپدیت local inbox
-    if (tm.inbox) {
-      const t = tm.inbox.find(x => x.id === _ttdTaskId);
-      if (t) { t.status = status; t.memberNote = note; }
-    }
-    closeAll();
+async function _ttdSave(){
+  if(!_ttdTaskId)return;
+  var activeBtn=document.querySelector('.ttd-st-btn.active-st')||document.querySelector('.ttd-st-btn[data-active="1"]');
+  var status=activeBtn?activeBtn.dataset.st:((_ttdTaskId?((tm.inbox||[]).find(function(x){return x.id===_ttdTaskId;})||{}).status||'in_progress':'in_progress'));
+  var note=document.getElementById('ttdNote')?document.getElementById('ttdNote').value.trim():'';
+  var errEl=document.getElementById('ttdErr');
+  var btn=document.getElementById('ttdSaveBtn');
+  var bCr=document.querySelector('input[name="blockedReason"]:checked');
+  var bRt=bCr&&bCr.value!=='other'?bCr.value:'';
+  var blockedNote=bRt?(bRt+(note?': '+note:'')):note;
+  if(status==='blocked'&&!blockedNote){if(errEl)errEl.textContent='دلیل توقف رو انتخاب کن یا توضیح بنویس';return;}
+  if(btn){btn.disabled=true;btn.textContent='در حال ذخیره...';}
+  try{
+    await tmAPI('PUT','/task/update',{taskId:_ttdTaskId,status,memberNote:status==='blocked'?blockedNote:note});
+    var t=(tm.inbox||[]).find(function(x){return x.id===_ttdTaskId;});
+    if(t){t.status=status;t.memberNote=note;t.seenAt=Date.now();}
+    toast_(svgIco('check'),'وضعیت ذخیره شد');
     tmApplyUI();
-    toast_(svgIco('check'), status === 'done' ? 'تسک تموم شد ✅' : 'وضعیت آپدیت شد');
-  } catch(e) {
-    errEl.textContent = e.message;
-  } finally {
-    btn.disabled = false; btn.textContent = 'ذخیره وضعیت';
-  }
+    setTimeout(tmSyncBackground,1500);
+  }catch(e){if(errEl)errEl.textContent=e.message;}
+  finally{if(btn){btn.disabled=false;btn.textContent='ذخیره';}}
 }
-
 // hook کردن به task card های تیمی در home
 (function(){
   const _origRenderInbox = window.tmRenderInboxSection;
@@ -21379,7 +21293,7 @@ function _tmUpdateHdrKpi() {
 
 
 var _mgThreadTaskId=null;
-function _commentTime(ts){var d=new Date(ts);return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');}
+function _commentTime(ts){if(!ts&&ts!==0)return '';var d=new Date(ts);if(isNaN(d.getTime()))return '';return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');}
 function _renderThread(c,role,el,taskObj){
   if(!el)return;
   if(!c||!c.length){el.innerHTML='<div class="tm-thread-empty">هنوز پیامی نیست</div>';el.scrollTop=0;return;}
@@ -21427,11 +21341,86 @@ function _renderThread(c,role,el,taskObj){
   });
   el.innerHTML=html;
   setTimeout(function(){el.scrollTop=el.scrollHeight;},50);
-}function _ttdRefreshThread(){var t=(tm.inbox||[]).find(function(t){return t.id===_ttdTaskId;});var el=document.getElementById('ttdThreadMsgs');if(el)_renderThread(t?t.comments||[]:[],'member',el);}
-async function _ttdSendComment(){var inp=document.querySelector('#ttdCommentSection .ttd-reply-inp');if(!inp||!inp.value.trim()||!_ttdTaskId)return;var text=inp.value.trim(),btn=document.querySelector('#ttdCommentSection .ttd-reply-send');if(btn)btn.disabled=true;var task=(tm.inbox||[]).find(function(t){return t.id===_ttdTaskId;});try{await tmAPI('POST','/task/comment',{taskId:_ttdTaskId,text,from:'member'});}catch(e){if(btn)btn.disabled=false;inp.value=text;toast_('','❌ خطا در ارسال پیام',2500);return;}if(task){if(!task.comments)task.comments=[];task.comments.push({from:'member',text,ts:Date.now()});}inp.value='';inp.style.height='auto';_ttdRefreshThread();var _se=document.getElementById('ttdThreadMsgs');if(_se)_se.scrollTop=_se.scrollHeight;if(btn)btn.disabled=false;}
-function tmOpenTaskThread(taskId){var members=(tm.snapshot&&tm.snapshot.members)||[],allTasks=[];members.forEach(function(m){(m.tasks||[]).forEach(function(t){allTasks.push(Object.assign({},t,{memberName:m.name}));});});var task=allTasks.find(function(t){return t.id===taskId;})||(tm.inbox||[]).find(function(t){return t.id===taskId;});if(!task)return;_mgThreadTaskId=taskId;var ttl=document.getElementById('mgThreadTitle');if(ttl)ttl.textContent=task.title||'گفتگو';var meta=document.getElementById('mgThreadMeta');if(meta){var ST={pending:'شروع نشده',in_progress:'در حال انجام',done:'تکمیل شد ✓',blocked:'متوقف 🚫'};meta.innerHTML='<span style="font-size:var(--fs-xs);font-weight:700">'+esc(task.memberName||'')+'</span><span style="font-size:var(--fs-xs);color:var(--t3)">· '+(ST[task.status]||'')+'</span>';}var tel=document.getElementById('mgThreadMsgs');if(tel)_renderThread(task.comments||[],'manager',tel);var nel=document.getElementById('mgThreadNote');if(nel&&task.memberNote){nel.style.display='';var nt=nel.querySelector('.mg-note-text');if(nt)nt.textContent=task.memberNote;}else if(nel)nel.style.display='none';openSheet('shTaskThread');}
-async function _mgSendComment(){var inp=document.querySelector('#shTaskThread .ttd-reply-inp');if(!inp||!inp.value.trim()||!_mgThreadTaskId)return;var text=inp.value.trim(),btn=document.querySelector('#shTaskThread .ttd-reply-send');if(btn)btn.disabled=true;try{await tmAPI('POST','/task/comment',{taskId:_mgThreadTaskId,text,from:'manager'});}catch(e){if(btn)btn.disabled=false;inp.value=text;toast_('','❌ خطا در ارسال پیام',2500);return;}var members=(tm.snapshot&&tm.snapshot.members)||[];for(var i=0;i<members.length;i++){var t=(members[i].tasks||[]).find(function(t){return t.id===_mgThreadTaskId;});if(t){if(!t.comments)t.comments=[];t.comments.push({from:'manager',text,ts:Date.now()});break;}}inp.value='';inp.style.height='auto';var tel=document.getElementById('mgThreadMsgs'),task=null;for(var j=0;j<members.length;j++){task=(members[j].tasks||[]).find(function(t){return t.id===_mgThreadTaskId;});if(task)break;}if(tel&&task)_renderThread(task.comments||[],'manager',tel);if(btn)btn.disabled=false;}
-async function _tmMemberAction(uuid,action,val){if(action==='remove'){if(!await _tmConfirmSheet('حذف عضو','این عضو دیگه دسترسی نخواهد داشت','حذف','var(--red)'))return;try{await tmAPI('POST','/member/remove',{memberUuid:uuid});toast_(svgIco('check'),'عضو حذف شد');await tmSyncBackground();tmRefreshInfoSheet();}catch(e){toast_(svgIco('x'),e.message);}}else if(action==='toggle'){try{await tmAPI('PUT','/member/status',{memberUuid:uuid,status:val?'active':'inactive'});await tmSyncBackground();tmRefreshInfoSheet();}catch(e){toast_(svgIco('x'),e.message);}}else if(action==='pin'){if(!await _tmConfirmSheet('ریست PIN','یه PIN موقت ساخته میشه','ریست','var(--amber)'))return;try{var d=await tmAPI('POST','/member/pin-reset',{memberUuid:uuid});_tmTempPin&&_tmTempPin(d.tempPin);}catch(e){toast_(svgIco('x'),e.message);}}else if(action==='thread'){tmOpenTaskThread(uuid);}}
+}function _ttdRefreshThread(){
+  var t=(tm.inbox||[]).find(function(x){return x.id===_ttdTaskId;});
+  var el=document.getElementById('ttdThreadMsgs');
+  if(el&&typeof _renderThread==='function')_renderThread(t?t.comments||[]:[],'member',el,t);
+}async function _ttdSendComment(){
+  var inp=document.querySelector('#ttdCommentSection .ttd-reply-inp');
+  if(!inp||!inp.value.trim()||!_ttdTaskId)return;
+  var text=inp.value.trim(),btn=document.querySelector('#ttdCommentSection .ttd-reply-send');
+  if(btn)btn.disabled=true;
+  var task=(tm.inbox||[]).find(function(t){return t.id===_ttdTaskId;});
+  try{await tmAPI('POST','/task/comment',{taskId:_ttdTaskId,text,from:'member'});}
+  catch(e){if(btn)btn.disabled=false;inp.value=text;toast_('','❌ خطا در ارسال پیام',2500);return;}
+  if(task){
+    if(!task.comments)task.comments=[];
+    task.comments.push({from:'member',text,ts:Date.now(),at:Date.now()});
+  }
+  inp.value='';inp.style.height='auto';
+  var thr=document.getElementById('ttdThreadMsgs');
+  if(thr&&task&&typeof _renderThread==='function')_renderThread(task.comments||[],'member',thr,task);
+  if(thr)thr.scrollTop=thr.scrollHeight;
+  if(btn)btn.disabled=false;
+}function tmOpenTaskThread(taskId){
+  var members=(tm.snapshot&&tm.snapshot.members)||[],allTasks=[];
+  members.forEach(function(m){(m.tasks||[]).forEach(function(t){allTasks.push(Object.assign({},t,{memberName:m.name}));});});
+  var task=allTasks.find(function(t){return t.id===taskId;})||(tm.inbox||[]).find(function(t){return t.id===taskId;});
+  if(!task)return;
+  _mgThreadTaskId=taskId;
+  var ttl=document.getElementById('mgThreadTitle');
+  if(ttl)ttl.textContent=task.title||'گفتگو';
+  var meta=document.getElementById('mgThreadMeta');
+  if(meta){
+    var ST={pending:'شروع نشده',in_progress:'در حال انجام',done:'تکمیل شد ✓',blocked:'متوقف 🚫',in_review:'منتظر بررسی 🔍'};
+    var priL={urgent:'🔴 فوری',high:'⚡ مهم',med:'🟡 متوسط',normal:''}[task.priority]||'';
+    var dlC=task.deadline&&task.deadline<mrTodayKey()?'var(--red)':'var(--t3)';
+    var dlL=task.deadline?(' · '+tmHumanDeadline(task.deadline)):'';
+    meta.innerHTML='<span style="font-size:var(--fs-xs);font-weight:700;color:var(--t1)">'+esc(task.memberName||'')+'</span>'+
+      '<span style="font-size:var(--fs-xs);color:var(--t3)"> · '+(ST[task.status]||task.status)+'</span>'+
+      (priL?'<span style="font-size:var(--fs-xs);color:var(--t3)"> · '+priL+'</span>':'')+
+      (dlL?'<span style="font-size:var(--fs-xs);color:'+dlC+'">'+dlL+'</span>':'');
+  }
+  // action bar
+  var actEl=document.getElementById('mgThreadActions');
+  if(actEl){
+    actEl.style.display='flex';
+    if(task.status==='in_review'){
+      actEl.innerHTML='<button onclick="_tmApproveTask(''+taskId+'')" style="flex:1;height:40px;background:var(--ag);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer">تأیید ✅</button>'+
+        '<button onclick="_tmReturnTask(''+taskId+'')" style="flex:1;height:40px;background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer">↩ برگشت</button>';
+    }else{
+      actEl.innerHTML='<button onclick="tmExtendDeadline(''+taskId+'')" style="height:36px;padding:0 var(--sp3);background:var(--bg2);color:var(--t2);border:1px solid var(--b1);border-radius:var(--r5);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">📅 تمدید ددلاین</button>';
+    }
+  }
+  var nel=document.getElementById('mgThreadNote');
+  if(nel&&task.memberNote){nel.style.display='';var nt=nel.querySelector('.mg-note-text');if(nt)nt.textContent=task.memberNote;}
+  else if(nel)nel.style.display='none';
+  var tel=document.getElementById('mgThreadMsgs');
+  if(tel&&typeof _renderThread==='function')_renderThread(task.comments||[],'manager',tel,task);
+  openSheet('shTaskThread');
+}async function _mgSendComment(){
+  var inp=document.querySelector('#shTaskThread .ttd-reply-inp');
+  if(!inp||!inp.value.trim()||!_mgThreadTaskId)return;
+  var text=inp.value.trim(),btn=document.querySelector('#shTaskThread .ttd-reply-send');
+  if(btn)btn.disabled=true;
+  try{await tmAPI('POST','/task/comment',{taskId:_mgThreadTaskId,text,from:'manager'});}
+  catch(e){if(btn)btn.disabled=false;inp.value=text;toast_('','❌ خطا در ارسال پیام',2500);return;}
+  var members=(tm.snapshot&&tm.snapshot.members)||[];
+  var task=null;
+  for(var i=0;i<members.length;i++){
+    var t=(members[i].tasks||[]).find(function(t){return t.id===_mgThreadTaskId;});
+    if(t){
+      if(!t.comments)t.comments=[];
+      t.comments.push({from:'manager',text,ts:Date.now(),at:Date.now()});
+      task=t;break;
+    }
+  }
+  inp.value='';inp.style.height='auto';
+  var tel=document.getElementById('mgThreadMsgs');
+  if(tel&&task&&typeof _renderThread==='function')_renderThread(task.comments||[],'manager',tel,task);
+  if(btn)btn.disabled=false;
+  setTimeout(tmSyncBackground,1500);
+}async function _tmMemberAction(uuid,action,val){if(action==='remove'){if(!await _tmConfirmSheet('حذف عضو','این عضو دیگه دسترسی نخواهد داشت','حذف','var(--red)'))return;try{await tmAPI('POST','/member/remove',{memberUuid:uuid});toast_(svgIco('check'),'عضو حذف شد');await tmSyncBackground();tmRefreshInfoSheet();}catch(e){toast_(svgIco('x'),e.message);}}else if(action==='toggle'){try{await tmAPI('PUT','/member/status',{memberUuid:uuid,status:val?'active':'inactive'});await tmSyncBackground();tmRefreshInfoSheet();}catch(e){toast_(svgIco('x'),e.message);}}else if(action==='pin'){if(!await _tmConfirmSheet('ریست PIN','یه PIN موقت ساخته میشه','ریست','var(--amber)'))return;try{var d=await tmAPI('POST','/member/pin-reset',{memberUuid:uuid});_tmTempPin&&_tmTempPin(d.tempPin);}catch(e){toast_(svgIco('x'),e.message);}}else if(action==='thread'){tmOpenTaskThread(uuid);}}
 
 
 // ── تابع باز کردن تسک‌های عضو در مدیر ──
@@ -21483,8 +21472,7 @@ async function _tmTryPushToMember(memberUuid,taskTitle,broadcast){
     });
   }catch(e){}
 }
-</script>
-<div class="sheet" id="shTaskThread"><div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl" id="mgThreadTitle">گفتگو</div><button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div><div id="mgThreadMeta" style="display:flex;align-items:center;gap:var(--sp2);padding:var(--sp2) 0 var(--sp3);direction:rtl;flex-wrap:wrap"></div></div><div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)"><div id="mgThreadNote" style="display:none;background:var(--ambm);border:1px solid rgba(217,119,6,.2);border-radius:var(--r2);padding:var(--sp3)"><div style="font-size:var(--fs-2xs);color:var(--amber);font-weight:700;margin-bottom:4px">📋 یادداشت</div><div class="mg-note-text" style="font-size:var(--fs-xs);color:var(--t1);direction:rtl"></div></div><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2);text-align:right">گفتگو</div><div class="ttd-thread tm-mgr-view" id="mgThreadMsgs"></div><div style="display:flex;gap:var(--sp2);align-items:flex-end;padding-top:var(--sp2);border-top:1px solid var(--b2);margin-top:var(--sp2)"><textarea class="ttd-reply-inp" rows="1" placeholder="پاسخ بده..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();_mgSendComment()}"></textarea><button class="ttd-reply-send" onclick="_mgSendComment()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button></div></div></div></div>
+"none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div><div id="mgThreadMeta" style="display:flex;align-items:center;gap:var(--sp2);padding:var(--sp2) 0 var(--sp3);direction:rtl;flex-wrap:wrap"></div></div><div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)"><div id="mgThreadNote" style="display:none;background:var(--ambm);border:1px solid rgba(217,119,6,.2);border-radius:var(--r2);padding:var(--sp3)"><div style="font-size:var(--fs-2xs);color:var(--amber);font-weight:700;margin-bottom:4px">📋 یادداشت</div><div class="mg-note-text" style="font-size:var(--fs-xs);color:var(--t1);direction:rtl"></div></div><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2);text-align:right">گفتگو</div><div class="ttd-thread tm-mgr-view" id="mgThreadMsgs"></div><div style="display:flex;gap:var(--sp2);align-items:flex-end;padding-top:var(--sp2);border-top:1px solid var(--b2);margin-top:var(--sp2)"><textarea class="ttd-reply-inp" rows="1" placeholder="پاسخ بده..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();_mgSendComment()}"></textarea><button class="ttd-reply-send" onclick="_mgSendComment()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button></div></div></div></div>
 
 <div class="sheet" id="shTmDirectLogin">
   <div class="sh-handle"></div>
