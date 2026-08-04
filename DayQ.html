@@ -5867,107 +5867,7 @@ body:has(#tmSokoPanel.open) #ov {
 <div class="sheet" id="shBag">
   <div class="sh-handle"></div>
   <div class="sh-head">
-    <div class="sh-tr"><div class="sh-ttl">آیتم جدید کیف</div><button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill=<div class="sheet" id="shTaskThread"><div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl" id="mgThreadTitle">گفتگو</div><button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-    <div class="sh-iw"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg><input class="sh-inp" id="bagItemInput" placeholder="نام آیتم..." maxlength="80" autocomplete="off"></div>
-  </div>
-  <div class="sh-body">
-    <div class="f-f"><label class="f-fl">تعداد / توضیح</label><input class="fi" id="bagItemQty" placeholder="مثلاً: ۲ عدد، کافی..." maxlength="30"></div>
-    <div><div class="f-lbl">آیکون</div><div class="icon-grid" id="bagIconGrid"></div></div>
-    <button class="sh-sub" onclick="addBagItem()">افزودن به کیف</button>
-  </div>
-</div>
-
-<!-- SHEET: TIMER -->
-<div class="sheet" id="shTimer">
-  <div class="sh-handle"></div>
-  <div class="sh-head"><div class="sh-tr"><div class="sh-ttl">ساعت شروع بازدید</div><button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></div>
-  <div class="sh-body">
-    <div class="f-lbl">ساعت</div>
-    <input class="t-big fi" type="time" id="timerInput">
-    <div class="qtime-row">
-      <button class="qt" onclick="setQT(8,0)">08:00</button><button class="qt" onclick="setQT(9,0)">09:00</button><button class="qt" onclick="setQT(10,0)">10:00</button><button class="qt" onclick="setQT(14,0)">14:00</button>
-    </div>
-    <button class="sh-sub" style="margin-top:4px;" onclick="saveTimer()">ذخیره</button>
-  </div>
-</div>
-
-<!-- SHEET: WORK HOURS -->
-<div class="sheet" id="shWorkHours">
-  <div class="sh-handle"></div>
-  <div class="sh-head"><div class="sh-tr"><div class="sh-ttl">ساعت‌های روز کاری</div><button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></div>
-  <div class="sh-body">
-    <div class="f-lbl">از کی به بعد «عصر» حساب می‌شه؟</div>
-    <input class="t-big fi" type="time" id="eveningStartInput" style="margin-bottom:16px;">
-    <div class="f-lbl">روز کاری معمولاً چه ساعتی تموم می‌شه؟</div>
-    <input class="t-big fi" type="time" id="workEndInput" style="margin-bottom:4px;">
-    <div style="font-size:var(--fs-2xs);color:var(--t3);margin-bottom:14px;">برای محاسبهٔ «ظرفیت روز» در صفحهٔ خانه استفاده می‌شه</div>
-    <button class="sh-sub" onclick="saveWorkHours()">ذخیره</button>
-  </div>
-</div>
-
-<!-- SHEET: ARCHIVE -->
-<div class="sheet" id="shArchive">
-  <div class="sh-handle"></div>
-  <div class="sh-head"><div class="sh-tr"><div class="sh-ttl">آرشیو کارهای قدیمی</div><button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></div>
-  <div class="sh-body" style="max-height:70vh;overflow-y:auto;">
-    <input class="fi" id="archiveSearchInp" placeholder="جستجو در آرشیو..." style="margin-bottom:10px;" oninput="renderArchiveList()">
-    <div id="archiveList"></div>
-  </div>
-</div>
-
-<!-- SHEET: PUSH -->
-<div class="sheet" id="shPush">
-  <div class="sh-handle"></div>
-  <div class="sh-head"><div class="sh-tr"><div class="sh-ttl">یادآوری واقعی (Push)</div><button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div></div>
-  <div class="sh-body">
-    <div class="f-lbl">آدرس Worker</div>
-    <input class="fi" id="pushUrlInp" placeholder="https://your-worker.workers.dev" dir="ltr" style="margin-bottom:6px;">
-    <div style="font-size:var(--fs-2xs);color:var(--t3);margin-bottom:14px;">آدرسی که بعد از Deploy کردن Worker در Cloudflare می‌گیری</div>
-    <button class="sh-sub" onclick="savePushSettings()">ذخیره و فعال‌سازی</button>
-  </div>
-</div>
-
-<!-- SHEET: SYNC -->
-<div class="sheet" id="shSync">
-  <div class="sh-handle"></div>
-  <div class="sh-head">
-    <div class="sh-tr"><div class="sh-ttl">همگام‌سازی داده‌ها</div><button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
-  </div>
-  <div class="sh-body">
-    <div class="sync-section">
-      <div class="sync-sec-lbl">خروجی — انتقال به دستگاه دیگر</div>
-      <div class="sync-option" onclick="syncExportJSON()">
-        <div class="sync-ico" style="background:var(--bluem);color:var(--blue);">
-          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        </div>
-        <div class="sync-body"><div class="sync-ttl">دانلود فایل JSON</div><div class="sync-sub">همه کارها و تنظیمات</div></div>
-        <span class="sync-arr"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></span>
-      </div>
-      <div class="sync-option" onclick="syncShowQR()">
-        <div class="sync-ico" style="background:var(--am);color:var(--a);">
-          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/><rect x="18" y="14" width="3" height="3"/><rect x="14" y="18" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/></svg>
-        </div>
-        <div class="sync-body"><div class="sync-ttl">کد QR</div><div class="sync-sub">اسکن با گوشی دیگر</div></div>
-        <span class="sync-arr"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></span>
-      </div>
-      <div class="qr-box" id="qrBox">
-        <canvas class="qr-canvas" id="qrCanvas" width="180" height="180"></canvas>
-        <div class="qr-hint">با گوشی دیگر اسکن کن<br>یا لینک رو کپی کن</div>
-        <button class="sh-sub" style="margin-top:10px;font-size:.78rem;" onclick="copyQRLink()">کپی لینک</button>
-      </div>
-    </div>
-    <div class="sync-section">
-      <div class="sync-sec-lbl">ورودی — بازیابی داده‌ها</div>
-      <div class="sync-option" onclick="syncShowImport()">
-        <div class="sync-ico" style="background:rgba(46,160,67,.1);color:#2ea043;">
-          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        </div>
-        <div class="sync-body"><div class="sync-ttl">بارگذاری فایل JSON</div><div class="sync-sub">بازیابی از فایل قبلی</div></div>
-        <span class="sync-arr"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg></span>
-      </div>
-      <div class="import-zone" id="importZone" onclick="document.getElementById('importFileInp').click()">
-        <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-        <div class="import-zone-t">انتخاب فایل</div>
+    <div class="sh-tr"><div class="sh-ttl">آیتم جدید کیف</div><button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill=  <div class="import-zone-t">انتخاب فایل</div>
         <div class="import-zone-s">فایل JSON قبلی رو انتخاب کن</div>
       </div>
       <input type="file" id="importFileInp" accept=".json" onchange="syncImportFile(this)">
@@ -19361,7 +19261,32 @@ function _tmDlSheet(tid,title,cur){
     '</div>'+
     '<input id="tmDlInp" value="'+cur+'" placeholder="1404-06-15" style="width:100%;padding:10px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:1.1rem;text-align:center;direction:ltr;outline:none"/>'+
     '<div id="tmDlErr" style="color:var(--red);font-size:var(--fs-xs);text-align:center;min-height:14px"></div>'+
-    '<button onclick="_tmDlOkBtn()" style="width:100%;height:46px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">تایید</button></div>';
+    '<button onclick="_tmDlOkBtn()" style="width:100%;height:46px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">تایید</button></div>
+<div class="sheet" id="shTaskThread">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div class="sh-ttl" id="mgThreadTitle">گفتگو</div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div id="mgThreadMeta" style="font-size:var(--fs-xs);color:var(--t3);padding:4px 0 8px;direction:rtl"></div>
+  </div>
+  <div id="mgThreadActions" style="display:none;padding:8px 16px;background:var(--bg1);border-bottom:1px solid var(--b2);gap:8px;align-items:center"></div>
+  <div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)">
+    <div id="mgThreadNote" style="display:none;background:var(--ambm);border:1px solid rgba(217,119,6,.2);border-radius:var(--r2);padding:var(--sp3)">
+      <div style="font-size:var(--fs-2xs);color:var(--amber);font-weight:700;margin-bottom:4px">📋 یادداشت</div>
+      <div class="mg-note-text" style="font-size:var(--fs-xs);color:var(--t1);direction:rtl"></div>
+    </div>
+    <div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2);text-align:right">گفتگو</div>
+      <div class="ttd-thread tm-mgr-view" id="mgThreadMsgs" style="min-height:120px"></div>
+      <div style="display:flex;gap:var(--sp2);align-items:flex-end;padding-top:var(--sp2);border-top:1px solid var(--b2);margin-top:var(--sp2)">
+        <textarea class="ttd-reply-inp" rows="1" placeholder="پاسخ بده..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();_mgSendComment()}"></textarea>
+        <button class="ttd-reply-send" onclick="_mgSendComment()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+      </div>
+    </div>
+  </div>
+</div>';
   s.style.zIndex='1200';document.body.appendChild(s);_sokoSheetOpen('shTmDl');
 }
 function _tmDlShortBtn(btn){
@@ -21429,54 +21354,3 @@ async function _tmTryPushToMember(memberUuid,taskTitle,broadcast){
 }
 "none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div><div id="mgThreadMeta" style="display:flex;align-items:center;gap:var(--sp2);padding:var(--sp2) 0 var(--sp3);direction:rtl;flex-wrap:wrap"></div></div><div id="mgThreadActions" style="display:none;padding:8px 16px;background:var(--bg1);border-bottom:1px solid var(--b2);display:flex;gap:8px;align-items:center"></div><div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)"><div id="mgThreadNote" style="display:none;background:var(--ambm);border:1px solid rgba(217,119,6,.2);border-radius:var(--r2);padding:var(--sp3)"><div style="font-size:var(--fs-2xs);color:var(--amber);font-weight:700;margin-bottom:4px">📋 یادداشت</div><div class="mg-note-text" style="font-size:var(--fs-xs);color:var(--t1);direction:rtl"></div></div><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2);text-align:right">گفتگو</div><div class="ttd-thread tm-mgr-view" id="mgThreadMsgs"></div><div style="display:flex;gap:var(--sp2);align-items:flex-end;padding-top:var(--sp2);border-top:1px solid var(--b2);margin-top:var(--sp2)"><textarea class="ttd-reply-inp" rows="1" placeholder="پاسخ بده..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();_mgSendComment()}"></textarea><button class="ttd-reply-send" onclick="_mgSendComment()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button></div></div></div></div>
 
-<div class="sheet" id="shTaskThread">
-  <div class="sh-handle"></div>
-  <div class="sh-head">
-    <div class="sh-tr">
-      <div class="sh-ttl" id="mgThreadTitle">گفتگو</div>
-      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-    <div id="mgThreadMeta" style="font-size:var(--fs-xs);color:var(--t3);padding:4px 0 8px;direction:rtl"></div>
-  </div>
-  <div id="mgThreadActions" style="display:none;padding:8px 16px;background:var(--bg1);border-bottom:1px solid var(--b2);flex-direction:row;gap:8px;align-items:center"></div>
-  <div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)">
-    <div id="mgThreadNote" style="display:none;background:var(--ambm);border:1px solid rgba(217,119,6,.2);border-radius:var(--r2);padding:var(--sp3)">
-      <div style="font-size:var(--fs-2xs);color:var(--amber);font-weight:700;margin-bottom:4px">📋 یادداشت</div>
-      <div class="mg-note-text" style="font-size:var(--fs-xs);color:var(--t1);direction:rtl"></div>
-    </div>
-    <div>
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2);text-align:right">گفتگو</div>
-      <div class="ttd-thread tm-mgr-view" id="mgThreadMsgs"></div>
-      <div style="display:flex;gap:var(--sp2);align-items:flex-end;padding-top:var(--sp2);border-top:1px solid var(--b2);margin-top:var(--sp2)">
-        <textarea class="ttd-reply-inp" rows="1" placeholder="پاسخ بده..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();_mgSendComment()}"></textarea>
-        <button class="ttd-reply-send" onclick="_mgSendComment()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="sheet" id="shTmDirectLogin">
-  <div class="sh-handle"></div>
-  <div class="sh-head">
-    <div class="sh-tr">
-      <div class="sh-ttl">ورود به تیم</div>
-      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-    <div style="font-size:var(--fs-xs);color:var(--t3);margin-top:4px">کد تیم + PIN خودت رو وارد کن</div>
-  </div>
-  <div class="sh-body tm-join-body">
-    <div>
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">کد تیم</div>
-      <input id="tmDLCode" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3);font-family:var(--mono);font-size:var(--fs-md);text-transform:uppercase;letter-spacing:.1em" placeholder="DQ-XXXXXXX" type="text" autocomplete="off"/>
-    </div>
-    <div>
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px">PIN شخصی (۴ رقم)</div>
-      <input id="tmDLPin" class="sh-iw" style="width:100%;padding:var(--sp2) var(--sp3)" type="password" inputmode="numeric" maxlength="4" placeholder="●●●●"/>
-    </div>
-    <div id="tmDLErr" style="font-size:var(--fs-xs);color:var(--red);text-align:center;min-height:16px"></div>
-    <button id="tmDLBtn" onclick="tmDoDirectLogin()" style="width:100%;height:48px;border-radius:var(--r2);background:var(--t1);color:var(--bg1);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);border:none;cursor:pointer">ورود</button>
-  </div>
-</div>
-
-</body>
-</html>
