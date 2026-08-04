@@ -1430,7 +1430,7 @@ export default {
       if (!task.comments) task.comments = [];
       const memberRaw = await env.DAYQ_KV.get(`team:${teamCode}:member:${uuid}`);
       const memberName = memberRaw ? JSON.parse(memberRaw).name : (role === 'manager' ? 'مدیر' : 'کارمند');
-      const comment = { id: crypto.randomUUID(), text: text.trim(), by: uuid, name: memberName, role, at: Date.now() };
+      const comment = { id: crypto.randomUUID(), text: text.trim(), by: uuid, name: memberName, role, from: role, at: Date.now() };
       task.comments.push(comment);
       await env.DAYQ_KV.put(`team:${teamCode}:task:${taskId}`, JSON.stringify(task));
       if (role === 'member') {
