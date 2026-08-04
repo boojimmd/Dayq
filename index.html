@@ -21362,6 +21362,7 @@ function _renderThread(c,role,el,taskObj){
   var readBy=(taskObj&&taskObj.readBy)||{};
   var html='',lastDay='';
   c.forEach(function(x,xi){
+    x = Object.assign({},x,{from:x.from||x.role||''});
     var ts=x.ts||x.at||0;
     var d=ts?new Date(ts):null;
     // date divider
@@ -21376,11 +21377,11 @@ function _renderThread(c,role,el,taskObj){
         html+='<div class="ttd-day-div"><span>'+lbl+'</span></div>';
       }
     }
-    if(x.from==='system'){
+    if((x.from||x.role)==='system'){
       html+='<div class="ttd-sys-msg">'+esc(x.text)+'</div>';return;
     }
-    var isOwn=(x.from===role);
-    var sndr=isOwn?'':(x.from==='manager'?'مدیر':'کارمند');
+    var isOwn=((x.from||x.role)===role);
+    var sndr=isOwn?'':((x.from||x.role)==='manager'?'مدیر':'کارمند');
     var hm='';
     if(d&&!isNaN(d.getTime())){
       hm=d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');
@@ -21392,7 +21393,7 @@ function _renderThread(c,role,el,taskObj){
       var readTs=otherKeys.length?readBy[otherKeys[0]]:0;
       tick=readTs&&ts&&readTs>ts?'<span class="ttd-tick ttd-tick-read">✓✓</span>':'<span class="ttd-tick">✓</span>';
     }
-    html+='<div class="ttd-bubble from-'+x.from+(isOwn?' is-own':'')+'">'+
+    html+='<div class="ttd-bubble from-'+(x.from||x.role)+(isOwn?' is-own':'')+'">'+
       '<div class="ttd-bubble-body">'+esc(x.text)+'</div>'+
       '<div class="ttd-bubble-foot">'+
         (sndr?'<span class="ttd-bubble-sender">'+sndr+'</span>':'')+
