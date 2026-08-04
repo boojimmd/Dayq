@@ -21161,7 +21161,6 @@ async function _tmTryPushToMember(memberUuid,taskTitle,broadcast){
     });
   }catch(e){}
 }
-wait tmAPI('PUT','/member/status',{memberUuid:uuid,status:val?'active':'inactive'});await tmSyncBackground();tmRefreshInfoSheet();}catch(e){toast_(svgIco('x'),e.message);}}else if(action==='pin'){if(!await _tmConfirmSheet('ریست PIN','یه PIN موقت ساخته میشه','ریست','var(--amber)'))return;try{var d=await tmAPI('POST','/member/pin-reset',{memberUuid:uuid});_tmTempPin&&_tmTempPin(d.tempPin);}catch(e){toast_(svgIco('x'),e.message);}}else if(action==='thread'){tmOpenTaskThread(uuid);}}
 
 
 // ── تابع باز کردن تسک‌های عضو در مدیر ──
