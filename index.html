@@ -4630,6 +4630,14 @@ select.fi{
   animation: tmFadeUp 200ms var(--ease-out) both;
 }
 
+
+/* ── sheets always above Soko panel ── */
+body.soko-open .sheet,
+body.soko-open #ov {
+  z-index: 2100 !important;
+}
+body.soko-open #ov { z-index: 2050 !important; }
+
 </style>
 </head>
 <body>
@@ -16941,7 +16949,8 @@ tmRefreshInfoSheet = function() {
 (function(){
   const TEAM_SHEETS = [
     'shTmAssign','shTmAnnounce','shTmJoin','shTmCreate',
-    'shTmCode','shTmInfo','shTmChoice','tmDetailSheet','shTmPending'
+    'shTmCode','shTmInfo','shTmChoice','tmDetailSheet','shTmPending',
+    'shTaskThread','shTeamTaskDetail','shTmDl'
   ];
   const _orig = window.openSheet;
   if (!_orig) return;
