@@ -18431,32 +18431,6 @@ function _tmSbReport(sb){
 boot();
 
 </script>
-<div class="sheet" id="shTaskThread">
-  <div class="sh-handle"></div>
-  <div class="sh-head">
-    <div class="sh-tr">
-      <div class="sh-ttl" id="mgThreadTitle">گفتگو</div>
-      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-    <div id="mgThreadMeta" style="font-size:var(--fs-xs);color:var(--t3);padding:4px 0 8px;direction:rtl"></div>
-  </div>
-  <div id="mgThreadActions" style="display:none;padding:8px 16px;background:var(--bg1);border-bottom:1px solid var(--b2);gap:8px;align-items:center"></div>
-  <div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)">
-    <div id="mgThreadNote" style="display:none;background:var(--ambm);border:1px solid rgba(217,119,6,.2);border-radius:var(--r2);padding:var(--sp3)">
-      <div style="font-size:var(--fs-2xs);color:var(--amber);font-weight:700;margin-bottom:4px">یادداشت</div>
-      <div class="mg-note-text" style="font-size:var(--fs-xs);color:var(--t1);direction:rtl"></div>
-    </div>
-    <div>
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2);text-align:right">گفتگو</div>
-      <div class="ttd-thread tm-mgr-view" id="mgThreadMsgs" style="min-height:100px;max-height:45vh;overflow-y:auto"></div>
-      <div style="display:flex;gap:var(--sp2);align-items:flex-end;padding-top:var(--sp2);border-top:1px solid var(--b2);margin-top:var(--sp2)">
-        <textarea class="ttd-reply-inp" rows="1" placeholder="پاسخ بده..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();_mgSendComment()}"></textarea>
-        <button class="ttd-reply-send" onclick="_mgSendComment()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
-      </div>
-    </div>
-  </div>
-</div>
-
 
 
 <!-- JALALI DATE PICKER -->
@@ -19227,7 +19201,84 @@ boot();
   </div>
 </div>
 
-yle="color:var(--red);font-size:var(--fs-xs);text-align:center;min-height:14px"></div>'+
+<div class="sheet" id="shTaskThread">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div class="sh-ttl" id="mgThreadTitle">گفتگو</div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div id="mgThreadMeta" style="font-size:var(--fs-xs);color:var(--t3);padding:4px 0 8px;direction:rtl"></div>
+  </div>
+  <div id="mgThreadActions" style="display:none;padding:8px 16px;background:var(--bg1);border-bottom:1px solid var(--b2);gap:8px;align-items:center"></div>
+  <div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)">
+    <div id="mgThreadNote" style="display:none;background:var(--ambm);border:1px solid rgba(217,119,6,.2);border-radius:var(--r2);padding:var(--sp3)">
+      <div style="font-size:var(--fs-2xs);color:var(--amber);font-weight:700;margin-bottom:4px">📋 یادداشت</div>
+      <div class="mg-note-text" style="font-size:var(--fs-xs);color:var(--t1);direction:rtl"></div>
+    </div>
+    <div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2);text-align:right">گفتگو</div>
+      <div class="ttd-thread tm-mgr-view" id="mgThreadMsgs" style="min-height:120px;max-height:40vh;overflow-y:auto"></div>
+      <div style="display:flex;gap:var(--sp2);align-items:flex-end;padding-top:var(--sp2);border-top:1px solid var(--b2);margin-top:var(--sp2)">
+        <textarea class="ttd-reply-inp" rows="1" placeholder="پاسخ بده..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();_mgSendComment()}"></textarea>
+        <button class="ttd-reply-send" onclick="_mgSendComment()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>function tmOpenTaskThread(taskId){
+  var members=(tm.snapshot&&tm.snapshot.members)||[],allTasks=[];
+  members.forEach(function(m){(m.tasks||[]).forEach(function(t){allTasks.push(Object.assign({},t,{memberName:m.name}));});});
+  var task=allTasks.find(function(t){return t.id===taskId;})||(tm.inbox||[]).find(function(t){return t.id===taskId;});
+  if(!task)return;
+  _mgThreadTaskId=taskId;
+  var ttl=document.getElementById('mgThreadTitle');if(ttl)ttl.textContent=task.title||'گفتگو';
+  var meta=document.getElementById('mgThreadMeta');
+  if(meta){
+    var ST={pending:'شروع نشده',in_progress:'در حال انجام',done:'تکمیل شد',blocked:'متوقف',in_review:'منتظر بررسی'};
+    meta.innerHTML='<span style="font-size:var(--fs-xs);font-weight:700">'+esc(task.memberName||'')+'</span>'+
+    '<span style="font-size:var(--fs-xs);color:var(--t3)"> · '+(ST[task.status]||task.status)+'</span>';
+  }
+  var actEl=document.getElementById('mgThreadActions');
+  if(actEl){actEl.style.display='flex';actEl.innerHTML='';
+    if(task.status==='in_review'){
+      var apB=document.createElement('button');apB.textContent='تأیید ✅';
+      apB.style.cssText='flex:1;height:40px;background:var(--ag);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer';
+      apB.onclick=function(){_tmApproveTask(taskId);};
+      var rtB=document.createElement('button');rtB.textContent='↩ برگشت';
+      rtB.style.cssText='flex:1;height:40px;background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer';
+      rtB.onclick=function(){_tmReturnTask(taskId);};
+      actEl.appendChild(apB);actEl.appendChild(rtB);
+    }else{
+      var dlB=document.createElement('button');dlB.textContent='📅 تمدید ددلاین';
+      dlB.style.cssText='height:36px;padding:0 var(--sp3);background:var(--bg2);color:var(--t2);border:1px solid var(--b1);border-radius:var(--r5);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer';
+      dlB.onclick=function(){tmExtendDeadline(taskId);};actEl.appendChild(dlB);
+    }
+  }
+  var nel=document.getElementById('mgThreadNote');
+  if(nel&&task.memberNote){nel.style.display='';var nt=nel.querySelector('.mg-note-text');if(nt)nt.textContent=task.memberNote;}
+  else if(nel)nel.style.display='none';
+  var tel=document.getElementById('mgThreadMsgs');
+  if(tel&&typeof _renderThread==='function')_renderThread(task.comments||[],'manager',tel,task);
+  _sokoSheetOpen('shTaskThread');
+}
+
+
+function _tmDlSheet(tid,title,cur){
+  var od=document.getElementById('shTmDl');if(od)od.remove();
+  var s=document.createElement('div');s.className='sheet';s.id='shTmDl';
+  s.dataset.tid=tid;
+  var bs='flex:1;height:38px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--bg2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer';
+  s.innerHTML='<div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl">تمدید ددلاین</div><button class="sh-x" onclick="closeAll()">✕</button></div></div>'+
+    '<div class="sh-body" style="gap:var(--sp3)">'+
+    '<div style="font-size:var(--fs-xs);color:var(--t3)">'+esc(title)+'</div>'+
+    '<div style="display:flex;gap:6px">'+
+    '<button data-days="1" onclick="_tmDlShortBtn(this)" style="'+bs+'">فردا</button>'+
+    '<button data-days="3" onclick="_tmDlShortBtn(this)" style="'+bs+'">3 روز</button>'+
+    '<button data-days="7" onclick="_tmDlShortBtn(this)" style="'+bs+'">هفته</button>'+
+    '</div>'+
+    '<input id="tmDlInp" value="'+cur+'" placeholder="1404-06-15" style="width:100%;padding:10px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:1.1rem;text-align:center;direction:ltr;outline:none"/>'+
+    '<div id="tmDlErr" style="color:var(--red);font-size:var(--fs-xs);text-align:center;min-height:14px"></div>'+
     '<button onclick="_tmDlOkBtn()" style="width:100%;height:46px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">تایید</button></div>';
   document.body.appendChild(s);
   _sokoSheetOpen('shTmDl');
