@@ -19200,6 +19200,31 @@ boot();
   </div>
 </div>
 
+<div class="sheet" id="shTaskThread">
+  <div class="sh-handle"></div>
+  <div class="sh-head">
+    <div class="sh-tr">
+      <div class="sh-ttl" id="mgThreadTitle">گفتگو</div>
+      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div id="mgThreadMeta" style="font-size:var(--fs-xs);color:var(--t3);padding:4px 0 8px;direction:rtl"></div>
+  </div>
+  <div id="mgThreadActions" style="display:none;padding:8px 16px;background:var(--bg1);border-bottom:1px solid var(--b2);gap:8px;align-items:center"></div>
+  <div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)">
+    <div id="mgThreadNote" style="display:none;background:var(--ambm);border:1px solid rgba(217,119,6,.2);border-radius:var(--r2);padding:var(--sp3)">
+      <div style="font-size:var(--fs-2xs);color:var(--amber);font-weight:700;margin-bottom:4px">📋 یادداشت</div>
+      <div class="mg-note-text" style="font-size:var(--fs-xs);color:var(--t1);direction:rtl"></div>
+    </div>
+    <div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2);text-align:right">گفتگو</div>
+      <div class="ttd-thread tm-mgr-view" id="mgThreadMsgs" style="min-height:120px;max-height:40vh;overflow-y:auto"></div>
+      <div style="display:flex;gap:var(--sp2);align-items:flex-end;padding-top:var(--sp2);border-top:1px solid var(--b2);margin-top:var(--sp2)">
+        <textarea class="ttd-reply-inp" rows="1" placeholder="پاسخ بده..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();_mgSendComment()}"></textarea>
+        <button class="ttd-reply-send" onclick="_mgSendComment()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
+      </div>
+    </div>
+  </div>
+</div>
 <script>function tmOpenTaskThread(taskId){
   var members=(tm.snapshot&&tm.snapshot.members)||[],allTasks=[];
   members.forEach(function(m){(m.tasks||[]).forEach(function(t){allTasks.push(Object.assign({},t,{memberName:m.name}));});});
@@ -19262,209 +19287,7 @@ function _tmDlSheet(tid,title,cur){
     '<input id="tmDlInp" value="'+cur+'" placeholder="1404-06-15" style="width:100%;padding:10px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:1.1rem;text-align:center;direction:ltr;outline:none"/>'+
     '<div id="tmDlErr" style="color:var(--red);font-size:var(--fs-xs);text-align:center;min-height:14px"></div>'+
     '<button onclick="_tmDlOkBtn()" style="width:100%;height:46px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">تایید</button></div>
-<div class="sheet" id="shTaskThread">
-  <div class="sh-handle"></div>
-  <div class="sh-head">
-    <div class="sh-tr">
-      <div class="sh-ttl" id="mgThreadTitle">گفتگو</div>
-      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-    <div id="mgThreadMeta" style="font-size:var(--fs-xs);color:var(--t3);padding:4px 0 8px;direction:rtl"></div>
-  </div>
-  <div id="mgThreadActions" style="display:none;padding:8px 16px;background:var(--bg1);border-bottom:1px solid var(--b2);gap:8px;align-items:center"></div>
-  <div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)">
-    <div id="mgThreadNote" style="display:none;background:var(--ambm);border:1px solid rgba(217,119,6,.2);border-radius:var(--r2);padding:var(--sp3)">
-      <div style="font-size:var(--fs-2xs);color:var(--amber);font-weight:700;margin-bottom:4px">📋 یادداشت</div>
-      <div class="mg-note-text" style="font-size:var(--fs-xs);color:var(--t1);direction:rtl"></div>
-    </div>
-    <div>
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2);text-align:right">گفتگو</div>
-      <div class="ttd-thread tm-mgr-view" id="mgThreadMsgs" style="min-height:120px"></div>
-      <div style="display:flex;gap:var(--sp2);align-items:flex-end;padding-top:var(--sp2);border-top:1px solid var(--b2);margin-top:var(--sp2)">
-        <textarea class="ttd-reply-inp" rows="1" placeholder="پاسخ بده..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();_mgSendComment()}"></textarea>
-        <button class="ttd-reply-send" onclick="_mgSendComment()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
-      </div>
-    </div>
-  </div>
-</div>';
-  s.style.zIndex='1200';document.body.appendChild(s);_sokoSheetOpen('shTmDl');
-}
-function _tmDlShortBtn(btn){
-  var days=parseInt(btn.dataset.days)||1;
-  var p=mrTodayKey().split('-').map(Number),d=p[2]+days,mo=p[1],y=p[0];
-  var dim=[0,31,31,31,31,31,31,30,30,30,30,30,29];
-  while(d>dim[mo]){d-=dim[mo];mo++;if(mo>12){mo=1;y++;}}
-  var nd=y+'-'+(mo<10?'0'+mo:mo)+'-'+(d<10?'0'+d:d);
-  var inp=document.getElementById('tmDlInp');if(inp)inp.value=nd;
-  _tmDlOkBtn();
-}
-async function _tmDlOkBtn(){
-  var sh=document.getElementById('shTmDl'),tid=sh?sh.dataset.tid:'';
-  var inp=document.getElementById('tmDlInp'),err=document.getElementById('tmDlErr');
-  var dl=(inp?inp.value:'').trim();
-  if(!dl||dl.length<8){if(err)err.textContent='فرمت: 1404-06-15';return;}
-  try{
-    await tmAPI('PUT','/task/update',{taskId:tid,deadline:dl});
-    closeAll();toast_(svgIco('check'),'ددلاین تمدید شد');setTimeout(tmSyncBackground,800);
-  }catch(e){if(err)err.textContent=e.message;}
-}
-var _tmRetConfirm=function(){return typeof _tmRtOk==="function"?_tmRtOk.apply(this,arguments):void 0;};
-
-/* ════ DayQ Soko — Team JS ════ */
-
-// ═════════════════════════════════════════════
-// Fix 4: tmApplyUI روی دسکتاپ — مطمئن شدن
-// ════════════════════════════════════════════
-// وقتی صفحه لود می‌شه، یه بار دیگه tmApplyUI اجرا کن
-// با delay تا اطمینان حاصل بشه DOM ساخته شده
-window.addEventListener('load', () => {
-  if (tm.code) {
-    setTimeout(() => {
-      tmApplyUI();
-      if (tm.role === 'manager') {
-        tmRenderTodaySection();
-        tmUpdateSokoCard();
-      }
-      if (tm.role === 'member') {
-        tmRenderInbox();
-        tmRenderAnnouncements();
-      }
-    }, 500);
-  }
-});
-
-/* ════ END CRITICAL FIXES ════ */
-
-
-/* ════ Direct Login — ورود با کد+PIN ════ */
-
-
-
-/* ════ End Direct Login ════ */
-
-
-/* ════ UX Polish — Optional & User-Friendly ════ */
-
-// آپدیت سطر تیم در اتصال
-(function(){
-  const _orig = (typeof tmApplyUI !== "undefined") ? tmApplyUI : null;
-
-})();
-
-function _tmUXRefresh() {
-  const hasTeam = !!tm.code;
-  const isManager = tm.role === 'manager';
-  const isMember = tm.role === 'member';
-
-  // سطر تیم در اتصال — همیشه نمایان (مثل push و sync)
-  const sub = document.getElementById('tmTeamSub');
-  if (sub) {
-    if (!hasTeam) sub.textContent = 'غیرفعال';
-    else if (isManager) sub.textContent = 'فعال — ' + (tm.teamName || '');
-    else sub.textContent = 'فعال — ' + (tm.teamName || '');
-  }
-
-  // سکو card — فقط مدیر و فقط وقتی تیم دارد
-  const sokoCard = document.getElementById('tmSokoCard');
-  if (sokoCard) sokoCard.style.display = isManager ? '' : 'none';
-
-  // سکو sub text
-  const sokoSub = document.getElementById('tmSokoSubText');
-  if (sokoSub && tm.snapshot) {
-    const alerts = (tm.snapshot.members||[]).filter(m=>m.alert!=='ok').length;
-    const members = tm.snapshot.memberCount || 0;
-    sokoSub.textContent = alerts > 0
-      ? `${members} نفر • ${alerts} نیاز توجه`
-      : `${members} نفر فعال`;
-    // alert dot
-    const dot = document.getElementById('tmSokoAlertDot');
-    if (dot) dot.style.display = alerts > 0 ? 'inline-block' : 'none';
-  }
-
-  // badge عضویت در پروفایل
-  const badge = document.getElementById('tmMemberBadge');
-  if (badge) {
-    badge.style.display = hasTeam ? '' : 'none';
-    badge.textContent = hasTeam
-      ? (isManager ? 'مدیر: ' : 'عضو: ') + (tm.teamName || tm.code)
-      : '';
-  }
-
-  // تیم امروز (مدیر) — فقط وقتی alert وجود داره
-  const todaySection = document.getElementById('tmTodaySection');
-  if (todaySection) {
-    const hasAlerts = tm.snapshot && (tm.snapshot.members||[]).some(m=>m.alert!=='ok');
-    const hasMembers = tm.snapshot && (tm.snapshot.memberCount||0) > 1;
-    todaySection.style.display = (isManager && hasMembers) ? '' : 'none';
-  }
-
-  // از مدیر (کارمند) — فقط وقتی تسک داره
-  const inboxSection = document.getElementById('tmInboxSection');
-  if (inboxSection) {
-    const activeCount = (tm.inbox||[]).filter(t=>!t.deleted&&t.status!=='done').length;
-    inboxSection.style.display = (isMember && activeCount > 0) ? '' : 'none';
-  }
-
-  // اطلاعیه‌ها — فقط وقتی خوانده‌نشده داره
-  const annosSection = document.getElementById('tmAnnosSection');
-  if (annosSection) {
-    const unread = (tm.announcements||[]).filter(a=>!(a.readBy||[]).includes(tm.uuid)).length;
-    annosSection.style.display = (isMember && unread > 0) ? '' : 'none';
-  }
-}
-
-// همچنین tmUpdateSokoCard رو آپدیت کن
-// const _origUpdateSokoCard = (typeof tmUpdateSokoCard !== "undefined") ? tmUpdateSokoCard : null; // already declared in script1
-tmUpdateSokoCard = function() {
-  try { _origUpdateSokoCard.apply(this, arguments); } catch(e) {}
-  _tmUXRefresh();
-};
-/* ════ End UX Polish ════ */
-
-/* ════════════════════════════════════════════════════════════════
-   DayQ Team — Assign NLP + Smart Deadline + Projects Full
-   ════════════════════════════════════════════════════════════════ */
-
-// ── State ─────────────────────────────────────────────────────
-// let _tmAssignParsed = null; // already declared in script1
-// let _tmAssignMember = ''; // already declared in script1
-// let _tmAssignBroadcast = false; // already declared in script1
-
-// ── Deadline display helper (از nlpShowPreview الگو گرفته) ────
-
-
-// ── Shortcut deadline calculator ───────────────────────────────
-
-
-// ── Open Assign Modal (NLP version) ───────────────────────────
-
-
-// ── NLP input handler ─────────────────────────────────────────
-
-
-// ── Update preview chips ───────────────────────────────────────
-
-
-// ── Deadline shortcut chips ────────────────────────────────────
-
-
-// ── Member chips update ────────────────────────────────────────
-
-
-
-
-
-
-// ── Priority override ─────────────────────────────────────────
-// let _tmAssignPriOverride = null; // already declared in script1
-
-
-// ── Submit ────────────────────────────────────────────────────
-
-
-
-
-// ── Projects tab — task list واقعی ────────────────────────────
+───
 
 // ── Toggle member tasks expand ─────────────────────────────────
 
