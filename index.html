@@ -21225,3 +21225,19 @@ async function _tmTryPushToMember(memberUuid,taskTitle,broadcast){
     });
   }catch(e){}
 }
+function _tmApproveTask(taskId){ tmApproveTask(taskId,true); }
+function _tmReturnTask(taskId){ tmApproveTask(taskId,false); }
+function tmExtendDeadline(taskId){
+  var members=(tm.snapshot&&tm.snapshot.members)||[];
+  var task=null;
+  members.forEach(function(m){(m.tasks||[]).forEach(function(t){if(t.id===taskId)task=t;});});
+  if(task&&typeof _tmDlSheet==='function')_tmDlSheet(taskId,task.title||'',task.deadline||'');
+}
+async function tmApproveTask(taskId,approve){
+  try{
+    await tmAPI('POST','/task/'+(approve?'approve':'return'),{taskId:taskId});
+    toast_(svgIco('check'),approve?'تسک تأیید شد ✅':'تسک برگشت داده شد');
+    setTimeout(function(){closeAll();if(typeof tmSyncBackground==='function')tmSyncBackground();},600);
+  }catch(e){toast_('','❌ خطا',2500);}
+}
+
