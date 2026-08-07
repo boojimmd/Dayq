@@ -17929,6 +17929,20 @@ function openTeamTaskDetail(taskId){
   openSheet('shTeamTaskDetail');
   setTimeout(function(){_ttdMarkSeen(taskId);},800);
   setTimeout(function(){try{tmAPI('POST','/task/read',{taskId:taskId});}catch(e){}},1000);
+  // live polling — هر ۵ ثانیه وقتی sheet کارمند بازه
+  var _empPollId=setInterval(function(){
+    var sh=document.getElementById('shTeamTaskDetail');
+    if(!sh||!sh.classList.contains('open')){clearInterval(_empPollId);return;}
+    if(typeof tmSyncBackground!=='function')return;
+    tmSyncBackground().then(function(){
+      var t2=(tm.inbox||[]).find(function(x){return x.id===taskId;});
+      if(!t2)return;
+      var tel2=sh.querySelector('#ttdThreadMsgs')||document.getElementById('ttdThreadMsgs');
+      if(tel2&&typeof _renderThread==='function'){
+        _renderThread(t2.comments||[],'member',tel2,t2);
+      }
+    }).catch(function(){});
+  },5000);
 }
 function _ttdSetStatus(st){_ttdUpdateBlockedUI(st);
   document.querySelectorAll('.ttd-st-btn').forEach(btn => {
