@@ -237,8 +237,8 @@ async function clearFailedAttempts(ip, env) {
 // ── Session ──
 async function createSession(uuid, teamCode, role, env) {
   const token = randomToken();
-  const session = { uuid, teamCode, role, exp: Date.now() + 30 * 24 * 3600 * 1000 };
-  await env.DAYQ_KV.put(`session:${token}`, JSON.stringify(session), { expirationTtl: 30 * 24 * 3600 });
+  const session = { uuid, teamCode, role, exp: Date.now() + 365 * 24 * 3600 * 1000 };
+  await env.DAYQ_KV.put(`session:${token}`, JSON.stringify(session), { expirationTtl: 365 * 24 * 3600 });
   return token;
 }
 
@@ -309,7 +309,7 @@ async function rebuildSnapshot(teamCode, env) {
     });
   }
 
-  await env.DAYQ_KV.put(`team:${teamCode}:snapshot`, JSON.stringify(snapshot), { expirationTtl: 30 * 24 * 3600 });
+  await env.DAYQ_KV.put(`team:${teamCode}:snapshot`, JSON.stringify(snapshot), { expirationTtl: 365 * 24 * 3600 });
 }
 
 // ── Push به یه عضو خاص ──
@@ -336,7 +336,7 @@ async function addToLog(teamCode, entry, env) {
   log.unshift({ ...entry, at: Date.now() });
   // فقط ۲۰۰ رویداد آخر نگه داشته می‌شه
   if (log.length > 200) log.splice(200);
-  await env.DAYQ_KV.put(key, JSON.stringify(log), { expirationTtl: 30 * 24 * 3600 });
+  await env.DAYQ_KV.put(key, JSON.stringify(log), { expirationTtl: 365 * 24 * 3600 });
 }
 
 // ── Helper: Response JSON ──
@@ -498,7 +498,7 @@ export default {
       const pendingKey = `team:${teamCode}:pending:${memberUuid}`;
       await env.DAYQ_KV.put(pendingKey, JSON.stringify({
         uuid: memberUuid, name, role, pinHash, salt, requestedAt: Date.now()
-      }), { expirationTtl: 30 * 24 * 3600 }); // ۷ روز expire
+      }), { expirationTtl: 365 * 24 * 3600 }); // ۷ روز expire
 
       // اضافه کردن به pendingUuids در meta
       const metaForPending = JSON.parse(await env.DAYQ_KV.get(`team:${teamCode}:meta`));
