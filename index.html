@@ -4604,8 +4604,8 @@ select.fi{
 
 
 /* ── bubble alignment — is-own is always right ── */
-.ttd-bubble.is-own { align-self: flex-end !important; }
-.ttd-bubble:not(.is-own) { align-self: flex-start !important; }
+.ttd-bubble.is-own { align-self: flex-start !important; }
+.ttd-bubble:not(.is-own) { align-self: flex-end !important; }
 .ttd-bubble.is-own.from-manager {
   background: var(--a) !important; color: #fff !important;
   border-radius: 12px 12px 2px 12px !important;
@@ -4646,6 +4646,60 @@ body:has(#tmSokoPanel.open) .sheet {
 body:has(#tmSokoPanel.open) #ov {
   z-index: 2050 !important;
 }
+
+
+/* ── RTL bubble fix ── */
+.ttd-thread { display:flex; flex-direction:column; gap:6px; padding:8px 4px; direction:rtl; }
+
+/* پیام خودم = راست (flex-start در RTL = right) */
+.ttd-bubble.is-own {
+  align-self: flex-start !important;
+  background: var(--a) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 16px 4px 16px 16px !important;
+  margin-right: 0 !important;
+  margin-left: 20% !important;
+}
+/* پیام دیگری = چپ (flex-end در RTL = left) */
+.ttd-bubble:not(.is-own) {
+  align-self: flex-end !important;
+  background: var(--bg2) !important;
+  color: var(--t1) !important;
+  border: 1px solid var(--b1) !important;
+  border-radius: 4px 16px 16px 16px !important;
+  margin-left: 0 !important;
+  margin-right: 20% !important;
+}
+.ttd-bubble { max-width: 78%; padding: 8px 12px 5px; }
+.ttd-bubble-body { font-size: var(--fs-xs); line-height: 1.55; word-break: break-word; }
+.ttd-bubble-foot {
+  display: flex; align-items: center; justify-content: flex-end;
+  gap: 4px; margin-top: 3px;
+}
+.ttd-bubble-time { font-size: 10px; opacity: .65; white-space: nowrap; }
+.ttd-bubble.is-own .ttd-bubble-time { color: rgba(255,255,255,.8); }
+.ttd-bubble-sender { font-size: 10px; opacity: .6; }
+.ttd-day-div {
+  text-align: center; margin: 10px 0; display: flex;
+  align-items: center; gap: 8px; direction: ltr;
+}
+.ttd-day-div::before,.ttd-day-div::after {
+  content:''; flex:1; height:1px; background:var(--b2);
+}
+.ttd-day-div span {
+  font-size: 11px; color: var(--t3); white-space: nowrap; padding: 0 8px;
+}
+.ttd-sys-msg {
+  text-align: center; font-size: 11px; color: var(--t3);
+  background: var(--bg2); border-radius: 12px;
+  padding: 3px 12px; margin: 4px auto; max-width: 80%;
+}
+/* tick */
+.ttd-tick { font-size: 10px; }
+.ttd-tick-read { color: #60c6f4; }
+.ttd-bubble.is-own .ttd-tick { color: rgba(255,255,255,.7); }
+.ttd-bubble.is-own .ttd-tick-read { color: #fff; }
 
 </style>
 </head>
