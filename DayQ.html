@@ -6249,48 +6249,71 @@ function _tmSbSel(uuid){
   var s=document.createElement('div');
   s.className='sheet';s.id='shTaskThread';
   var ST={pending:'شروع نشده',in_progress:'در حال انجام',done:'تکمیل شد',blocked:'متوقف',in_review:'منتظر بررسی'};
-  var isReview=task.status==='in_review';
+  var isReview=(task.status==='in_review');
+
+  // action buttons
   var actEl=document.createElement('div');
+  actEl.id='mgThreadActions';
   actEl.style.cssText='display:flex;gap:8px;padding:8px 16px;background:var(--bg1);border-bottom:1px solid var(--b2)';
   if(isReview){
-    var apB=document.createElement('button');apB.textContent='تأیید ✅';
+    var apB=document.createElement('button');apB.textContent='تأیید \u2705';
     apB.style.cssText='flex:1;height:36px;background:var(--ag);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer';
     apB.onclick=function(){_tmApproveTask(taskId);};
-    var rtB=document.createElement('button');rtB.textContent='↩ برگشت';
+    var rtB=document.createElement('button');rtB.textContent='\u21a9 برگشت';
     rtB.style.cssText='flex:1;height:36px;background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer';
     rtB.onclick=function(){_tmReturnTask(taskId);};
     actEl.appendChild(apB);actEl.appendChild(rtB);
   }else{
-    var dlB=document.createElement('button');dlB.textContent='📅 تمدید';
+    var dlB=document.createElement('button');dlB.textContent='\ud83d\udcc5 تمدید ددلاین';
     dlB.style.cssText='height:34px;padding:0 12px;background:var(--bg2);color:var(--t2);border:1px solid var(--b1);border-radius:var(--r5);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer';
     dlB.onclick=function(){tmExtendDeadline(taskId);};
     actEl.appendChild(dlB);
   }
-  s.innerHTML='<div class="sh-handle"></div>'+
+
+  s.innerHTML=
+    '<div class="sh-handle"></div>'+
     '<div class="sh-head"><div class="sh-tr">'+
     '<div class="sh-ttl">'+esc(task.title||'گفتگو')+'</div>'+
     '<button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>'+
     '</div><div style="font-size:var(--fs-xs);color:var(--t3);padding:4px 0;direction:rtl">'+
-    esc(task.memberName||'')+' · '+(ST[task.status]||task.status||'')+
+    esc(task.memberName||'')+' \u00b7 '+(ST[task.status]||task.status||'')+
     '</div></div>'+
-    (task.memberNote?'<div style="margin:8px 16px 0;background:var(--ambm);border:1px solid rgba(217,119,6,.2);border-radius:var(--r2);padding:10px"><div style="font-size:var(--fs-2xs);color:var(--amber);font-weight:700;margin-bottom:4px">یادداشت</div><div style="font-size:var(--fs-xs);direction:rtl">'+esc(task.memberNote)+'</div></div>':'')+
-    '<div class="sh-body" style="flex:1;display:flex;flex-direction:column;gap:var(--sp2)">'+
-    '<div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2);text-align:right">گفتگو</div>'+
-    '<div class="ttd-thread tm-mgr-view" id="mgThreadMsgs" style="flex:1;min-height:120px;max-height:45vh;overflow-y:auto"></div>'+
+    (task.memberNote?'<div style="margin:8px 16px 0;background:var(--ambm);border:1px solid rgba(217,119,6,.2);border-radius:var(--r2);padding:10px"><div style="font-size:var(--fs-2xs);color:var(--amber);font-weight:700;margin-bottom:4px">\ud83d\udccb یادداشت</div><div style="font-size:var(--fs-xs);direction:rtl">'+esc(task.memberNote)+'</div></div>':'')+
+    '<div class="sh-body" style="flex:1;display:flex;flex-direction:column">'+
+    '<div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px;text-align:right">گفتگو</div>'+
+    '<div class="ttd-thread tm-mgr-view" id="mgThreadMsgs" style="flex:1;min-height:100px;max-height:40vh;overflow-y:auto"></div>'+
     '<div style="display:flex;gap:var(--sp2);align-items:flex-end;padding-top:var(--sp2);border-top:1px solid var(--b2);margin-top:var(--sp2)">'+
-    '<textarea class="ttd-reply-inp" rows="1" placeholder="پاسخ بده..." oninput="this.style.height=\'auto\';this.style.height=this.scrollHeight+\'px\'" onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();_mgSendComment()}"></textarea>'+
+    '<textarea class="ttd-reply-inp" rows="1" placeholder="\u067e\u0627\u0633\u062e \u0628\u062f\u0647..." oninput="this.style.height=\'auto\';this.style.height=this.scrollHeight+\'px\'" onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();_mgSendComment()}"></textarea>'+
     '<button class="ttd-reply-send" onclick="_mgSendComment()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>'+
     '</div></div>';
+
   s.insertBefore(actEl,s.querySelector('.sh-body'));
   document.body.appendChild(s);
+
+  // render thread
   var tel=s.querySelector('#mgThreadMsgs');
   if(tel&&typeof _renderThread==='function')_renderThread(task.comments||[],'manager',tel,task);
+
+  // open
   var ov=document.getElementById('ov');
   if(ov){ov.classList.add('open');ov.style.zIndex='2050';}
-  s.classList.add('open');
-  s.style.zIndex='2100';
-}
-/* ══ ICON LIBRARY ══ */
+  s.classList.add('open');s.style.zIndex='2100';
+
+  // live polling — هر ۵ ثانیه sync وقتی sheet بازه
+  var _pollId=setInterval(function(){
+    var sh=document.getElementById('shTaskThread');
+    if(!sh||!sh.classList.contains('open')){clearInterval(_pollId);return;}
+    if(typeof tmSyncBackground!=='function')return;
+    tmSyncBackground().then(function(){
+      var members2=(tm.snapshot&&tm.snapshot.members)||[];
+      var t2=null;
+      members2.forEach(function(m){(m.tasks||[]).forEach(function(t){if(t.id===taskId)t2=t;});});
+      if(!t2)return;
+      var tel2=document.getElementById('mgThreadMsgs');
+      if(tel2&&typeof _renderThread==='function')_renderThread(t2.comments||[],'manager',tel2,t2);
+    }).catch(function(){});
+  },5000);
+}/* ══ ICON LIBRARY ══ */
 const ICONS=[
   {id:'wx-sun',c:'#a1a8b3',s:`<circle cx="12" cy="12" r="4.5" stroke-width="1.7"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5 5l2.1 2.1M16.9 16.9 19 19M19 5l-2.1 2.1M7.1 16.9 5 19" stroke-width="1.7"/>`},
   {id:'wx-cloud',c:'#a1a8b3',s:`<path d="M7 18a4.5 4.5 0 0 1-.5-9 5.5 5.5 0 0 1 10.7-1.6A4 4 0 0 1 17 18H7Z" stroke-width="1.6"/>`},
