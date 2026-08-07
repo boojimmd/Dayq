@@ -237,8 +237,8 @@ async function clearFailedAttempts(ip, env) {
 // ── Session ──
 async function createSession(uuid, teamCode, role, env) {
   const token = randomToken();
-  const session = { uuid, teamCode, role, exp: Date.now() + 7 * 24 * 3600 * 1000 };
-  await env.DAYQ_KV.put(`session:${token}`, JSON.stringify(session), { expirationTtl: 7 * 24 * 3600 });
+  const session = { uuid, teamCode, role, exp: Date.now() + 30 * 24 * 3600 * 1000 };
+  await env.DAYQ_KV.put(`session:${token}`, JSON.stringify(session), { expirationTtl: 30 * 24 * 3600 });
   return token;
 }
 
@@ -309,7 +309,7 @@ async function rebuildSnapshot(teamCode, env) {
     });
   }
 
-  await env.DAYQ_KV.put(`team:${teamCode}:snapshot`, JSON.stringify(snapshot), { expirationTtl: 7 * 24 * 3600 });
+  await env.DAYQ_KV.put(`team:${teamCode}:snapshot`, JSON.stringify(snapshot), { expirationTtl: 30 * 24 * 3600 });
 }
 
 // ── Push به یه عضو خاص ──
@@ -498,7 +498,7 @@ export default {
       const pendingKey = `team:${teamCode}:pending:${memberUuid}`;
       await env.DAYQ_KV.put(pendingKey, JSON.stringify({
         uuid: memberUuid, name, role, pinHash, salt, requestedAt: Date.now()
-      }), { expirationTtl: 7 * 24 * 3600 }); // ۷ روز expire
+      }), { expirationTtl: 30 * 24 * 3600 }); // ۷ روز expire
 
       // اضافه کردن به pendingUuids در meta
       const metaForPending = JSON.parse(await env.DAYQ_KV.get(`team:${teamCode}:meta`));
