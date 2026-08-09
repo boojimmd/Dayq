@@ -6817,6 +6817,7 @@ function _tmSbSel(uuid){
   s.classList.add('open');s.style.zIndex='2100';
 
   // live polling — هر ۵ ثانیه sync وقتی sheet بازه
+  if(window._mgPollId){clearInterval(window._mgPollId);window._mgPollId=null;}
   var _pollId=setInterval(function(){
     var sh=document.getElementById('shTaskThread');
     if(!sh||!sh.classList.contains('open')){clearInterval(_pollId);return;}
@@ -6830,7 +6831,8 @@ function _tmSbSel(uuid){
       if(tel2&&typeof _renderThread==='function')_renderThread(t2.comments||[],'manager',tel2,t2);
     }).catch(function(){});
   },5000);
-}/* ══ ICON LIBRARY ══ */
+}
+  window._mgPollId=_pollId;/* ══ ICON LIBRARY ══ */
 const ICONS=[
   {id:'wx-sun',c:'#a1a8b3',s:`<circle cx="12" cy="12" r="4.5" stroke-width="1.7"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5 5l2.1 2.1M16.9 16.9 19 19M19 5l-2.1 2.1M7.1 16.9 5 19" stroke-width="1.7"/>`},
   {id:'wx-cloud',c:'#a1a8b3',s:`<path d="M7 18a4.5 4.5 0 0 1-.5-9 5.5 5.5 0 0 1 10.7-1.6A4 4 0 0 1 17 18H7Z" stroke-width="1.6"/>`},
@@ -9631,6 +9633,8 @@ function _sheetDragInit(el){
   });
 }
 function closeAll(){
+  if(window._mgPollId){clearInterval(window._mgPollId);window._mgPollId=null;}
+  if(window._empPollId){clearInterval(window._empPollId);window._empPollId=null;}
   document.getElementById('ov').classList.remove('open');
   // Emil asymmetric timing: exit سریع‌تر از enter
   document.querySelectorAll('.sheet.open').forEach(s=>{
@@ -18894,8 +18898,18 @@ async function _tmRtOk(tid){
   catch(e){toast_(svgIco('flag'),e.message);}
 }
 
-function _ttdUpdateBlockedUI(s){var bs=document.getElementById('ttdBlockedSection');var nl=document.getElementById('ttdNoteLabel');if(bs)bs.style.display=s==='blocked'?'':'none';if(nl)nl.textContent=s==='blocked'?'توضیح بیشتر':'یادداشت برای مدیر';}
-async function _ttdMarkSeen(tid){if(!tid||!tm.token)return;try{await tmAPI('PUT','/task/update',{taskId:tid,seenAt:Date.now()});}catch(e){}}
+function _ttdUpdateBlockedUI(status){
+  var sec=document.getElementById('ttdBlockedSection');
+  if(!sec)return;
+  if(status!=='blocked'){sec.style.display='none';return;}
+  sec.style.display='block';
+  if(sec.querySelector('.blocked-reasons'))return;
+  var reasons=['منتظر اطلاعات از مدیر','نیاز به تأیید دارم','ابزار یا دسترسی ندارم','توضیح دیگه'];
+  var html='<div class="blocked-reasons"><div style="font-size:var(--fs-xs);color:var(--red);font-weight:600;margin-bottom:8px;text-align:right">چرا متوقف شدی؟</div>';
+  reasons.forEach(function(r,i){html+='<label style="display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer;direction:rtl"><input type="radio" name="blockedReason" value="'+i+'" style="accent-color:var(--red);width:16px;height:16px"><span style="font-size:var(--fs-xs)">'+r+'</span></label>';});
+  html+='<textarea id="ttdBlockedNote" rows="2" placeholder="توضیح بیشتر..." style="width:100%;margin-top:8px;padding:8px;background:var(--bg2);border:1px solid rgba(229,62,90,.2);border-radius:var(--r2);font-size:var(--fs-xs);font-family:var(--f);resize:none;direction:rtl;outline:none;box-sizing:border-box"></textarea></div>';
+  sec.innerHTML=html;
+}async function _ttdMarkSeen(tid){if(!tid||!tm.token)return;try{await tmAPI('PUT','/task/update',{taskId:tid,seenAt:Date.now()});}catch(e){}}
 async function _ttdQuickStatus(tid,st){try{await tmAPI('PUT','/task/update',{taskId:tid,status:st});toast_(svgIco('check'),st==='in_progress'?'▶ شروع شد':'📤 ارسال شد');setTimeout(tmSyncBackground,800);}catch(e){toast_(svgIco('flag'),e.message);}}
 
 function _tmTempPin(pin){
@@ -19043,29 +19057,7 @@ function _renderThread(c,role,el,taskObj){
   var _last=el.querySelector('.ttd-bubble:last-child');
   if(_last){_last.classList.add('is-new');}},50);
 }f
-async function _mgSendComment(){
-  var inp=document.querySelector('#shTaskThread .ttd-reply-inp');
-  if(!inp||!inp.value.trim()||!_mgThreadTaskId)return;
-  var text=inp.value.trim(),btn=document.querySelector('#shTaskThread .ttd-reply-send');
-  if(btn)btn.disabled=true;
-  try{await tmAPI('POST','/task/comment',{taskId:_mgThreadTaskId,text,from:'manager'});}
-  catch(e){if(btn)btn.disabled=false;inp.value=text;toast_('','❌ خطا در ارسال پیام',2500);return;}
-  var members=(tm.snapshot&&tm.snapshot.members)||[];
-  var task=null;
-  for(var i=0;i<members.length;i++){
-    var t=(members[i].tasks||[]).find(function(t){return t.id===_mgThreadTaskId;});
-    if(t){
-      if(!t.comments)t.comments=[];
-      t.comments.push({from:'manager',text,ts:Date.now(),at:Date.now()});
-      task=t;break;
-    }
-  }
-  inp.value='';inp.style.height='auto';
-  var tel=document.getElementById('mgThreadMsgs');
-  if(tel&&task&&typeof _renderThread==='function')_renderThread(task.comments||[],'manager',tel,task);
-  if(btn)btn.disabled=false;
-  setTimeout(tmSyncBackground,1500);
-}a
+
 function _commentTime(ts){if(!ts&&ts!==0)return '';var d=new Date(ts);if(isNaN(d.getTime()))return '';return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');}
 
 async function _ttdSendComment(){
