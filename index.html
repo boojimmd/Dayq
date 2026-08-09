@@ -18452,7 +18452,7 @@ function openTeamTaskDetail(taskId){
     }).catch(function(){});
   },5000);
 }function _ttdSetStatus(st){_ttdUpdateBlockedUI(st);
-  document.querySelectorAll('.ttd-st-btn').forEach(btn => {
+  var _sheet=document.getElementById('shTeamTaskDetail');(_sheet?_sheet:document).querySelectorAll('.ttd-st-btn').forEach(btn => {
     const active = btn.dataset.st === st;
     btn.style.background = active ? 'var(--t1)' : 'var(--bg2)';
     btn.style.color = active ? 'var(--bg1)' : 'var(--t2)';
@@ -18851,13 +18851,23 @@ async function _ttdSubmitForReview(){
     await tmAPI('PUT','/task/update',{taskId,status:'in_review',memberNote:note});
     var t=(tm.inbox||[]).find(function(x){return x.id===taskId;});
     if(t){t.status='in_review';t.memberNote=note;}
-    var rvBanner=document.getElementById('ttdReviewBanner');
+    // sheet رو close و دوباره open با status جدید
     var stBtns=document.getElementById('ttdStatusBtns');
     var svBtn=document.getElementById('ttdSaveBtn');
-    if(rvBanner)rvBanner.style.display='';
+    var rvBtn=document.getElementById('ttdReviewBtn');
     if(stBtns)stBtns.style.display='none';
-    if(btn)btn.style.display='none';
     if(svBtn)svBtn.style.display='none';
+    if(rvBtn)rvBtn.style.display='none';
+    // banner inline
+    var _sh=document.getElementById('shTeamTaskDetail');
+    if(_sh&&!_sh.querySelector('.ttd-review-banner')){
+      var _banner=document.createElement('div');
+      _banner.className='ttd-review-banner';
+      _banner.style.cssText='background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.2);border-radius:var(--r2);padding:var(--sp3);text-align:center;font-size:var(--fs-xs);color:var(--a);margin-bottom:8px';
+      _banner.textContent='?? تسک برای بررسی ارسال شده';
+      var _body=_sh.querySelector('.sh-body');
+      if(_body)_body.prepend(_banner);
+    }
     toast_(svgIco('check'),'📤 برای بررسی ارسال شد');
     setTimeout(tmSyncBackground,1500);
   }catch(e){toast_(svgIco('flag'),e.message||'خطا');}
@@ -19080,7 +19090,7 @@ async function _ttdSendComment(){
   if(thr&&task&&typeof _renderThread==='function')_renderThread(task.comments||[],'member',thr,task);
   if(thr)thr.scrollTop=thr.scrollHeight;
   if(btn)btn.disabled=false;
-}a
+}
 
 function _tmAnimateKpi(selector){
   document.querySelectorAll(selector).forEach(function(el){
