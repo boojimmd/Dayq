@@ -19000,7 +19000,10 @@ async function tmApproveTask(taskId,approve){
   try{var _rows=document.querySelectorAll('[onclick*="'+taskId+'"]');
   _rows.forEach(function(r){var card=r.closest('.tm-task-row');if(card){card.classList.add('task-exiting');}});}catch(_e){}
   try{
-    await tmAPI('POST','/task/'+(approve?'approve':'return'),{taskId:taskId});
+    await tmAPI('PUT','/task/update',{taskId:taskId,status:approve?'done':'in_progress'});
+    // system comment
+    var msg=approve?'تسک تأیید شد ✅':'تسک برای اصلاح برگشت شد ↩';
+    try{await tmAPI('POST','/task/comment',{taskId:taskId,text:msg});}catch(_){}
     toast_(svgIco('check'),approve?'تسک تأیید شد ✅':'تسک برگشت داده شد');
     setTimeout(function(){closeAll();if(typeof tmSyncBackground==='function')tmSyncBackground();},600);
   }catch(e){toast_('','❌ خطا',2500);}
@@ -19013,7 +19016,7 @@ function _renderThread(c,role,el,taskObj){
   var html='',lastDay='';
   c.forEach(function(x,xi){
     x = Object.assign({},x,{from:x.from||x.role||''});
-    var ts=x.ts||x.at||0;
+    var ts=_commentTime(x.ts||x.at||0);
     var d=ts?new Date(ts):null;
     // date divider
     if(d&&!isNaN(d.getTime())){
