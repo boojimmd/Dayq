@@ -650,6 +650,45 @@ export default {
       return jsonRes({ ok: true }, 200, cors);
     }
 
+    
+    // ── task approve (مدیر) ──
+    if (path === '/task/approve' && req.method === 'POST') {
+      const token = req.headers.get('X-DayQ-Token');
+      const session = await validateSession(token, env);
+      if (!session || session.role !== 'manager') return errRes('دسترسی نامعتبر', 403, cors);
+      const { taskId } = await req.json();
+      const { teamCode, uuid } = session;
+      const taskRaw = await env.DAYQ_KV.get(`team:${teamCode}:task:${taskId}`);
+      if (!taskRaw) return errRes('تسک یافت نشد', 404, cors);
+      const task = JSON.parse(taskRaw);
+      task.status = 'done';
+      task.approvedAt = Date.now();
+      task.approvedBy = uuid;
+      if (!task.comments) task.comments = [];
+      task.comments.push({ id: crypto.randomUUID(), text: 'تسک تأیید شد ✅', by: uuid, name: 'مدیر', role: 'manager', from: 'system', at: Date.now() });
+      await env.DAYQ_KV.put(`team:${teamCode}:task:${taskId}`, JSON.stringify(task));
+      await pushToMember(teamCode, task.assignedTo, { title: '✅ تسک تأیید شد', body: task.title, data: { type: 'task_approved', taskId, teamCode } }, env);
+      return jsonRes({ ok: true, status: 'done' }, 200, cors);
+    }
+
+    // ── task return (مدیر برمیگردونه) ──
+    if (path === '/task/return' && req.method === 'POST') {
+      const token = req.headers.get('X-DayQ-Token');
+      const session = await validateSession(token, env);
+      if (!session || session.role !== 'manager') return errRes('دسترسی نامعتبر', 403, cors);
+      const { taskId } = await req.json();
+      const { teamCode, uuid } = session;
+      const taskRaw = await env.DAYQ_KV.get(`team:${teamCode}:task:${taskId}`);
+      if (!taskRaw) return errRes('تسک یافت نشد', 404, cors);
+      const task = JSON.parse(taskRaw);
+      task.status = 'in_progress';
+      if (!task.comments) task.comments = [];
+      task.comments.push({ id: crypto.randomUUID(), text: 'تسک برای اصلاح برگشت داده شد ↩', by: uuid, name: 'مدیر', role: 'manager', from: 'system', at: Date.now() });
+      await env.DAYQ_KV.put(`team:${teamCode}:task:${taskId}`, JSON.stringify(task));
+      await pushToMember(teamCode, task.assignedTo, { title: '↩ تسک برگشت داده شد', body: task.title, data: { type: 'task_returned', taskId, teamCode } }, env);
+      return jsonRes({ ok: true, status: 'in_progress' }, 200, cors);
+    }
+
     // ── assign تسک (مدیر) ──
     if (path === '/task/assign' && req.method === 'POST') {
       const token = req.headers.get('X-DayQ-Token');
