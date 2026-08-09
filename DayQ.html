@@ -4852,6 +4852,138 @@ body:has(#tmSokoPanel.open) #ov {
   cursor: pointer;
 }
 
+
+/* ════════════════════════════════════════════════
+   Emil Kowalski animation pass — DayQ / Soko
+   Philosophy: animate with purpose, never for style
+   ════════════════════════════════════════════════ */
+
+/* ── 1. Token fix: remove ease-in from UI usage ── */
+/* --ease-in هرگز در UI استفاده نشود — فقط برای
+   خروج element هایی که خودشان initiate میکنن */
+
+/* ── 2. Chat bubble enter ──
+   Purpose: spatial consistency — پیام از کجا اومد
+   Frequency: occasional → standard animation
+   Tool: CSS animation (entry on mount)
+   Properties: transform + opacity only
+   Duration: 180ms — زیر 300ms */
+@keyframes bubbleIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.ttd-bubble {
+  animation: bubbleIn 180ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+/* stagger — هر bubble 40ms بعد از قبلی */
+.ttd-bubble:nth-child(1)  { animation-delay: 0ms; }
+.ttd-bubble:nth-child(2)  { animation-delay: 40ms; }
+.ttd-bubble:nth-child(3)  { animation-delay: 80ms; }
+.ttd-bubble:nth-child(4)  { animation-delay: 120ms; }
+.ttd-bubble:nth-child(5)  { animation-delay: 160ms; }
+.ttd-bubble:nth-child(n+6){ animation-delay: 200ms; }
+/* آخرین bubble (جدیدترین) بدون delay */
+.ttd-bubble.is-new {
+  animation: bubbleIn 160ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  animation-delay: 0ms;
+}
+
+/* ── 3. Task card exit ──
+   Purpose: state indication — تسک تموم شد
+   Frequency: occasional → standard
+   Tool: CSS transition
+   Properties: opacity + transform + height */
+.tm-task-row.task-exiting {
+  animation: taskExit 280ms cubic-bezier(0.4, 0, 1, 1) forwards;
+  pointer-events: none;
+  overflow: hidden;
+}
+@keyframes taskExit {
+  0%   { opacity: 1; transform: none; max-height: 100px; }
+  40%  { opacity: 0; transform: translateX(20px) scale(0.98); max-height: 100px; }
+  100% { opacity: 0; transform: translateX(20px); max-height: 0; margin: 0; padding: 0; }
+}
+
+/* ── 4. Badge pulse ──
+   Purpose: feedback — تعداد تغییر کرد
+   Frequency: occasional
+   Tool: CSS animation
+   Duration: 300ms — یه‌بار اجرا */
+@keyframes badgePop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.4); }
+  100% { transform: scale(1); }
+}
+.tm-soko-badge.badge-pop {
+  animation: badgePop 300ms cubic-bezier(0.34, 1.3, 0.64, 1);
+}
+
+/* ── 5. Approve/Return button press ──
+   Purpose: feedback — interface heard you
+   Frequency: occasional
+   Tool: CSS transition on :active */
+#mgThreadActions button:active,
+.ttd-review-btn:active,
+.ttd-save-btn:active {
+  transform: scale(0.97);
+  transition: transform 80ms ease;
+}
+#mgThreadActions button,
+.ttd-review-btn,
+.ttd-save-btn {
+  transition: transform 120ms cubic-bezier(0.23, 1, 0.32, 1),
+              background 150ms cubic-bezier(0.23, 1, 0.32, 1),
+              opacity 120ms ease;
+}
+
+/* ── 6. Send button press ──
+   Purpose: feedback
+   Frequency: occasional */
+.ttd-reply-send:active {
+  transform: scale(0.92);
+}
+.ttd-reply-send {
+  transition: transform 100ms cubic-bezier(0.23, 1, 0.32, 1),
+              background 150ms ease;
+}
+
+/* ── 7. Status button toggle ──
+   Already had 150ms ease-out — upgrade to Emil's strong curve */
+.ttd-st-btn {
+  transition:
+    background 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    color 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    border-color 150ms cubic-bezier(0.23, 1, 0.32, 1),
+    box-shadow 150ms cubic-bezier(0.23, 1, 0.32, 1) !important;
+}
+
+/* ── 8. Soko panel — slightly faster ──
+   320ms → 280ms (still feels intentional, not instant) */
+.tm-panel {
+  transition: transform 280ms cubic-bezier(0.32, 0.72, 0, 1) !important;
+}
+
+/* ── Reduced motion respect — ships with animation ── */
+@media (prefers-reduced-motion: reduce) {
+  .ttd-bubble,
+  .tm-task-row.task-exiting,
+  .tm-soko-badge.badge-pop {
+    animation: none;
+  }
+  .ttd-bubble { opacity: 1; transform: none; }
+  #mgThreadActions button,
+  .ttd-reply-send,
+  .ttd-st-btn {
+    transition: background 150ms ease, color 150ms ease;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -18670,6 +18802,9 @@ function _tmSbReport(sb){
   sb.innerHTML=h;
 }
 async function tmApproveTask(taskId,approve){
+  // exit animation روی task card
+  try{var _rows=document.querySelectorAll('[onclick*="'+taskId+'"]');
+  _rows.forEach(function(r){var card=r.closest('.tm-task-row');if(card){card.classList.add('task-exiting');}});}catch(_e){}
   try{
     await tmAPI('POST','/task/'+(approve?'approve':'return'),{taskId:taskId});
     toast_(svgIco('check'),approve?'تسک تأیید شد ✅':'تسک برگشت داده شد');
@@ -18723,7 +18858,10 @@ function _renderThread(c,role,el,taskObj){
       '</div></div>';
   });
   el.innerHTML=html;
-  setTimeout(function(){el.scrollTop=el.scrollHeight;},50);
+  setTimeout(function(){el.scrollTop=el.scrollHeight;
+  // mark last bubble as new for faster animation
+  var _last=el.querySelector('.ttd-bubble:last-child');
+  if(_last){_last.classList.add('is-new');}},50);
 }f
 async function _mgSendComment(){
   var inp=document.querySelector('#shTaskThread .ttd-reply-inp');
