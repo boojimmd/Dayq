@@ -5155,6 +5155,15 @@ body:has(#tmSokoPanel.open) #ov {
   .tm-btn:active { transform: none !important; }
 }
 
+
+/* ════ Empty State — Soko ════ */
+.soko-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:var(--sp6) var(--sp4);text-align:center;gap:var(--sp3);animation:paneIn 250ms cubic-bezier(0.23,1,0.32,1) both}
+.soko-empty-icon{font-size:40px;line-height:1;opacity:.75}
+.soko-empty-title{font-size:var(--fs-sm);font-weight:700;color:var(--t1);margin:0}
+.soko-empty-body{font-size:var(--fs-xs);color:var(--t3);line-height:1.65;max-width:210px;margin:0}
+.soko-empty-action{margin-top:var(--sp2);height:36px;padding:0 var(--sp4);border-radius:var(--r5);background:var(--a);color:#fff;border:none;font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer;transition:opacity 120ms ease}
+.soko-empty-action:active{opacity:.8}
+
 </style>
 </head>
 <body>
@@ -16034,7 +16043,7 @@ function tmRenderSokoStatus() {
     <!-- Fix: assign = primary action -->
     <button onclick="tmAssignTask('')" style="width:100%;height:42px;background:var(--a);color:#fff;border:none;border-radius:var(--r3);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">&#x271A; ارسال تسک به تیم</button><div id="tmSokoFilterChip" style="margin-top:6px;min-height:20px"></div>
     ${noTasks
-      ? `<div style="text-align:center;padding:var(--sp5);color:var(--t3);font-size:var(--fs-sm)">همه تسک‌ها تموم شدن 🎉</div>`
+      ? `${_sokoEmpty("🎉","همه تسک\u200cها انجام شد!","تیم عالی کار کرده. برای ادامه تسک جدید بفرست.","+ ارسال تسک","tmAssignTask('')")}`
       : `${inReview.length?reviewGroup(inReview):''}
          ${group('دیر شده', 'var(--red)', '🔴', overdue, '')}
          ${group('امروز', 'var(--amber)', '⚡', dueToday, 'برای امروز تسکی نیست')}
@@ -19085,6 +19094,15 @@ function _tmAnimateKpi(selector){
     el.classList.add('kpi-updated');
     setTimeout(function(){el.classList.remove('kpi-updated');},400);
   });
+}
+
+function _sokoEmpty(icon,title,body,actionLabel,onAction){
+  return '<div class="soko-empty">'+
+    '<div class="soko-empty-icon">'+icon+'</div>'+
+    '<p class="soko-empty-title">'+title+'</p>'+
+    '<p class="soko-empty-body">'+body+'</p>'+
+    (actionLabel?'<button class="soko-empty-action" onclick="'+onAction+'">'+actionLabel+'</button>':'')+
+    '</div>';
 }
 
 boot();
