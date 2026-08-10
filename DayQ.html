@@ -18543,6 +18543,113 @@ async function tmApproveTask(taskId,approve){
   }catch(e){toast_('','❌ خطا',2500);}
 }
 
+
+var _asState={member:'',priority:'normal',broadcast:false};
+function tmAssignTask(preUuid){
+  _asState={member:preUuid||'',priority:'normal',broadcast:false};
+  var old=document.getElementById('shTmAssign');if(old)old.remove();
+  var members=((tm.snapshot&&tm.snapshot.members)||[]).filter(function(m){return !m.isManager&&m.role!=='manager'&&m.status!=='pending';});
+  var dl=(function(){
+    var p=mrTodayKey().split('-').map(Number),d=p[2]+1,mo=p[1],y=p[0];
+    var dim=[0,31,31,31,31,31,31,30,30,30,30,30,29];
+    if(d>dim[mo]){d=1;mo++;if(mo>12){mo=1;y++;}}
+    return y+'-'+(mo<10?'0'+mo:mo)+'-'+(d<10?'0'+d:d);
+  })();
+  var mHtml=members.length?members.map(function(m){
+    var sel=m.uuid===_asState.member;
+    return '<button class="as-member-chip'+(sel?' sel':'')+'" data-uuid="'+esc(m.uuid)+'" onclick="_asPickMember(this)">'+esc(m.name)+(m.activeTasks>0?'<span class="as-chip-count">'+m.activeTasks+'</span>':'')+'</button>';
+  }).join(''):'<div style="font-size:var(--fs-xs);color:var(--t3)">\u0647\u0646\u0648\u0632 \u0639\u0636\u0648\u06cc \u062a\u0623\u06cc\u06cc\u062f \u0646\u0634\u062f\u0647</div>';
+  var s=document.createElement('div');s.className='sheet';s.id='shTmAssign';
+  s.innerHTML=
+    '<div class="sh-handle"></div>'+
+    '<div class="sh-head"><div class="sh-tr"><div class="sh-ttl">\u062a\u0633\u06a9 \u062c\u062f\u06cc\u062f</div>'+
+    '<button class="sh-x" onclick="closeAll()">\u00d7</button></div></div>'+
+    '<div class="sh-body" style="display:flex;flex-direction:column;gap:14px">'+
+    '<div><div class="as-label">\u0628\u0631\u0627\u06cc \u06a9\u06cc\u061f<span class="as-required">*</span></div>'+
+    '<div class="as-member-grid" id="asMemberGrid">'+mHtml+'</div>'+
+    (members.length>1?'<button class="as-broadcast" id="asBroadcast" onclick="_asToggleBroadcast()">\ud83d\udce1 \u0627\u0631\u0633\u0627\u0644 \u0628\u0647 \u0647\u0645\u0647</button>':'')+
+    '</div>'+
+    '<div><div class="as-label">\u0639\u0646\u0648\u0627\u0646<span class="as-required">*</span></div>'+
+    '<input id="asTitle" class="as-input" type="text" placeholder="\u0639\u0646\u0648\u0627\u0646 \u062a\u0633\u06a9..." autocomplete="off"/></div>'+
+    '<div><div class="as-label">\u0627\u0648\u0644\u0648\u06cc\u062a</div>'+
+    '<div class="as-pri-row">'+
+    '<button class="as-pri-btn sel" data-p="normal" onclick="_asPri(this)">\u0639\u0627\u062f\u06cc</button>'+
+    '<button class="as-pri-btn" data-p="high" onclick="_asPri(this)">\u26a1 \u0645\u0647\u0645</button>'+
+    '<button class="as-pri-btn" data-p="urgent" onclick="_asPri(this)">\ud83d\udd34 \u0641\u0648\u0631\u06cc</button>'+
+    '</div></div>'+
+    '<div><div class="as-label">\u062f\u062f\u0644\u0627\u06cc\u0646<span class="as-required">*</span></div>'+
+    '<div class="as-dl-row">'+
+    '<button class="as-dl-btn sel" data-days="1" onclick="_asDl(this)">\u0641\u0631\u062f\u0627</button>'+
+    '<button class="as-dl-btn" data-days="3" onclick="_asDl(this)">3 \u0631\u0648\u0632</button>'+
+    '<button class="as-dl-btn" data-days="7" onclick="_asDl(this)">\u0647\u0641\u062a\u0647</button>'+
+    '<button class="as-dl-btn" data-days="14" onclick="_asDl(this)">2 \u0647\u0641\u062a\u0647</button>'+
+    '</div>'+
+    '<input id="asDeadline" class="as-input" type="text" value="'+dl+'" style="direction:ltr;text-align:center"/></div>'+
+    '<div><div class="as-label">\u062a\u0648\u0636\u06cc\u062d</div>'+
+    '<textarea id="asDesc" class="as-textarea" rows="2" placeholder="\u062c\u0632\u0626\u06cc\u0627\u062a \u0628\u06cc\u0634\u062a\u0631..."></textarea></div>'+
+    '<div class="as-err" id="asErr"></div>'+
+    '<button class="as-submit" id="asSubmit" onclick="_asSubmit()">\u2709\ufe0f \u0627\u0631\u0633\u0627\u0644 \u062a\u0633\u06a9</button></div>';
+  document.body.appendChild(s);
+  var ov=document.getElementById('ov');if(ov){ov.classList.add('open');ov.style.zIndex='2050';}
+  s.classList.add('open');s.style.zIndex='2100';
+  setTimeout(function(){var t=document.getElementById('asTitle');if(t)t.focus();},200);
+}
+function _asPickMember(btn){
+  if(_asState.broadcast)return;
+  var grid=document.getElementById('asMemberGrid');if(!grid)return;
+  var was=btn.classList.contains('sel');
+  grid.querySelectorAll('.as-member-chip').forEach(function(b){b.classList.remove('sel');});
+  if(!was){btn.classList.add('sel');_asState.member=btn.dataset.uuid;}
+  else _asState.member='';
+}
+function _asToggleBroadcast(){
+  _asState.broadcast=!_asState.broadcast;
+  var btn=document.getElementById('asBroadcast');
+  if(btn)btn.classList.toggle('on',_asState.broadcast);
+  var grid=document.getElementById('asMemberGrid');
+  if(grid){grid.style.opacity=_asState.broadcast?'.4':'1';grid.style.pointerEvents=_asState.broadcast?'none':'';}
+  if(_asState.broadcast)_asState.member='';
+}
+function _asPri(btn){
+  btn.parentElement.querySelectorAll('.as-pri-btn').forEach(function(b){b.classList.remove('sel');});
+  btn.classList.add('sel');_asState.priority=btn.dataset.p;
+}
+function _asDl(btn){
+  btn.parentElement.querySelectorAll('.as-dl-btn').forEach(function(b){b.classList.remove('sel');});
+  btn.classList.add('sel');
+  var days=parseInt(btn.dataset.days),p=mrTodayKey().split('-').map(Number);
+  var d=p[2]+days,mo=p[1],y=p[0];
+  var dim=[0,31,31,31,31,31,31,30,30,30,30,30,29];
+  while(d>dim[mo]){d-=dim[mo];mo++;if(mo>12){mo=1;y++;}}
+  var inp=document.getElementById('asDeadline');
+  if(inp)inp.value=y+'-'+(mo<10?'0'+mo:mo)+'-'+(d<10?'0'+d:d);
+}
+async function _asSubmit(){
+  var title=(document.getElementById('asTitle')?.value||'').trim();
+  var deadline=(document.getElementById('asDeadline')?.value||'').trim();
+  var desc=(document.getElementById('asDesc')?.value||'').trim();
+  var errEl=document.getElementById('asErr');
+  var btn=document.getElementById('asSubmit');
+  errEl.textContent='';
+  if(!title){errEl.textContent='\u0639\u0646\u0648\u0627\u0646 \u062a\u0633\u06a9 \u0631\u0627 \u0628\u0646\u0648\u06cc\u0633';return;}
+  if(!deadline||!/^\d{4}-\d{2}-\d{2}$/.test(deadline)){errEl.textContent='\u062f\u062f\u0644\u0627\u06cc\u0646 \u0627\u0634\u062a\u0628\u0627\u0647 \u062f\u0627\u0631\u062f';return;}
+  if(!_asState.broadcast&&!_asState.member){errEl.textContent='\u06cc\u06a9 \u0646\u0641\u0631 \u0627\u0646\u062a\u062e\u0627\u0628 \u06a9\u0646 \u06cc\u0627 Broadcast \u0628\u0632\u0646';return;}
+  btn.disabled=true;btn.textContent='\u062f\u0631 \u062d\u0627\u0644 \u0627\u0631\u0633\u0627\u0644...';
+  try{
+    if(_asState.broadcast){
+      await tmAPI('POST','/task/broadcast',{title:title,description:desc,deadline:deadline,priority:_asState.priority});
+    }else{
+      await tmAPI('POST','/task/assign',{title:title,description:desc,deadline:deadline,assignedTo:_asState.member,priority:_asState.priority});
+    }
+    closeAll();
+    toast_(typeof svgIco==='function'?svgIco('check'):'',_asState.broadcast?'\ud83d\udce1 \u0627\u0631\u0633\u0627\u0644 \u0634\u062f':'\u062a\u0633\u06a9 \u0627\u0631\u0633\u0627\u0644 \u0634\u062f \u2705');
+    if(typeof tmSyncBackground==='function')tmSyncBackground();
+  }catch(e){
+    errEl.textContent=e.message||'\u062e\u0637\u0627 \u062f\u0631 \u0627\u0631\u0633\u0627\u0644';
+    btn.disabled=false;btn.textContent='\u2709\ufe0f \u0627\u0631\u0633\u0627\u0644 \u062a\u0633\u06a9';
+  }
+}
+
 boot();
 
 </script>
