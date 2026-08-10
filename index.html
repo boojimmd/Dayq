@@ -18355,7 +18355,22 @@ async function _tmRtOk(tid){
   catch(e){toast_(svgIco('flag'),e.message);}
 }
 
-function _ttdUpdateBlockedUI(s){var bs=document.getElementById('ttdBlockedSection');var nl=document.getElementById('ttdNoteLabel');if(bs)bs.style.display=s==='blocked'?'':'none';if(nl)nl.textContent=s==='blocked'?'توضیح بیشتر':'یادداشت برای مدیر';}
+function _ttdUpdateBlockedUI(status){
+  var sec=document.getElementById('ttdBlockedSection');
+  if(!sec)return;
+  if(status!=='blocked'){sec.style.display='none';return;}
+  sec.style.display='block';
+  if(sec.querySelector('.blocked-reasons'))return;
+  var reasons=['منتظر اطلاعات از مدیر','نیاز به تأیید دارم','ابزار یا دسترسی ندارم','توضیح دیگه'];
+  var html='<div class="blocked-reasons">چرا متوقف شدی؟';
+  reasons.forEach(function(r,i){
+    html+='<label style="display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer;direction:rtl">'
+         +'<input type="radio" name="blockedReason" value="'+i+'" style="accent-color:var(--red);width:16px;height:16px">'
+         +'<span style="font-size:var(--fs-xs)">'+r+'</span></label>';
+  });
+  html+='</div>';
+  sec.innerHTML=html;
+}
 async function _ttdMarkSeen(tid){if(!tid||!tm.token)return;try{await tmAPI('PUT','/task/update',{taskId:tid,seenAt:Date.now()});}catch(e){}}
 async function _ttdQuickStatus(tid,st){try{await tmAPI('PUT','/task/update',{taskId:tid,status:st});toast_(svgIco('check'),st==='in_progress'?'▶ شروع شد':'📤 ارسال شد');setTimeout(tmSyncBackground,800);}catch(e){toast_(svgIco('flag'),e.message);}}
 
