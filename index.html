@@ -2,10 +2,6 @@
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
-  <!-- v1786360384 -->
 
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -4608,8 +4604,8 @@ select.fi{
 
 
 /* ── bubble alignment — is-own is always right ── */
-.ttd-bubble.is-own { align-self: flex-start !important; }
-.ttd-bubble:not(.is-own) { align-self: flex-end !important; }
+.ttd-bubble.is-own { align-self: flex-end !important; }
+.ttd-bubble:not(.is-own) { align-self: flex-start !important; }
 .ttd-bubble.is-own.from-manager {
   background: var(--a) !important; color: #fff !important;
   border-radius: 12px 12px 2px 12px !important;
@@ -4650,523 +4646,6 @@ body:has(#tmSokoPanel.open) .sheet {
 body:has(#tmSokoPanel.open) #ov {
   z-index: 2050 !important;
 }
-
-
-/* ── RTL bubble fix ── */
-.ttd-thread { display:flex; flex-direction:column; gap:6px; padding:8px 4px; direction:rtl; }
-
-/* پیام خودم = راست (flex-start در RTL = right) */
-.ttd-bubble.is-own {
-  align-self: flex-start !important;
-  background: var(--a) !important;
-  color: #fff !important;
-  border: none !important;
-  border-radius: 16px 4px 16px 16px !important;
-  margin-right: 0 !important;
-  margin-left: 20% !important;
-}
-/* پیام دیگری = چپ (flex-end در RTL = left) */
-.ttd-bubble:not(.is-own) {
-  align-self: flex-end !important;
-  background: var(--bg2) !important;
-  color: var(--t1) !important;
-  border: 1px solid var(--b1) !important;
-  border-radius: 4px 16px 16px 16px !important;
-  margin-left: 0 !important;
-  margin-right: 20% !important;
-}
-.ttd-bubble { max-width: 78%; padding: 8px 12px 5px; }
-.ttd-bubble-body { font-size: var(--fs-xs); line-height: 1.55; word-break: break-word; }
-.ttd-bubble-foot {
-  display: flex; align-items: center; justify-content: flex-end;
-  gap: 4px; margin-top: 3px;
-}
-.ttd-bubble-time { font-size: 10px; opacity: .65; white-space: nowrap; }
-.ttd-bubble.is-own .ttd-bubble-time { color: rgba(255,255,255,.8); }
-.ttd-bubble-sender { font-size: 10px; opacity: .6; }
-.ttd-day-div {
-  text-align: center; margin: 10px 0; display: flex;
-  align-items: center; gap: 8px; direction: ltr;
-}
-.ttd-day-div::before,.ttd-day-div::after {
-  content:''; flex:1; height:1px; background:var(--b2);
-}
-.ttd-day-div span {
-  font-size: 11px; color: var(--t3); white-space: nowrap; padding: 0 8px;
-}
-.ttd-sys-msg {
-  text-align: center; font-size: 11px; color: var(--t3);
-  background: var(--bg2); border-radius: 12px;
-  padding: 3px 12px; margin: 4px auto; max-width: 80%;
-}
-/* tick */
-.ttd-tick { font-size: 10px; }
-.ttd-tick-read { color: #60c6f4; }
-.ttd-bubble.is-own .ttd-tick { color: rgba(255,255,255,.7); }
-.ttd-bubble.is-own .ttd-tick-read { color: #fff; }
-
-
-/* ════ Employee Task Sheet — UI Polish ════ */
-
-/* Status buttons — cleaner active state */
-.ttd-st-btn {
-  transition: all 150ms;
-  border-radius: var(--r2) !important;
-  font-family: var(--f) !important;
-}
-.ttd-st-btn.active-st {
-  background: var(--t1) !important;
-  color: var(--bg1) !important;
-  border-color: var(--t1) !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,.15);
-}
-/* blocked button — softer when not active */
-.ttd-st-btn[data-st="blocked"]:not(.active-st) {
-  color: var(--red) !important;
-  border-color: rgba(229,62,90,.25) !important;
-  background: rgba(229,62,90,.05) !important;
-}
-
-/* blocked reason section */
-#ttdBlockedSection {
-  background: rgba(229,62,90,.04);
-  border: 1px solid rgba(229,62,90,.15);
-  border-radius: var(--r2);
-  padding: var(--sp3);
-}
-#ttdBlockedSection h4 {
-  font-size: var(--fs-xs);
-  color: var(--red);
-  margin: 0 0 10px 0;
-  text-align: right;
-}
-#ttdBlockedSection label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: var(--fs-xs);
-  color: var(--t2);
-  padding: 6px 0;
-  cursor: pointer;
-  direction: rtl;
-}
-#ttdBlockedSection input[type=radio] {
-  accent-color: var(--a);
-  width: 16px; height: 16px; flex-shrink: 0;
-}
-
-/* note textarea */
-#ttdNote {
-  background: var(--bg2) !important;
-  border: 1px solid var(--b1) !important;
-  border-radius: var(--r2) !important;
-  padding: 10px 12px !important;
-  font-size: var(--fs-xs) !important;
-  font-family: var(--f) !important;
-  color: var(--t1) !important;
-  resize: none !important;
-  direction: rtl;
-  outline: none !important;
-  transition: border-color 150ms;
-}
-#ttdNote:focus { border-color: var(--a) !important; }
-#ttdNote::placeholder { color: var(--t4) !important; font-size: var(--fs-xs) !important; }
-
-/* chat label */
-.ttd-chat-label {
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  color: var(--t3);
-  text-align: right;
-  margin-bottom: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 4px;
-}
-
-/* send input row */
-.ttd-send-row {
-  display: flex;
-  gap: 8px;
-  align-items: flex-end;
-  padding: var(--sp2) 0 0;
-  border-top: 1px solid var(--b2);
-  margin-top: var(--sp2);
-}
-.ttd-reply-inp {
-  flex: 1 !important;
-  background: var(--bg2) !important;
-  border: 1px solid var(--b1) !important;
-  border-radius: 20px !important;
-  padding: 9px 14px !important;
-  font-size: var(--fs-xs) !important;
-  font-family: var(--f) !important;
-  direction: rtl;
-  outline: none !important;
-  resize: none !important;
-  line-height: 1.4 !important;
-  transition: border-color 150ms;
-}
-.ttd-reply-inp:focus { border-color: var(--a) !important; }
-.ttd-reply-send {
-  width: 36px !important;
-  height: 36px !important;
-  border-radius: 50% !important;
-  background: var(--a) !important;
-  border: none !important;
-  cursor: pointer !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  flex-shrink: 0 !important;
-  transition: opacity 150ms;
-}
-.ttd-reply-send:active { opacity: .8; }
-
-/* bottom action row */
-.ttd-action-row {
-  display: flex;
-  gap: 8px;
-  padding-top: var(--sp3);
-}
-.ttd-save-btn {
-  height: 44px;
-  padding: 0 16px;
-  border: 1px solid var(--b1);
-  border-radius: var(--r2);
-  background: var(--bg2);
-  color: var(--t2);
-  font-size: var(--fs-xs);
-  font-weight: 600;
-  font-family: var(--f);
-  cursor: pointer;
-  white-space: nowrap;
-}
-.ttd-review-btn {
-  flex: 1;
-  height: 44px;
-  border: none;
-  border-radius: var(--r2);
-  background: var(--ag);
-  color: #fff;
-  font-size: var(--fs-xs);
-  font-weight: 700;
-  font-family: var(--f);
-  cursor: pointer;
-}
-
-
-/* ════════════════════════════════════════════════
-   Emil Kowalski animation pass — DayQ / Soko
-   Philosophy: animate with purpose, never for style
-   ════════════════════════════════════════════════ */
-
-/* ── 1. Token fix: remove ease-in from UI usage ── */
-/* --ease-in هرگز در UI استفاده نشود — فقط برای
-   خروج element هایی که خودشان initiate میکنن */
-
-/* ── 2. Chat bubble enter ──
-   Purpose: spatial consistency — پیام از کجا اومد
-   Frequency: occasional → standard animation
-   Tool: CSS animation (entry on mount)
-   Properties: transform + opacity only
-   Duration: 180ms — زیر 300ms */
-@keyframes bubbleIn {
-  from {
-    opacity: 0;
-    transform: translateY(6px) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-.ttd-bubble {
-  animation: bubbleIn 180ms cubic-bezier(0.23, 1, 0.32, 1) both;
-}
-/* stagger — هر bubble 40ms بعد از قبلی */
-.ttd-bubble:nth-child(1)  { animation-delay: 0ms; }
-.ttd-bubble:nth-child(2)  { animation-delay: 40ms; }
-.ttd-bubble:nth-child(3)  { animation-delay: 80ms; }
-.ttd-bubble:nth-child(4)  { animation-delay: 120ms; }
-.ttd-bubble:nth-child(5)  { animation-delay: 160ms; }
-.ttd-bubble:nth-child(n+6){ animation-delay: 200ms; }
-/* آخرین bubble (جدیدترین) بدون delay */
-.ttd-bubble.is-new {
-  animation: bubbleIn 160ms cubic-bezier(0.23, 1, 0.32, 1) both;
-  animation-delay: 0ms;
-}
-
-/* ── 3. Task card exit ──
-   Purpose: state indication — تسک تموم شد
-   Frequency: occasional → standard
-   Tool: CSS transition
-   Properties: opacity + transform + height */
-.tm-task-row.task-exiting {
-  animation: taskExit 280ms cubic-bezier(0.4, 0, 1, 1) forwards;
-  pointer-events: none;
-  overflow: hidden;
-}
-@keyframes taskExit {
-  0%   { opacity: 1; transform: none; max-height: 100px; }
-  40%  { opacity: 0; transform: translateX(20px) scale(0.98); max-height: 100px; }
-  100% { opacity: 0; transform: translateX(20px); max-height: 0; margin: 0; padding: 0; }
-}
-
-/* ── 4. Badge pulse ──
-   Purpose: feedback — تعداد تغییر کرد
-   Frequency: occasional
-   Tool: CSS animation
-   Duration: 300ms — یه‌بار اجرا */
-@keyframes badgePop {
-  0%   { transform: scale(1); }
-  40%  { transform: scale(1.4); }
-  100% { transform: scale(1); }
-}
-.tm-soko-badge.badge-pop {
-  animation: badgePop 300ms cubic-bezier(0.34, 1.3, 0.64, 1);
-}
-
-/* ── 5. Approve/Return button press ──
-   Purpose: feedback — interface heard you
-   Frequency: occasional
-   Tool: CSS transition on :active */
-#mgThreadActions button:active,
-.ttd-review-btn:active,
-.ttd-save-btn:active {
-  transform: scale(0.97);
-  transition: transform 80ms ease;
-}
-#mgThreadActions button,
-.ttd-review-btn,
-.ttd-save-btn {
-  transition: transform 120ms cubic-bezier(0.23, 1, 0.32, 1),
-              background 150ms cubic-bezier(0.23, 1, 0.32, 1),
-              opacity 120ms ease;
-}
-
-/* ── 6. Send button press ──
-   Purpose: feedback
-   Frequency: occasional */
-.ttd-reply-send:active {
-  transform: scale(0.92);
-}
-.ttd-reply-send {
-  transition: transform 100ms cubic-bezier(0.23, 1, 0.32, 1),
-              background 150ms ease;
-}
-
-/* ── 7. Status button toggle ──
-   Already had 150ms ease-out — upgrade to Emil's strong curve */
-.ttd-st-btn {
-  transition:
-    background 150ms cubic-bezier(0.23, 1, 0.32, 1),
-    color 150ms cubic-bezier(0.23, 1, 0.32, 1),
-    border-color 150ms cubic-bezier(0.23, 1, 0.32, 1),
-    box-shadow 150ms cubic-bezier(0.23, 1, 0.32, 1) !important;
-}
-
-/* ── 8. Soko panel — slightly faster ──
-   320ms → 280ms (still feels intentional, not instant) */
-.tm-panel {
-  transition: transform 280ms cubic-bezier(0.32, 0.72, 0, 1) !important;
-}
-
-/* ── Reduced motion respect — ships with animation ── */
-@media (prefers-reduced-motion: reduce) {
-  .ttd-bubble,
-  .tm-task-row.task-exiting,
-  .tm-soko-badge.badge-pop {
-    animation: none;
-  }
-  .ttd-bubble { opacity: 1; transform: none; }
-  #mgThreadActions button,
-  .ttd-reply-send,
-  .ttd-st-btn {
-    transition: background 150ms ease, color 150ms ease;
-  }
-}
-
-
-/* ════════════════════════════════════════════════
-   Soko animation pass — Emil Kowalski framework
-   ════════════════════════════════════════════════ */
-
-/* ── 1. Tab sliding indicator ──
-   Purpose: spatial consistency — "where am I in nav"
-   Frequency: occasional → standard
-   Tool: CSS transition on pseudo-element
-   Properties: transform only (GPU)
-   Duration: 200ms ease-out */
-.tm-tabs {
-  position: relative;
-}
-.tm-tab {
-  position: relative;
-  transition:
-    color 150ms cubic-bezier(0.23, 1, 0.32, 1),
-    border-color 150ms cubic-bezier(0.23, 1, 0.32, 1) !important;
-}
-/* underline indicator slides */
-.tm-tab::after {
-  content: '';
-  position: absolute;
-  bottom: -1px;
-  left: 0; right: 0;
-  height: 2px;
-  background: var(--a);
-  border-radius: 2px;
-  transform: scaleX(0);
-  transition: transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
-  transform-origin: left;
-}
-.tm-tab.active::after {
-  transform: scaleX(1);
-}
-
-/* ── 2. Tab pane content transition ──
-   Purpose: spatial consistency — tab مثل صفحه رفتار میکنه
-   Frequency: occasional
-   Tool: CSS animation on active pane
-   Duration: 180ms — ظاهر شدن محتوا */
-@keyframes paneIn {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-.tm-tab-pane.active {
-  animation: paneIn 180ms cubic-bezier(0.23, 1, 0.32, 1) both !important;
-  transition: none !important;
-}
-
-/* ── 3. Modal enter ──
-   Purpose: spatial consistency
-   Frequency: occasional
-   Tool: CSS animation
-   Properties: transform (scale) + opacity — modal stays centered (exempt from transform-origin rule)
-   Duration: 200ms */
-@keyframes modalIn {
-  from {
-    opacity: 0;
-    transform: scale(0.96) translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-@keyframes modalOut {
-  from { opacity: 1; transform: none; }
-  to   { opacity: 0; transform: scale(0.97); }
-}
-.tm-modal-open .tm-modal-sheet {
-  animation: modalIn 220ms cubic-bezier(0.23, 1, 0.32, 1) both;
-}
-
-/* ── 4. Member card enter — staggered load ──
-   Purpose: preventing jarring change — list ناگهانی ظاهر نشه
-   Frequency: occasional (once per Soko open)
-   Tool: CSS animation
-   Properties: opacity + transform
-   Duration: 200ms با stagger */
-@keyframes memberCardIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-.tm-member-card {
-  animation: memberCardIn 200ms cubic-bezier(0.23, 1, 0.32, 1) both;
-}
-.tm-member-card:nth-child(1) { animation-delay: 0ms; }
-.tm-member-card:nth-child(2) { animation-delay: 50ms; }
-.tm-member-card:nth-child(3) { animation-delay: 100ms; }
-.tm-member-card:nth-child(4) { animation-delay: 150ms; }
-.tm-member-card:nth-child(n+5){ animation-delay: 180ms; }
-
-/* ── 5. Button press feedback — همه Soko buttons ──
-   Purpose: feedback — interface heard you
-   Frequency: occasional
-   Tool: CSS :active + transition
-   Duration: 80ms press, 120ms release */
-.tm-soko-btn,
-.tm-panel-action-btn,
-.tm-btn,
-.tm-status-btn,
-.tm-read-btn,
-.tm-tab-pane button:not(.tm-modal-x) {
-  transition:
-    transform 100ms cubic-bezier(0.23, 1, 0.32, 1),
-    background 150ms cubic-bezier(0.23, 1, 0.32, 1),
-    opacity 100ms ease !important;
-}
-.tm-soko-btn:active,
-.tm-panel-action-btn:active,
-.tm-btn:active,
-.tm-status-btn:active,
-.tm-read-btn:active {
-  transform: scale(0.96) !important;
-}
-
-/* ── 6. KPI number change pulse ──
-   Purpose: state indication — عدد تغییر کرد
-   Frequency: occasional (sync)
-   Tool: CSS animation triggered by class */
-@keyframes kpiPop {
-  0%   { transform: scale(1); }
-  40%  { transform: scale(1.12); color: var(--a); }
-  100% { transform: scale(1); }
-}
-.tm-kpi-num.kpi-updated,
-.tm-sb-kpi-val.kpi-updated {
-  animation: kpiPop 350ms cubic-bezier(0.34, 1.3, 0.64, 1);
-}
-
-/* ── 7. Urgency group enter ──
-   Purpose: spatial consistency — group‌ها از کجا میان
-   Now using 6px (was 8px) — more subtle */
-@keyframes tmUrgHdrIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 1; transform: none; }
-}
-.tm-urg-hdr {
-  animation: tmUrgHdrIn 160ms cubic-bezier(0.23, 1, 0.32, 1) both;
-}
-
-/* ── Reduced motion ── */
-@media (prefers-reduced-motion: reduce) {
-  .tm-tab::after,
-  .tm-tab-pane.active,
-  .tm-modal-open .tm-modal-sheet,
-  .tm-member-card,
-  .tm-urg-hdr {
-    animation: none !important;
-  }
-  .tm-tab::after { transition: none !important; }
-  .tm-tab-pane.active { opacity: 1; transform: none; }
-  .tm-member-card { opacity: 1; transform: none; }
-  .tm-soko-btn:active,
-  .tm-btn:active { transform: none !important; }
-}
-
-
-/* ════ Empty State — Soko ════ */
-.soko-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:var(--sp6) var(--sp4);text-align:center;gap:var(--sp3);animation:paneIn 250ms cubic-bezier(0.23,1,0.32,1) both}
-.soko-empty-icon{font-size:40px;line-height:1;opacity:.75}
-.soko-empty-title{font-size:var(--fs-sm);font-weight:700;color:var(--t1);margin:0}
-.soko-empty-body{font-size:var(--fs-xs);color:var(--t3);line-height:1.65;max-width:210px;margin:0}
-.soko-empty-action{margin-top:var(--sp2);height:36px;padding:0 var(--sp4);border-radius:var(--r5);background:var(--a);color:#fff;border:none;font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer;transition:opacity 120ms ease}
-.soko-empty-action:active{opacity:.8}
 
 </style>
 </head>
@@ -6770,73 +6249,48 @@ function _tmSbSel(uuid){
   var s=document.createElement('div');
   s.className='sheet';s.id='shTaskThread';
   var ST={pending:'شروع نشده',in_progress:'در حال انجام',done:'تکمیل شد',blocked:'متوقف',in_review:'منتظر بررسی'};
-  var isReview=(task.status==='in_review');
-
-  // action buttons
+  var isReview=task.status==='in_review';
   var actEl=document.createElement('div');
-  actEl.id='mgThreadActions';
   actEl.style.cssText='display:flex;gap:8px;padding:8px 16px;background:var(--bg1);border-bottom:1px solid var(--b2)';
   if(isReview){
-    var apB=document.createElement('button');apB.textContent='تأیید \u2705';
+    var apB=document.createElement('button');apB.textContent='تأیید ✅';
     apB.style.cssText='flex:1;height:36px;background:var(--ag);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer';
     apB.onclick=function(){_tmApproveTask(taskId);};
-    var rtB=document.createElement('button');rtB.textContent='\u21a9 برگشت';
+    var rtB=document.createElement('button');rtB.textContent='↩ برگشت';
     rtB.style.cssText='flex:1;height:36px;background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer';
     rtB.onclick=function(){_tmReturnTask(taskId);};
     actEl.appendChild(apB);actEl.appendChild(rtB);
   }else{
-    var dlB=document.createElement('button');dlB.textContent='\ud83d\udcc5 تمدید ددلاین';
+    var dlB=document.createElement('button');dlB.textContent='📅 تمدید';
     dlB.style.cssText='height:34px;padding:0 12px;background:var(--bg2);color:var(--t2);border:1px solid var(--b1);border-radius:var(--r5);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer';
     dlB.onclick=function(){tmExtendDeadline(taskId);};
     actEl.appendChild(dlB);
   }
-
-  s.innerHTML=
-    '<div class="sh-handle"></div>'+
+  s.innerHTML='<div class="sh-handle"></div>'+
     '<div class="sh-head"><div class="sh-tr">'+
     '<div class="sh-ttl">'+esc(task.title||'گفتگو')+'</div>'+
     '<button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>'+
     '</div><div style="font-size:var(--fs-xs);color:var(--t3);padding:4px 0;direction:rtl">'+
-    esc(task.memberName||'')+' \u00b7 '+(ST[task.status]||task.status||'')+
+    esc(task.memberName||'')+' · '+(ST[task.status]||task.status||'')+
     '</div></div>'+
-    (task.memberNote?'<div style="margin:8px 16px 0;background:var(--ambm);border:1px solid rgba(217,119,6,.2);border-radius:var(--r2);padding:10px"><div style="font-size:var(--fs-2xs);color:var(--amber);font-weight:700;margin-bottom:4px">\ud83d\udccb یادداشت</div><div style="font-size:var(--fs-xs);direction:rtl">'+esc(task.memberNote)+'</div></div>':'')+
-    '<div class="sh-body" style="flex:1;display:flex;flex-direction:column">'+
-    '<div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:4px;text-align:right">گفتگو</div>'+
-    '<div class="ttd-thread tm-mgr-view" id="mgThreadMsgs" style="flex:1;min-height:100px;max-height:40vh;overflow-y:auto"></div>'+
+    (task.memberNote?'<div style="margin:8px 16px 0;background:var(--ambm);border:1px solid rgba(217,119,6,.2);border-radius:var(--r2);padding:10px"><div style="font-size:var(--fs-2xs);color:var(--amber);font-weight:700;margin-bottom:4px">یادداشت</div><div style="font-size:var(--fs-xs);direction:rtl">'+esc(task.memberNote)+'</div></div>':'')+
+    '<div class="sh-body" style="flex:1;display:flex;flex-direction:column;gap:var(--sp2)">'+
+    '<div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2);text-align:right">گفتگو</div>'+
+    '<div class="ttd-thread tm-mgr-view" id="mgThreadMsgs" style="flex:1;min-height:120px;max-height:45vh;overflow-y:auto"></div>'+
     '<div style="display:flex;gap:var(--sp2);align-items:flex-end;padding-top:var(--sp2);border-top:1px solid var(--b2);margin-top:var(--sp2)">'+
-    '<textarea class="ttd-reply-inp" rows="1" placeholder="\u067e\u0627\u0633\u062e \u0628\u062f\u0647..." oninput="this.style.height=\'auto\';this.style.height=this.scrollHeight+\'px\'" onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();_mgSendComment()}"></textarea>'+
+    '<textarea class="ttd-reply-inp" rows="1" placeholder="پاسخ بده..." oninput="this.style.height=\'auto\';this.style.height=this.scrollHeight+\'px\'" onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();_mgSendComment()}"></textarea>'+
     '<button class="ttd-reply-send" onclick="_mgSendComment()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>'+
     '</div></div>';
-
   s.insertBefore(actEl,s.querySelector('.sh-body'));
   document.body.appendChild(s);
-
-  // render thread
   var tel=s.querySelector('#mgThreadMsgs');
   if(tel&&typeof _renderThread==='function')_renderThread(task.comments||[],'manager',tel,task);
-
-  // open
   var ov=document.getElementById('ov');
   if(ov){ov.classList.add('open');ov.style.zIndex='2050';}
-  s.classList.add('open');s.style.zIndex='2100';
-
-  // live polling — هر ۵ ثانیه sync وقتی sheet بازه
-  if(window._mgPollId){clearInterval(window._mgPollId);window._mgPollId=null;}
-  var _pollId=setInterval(function(){
-    var sh=document.getElementById('shTaskThread');
-    if(!sh||!sh.classList.contains('open')){clearInterval(_pollId);return;}
-    if(typeof tmSyncBackground!=='function')return;
-    tmSyncBackground().then(function(){
-      var members2=(tm.snapshot&&tm.snapshot.members)||[];
-      var t2=null;
-      members2.forEach(function(m){(m.tasks||[]).forEach(function(t){if(t.id===taskId)t2=t;});});
-      if(!t2)return;
-      var tel2=document.getElementById('mgThreadMsgs');
-      if(tel2&&typeof _renderThread==='function')_renderThread(t2.comments||[],'manager',tel2,t2);
-    }).catch(function(){});
-  },5000);
+  s.classList.add('open');
+  s.style.zIndex='2100';
 }
-  window._mgPollId=_pollId;/* ══ ICON LIBRARY ══ */
+/* ══ ICON LIBRARY ══ */
 const ICONS=[
   {id:'wx-sun',c:'#a1a8b3',s:`<circle cx="12" cy="12" r="4.5" stroke-width="1.7"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5 5l2.1 2.1M16.9 16.9 19 19M19 5l-2.1 2.1M7.1 16.9 5 19" stroke-width="1.7"/>`},
   {id:'wx-cloud',c:'#a1a8b3',s:`<path d="M7 18a4.5 4.5 0 0 1-.5-9 5.5 5.5 0 0 1 10.7-1.6A4 4 0 0 1 17 18H7Z" stroke-width="1.6"/>`},
@@ -16049,7 +15503,7 @@ function tmRenderSokoStatus() {
     <!-- Fix: assign = primary action -->
     <button onclick="tmAssignTask('')" style="width:100%;height:42px;background:var(--a);color:#fff;border:none;border-radius:var(--r3);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">&#x271A; ارسال تسک به تیم</button><div id="tmSokoFilterChip" style="margin-top:6px;min-height:20px"></div>
     ${noTasks
-      ? `${_sokoEmpty("🎉","همه تسک\u200cها انجام شد!","تیم عالی کار کرده. برای ادامه تسک جدید بفرست.","+ ارسال تسک","tmAssignTask('')")}`
+      ? `<div style="text-align:center;padding:var(--sp5);color:var(--t3);font-size:var(--fs-sm)">همه تسک‌ها تموم شدن 🎉</div>`
       : `${inReview.length?reviewGroup(inReview):''}
          ${group('دیر شده', 'var(--red)', '🔴', overdue, '')}
          ${group('امروز', 'var(--amber)', '⚡', dueToday, 'برای امروز تسکی نیست')}
@@ -18352,109 +17806,109 @@ function openTeamTaskDetail(taskId){
   _ttdTaskId=taskId;
   t.lastReadAt=Date.now();
 
-  var old=document.getElementById('shTeamTaskDetail');
-  if(old)old.remove();
-  var s=document.createElement('div');
-  s.className='sheet';s.id='shTeamTaskDetail';
+  // عنوان
+  var el_title=document.getElementById('ttdTitle');
+  if(el_title)el_title.textContent=t.title||'تسک تیمی';
 
-  var months=['\u0641\u0631\u0648\u0631\u062f\u06cc\u0646','\u0627\u0631\u062f\u06cc\u0628\u0647\u0634\u062a','\u062e\u0631\u062f\u0627\u062f','\u062a\u06cc\u0631','\u0645\u0631\u062f\u0627\u062f','\u0634\u0647\u0631\u06cc\u0648\u0631','\u0645\u0647\u0631','\u0622\u0628\u0627\u0646','\u0622\u0630\u0631','\u062f\u06cc','\u0628\u0647\u0645\u0646','\u0627\u0633\u0641\u0646\u062f'];
+  // ددلاین
+  var months=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
   var dlLabel='';
   if(t.deadline){
     var parts=t.deadline.split('-').map(Number);
-    var today=mrTodayKey().split('-').map(Number);
-    var diff=_jalToDays(parts[0],parts[1],parts[2])-_jalToDays(today[0],today[1],today[2]);
-    dlLabel=diff===0?'\u0627\u0645\u0631\u0648\u0632':diff===1?'\u0641\u0631\u062f\u0627':diff<0?(Math.abs(diff)+' \u0631\u0648\u0632 \u06af\u0630\u0634\u062a\u0647 \u26a0\ufe0f'):(parts[2]+' '+months[parts[1]-1]);
+    var today=mrTodayKey();
+    var tparts=today.split('-').map(Number);
+    var diff=_jalToDays(parts[0],parts[1],parts[2])-_jalToDays(tparts[0],tparts[1],tparts[2]);
+    dlLabel=diff===0?'امروز':diff===1?'فردا':diff<0?(Math.abs(diff)+' روز گذشته ⚠️'):(parts[2]+' '+months[parts[1]-1]);
   }
-  var mgName='\u0645\u062f\u06cc\u0631';
+  var el_dl=document.getElementById('ttdDeadline');
+  if(el_dl)el_dl.textContent=dlLabel?('📅 '+dlLabel):'';
+
+  // نام مدیر — از snapshot
+  var mgName='مدیر';
   if(tm.snapshot&&tm.snapshot.members){
     var mgM=tm.snapshot.members.find(function(m){return m.isManager||m.role==='manager';});
     if(mgM&&mgM.name)mgName=mgM.name;
   }
-  var priMap={high:'\ud83d\udd34 \u0641\u0648\u0631\u06cc',med:'\ud83d\udfe1 \u0645\u0647\u0645',low:'\u26aa \u0639\u0627\u062f\u06cc',urgent:'\ud83d\udd34 \u0641\u0648\u0631\u06cc'};
+  var el_mg=document.getElementById('ttdManager');
+  if(el_mg)el_mg.textContent='از '+mgName;
+
+  // اولویت
+  var priMap={high:'🔴 فوری',med:'🟡 مهم',low:'⚪ عادی',urgent:'🔴 فوری'};
+  var el_pri=document.getElementById('ttdPriority');
+  if(el_pri)el_pri.textContent=priMap[t.priority]||'';
+
+  // توضیح
+  var el_db=document.getElementById('ttdDescBlock');
+  var el_desc=document.getElementById('ttdDesc');
+  if(el_db&&el_desc){
+    if(t.description){el_desc.textContent=t.description;el_db.style.display='';}
+    else el_db.style.display='none';
+  }
+
+  // وضعیت — هم style هم dataset
   var status=t.status||'pending';
-  var isReview=status==='in_review';
-
-  var metaChips='';
-  if(dlLabel)metaChips+='<span style="background:rgba(217,119,6,.1);color:var(--amber);padding:2px 8px;border-radius:var(--r5);font-size:11px">\ud83d\udcc5 '+dlLabel+'</span>';
-  if(t.priority&&priMap[t.priority])metaChips+='<span style="background:var(--bg2);color:var(--t3);padding:2px 8px;border-radius:var(--r5);font-size:11px">'+priMap[t.priority]+'</span>';
-  metaChips+='<span style="background:var(--bg2);color:var(--t3);padding:2px 8px;border-radius:var(--r5);font-size:11px">\u0627\u0632 '+esc(mgName)+'</span>';
-
-  s.innerHTML=
-    '<div class="sh-handle"></div>'+
-    '<div class="sh-head">'+
-      '<div class="sh-tr">'+
-        '<div class="sh-ttl">'+esc(t.title||'\u062a\u0633\u06a9 \u062a\u06cc\u0645\u06cc')+'</div>'+
-        '<button class="sh-x" onclick="closeAll()">\u00d7</button>'+
-      '</div>'+
-      '<div style="display:flex;flex-wrap:wrap;gap:4px;padding:6px 0;direction:rtl">'+metaChips+'</div>'+
-    '</div>'+
-    '<div class="sh-body" style="display:flex;flex-direction:column;gap:12px;padding-bottom:var(--sp4)">'+
-      (t.description?'<div style="background:var(--bg2);border-radius:var(--r2);padding:var(--sp3);font-size:var(--fs-xs);color:var(--t2);direction:rtl;line-height:1.6">'+esc(t.description)+'</div>':'')+
-      (isReview?'<div style="background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.2);border-radius:var(--r2);padding:var(--sp3);text-align:center;font-size:var(--fs-xs);color:var(--a)">\ud83d\udd0d \u062a\u0633\u06a9 \u0628\u0631\u0627\u06cc \u0628\u0631\u0631\u0633\u06cc \u0627\u0631\u0633\u0627\u0644 \u0634\u062f\u0647</div>':
-      '<div id="ttdStatusBtns" style="display:flex;gap:8px">'+
-        '<button class="ttd-st-btn" data-st="in_progress" onclick="_ttdSetStatus(\'in_progress\')" style="flex:1;height:40px;background:var(--bg2);border:1px solid var(--b1);">\ud83d\udd35 \u062f\u0631 \u0627\u0646\u062c\u0627\u0645</button>'+
-        '<button class="ttd-st-btn" data-st="blocked" onclick="_ttdSetStatus(\'blocked\')" style="flex:1;height:40px;background:rgba(229,62,90,.05);border:1px solid rgba(229,62,90,.25);color:var(--red)">\ud83d\udeab \u0645\u062a\u0648\u0642\u0641</button>'+
-      '</div>')+
-      '<div id="ttdBlockedSection" style="display:none"></div>'+
-      '<div>'+
-        '<div style="font-size:11px;color:var(--t3);margin-bottom:6px;text-align:right">\u062a\u0648\u0636\u06cc\u062d (\u0627\u062e\u062a\u06cc\u0627\u0631\u06cc)</div>'+
-        '<textarea id="ttdNote" class="ttd-reply-inp" rows="2" style="border-radius:var(--r2)!important;width:100%;box-sizing:border-box" placeholder="\u0647\u0631 \u062a\u0648\u0636\u06cc\u062d\u06cc \u0628\u0631\u0627\u06cc \u0645\u062f\u06cc\u0631 \u0628\u0646\u0648\u06cc\u0633...">'+esc(t.memberNote||'')+'</textarea>'+
-      '</div>'+
-      '<div style="height:1px;background:var(--b2)"></div>'+
-      '<div>'+
-        '<div class="ttd-chat-label"><span>\ud83d\udcac</span><span>\u067e\u06cc\u0627\u0645 \u0628\u0627 \u0645\u062f\u06cc\u0631</span></div>'+
-        '<div class="ttd-thread" id="ttdThreadMsgs" style="min-height:60px;max-height:30vh;overflow-y:auto"></div>'+
-        '<div class="ttd-send-row">'+
-          '<button class="ttd-reply-send" onclick="_ttdSendComment()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>'+
-          '<textarea class="ttd-reply-inp" rows="1" placeholder="\u067e\u06cc\u0627\u0645 \u0628\u0646\u0648\u06cc\u0633..." oninput="this.style.height=\'auto\';this.style.height=this.scrollHeight+\'px\'" onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();_ttdSendComment()}"></textarea>'+
-        '</div>'+
-      '</div>'+
-      '<div id="ttdErr" style="font-size:var(--fs-xs);color:var(--red);min-height:14px;text-align:center"></div>'+
-      (isReview?'':
-      '<div class="ttd-action-row">'+
-        '<button class="ttd-save-btn" onclick="_ttdSave()" id="ttdSaveBtn">\u0630\u062e\u06cc\u0631\u0647</button>'+
-        '<button class="ttd-review-btn" onclick="_ttdSubmitForReview()" id="ttdReviewBtn">\u2705 \u0627\u0631\u0633\u0627\u0644 \u0628\u0631\u0627\u06cc \u0628\u0631\u0631\u0633\u06cc \u0645\u062f\u06cc\u0631</button>'+
-      '</div>')+
-    '</div>';
-
-  document.body.appendChild(s);
-
-  // status buttons active state
-  s.querySelectorAll('.ttd-st-btn').forEach(function(btn){
+  document.querySelectorAll('.ttd-st-btn').forEach(function(btn){
     var active=btn.dataset.st===status;
     btn.dataset.active=active?'1':'0';
     btn.classList.toggle('active-st',active);
+    btn.style.background=active?'var(--t1)':'var(--bg2)';
+    btn.style.color=active?'var(--bg1)':'var(--t2)';
+    btn.style.borderColor=active?'var(--t1)':'var(--b1)';
   });
+  _ttdUpdateBlockedUI(status);
 
-  // blocked section
-  if(typeof _ttdUpdateBlockedUI==='function')_ttdUpdateBlockedUI(status);
+  // یادداشت قبلی
+  var el_note=document.getElementById('ttdNote');
+  if(el_note)el_note.value=t.memberNote||'';
 
-  // thread
-  var tel=s.querySelector('#ttdThreadMsgs');
-  if(tel&&typeof _renderThread==='function')_renderThread(t.comments||[],'member',tel,t);
+  // review banner و button
+  var rvBanner=document.getElementById('ttdReviewBanner');
+  var rvBtn=document.getElementById('ttdReviewBtn');
+  var stBtns=document.getElementById('ttdStatusBtns');
+  var svBtn=document.getElementById('ttdSaveBtn');
+  if(status==='in_review'){
+    if(rvBanner)rvBanner.style.display='';
+    if(rvBtn)rvBtn.style.display='none';
+    if(stBtns)stBtns.style.display='none';
+    if(svBtn)svBtn.style.display='none';
+  }else{
+    if(rvBanner)rvBanner.style.display='none';
+    if(rvBtn)rvBtn.style.display='';
+    if(stBtns)stBtns.style.display='';
+    if(svBtn)svBtn.style.display='';
+  }
 
-  // open
-  var ov=document.getElementById('ov');
-  if(ov){ov.classList.add('open');}
-  s.classList.add('open');
+  // checklist
+  var el_cl=document.getElementById('ttdChecklist');
+  var el_cli=document.getElementById('ttdChecklistItems');
+  if(t.checklist&&t.checklist.length&&el_cl&&el_cli){
+    el_cl.style.display='';
+    el_cli.innerHTML=t.checklist.map(function(item){
+      return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--b2)">'+
+        '<div style="width:14px;height:14px;border-radius:3px;border:2px solid '+(item.done?'var(--t1)':'var(--b1)')+';background:'+(item.done?'var(--t1)':'transparent')+';flex-shrink:0;display:flex;align-items:center;justify-content:center">'+
+        (item.done?'<svg viewBox="0 0 12 12" width="8" height="8"><polyline points="2,6 5,9 10,3" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>':'')+
+        '</div>'+
+        '<span style="font-size:var(--fs-xs);color:'+(item.done?'var(--t3)':'var(--t1)')+';text-decoration:'+(item.done?'line-through':'none')+'">'+esc(item.text)+'</span></div>';
+    }).join('');
+  }else if(el_cl)el_cl.style.display='none';
 
-  setTimeout(function(){if(typeof _ttdMarkSeen==='function')_ttdMarkSeen(taskId);},800);
+  var el_err=document.getElementById('ttdErr');
+  if(el_err)el_err.textContent='';
+  var el_body=document.getElementById('ttdBody');
+  if(el_body)el_body.dataset.taskId=taskId;
+
+  // thread مستقیم render — نه timeout
+  var el_thread=document.getElementById('ttdThreadMsgs');
+  if(el_thread&&typeof _renderThread==='function'){
+    _renderThread(t.comments||[],'member',el_thread,t);
+  }
+
+  openSheet('shTeamTaskDetail');
+  setTimeout(function(){_ttdMarkSeen(taskId);},800);
   setTimeout(function(){try{tmAPI('POST','/task/read',{taskId:taskId});}catch(e){}},1000);
-
-  // live polling
-  var _empPollId=setInterval(function(){
-    var sh=document.getElementById('shTeamTaskDetail');
-    if(!sh||!sh.classList.contains('open')){clearInterval(_empPollId);return;}
-    if(typeof tmSyncBackground!=='function')return;
-    tmSyncBackground().then(function(){
-      var t2=(tm.inbox||[]).find(function(x){return x.id===taskId;});
-      if(!t2)return;
-      var tel2=document.getElementById('ttdThreadMsgs');
-      if(tel2&&typeof _renderThread==='function')_renderThread(t2.comments||[],'member',tel2,t2);
-    }).catch(function(){});
-  },5000);
-}function _ttdSetStatus(st){_ttdUpdateBlockedUI(st);
-  var _sheet=document.getElementById('shTeamTaskDetail');(_sheet?_sheet:document).querySelectorAll('.ttd-st-btn').forEach(btn => {
+}
+function _ttdSetStatus(st){_ttdUpdateBlockedUI(st);
+  document.querySelectorAll('.ttd-st-btn').forEach(btn => {
     const active = btn.dataset.st === st;
     btn.style.background = active ? 'var(--t1)' : 'var(--bg2)';
     btn.style.color = active ? 'var(--bg1)' : 'var(--t2)';
@@ -18853,23 +18307,13 @@ async function _ttdSubmitForReview(){
     await tmAPI('PUT','/task/update',{taskId,status:'in_review',memberNote:note});
     var t=(tm.inbox||[]).find(function(x){return x.id===taskId;});
     if(t){t.status='in_review';t.memberNote=note;}
-    // sheet رو close و دوباره open با status جدید
+    var rvBanner=document.getElementById('ttdReviewBanner');
     var stBtns=document.getElementById('ttdStatusBtns');
     var svBtn=document.getElementById('ttdSaveBtn');
-    var rvBtn=document.getElementById('ttdReviewBtn');
+    if(rvBanner)rvBanner.style.display='';
     if(stBtns)stBtns.style.display='none';
+    if(btn)btn.style.display='none';
     if(svBtn)svBtn.style.display='none';
-    if(rvBtn)rvBtn.style.display='none';
-    // banner inline
-    var _sh=document.getElementById('shTeamTaskDetail');
-    if(_sh&&!_sh.querySelector('.ttd-review-banner')){
-      var _banner=document.createElement('div');
-      _banner.className='ttd-review-banner';
-      _banner.style.cssText='background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.2);border-radius:var(--r2);padding:var(--sp3);text-align:center;font-size:var(--fs-xs);color:var(--a);margin-bottom:8px';
-      _banner.textContent='?? تسک برای بررسی ارسال شده';
-      var _body=_sh.querySelector('.sh-body');
-      if(_body)_body.prepend(_banner);
-    }
     toast_(svgIco('check'),'📤 برای بررسی ارسال شد');
     setTimeout(tmSyncBackground,1500);
   }catch(e){toast_(svgIco('flag'),e.message||'خطا');}
@@ -18910,18 +18354,8 @@ async function _tmRtOk(tid){
   catch(e){toast_(svgIco('flag'),e.message);}
 }
 
-function _ttdUpdateBlockedUI(status){
-  var sec=document.getElementById('ttdBlockedSection');
-  if(!sec)return;
-  if(status!=='blocked'){sec.style.display='none';return;}
-  sec.style.display='block';
-  if(sec.querySelector('.blocked-reasons'))return;
-  var reasons=['منتظر اطلاعات از مدیر','نیاز به تأیید دارم','ابزار یا دسترسی ندارم','توضیح دیگه'];
-  var html='<div class="blocked-reasons"><div style="font-size:var(--fs-xs);color:var(--red);font-weight:600;margin-bottom:8px;text-align:right">چرا متوقف شدی؟</div>';
-  reasons.forEach(function(r,i){html+='<label style="display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer;direction:rtl"><input type="radio" name="blockedReason" value="'+i+'" style="accent-color:var(--red);width:16px;height:16px"><span style="font-size:var(--fs-xs)">'+r+'</span></label>';});
-  html+='<textarea id="ttdBlockedNote" rows="2" placeholder="توضیح بیشتر..." style="width:100%;margin-top:8px;padding:8px;background:var(--bg2);border:1px solid rgba(229,62,90,.2);border-radius:var(--r2);font-size:var(--fs-xs);font-family:var(--f);resize:none;direction:rtl;outline:none;box-sizing:border-box"></textarea></div>';
-  sec.innerHTML=html;
-}async function _ttdMarkSeen(tid){if(!tid||!tm.token)return;try{await tmAPI('PUT','/task/update',{taskId:tid,seenAt:Date.now()});}catch(e){}}
+function _ttdUpdateBlockedUI(s){var bs=document.getElementById('ttdBlockedSection');var nl=document.getElementById('ttdNoteLabel');if(bs)bs.style.display=s==='blocked'?'':'none';if(nl)nl.textContent=s==='blocked'?'توضیح بیشتر':'یادداشت برای مدیر';}
+async function _ttdMarkSeen(tid){if(!tid||!tm.token)return;try{await tmAPI('PUT','/task/update',{taskId:tid,seenAt:Date.now()});}catch(e){}}
 async function _ttdQuickStatus(tid,st){try{await tmAPI('PUT','/task/update',{taskId:tid,status:st});toast_(svgIco('check'),st==='in_progress'?'▶ شروع شد':'📤 ارسال شد');setTimeout(tmSyncBackground,800);}catch(e){toast_(svgIco('flag'),e.message);}}
 
 function _tmTempPin(pin){
@@ -19007,111 +18441,6 @@ function _tmSbReport(sb){
   h+='</div>';
   sb.innerHTML=h;
 }
-async function tmApproveTask(taskId,approve){
-  // exit animation روی task card
-  try{var _rows=document.querySelectorAll('[onclick*="'+taskId+'"]');
-  _rows.forEach(function(r){var card=r.closest('.tm-task-row');if(card){card.classList.add('task-exiting');}});}catch(_e){}
-  try{
-    await tmAPI('PUT','/task/update',{taskId:taskId,status:approve?'done':'in_progress'});
-    // system comment
-    var msg=approve?'تسک تأیید شد ✅':'تسک برای اصلاح برگشت شد ↩';
-    try{await tmAPI('POST','/task/comment',{taskId:taskId,text:msg});}catch(_){}
-    toast_(svgIco('check'),approve?'تسک تأیید شد ✅':'تسک برگشت داده شد');
-    setTimeout(function(){closeAll();if(typeof tmSyncBackground==='function')tmSyncBackground();},600);
-  }catch(e){toast_('','❌ خطا',2500);}
-}
-
-function _renderThread(c,role,el,taskObj){
-  if(!el)return;
-  if(!c||!c.length){el.innerHTML='<div class="tm-thread-empty">هنوز پیامی نیست</div>';el.scrollTop=0;return;}
-  var readBy=(taskObj&&taskObj.readBy)||{};
-  var html='',lastDay='';
-  c.forEach(function(x,xi){
-    x = Object.assign({},x,{from:x.from||x.role||''});
-    var ts=_commentTime(x.ts||x.at||0);
-    var d=ts?new Date(ts):null;
-    // date divider
-    if(d&&!isNaN(d.getTime())){
-      var dk=d.toDateString();
-      if(dk!==lastDay){
-        lastDay=dk;
-        var now=new Date();
-        var lbl=d.toDateString()===now.toDateString()?'امروز':
-                new Date(now-86400000).toDateString()===d.toDateString()?'دیروز':
-                (function(){try{var j=gregorianToJalali(d.getFullYear(),d.getMonth()+1,d.getDate());return j[2]+'/'+j[1]+'/'+(j[0]%100);}catch(e){return d.getDate()+'/'+(d.getMonth()+1);}})();
-        html+='<div class="ttd-day-div"><span>'+lbl+'</span></div>';
-      }
-    }
-    if((x.from||x.role)==='system'){
-      html+='<div class="ttd-sys-msg">'+esc(x.text)+'</div>';return;
-    }
-    var isOwn=((x.from||x.role)===role);
-    var sndr=isOwn?'':((x.from||x.role)==='manager'?'مدیر':'کارمند');
-    var hm='';
-    if(d&&!isNaN(d.getTime())){
-      hm=d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');
-    }
-    // read receipt
-    var tick='';
-    if(isOwn){
-      var otherKeys=Object.keys(readBy).filter(function(k){return k!==tm.uuid;});
-      var readTs=otherKeys.length?readBy[otherKeys[0]]:0;
-      tick=readTs&&ts&&readTs>ts?'<span class="ttd-tick ttd-tick-read">✓✓</span>':'<span class="ttd-tick">✓</span>';
-    }
-    html+='<div class="ttd-bubble from-'+(x.from||x.role)+(isOwn?' is-own':'')+'">'+
-      '<div class="ttd-bubble-body">'+esc(x.text)+'</div>'+
-      '<div class="ttd-bubble-foot">'+
-        (sndr?'<span class="ttd-bubble-sender">'+sndr+'</span>':'')+
-        (hm?'<span class="ttd-bubble-time">'+hm+'</span>':'')+
-        tick+
-      '</div></div>';
-  });
-  el.innerHTML=html;
-  setTimeout(function(){el.scrollTop=el.scrollHeight;
-  // mark last bubble as new for faster animation
-  var _last=el.querySelector('.ttd-bubble:last-child');
-  if(_last){_last.classList.add('is-new');}},50);
-}f
-
-function _commentTime(ts){if(!ts&&ts!==0)return '';var d=new Date(ts);if(isNaN(d.getTime()))return '';return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');}
-
-async function _ttdSendComment(){
-  var inp=document.querySelector('#ttdCommentSection .ttd-reply-inp');
-  if(!inp||!inp.value.trim()||!_ttdTaskId)return;
-  var text=inp.value.trim(),btn=document.querySelector('#ttdCommentSection .ttd-reply-send');
-  if(btn)btn.disabled=true;
-  var task=(tm.inbox||[]).find(function(t){return t.id===_ttdTaskId;});
-  try{await tmAPI('POST','/task/comment',{taskId:_ttdTaskId,text,from:'member'});}
-  catch(e){if(btn)btn.disabled=false;inp.value=text;toast_('','❌ خطا در ارسال پیام',2500);return;}
-  if(task){
-    if(!task.comments)task.comments=[];
-    task.comments.push({from:'member',text,ts:Date.now(),at:Date.now()});
-  }
-  inp.value='';inp.style.height='auto';
-  var thr=document.getElementById('ttdThreadMsgs');
-  if(thr&&task&&typeof _renderThread==='function')_renderThread(task.comments||[],'member',thr,task);
-  if(thr)thr.scrollTop=thr.scrollHeight;
-  if(btn)btn.disabled=false;
-}
-
-function _tmAnimateKpi(selector){
-  document.querySelectorAll(selector).forEach(function(el){
-    el.classList.remove('kpi-updated');
-    void el.offsetWidth; // reflow
-    el.classList.add('kpi-updated');
-    setTimeout(function(){el.classList.remove('kpi-updated');},400);
-  });
-}
-
-function _sokoEmpty(icon,title,body,actionLabel,onAction){
-  return '<div class="soko-empty">'+
-    '<div class="soko-empty-icon">'+icon+'</div>'+
-    '<p class="soko-empty-title">'+title+'</p>'+
-    '<p class="soko-empty-body">'+body+'</p>'+
-    (actionLabel?'<button class="soko-empty-action" onclick="'+onAction+'">'+actionLabel+'</button>':'')+
-    '</div>';
-}
-
 boot();
 
 </script>
@@ -21896,19 +21225,3 @@ async function _tmTryPushToMember(memberUuid,taskTitle,broadcast){
     });
   }catch(e){}
 }
-function _tmApproveTask(taskId){ tmApproveTask(taskId,true); }
-function _tmReturnTask(taskId){ tmApproveTask(taskId,false); }
-function tmExtendDeadline(taskId){
-  var members=(tm.snapshot&&tm.snapshot.members)||[];
-  var task=null;
-  members.forEach(function(m){(m.tasks||[]).forEach(function(t){if(t.id===taskId)task=t;});});
-  if(task&&typeof _tmDlSheet==='function')_tmDlSheet(taskId,task.title||'',task.deadline||'');
-}
-async function tmApproveTask(taskId,approve){
-  try{
-    await tmAPI('POST','/task/'+(approve?'approve':'return'),{taskId:taskId});
-    toast_(svgIco('check'),approve?'تسک تأیید شد ✅':'تسک برگشت داده شد');
-    setTimeout(function(){closeAll();if(typeof tmSyncBackground==='function')tmSyncBackground();},600);
-  }catch(e){toast_('','❌ خطا',2500);}
-}
-
