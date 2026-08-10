@@ -17806,106 +17806,107 @@ function openTeamTaskDetail(taskId){
   _ttdTaskId=taskId;
   t.lastReadAt=Date.now();
 
-  // عنوان
-  var el_title=document.getElementById('ttdTitle');
-  if(el_title)el_title.textContent=t.title||'تسک تیمی';
+  var old=document.getElementById('shTeamTaskDetail');
+  if(old)old.remove();
+  var s=document.createElement('div');
+  s.className='sheet';s.id='shTeamTaskDetail';
 
-  // ددلاین
-  var months=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+  var months=['\u0641\u0631\u0648\u0631\u062f\u06cc\u0646','\u0627\u0631\u062f\u06cc\u0628\u0647\u0634\u062a','\u062e\u0631\u062f\u0627\u062f','\u062a\u06cc\u0631','\u0645\u0631\u062f\u0627\u062f','\u0634\u0647\u0631\u06cc\u0648\u0631','\u0645\u0647\u0631','\u0622\u0628\u0627\u0646','\u0622\u0630\u0631','\u062f\u06cc','\u0628\u0647\u0645\u0646','\u0627\u0633\u0641\u0646\u062f'];
   var dlLabel='';
   if(t.deadline){
     var parts=t.deadline.split('-').map(Number);
-    var today=mrTodayKey();
-    var tparts=today.split('-').map(Number);
-    var diff=_jalToDays(parts[0],parts[1],parts[2])-_jalToDays(tparts[0],tparts[1],tparts[2]);
-    dlLabel=diff===0?'امروز':diff===1?'فردا':diff<0?(Math.abs(diff)+' روز گذشته ⚠️'):(parts[2]+' '+months[parts[1]-1]);
+    var today=mrTodayKey().split('-').map(Number);
+    var diff=_jalToDays(parts[0],parts[1],parts[2])-_jalToDays(today[0],today[1],today[2]);
+    dlLabel=diff===0?'\u0627\u0645\u0631\u0648\u0632':diff===1?'\u0641\u0631\u062f\u0627':diff<0?(Math.abs(diff)+' \u0631\u0648\u0632 \u06af\u0630\u0634\u062a\u0647 \u26a0\ufe0f'):(parts[2]+' '+months[parts[1]-1]);
   }
-  var el_dl=document.getElementById('ttdDeadline');
-  if(el_dl)el_dl.textContent=dlLabel?('📅 '+dlLabel):'';
-
-  // نام مدیر — از snapshot
-  var mgName='مدیر';
+  var mgName='\u0645\u062f\u06cc\u0631';
   if(tm.snapshot&&tm.snapshot.members){
     var mgM=tm.snapshot.members.find(function(m){return m.isManager||m.role==='manager';});
     if(mgM&&mgM.name)mgName=mgM.name;
   }
-  var el_mg=document.getElementById('ttdManager');
-  if(el_mg)el_mg.textContent='از '+mgName;
-
-  // اولویت
-  var priMap={high:'🔴 فوری',med:'🟡 مهم',low:'⚪ عادی',urgent:'🔴 فوری'};
-  var el_pri=document.getElementById('ttdPriority');
-  if(el_pri)el_pri.textContent=priMap[t.priority]||'';
-
-  // توضیح
-  var el_db=document.getElementById('ttdDescBlock');
-  var el_desc=document.getElementById('ttdDesc');
-  if(el_db&&el_desc){
-    if(t.description){el_desc.textContent=t.description;el_db.style.display='';}
-    else el_db.style.display='none';
-  }
-
-  // وضعیت — هم style هم dataset
+  var priMap={high:'\ud83d\udd34 \u0641\u0648\u0631\u06cc',med:'\ud83d\udfe1 \u0645\u0647\u0645',low:'\u26aa \u0639\u0627\u062f\u06cc',urgent:'\ud83d\udd34 \u0641\u0648\u0631\u06cc'};
   var status=t.status||'pending';
-  document.querySelectorAll('.ttd-st-btn').forEach(function(btn){
+  var isReview=status==='in_review';
+
+  var metaChips='';
+  if(dlLabel)metaChips+='<span style="background:rgba(217,119,6,.1);color:var(--amber);padding:2px 8px;border-radius:var(--r5);font-size:11px">\ud83d\udcc5 '+dlLabel+'</span>';
+  if(t.priority&&priMap[t.priority])metaChips+='<span style="background:var(--bg2);color:var(--t3);padding:2px 8px;border-radius:var(--r5);font-size:11px">'+priMap[t.priority]+'</span>';
+  metaChips+='<span style="background:var(--bg2);color:var(--t3);padding:2px 8px;border-radius:var(--r5);font-size:11px">\u0627\u0632 '+esc(mgName)+'</span>';
+
+  s.innerHTML=
+    '<div class="sh-handle"></div>'+
+    '<div class="sh-head">'+
+      '<div class="sh-tr">'+
+        '<div class="sh-ttl">'+esc(t.title||'\u062a\u0633\u06a9 \u062a\u06cc\u0645\u06cc')+'</div>'+
+        '<button class="sh-x" onclick="closeAll()">\u00d7</button>'+
+      '</div>'+
+      '<div style="display:flex;flex-wrap:wrap;gap:4px;padding:6px 0;direction:rtl">'+metaChips+'</div>'+
+    '</div>'+
+    '<div class="sh-body" style="display:flex;flex-direction:column;gap:12px;padding-bottom:var(--sp4)">'+
+      (t.description?'<div style="background:var(--bg2);border-radius:var(--r2);padding:var(--sp3);font-size:var(--fs-xs);color:var(--t2);direction:rtl;line-height:1.6">'+esc(t.description)+'</div>':'')+
+      (isReview?'<div style="background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.2);border-radius:var(--r2);padding:var(--sp3);text-align:center;font-size:var(--fs-xs);color:var(--a)">\ud83d\udd0d \u062a\u0633\u06a9 \u0628\u0631\u0627\u06cc \u0628\u0631\u0631\u0633\u06cc \u0627\u0631\u0633\u0627\u0644 \u0634\u062f\u0647</div>':
+      '<div id="ttdStatusBtns" style="display:flex;gap:8px">'+
+        '<button class="ttd-st-btn" data-st="in_progress" onclick="_ttdSetStatus(\'in_progress\')" style="flex:1;height:40px;background:var(--bg2);border:1px solid var(--b1);">\ud83d\udd35 \u062f\u0631 \u0627\u0646\u062c\u0627\u0645</button>'+
+        '<button class="ttd-st-btn" data-st="blocked" onclick="_ttdSetStatus(\'blocked\')" style="flex:1;height:40px;background:rgba(229,62,90,.05);border:1px solid rgba(229,62,90,.25);color:var(--red)">\ud83d\udeab \u0645\u062a\u0648\u0642\u0641</button>'+
+      '</div>')+
+      '<div id="ttdBlockedSection" style="display:none"></div>'+
+      '<div>'+
+        '<div style="font-size:11px;color:var(--t3);margin-bottom:6px;text-align:right">\u062a\u0648\u0636\u06cc\u062d (\u0627\u062e\u062a\u06cc\u0627\u0631\u06cc)</div>'+
+        '<textarea id="ttdNote" class="ttd-reply-inp" rows="2" style="border-radius:var(--r2)!important;width:100%;box-sizing:border-box" placeholder="\u0647\u0631 \u062a\u0648\u0636\u06cc\u062d\u06cc \u0628\u0631\u0627\u06cc \u0645\u062f\u06cc\u0631 \u0628\u0646\u0648\u06cc\u0633...">'+esc(t.memberNote||'')+'</textarea>'+
+      '</div>'+
+      '<div style="height:1px;background:var(--b2)"></div>'+
+      '<div>'+
+        '<div class="ttd-chat-label"><span>\ud83d\udcac</span><span>\u067e\u06cc\u0627\u0645 \u0628\u0627 \u0645\u062f\u06cc\u0631</span></div>'+
+        '<div class="ttd-thread" id="ttdThreadMsgs" style="min-height:60px;max-height:30vh;overflow-y:auto"></div>'+
+        '<div class="ttd-send-row">'+
+          '<button class="ttd-reply-send" onclick="_ttdSendComment()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>'+
+          '<textarea class="ttd-reply-inp" rows="1" placeholder="\u067e\u06cc\u0627\u0645 \u0628\u0646\u0648\u06cc\u0633..." oninput="this.style.height=\'auto\';this.style.height=this.scrollHeight+\'px\'" onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();_ttdSendComment()}"></textarea>'+
+        '</div>'+
+      '</div>'+
+      '<div id="ttdErr" style="font-size:var(--fs-xs);color:var(--red);min-height:14px;text-align:center"></div>'+
+      (isReview?'':
+      '<div class="ttd-action-row">'+
+        '<button class="ttd-save-btn" onclick="_ttdSave()" id="ttdSaveBtn">\u0630\u062e\u06cc\u0631\u0647</button>'+
+        '<button class="ttd-review-btn" onclick="_ttdSubmitForReview()" id="ttdReviewBtn">\u2705 \u0627\u0631\u0633\u0627\u0644 \u0628\u0631\u0627\u06cc \u0628\u0631\u0631\u0633\u06cc \u0645\u062f\u06cc\u0631</button>'+
+      '</div>')+
+    '</div>';
+
+  document.body.appendChild(s);
+
+  // status buttons active state
+  s.querySelectorAll('.ttd-st-btn').forEach(function(btn){
     var active=btn.dataset.st===status;
     btn.dataset.active=active?'1':'0';
     btn.classList.toggle('active-st',active);
-    btn.style.background=active?'var(--t1)':'var(--bg2)';
-    btn.style.color=active?'var(--bg1)':'var(--t2)';
-    btn.style.borderColor=active?'var(--t1)':'var(--b1)';
   });
-  _ttdUpdateBlockedUI(status);
 
-  // یادداشت قبلی
-  var el_note=document.getElementById('ttdNote');
-  if(el_note)el_note.value=t.memberNote||'';
+  // blocked section
+  if(typeof _ttdUpdateBlockedUI==='function')_ttdUpdateBlockedUI(status);
 
-  // review banner و button
-  var rvBanner=document.getElementById('ttdReviewBanner');
-  var rvBtn=document.getElementById('ttdReviewBtn');
-  var stBtns=document.getElementById('ttdStatusBtns');
-  var svBtn=document.getElementById('ttdSaveBtn');
-  if(status==='in_review'){
-    if(rvBanner)rvBanner.style.display='';
-    if(rvBtn)rvBtn.style.display='none';
-    if(stBtns)stBtns.style.display='none';
-    if(svBtn)svBtn.style.display='none';
-  }else{
-    if(rvBanner)rvBanner.style.display='none';
-    if(rvBtn)rvBtn.style.display='';
-    if(stBtns)stBtns.style.display='';
-    if(svBtn)svBtn.style.display='';
-  }
+  // thread
+  var tel=s.querySelector('#ttdThreadMsgs');
+  if(tel&&typeof _renderThread==='function')_renderThread(t.comments||[],'member',tel,t);
 
-  // checklist
-  var el_cl=document.getElementById('ttdChecklist');
-  var el_cli=document.getElementById('ttdChecklistItems');
-  if(t.checklist&&t.checklist.length&&el_cl&&el_cli){
-    el_cl.style.display='';
-    el_cli.innerHTML=t.checklist.map(function(item){
-      return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--b2)">'+
-        '<div style="width:14px;height:14px;border-radius:3px;border:2px solid '+(item.done?'var(--t1)':'var(--b1)')+';background:'+(item.done?'var(--t1)':'transparent')+';flex-shrink:0;display:flex;align-items:center;justify-content:center">'+
-        (item.done?'<svg viewBox="0 0 12 12" width="8" height="8"><polyline points="2,6 5,9 10,3" fill="none" stroke="white" stroke-width="1.8" stroke-linecap="round"/></svg>':'')+
-        '</div>'+
-        '<span style="font-size:var(--fs-xs);color:'+(item.done?'var(--t3)':'var(--t1)')+';text-decoration:'+(item.done?'line-through':'none')+'">'+esc(item.text)+'</span></div>';
-    }).join('');
-  }else if(el_cl)el_cl.style.display='none';
+  // open
+  var ov=document.getElementById('ov');
+  if(ov){ov.classList.add('open');}
+  s.classList.add('open');
 
-  var el_err=document.getElementById('ttdErr');
-  if(el_err)el_err.textContent='';
-  var el_body=document.getElementById('ttdBody');
-  if(el_body)el_body.dataset.taskId=taskId;
-
-  // thread مستقیم render — نه timeout
-  var el_thread=document.getElementById('ttdThreadMsgs');
-  if(el_thread&&typeof _renderThread==='function'){
-    _renderThread(t.comments||[],'member',el_thread,t);
-  }
-
-  openSheet('shTeamTaskDetail');
-  setTimeout(function(){_ttdMarkSeen(taskId);},800);
+  setTimeout(function(){if(typeof _ttdMarkSeen==='function')_ttdMarkSeen(taskId);},800);
   setTimeout(function(){try{tmAPI('POST','/task/read',{taskId:taskId});}catch(e){}},1000);
+
+  // live polling
+  var _empPollId=setInterval(function(){
+    var sh=document.getElementById('shTeamTaskDetail');
+    if(!sh||!sh.classList.contains('open')){clearInterval(_empPollId);return;}
+    if(typeof tmSyncBackground!=='function')return;
+    tmSyncBackground().then(function(){
+      var t2=(tm.inbox||[]).find(function(x){return x.id===taskId;});
+      if(!t2)return;
+      var tel2=document.getElementById('ttdThreadMsgs');
+      if(tel2&&typeof _renderThread==='function')_renderThread(t2.comments||[],'member',tel2,t2);
+    }).catch(function(){});
+  },5000);
 }
 function _ttdSetStatus(st){_ttdUpdateBlockedUI(st);
   document.querySelectorAll('.ttd-st-btn').forEach(btn => {
