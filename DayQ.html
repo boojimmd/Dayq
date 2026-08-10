@@ -5164,110 +5164,6 @@ body:has(#tmSokoPanel.open) #ov {
 .soko-empty-action{margin-top:var(--sp2);height:36px;padding:0 var(--sp4);border-radius:var(--r5);background:var(--a);color:#fff;border:none;font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer;transition:opacity 120ms ease}
 .soko-empty-action:active{opacity:.8}
 
-
-/* ════ Assign Task Sheet ════ */
-.as-section { display:flex; flex-direction:column; gap:6px; }
-.as-label {
-  font-size:11px; font-weight:600; color:var(--t3);
-  text-transform:uppercase; letter-spacing:.03em;
-}
-.as-required { color:var(--red); margin-right:2px; }
-
-/* member chips */
-.as-member-grid { display:flex; flex-wrap:wrap; gap:8px; }
-.as-member-chip {
-  display:inline-flex; align-items:center; gap:6px;
-  height:36px; padding:0 12px;
-  border-radius:var(--r5);
-  border:1px solid var(--b1);
-  background:var(--bg2); color:var(--t2);
-  font-size:var(--fs-xs); font-weight:600; font-family:var(--f);
-  cursor:pointer;
-  transition:all 150ms cubic-bezier(0.23,1,0.32,1);
-}
-.as-member-chip.sel {
-  border-color:var(--a); background:rgba(0,184,122,.1); color:var(--a);
-}
-.as-member-chip.busy { opacity:.6; }
-.as-member-chip .as-chip-count {
-  font-size:10px; opacity:.6; background:var(--bg3);
-  border-radius:var(--r5); padding:0 5px; height:18px;
-  display:inline-flex; align-items:center;
-}
-
-/* priority */
-.as-pri-row { display:flex; gap:8px; }
-.as-pri-btn {
-  flex:1; height:36px; border-radius:var(--r2);
-  border:1px solid var(--b1); background:var(--bg2);
-  font-size:var(--fs-xs); font-weight:600; font-family:var(--f);
-  cursor:pointer; color:var(--t2);
-  transition:all 150ms cubic-bezier(0.23,1,0.32,1);
-}
-.as-pri-btn.sel { border-color:var(--t1); background:var(--t1); color:var(--bg1); }
-.as-pri-btn[data-p="high"].sel  { border-color:var(--amber);background:rgba(217,119,6,.1);color:var(--amber); }
-.as-pri-btn[data-p="urgent"].sel{ border-color:var(--red);background:rgba(229,62,90,.1);color:var(--red); }
-
-/* deadline shortcuts */
-.as-dl-row { display:flex; gap:6px; margin-bottom:6px; }
-.as-dl-btn {
-  flex:1; height:30px; border-radius:var(--r5);
-  border:1px solid var(--b1); background:var(--bg2);
-  font-size:11px; font-weight:600; font-family:var(--f);
-  cursor:pointer; color:var(--t2);
-  transition:all 120ms ease;
-}
-.as-dl-btn.sel { border-color:var(--a); color:var(--a); background:rgba(0,184,122,.06); }
-.as-dl-btn:active { transform:scale(.97); }
-
-/* input */
-.as-input {
-  width:100%; height:40px; padding:0 12px;
-  background:var(--bg2); border:1.5px solid var(--b1);
-  border-radius:var(--r2); font-size:var(--fs-xs); font-family:var(--f);
-  color:var(--t1); outline:none; box-sizing:border-box;
-  transition:border-color 150ms ease;
-  direction:rtl;
-}
-.as-input:focus { border-color:var(--a); }
-.as-input.err   { border-color:var(--red); }
-.as-textarea {
-  width:100%; padding:10px 12px; min-height:64px;
-  background:var(--bg2); border:1.5px solid var(--b1);
-  border-radius:var(--r2); font-size:var(--fs-xs); font-family:var(--f);
-  color:var(--t1); outline:none; box-sizing:border-box; resize:none;
-  transition:border-color 150ms ease; direction:rtl; line-height:1.5;
-}
-.as-textarea:focus { border-color:var(--a); }
-
-/* broadcast toggle */
-.as-broadcast {
-  display:flex; align-items:center; justify-content:space-between;
-  padding:10px 12px; border-radius:var(--r2);
-  background:var(--bg2); border:1px solid var(--b1);
-  cursor:pointer; transition:all 150ms ease;
-}
-.as-broadcast.on { background:rgba(37,99,235,.06); border-color:rgba(37,99,235,.3); }
-.as-broadcast-label { font-size:var(--fs-xs); color:var(--t2); font-weight:600; }
-.as-broadcast.on .as-broadcast-label { color:var(--blue); }
-
-/* submit */
-.as-submit {
-  width:100%; height:48px;
-  border-radius:var(--r2); border:none;
-  background:var(--ag); color:#fff;
-  font-size:var(--fs-sm); font-weight:700; font-family:var(--f);
-  cursor:pointer;
-  transition:opacity 150ms ease, transform 100ms ease;
-}
-.as-submit:disabled { opacity:.5; cursor:not-allowed; }
-.as-submit:not(:disabled):active { transform:scale(.98); }
-.as-err {
-  font-size:var(--fs-xs); color:var(--red);
-  min-height:16px; text-align:right;
-  animation:paneIn 150ms ease both;
-}
-
 </style>
 </head>
 <body>
@@ -6717,7 +6613,58 @@ body:has(#tmSokoPanel.open) #ov {
         <option value="visit">بازدید</option>
         <option value="meeting">جلسه</option>
         <option value="report">تاریخچه</option>
-   function _tmSbStatus(sb){
+        <option value="followup">پیگیری</option>
+        <option value="email">پیام</option>
+        <option value="call">تماس تلفنی</option>
+      </select>
+      <div class="f-lbl" id="editContactLbl" style="display:none">شماره تماس</div>
+      <input class="fi" id="editContact" placeholder="09121234567" maxlength="20" style="margin-bottom:10px;display:none;" dir="ltr">
+      <div class="f-lbl" id="editWFLbl" style="display:none">منتظر چی / چه کسی هستم؟ (اختیاری)</div>
+      <input class="fi" id="editWaitingFor" placeholder="مثلاً: تأیید مدیر، فایل طراح..." maxlength="80" style="margin-bottom:10px;display:none">
+      <div class="f-lbl">لینک فایل (اختیاری)</div>
+      <input class="fi" id="editFileLink" placeholder="لینک گوگل‌درایو، تلگرام و..." maxlength="300" style="margin-bottom:10px;" dir="ltr">
+      <div class="f-lbl">مکان (اختیاری)</div>
+      <input class="fi" id="editLocation" placeholder="مثلاً: هتل اسپیناس، دفتر برند فلان" maxlength="120" style="margin-bottom:10px;">
+      <div class="f-lbl">پروژه</div>
+      <div id="editProjRow" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;"></div>
+      <div id="editPhaseWrap" style="display:none;margin-bottom:12px;">
+        <div class="f-lbl">فاز / بخش این پروژه (اختیاری)</div>
+        <input class="fi" id="editPhase" placeholder="مثلاً: قبل از رویداد" maxlength="40" style="margin-bottom:6px;">
+        <div id="editPhaseChips" style="display:flex;gap:5px;flex-wrap:wrap;"></div>
+      </div>
+      <div class="f-lbl">اولویت</div>
+      <div class="pri-row" style="margin-bottom:12px;">
+        <button class="pp" id="epHigh" data-p="high" onclick="selEditPri('high',this)"><svg viewBox="0 0 10 10" fill="var(--red)"><circle cx="5" cy="5" r="5"/></svg>فوری</button>
+        <button class="pp" id="epMed"  data-p="med"  onclick="selEditPri('med',this)"><svg viewBox="0 0 10 10" fill="var(--amber)"><circle cx="5" cy="5" r="5"/></svg>متوسط</button>
+        <button class="pp" id="epLow"  data-p="low"  onclick="selEditPri('low',this)"><svg viewBox="0 0 10 10" fill="var(--t4)"><circle cx="5" cy="5" r="5"/></svg>پایین</button>
+      </div>
+      <button id="noteWaitBtn" class="sh-sub" style="background:var(--bluem);color:var(--blue);border:1px solid rgba(37,99,235,.25);margin-bottom:8px;" onclick="toggleWaitingStatus()">⏳ منتظرم</button>
+      <button id="noteSomedayBtn" class="sh-sub" style="background:var(--bg3);color:var(--t2);border:1px solid var(--b1);margin-bottom:8px;" onclick="noteToggleSomeday()">یه روزی، نه الان</button>
+      <button class="sh-sub" onclick="saveEditTask()">ذخیره تغییرات</button>
+      <button class="remind-clear" onclick="confirmDeleteTask()" style="margin-top:6px;">حذف کار</button>
+    </div>
+    <!-- Note panel -->
+    <div class="note-panel active" id="notePanelNote">
+      <textarea class="note-ta" id="noteTa" placeholder="یادداشت، توضیح، لینک..." rows="5"></textarea>
+      <button class="sh-sub" onclick="saveNote()">ذخیره یادداشت</button>
+      <button class="remind-clear" id="noteClearBtn" onclick="clearNote()" style="display:none;margin-top:6px;">حذف یادداشت</button>
+    </div>
+    <!-- Checklist panel -->
+    <div class="note-panel" id="notePanelCheck">
+      <div class="cl-list" id="clList"></div>
+      <div class="cl-add">
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="var(--t3)" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <input class="cl-add-inp" id="clAddInp" placeholder="آیتم جدید..." maxlength="100" autocomplete="off">
+      </div>
+      <button class="sh-sub" style="margin-top:12px;" onclick="saveChecklist()">ذخیره چک‌لیست</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span class="t-ico" id="tIco"></span><span id="tMsg"></span></div>
+
+<script>function _tmSbStatus(sb){
   if(!sb)return;
   try{
     var snap=tm.snapshot;
@@ -16154,7 +16101,45 @@ function tmAssignTask(preUuid = '') {
   openSheet('shTmAssign');
 }
 
-/* replaced */
+async function tmDoAssign() {
+  const title = document.getElementById('tmAssignTitle').value.trim();
+  const deadline = document.getElementById('tmAssignDeadline').value.trim();
+  const desc = (document.getElementById('tmAssignDesc')?.value||'').trim();
+  const errEl = document.getElementById('tmAssignErr');
+  const selectedOpt = document.querySelector('.tm-member-opt.active');
+  const assignedTo = selectedOpt ? selectedOpt.dataset.uuid : null;
+
+  if (!title)      { errEl.textContent='عنوان تسک را وارد کن'; return; }
+  if (!deadline)   { errEl.textContent='ددلاین اجباریه'; return; }
+  if (!assignedTo) { errEl.textContent='یه نفر انتخاب کن'; return; }
+
+  const btn = document.getElementById('tmAssignBtn');
+  btn.disabled = true;
+  errEl.textContent = '';
+
+  // priority از chip انتخاب شده
+  const priChip = document.querySelector('.tm-pri-chip.active');
+  const priority = priChip ? priChip.dataset.pri : 'normal';
+
+  const isBroadcast = document.getElementById('tmBroadcastToggle')?.checked;
+  const needsVerify = document.getElementById('tmNeedsVerifyToggle')?.checked;
+  try {
+    if(isBroadcast){
+      await tmAPI('POST','/task/broadcast',{title,description:desc,deadline,priority});
+    } else {
+      await tmAPI('POST', '/task/assign', { title, description:desc, deadline, assignedTo, priority, needsVerify });
+    }
+    closeAll();
+    toast_(svgIco('check'), 'تسک ارسال شد');
+    _tmTryPushToMember(assignedTo,title,false);
+    tmSyncBackground();
+  } catch(e) {
+    errEl.textContent = e.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
 // ── Pending approvals check ────────────────────────────────────
 async function tmRenderPendingList(pending) {
   const el = document.getElementById('tmPendingList');
@@ -16630,11 +16615,24 @@ function tmRenderAnnoReceipts() {
 // ── Priority Chips برای Assign Sheet ─────────────────────────
 let _tmAssignPriority = 'normal';
 
-/* replaced */
+function tmSelectPriority(el, pri) {
+  _tmAssignPriority = pri;
+  document.querySelectorAll('.tm-pri-opt').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
 // ── Broadcast Toggle ──────────────────────────────────────────
 let _tmBroadcast = false;
 
-/* replaced */
+function tmToggleBroadcast(el) {
+  _tmBroadcast = el.checked;
+  const memberOpts = document.getElementById('tmAssignMemberOpts');
+  if (memberOpts) {
+    memberOpts.style.opacity = _tmBroadcast ? '.4' : '1';
+    memberOpts.style.pointerEvents = _tmBroadcast ? 'none' : '';
+  }
+}
+
 // override tmDoAssign با Broadcast support
 const _origDoAssign = tmDoAssign;
 tmDoAssign = async function() {
@@ -18138,9 +18136,50 @@ function _tmSetDeadlineShortcut(text) {
 }
 
 // ── Member chips update ────────────────────────────────────────
-/* replaced */
-/* replaced */
-/* replaced */
+function _tmUpdateAssignMemberChips() {
+  const el = document.getElementById('tmAMemberChips');
+  if (!el) return;
+  const members = tm.snapshot?.members?.filter(m => !m.isManager && m.status === 'active') || [];
+  if (!members.length) {
+    el.innerHTML = '<div style="color:var(--t3);font-size:var(--fs-xs)">هنوز عضوی تأیید نشده</div>';
+    return;
+  }
+  el.innerHTML = members.map(m => {
+    const active = _tmAssignMember === m.uuid;
+    const st = m.alert === 'blocked' ? 'block' : m.alert === 'stale' ? 'warn' : 'ok';
+    return `<button
+      class="tm-member-chip${active ? ' active' : ''}"
+      data-uuid="${m.uuid}"
+      onclick="_tmSelectMember('${m.uuid}')"
+      style="display:inline-flex;align-items:center;gap:6px;height:32px;padding:0 12px;border-radius:var(--r5);border:1px solid ${active ? 'var(--blue)' : 'var(--b1)'};background:${active ? 'var(--bluem)' : 'var(--bg2)'};color:${active ? 'var(--blue)' : 'var(--t1)'};font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;transition:all 150ms ease">
+      ${tmDot(st)}<span>${esc(m.name)}</span>
+      ${m.activeTasks > 0 ? `<span style="font-size:var(--fs-2xs);opacity:.6">${m.activeTasks}</span>` : ''}
+    </button>`;
+  }).join('');
+}
+
+function _tmSelectMember(uuid) {
+  if (_tmAssignBroadcast) return;
+  _tmAssignMember = (_tmAssignMember === uuid) ? '' : uuid;
+  _tmValidateSubmit();
+  _tmUpdateAssignMemberChips();
+}
+
+function _tmToggleBroadcast() {
+  _tmAssignBroadcast = !_tmAssignBroadcast;
+  const btn = document.getElementById('tmABroadcastBtn');
+  if (btn) {
+    btn.style.background = _tmAssignBroadcast ? 'var(--bluem)' : 'var(--bg2)';
+    btn.style.color = _tmAssignBroadcast ? 'var(--blue)' : 'var(--t2)';
+    btn.style.borderColor = _tmAssignBroadcast ? 'rgba(59,130,246,.3)' : 'var(--b1)';
+    btn.textContent = _tmAssignBroadcast ? '📡 همه اعضا (فعال)' : '📡 ارسال به همه';
+  }
+  if (_tmAssignBroadcast) {
+    _tmAssignMember = '';
+    _tmUpdateAssignMemberChips();
+  }
+}
+
 // ── Priority override ─────────────────────────────────────────
 let _tmAssignPriOverride = null;
 function _tmSetPri(pri) {
@@ -18925,7 +18964,14 @@ function _tmConfirmSheet(title,body,okLabel,okColor){
 
 function tmNewProject(){toast_(svgIco('flag'),'قابلیت پروژه در نسخه بعدی اضافه میشه');}
 
-/* replaced */
+function tmDlShortcut(days){
+  var p=mrTodayKey().split('-').map(Number),d=p[2]+days,mo=p[1],y=p[0];
+  var dim=[0,31,31,31,31,31,31,30,30,30,30,30,29];
+  while(d>dim[mo]){d-=dim[mo];mo++;if(mo>12){mo=1;y++;}}
+  var nd=y+'-'+(mo<10?'0'+mo:mo)+'-'+(d<10?'0'+d:d);
+  var inp=document.getElementById('tmAssignDeadline');if(inp)inp.value=nd;
+}
+
 
 function _tmSbProjects(sb){
   if(!sb)return;
@@ -18977,302 +19023,6 @@ function _renderThread(c,role,el,taskObj){
   if(!el)return;
   if(!c||!c.length){el.innerHTML='<div class="tm-thread-empty">هنوز پیامی نیست</div>';el.scrollTop=0;return;}
   var readBy=(taskObj&&taskObj.readBy)||{};
-  var html='',lastDay='';
-  c.forEach(function(x,xi){
-    x = Object.assign({},x,{from:x.from||x.role||''});
-    var ts=_commentTime(x.ts||x.at||0);
-    var d=ts?new Date(ts):null;
-    // date divider
-    if(d&&!isNaN(d.getTime())){
-      var dk=d.toDateString();
-      if(dk!==lastDay){
-        lastDay=dk;
-        var now=new Date();
-        var lbl=d.toDateString()===now.toDateString()?'امروز':
-                new Date(now-86400000).toDateString()===d.toDateString()?'دیروز':
-                (function(){try{var j=gregorianToJalali(d.getFullYear(),d.getMonth()+1,d.getDate());return j[2]+'/'+j[1]+'/'+(j[0]%100);}catch(e){return d.getDate()+'/'+(d.getMonth()+1);}})();
-        html+='<div class="ttd-day-div"><span>'+lbl+'</span></div>';
-      }
-    }
-    if((x.from||x.role)==='system'){
-      html+='<div class="ttd-sys-msg">'+esc(x.text)+'</div>';return;
-    }
-    var isOwn=((x.from||x.role)===role);
-    var sndr=isOwn?'':((x.from||x.role)==='manager'?'مدیر':'کارمند');
-    var hm='';
-    if(d&&!isNaN(d.getTime())){
-      hm=d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');
-    }
-    // read receipt
-    var tick='';
-    if(isOwn){
-      var otherKeys=Object.keys(readBy).filter(function(k){return k!==tm.uuid;});
-      var readTs=otherKeys.length?readBy[otherKeys[0]]:0;
-      tick=readTs&&ts&&readTs>ts?'<span class="ttd-tick ttd-tick-read">✓✓</span>':'<span class="ttd-tick">✓</span>';
-    }
-    html+='<div class="ttd-bubble from-'+(x.from||x.role)+(isOwn?' is-own':'')+'">'+
-      '<div class="ttd-bubble-body">'+esc(x.text)+'</div>'+
-      '<div class="ttd-bubble-foot">'+
-        (sndr?'<span class="ttd-bubble-sender">'+sndr+'</span>':'')+
-        (hm?'<span class="ttd-bubble-time">'+hm+'</span>':'')+
-        tick+
-      '</div></div>';
-  });
-  el.innerHTML=html;
-  setTimeout(function(){el.scrollTop=el.scrollHeight;
-  // mark last bubble as new for faster animation
-  var _last=el.querySelector('.ttd-bubble:last-child');
-  if(_last){_last.classList.add('is-new');}},50);
-}f
-
-function _commentTime(ts){if(!ts&&ts!==0)return '';var d=new Date(ts);if(isNaN(d.getTime()))return '';return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');}
-
-async function _ttdSendComment(){
-  var inp=document.querySelector('#ttdCommentSection .ttd-reply-inp');
-  if(!inp||!inp.value.trim()||!_ttdTaskId)return;
-  var text=inp.value.trim(),btn=document.querySelector('#ttdCommentSection .ttd-reply-send');
-  if(btn)btn.disabled=true;
-  var task=(tm.inbox||[]).find(function(t){return t.id===_ttdTaskId;});
-  try{await tmAPI('POST','/task/comment',{taskId:_ttdTaskId,text,from:'member'});}
-  catch(e){if(btn)btn.disabled=false;inp.value=text;toast_('','❌ خطا در ارسال پیام',2500);return;}
-  if(task){
-    if(!task.comments)task.comments=[];
-    task.comments.push({from:'member',text,ts:Date.now(),at:Date.now()});
-  }
-  inp.value='';inp.style.height='auto';
-  var thr=document.getElementById('ttdThreadMsgs');
-  if(thr&&task&&typeof _renderThread==='function')_renderThread(task.comments||[],'member',thr,task);
-  if(thr)thr.scrollTop=thr.scrollHeight;
-  if(btn)btn.disabled=false;
-}
-
-function _tmAnimateKpi(selector){
-  document.querySelectorAll(selector).forEach(function(el){
-    el.classList.remove('kpi-updated');
-    void el.offsetWidth; // reflow
-    el.classList.add('kpi-updated');
-    setTimeout(function(){el.classList.remove('kpi-updated');},400);
-  });
-}
-
-function _sokoEmpty(icon,title,body,actionLabel,onAction){
-  return '<div class="soko-empty">'+
-    '<div class="soko-empty-icon">'+icon+'</div>'+
-    '<p class="soko-empty-title">'+title+'</p>'+
-    '<p class="soko-empty-body">'+body+'</p>'+
-    (actionLabel?'<button class="soko-empty-action" onclick="'+onAction+'">'+actionLabel+'</button>':'')+
-    '</div>';
-}
-
-/* ══════════════════════════════════════════════
-   Assign Task — complete rewrite
-   State: _asState (single object, no globals)
-   ══════════════════════════════════════════════ */
-var _asState = { member:'', priority:'normal', broadcast:false, dlShortcut:0 };
-
-function tmAssignTask(preUuid) {
-  // reset state
-  _asState = { member: preUuid||'', priority:'normal', broadcast:false, dlShortcut:1 };
-
-  // remove old sheet if exists
-  var old = document.getElementById('shTmAssign');
-  if (old) old.remove();
-
-  var members = (tm.snapshot&&tm.snapshot.members||[]).filter(function(m){
-    return !m.isManager && m.role !== 'manager' && m.status !== 'pending';
-  });
-
-  // build member chips
-  var memberHtml = members.length ? members.map(function(m) {
-    var isSel = m.uuid === _asState.member;
-    var loadIcon = m.activeTasks > 0 ? '<span class="as-chip-count">'+m.activeTasks+'</span>' : '';
-    return '<button class="as-member-chip'+(isSel?' sel':'')+'" data-uuid="'+esc(m.uuid)+'" onclick="_asPickMember(this)">'+
-      '<span>'+esc(m.name)+'</span>'+loadIcon+'</button>';
-  }).join('') :
-  '<div style="font-size:var(--fs-xs);color:var(--t3)">\u0647\u0646\u0648\u0632 \u0639\u0636\u0648\u06cc \u062a\u0623\u06cc\u06cc\u062f \u0646\u0634\u062f\u0647</div>';
-
-  // deadline default = tomorrow
-  var dl = (function(){
-    var p=mrTodayKey().split('-').map(Number);
-    var d=p[2]+1,mo=p[1],y=p[0];
-    var dim=[0,31,31,31,31,31,31,30,30,30,30,30,29];
-    if(d>dim[mo]){d=1;mo++;if(mo>12){mo=1;y++;}}
-    return y+'-'+(mo<10?'0'+mo:mo)+'-'+(d<10?'0'+d:d);
-  })();
-
-  var s = document.createElement('div');
-  s.className = 'sheet'; s.id = 'shTmAssign';
-  s.innerHTML =
-    '<div class="sh-handle"></div>'+
-    '<div class="sh-head"><div class="sh-tr">'+
-      '<div class="sh-ttl">\u062a\u0633\u06a9 \u062c\u062f\u06cc\u062f</div>'+
-      '<button class="sh-x" onclick="closeAll()">\u00d7</button>'+
-    '</div></div>'+
-    '<div class="sh-body" style="display:flex;flex-direction:column;gap:16px">'+
-
-      // member
-      (members.length > 1 ?
-      '<div class="as-section">'+
-        '<div class="as-label">\u0628\u0631\u0627\u06cc \u06a9\u06cc\u061f <span class="as-required">*</span></div>'+
-        '<div class="as-member-grid" id="asMemberGrid">'+memberHtml+'</div>'+
-        '<button class="as-broadcast" id="asBroadcast" onclick="_asToggleBroadcast()">'+
-          '<span class="as-broadcast-label">\ud83d\udce1 \u0627\u0631\u0633\u0627\u0644 \u0628\u0647 \u0647\u0645\u0647 \u0627\u0639\u0636\u0627</span>'+
-          '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>'+
-        '</button>'+
-      '</div>' :
-      '<div class="as-section">'+
-        '<div class="as-label">\u0628\u0631\u0627\u06cc \u06a9\u06cc\u061f</div>'+
-        '<div class="as-member-grid" id="asMemberGrid">'+memberHtml+'</div>'+
-      '</div>')+
-
-      // title
-      '<div class="as-section">'+
-        '<div class="as-label">\u0639\u0646\u0648\u0627\u0646 <span class="as-required">*</span></div>'+
-        '<input id="asTitle" class="as-input" type="text" placeholder="\u0639\u0646\u0648\u0627\u0646 \u062a\u0633\u06a9 \u0631\u0627 \u0628\u0646\u0648\u06cc\u0633..." autocomplete="off"/>'+
-      '</div>'+
-
-      // priority
-      '<div class="as-section">'+
-        '<div class="as-label">\u0627\u0648\u0644\u0648\u06cc\u062a</div>'+
-        '<div class="as-pri-row">'+
-          '<button class="as-pri-btn sel" data-p="normal" onclick="_asPri(this)">\u0639\u0627\u062f\u06cc</button>'+
-          '<button class="as-pri-btn" data-p="high" onclick="_asPri(this)">\u26a1 \u0645\u0647\u0645</button>'+
-          '<button class="as-pri-btn" data-p="urgent" onclick="_asPri(this)">\ud83d\udd34 \u0641\u0648\u0631\u06cc</button>'+
-        '</div>'+
-      '</div>'+
-
-      // deadline
-      '<div class="as-section">'+
-        '<div class="as-label">\u062f\u062f\u0644\u0627\u06cc\u0646 <span class="as-required">*</span></div>'+
-        '<div class="as-dl-row">'+
-          '<button class="as-dl-btn sel" data-days="1" onclick="_asDl(this)">\u0641\u0631\u062f\u0627</button>'+
-          '<button class="as-dl-btn" data-days="3" onclick="_asDl(this)">3 \u0631\u0648\u0632</button>'+
-          '<button class="as-dl-btn" data-days="7" onclick="_asDl(this)">\u0647\u0641\u062a\u0647</button>'+
-          '<button class="as-dl-btn" data-days="14" onclick="_asDl(this)">2 \u0647\u0641\u062a\u0647</button>'+
-        '</div>'+
-        '<input id="asDeadline" class="as-input" type="text" value="'+dl+'" placeholder="1404-05-15" style="direction:ltr;text-align:center" oninput="_asDeadlineInput()"/>'+
-      '</div>'+
-
-      // description
-      '<div class="as-section">'+
-        '<div class="as-label">\u062a\u0648\u0636\u06cc\u062d</div>'+
-        '<textarea id="asDesc" class="as-textarea" rows="2" placeholder="\u062c\u0632\u0626\u06cc\u0627\u062a \u0628\u06cc\u0634\u062a\u0631 (\u0627\u062e\u062a\u06cc\u0627\u0631\u06cc)..."></textarea>'+
-      '</div>'+
-
-      '<div class="as-err" id="asErr"></div>'+
-      '<button class="as-submit" id="asSubmit" onclick="_asSubmit()">\u2709\ufe0f \u0627\u0631\u0633\u0627\u0644 \u062a\u0633\u06a9</button>'+
-    '</div>';
-
-  document.body.appendChild(s);
-  var ov=document.getElementById('ov');
-  if(ov){ov.classList.add('open');ov.style.zIndex='2050';}
-  s.classList.add('open');s.style.zIndex='2100';
-
-  // focus title
-  setTimeout(function(){var t=document.getElementById('asTitle');if(t)t.focus();},200);
-}
-
-function _asPickMember(btn) {
-  if(_asState.broadcast) return;
-  var grid=document.getElementById('asMemberGrid');
-  if(!grid) return;
-  var uuid=btn.dataset.uuid;
-  var wasSel=btn.classList.contains('sel');
-  grid.querySelectorAll('.as-member-chip').forEach(function(b){b.classList.remove('sel');});
-  if(!wasSel){btn.classList.add('sel');_asState.member=uuid;}
-  else _asState.member='';
-}
-
-function _asToggleBroadcast() {
-  _asState.broadcast=!_asState.broadcast;
-  var btn=document.getElementById('asBroadcast');
-  if(btn) btn.classList.toggle('on',_asState.broadcast);
-  var grid=document.getElementById('asMemberGrid');
-  if(grid){
-    grid.style.opacity=_asState.broadcast?'.4':'1';
-    grid.style.pointerEvents=_asState.broadcast?'none':'';
-  }
-  if(_asState.broadcast) _asState.member='';
-}
-
-function _asPri(btn) {
-  var row=btn.parentElement;
-  row.querySelectorAll('.as-pri-btn').forEach(function(b){b.classList.remove('sel');});
-  btn.classList.add('sel');
-  _asState.priority=btn.dataset.p;
-}
-
-function _asDl(btn) {
-  var row=btn.parentElement;
-  row.querySelectorAll('.as-dl-btn').forEach(function(b){b.classList.remove('sel');});
-  btn.classList.add('sel');
-  var days=parseInt(btn.dataset.days);
-  var p=mrTodayKey().split('-').map(Number);
-  var d=p[2]+days,mo=p[1],y=p[0];
-  var dim=[0,31,31,31,31,31,31,30,30,30,30,30,29];
-  while(d>dim[mo]){d-=dim[mo];mo++;if(mo>12){mo=1;y++;}}
-  var nd=y+'-'+(mo<10?'0'+mo:mo)+'-'+(d<10?'0'+d:d);
-  var inp=document.getElementById('asDeadline');
-  if(inp)inp.value=nd;
-}
-
-function _asDeadlineInput() {
-  // clear shortcut selection وقتی دستی تایپ میشه
-  var row=document.querySelector('.as-dl-row');
-  if(row)row.querySelectorAll('.as-dl-btn').forEach(function(b){b.classList.remove('sel');});
-}
-
-async function _asSubmit() {
-  var title=(document.getElementById('asTitle')?.value||'').trim();
-  var deadline=(document.getElementById('asDeadline')?.value||'').trim();
-  var desc=(document.getElementById('asDesc')?.value||'').trim();
-  var errEl=document.getElementById('asErr');
-  var btn=document.getElementById('asSubmit');
-
-  // validation
-  errEl.textContent='';
-  document.getElementById('asTitle')?.classList.remove('err');
-  document.getElementById('asDeadline')?.classList.remove('err');
-
-  if(!title){
-    errEl.textContent='\u0639\u0646\u0648\u0627\u0646 \u062a\u0633\u06a9 \u0631\u0627 \u0628\u0646\u0648\u06cc\u0633';
-    document.getElementById('asTitle')?.classList.add('err');
-    document.getElementById('asTitle')?.focus();
-    return;
-  }
-  if(!deadline||!/^\d{4}-\d{2}-\d{2}$/.test(deadline)){
-    errEl.textContent='\u062f\u062f\u0644\u0627\u06cc\u0646 \u0631\u0627 \u062a\u0639\u06cc\u06cc\u0646 \u06a9\u0646 (1404-05-15)';
-    document.getElementById('asDeadline')?.classList.add('err');
-    return;
-  }
-  if(!_asState.broadcast&&!_asState.member){
-    errEl.textContent='\u06cc\u06a9 \u0646\u0641\u0631 \u0627\u0646\u062a\u062e\u0627\u0628 \u06a9\u0646 \u06cc\u0627 Broadcast \u0628\u0632\u0646';
-    return;
-  }
-
-  btn.disabled=true;
-  btn.textContent='\u062f\u0631 \u062d\u0627\u0644 \u0627\u0631\u0633\u0627\u0644...';
-
-  try {
-    if(_asState.broadcast){
-      await tmAPI('POST','/task/broadcast',{title,description:desc,deadline,priority:_asState.priority});
-    } else {
-      await tmAPI('POST','/task/assign',{title,description:desc,deadline,assignedTo:_asState.member,priority:_asState.priority});
-      _tmTryPushToMember(_asState.member,title,false);
-    }
-    closeAll();
-    toast_(svgIco('check'),_asState.broadcast?'\ud83d\udce1 \u0628\u0631\u0648\u062f\u06a9\u0633\u062a \u0627\u0631\u0633\u0627\u0644 \u0634\u062f':'\u062a\u0633\u06a9 \u0627\u0631\u0633\u0627\u0644 \u0634\u062f \u2705');
-    tmSyncBackground();
-  } catch(e) {
-    errEl.textContent=e.message||'\u062e\u0637\u0627 \u062f\u0631 \u0627\u0631\u0633\u0627\u0644';
-    btn.disabled=false;
-    btn.textContent='\u2709\ufe0f \u0627\u0631\u0633\u0627\u0644 \u062a\u0633\u06a9';
-  }
-}
-
-boot();
-
-By=(taskObj&&taskObj.readBy)||{};
   var html='',lastDay='';
   c.forEach(function(x,xi){
     x = Object.assign({},x,{from:x.from||x.role||''});
