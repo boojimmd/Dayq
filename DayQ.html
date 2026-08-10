@@ -9637,8 +9637,6 @@ function _sheetDragInit(el){
   });
 }
 function closeAll(){
-  if(window._mgPollId){clearInterval(window._mgPollId);window._mgPollId=null;}
-  if(window._empPollId){clearInterval(window._empPollId);window._empPollId=null;}
   document.getElementById('ov').classList.remove('open');
   // Emil asymmetric timing: exit سریع‌تر از enter
   document.querySelectorAll('.sheet.open').forEach(s=>{
