@@ -18702,10 +18702,23 @@ function _idbRestoreCheck(onDone){
   }).catch(function(){onDone(false);});
 }
 
-_idbRestoreCheck(function(restored){
-  if(restored)console.log('[DayQ] will reload with restored data');
-  boot();
-});
+boot();
+// IDB: بعد از boot اگه localStorage خالی بود restore کن
+setTimeout(function(){
+  var SK='dq5_t';
+  var raw=localStorage.getItem(SK);
+  if(!raw||raw==='[]'||raw==='null'){
+    _idbGet(SK).then(function(v){
+      if(v&&v!=='[]'&&v!=='null'){
+        localStorage.setItem(SK,v);
+        _idbGet('dq5_b').then(function(b){if(b)localStorage.setItem('dq5_b',b);});
+        console.log('[DayQ] IDB restore after boot');
+        // reload تا data اعمال بشه
+        setTimeout(function(){location.reload();},100);
+      }
+    }).catch(function(){});
+  }
+},50);
 
 </script>
 
