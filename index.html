@@ -6635,7 +6635,7 @@ function loadAll(){
   }
 }
 let _batchSave=false;
-function saveAll(){  _idbSave('dq5_t',JSON.stringify(tasks));  _idbSave('dq5_b',JSON.stringify(cfg));
+function saveAll(){  _idbSave('dq5_t',JSON.stringify(tasks));  _idbSave('dq5_s',JSON.stringify(cfg));  _idbSave('dq5_b',JSON.stringify(bagItems));
   try{
     localStorage.setItem(SK,JSON.stringify(tasks));
     localStorage.setItem(SB,JSON.stringify(bagItems));
@@ -6673,7 +6673,7 @@ function _debouncedSync(){
   clearTimeout(_debSyncT);
   _debSyncT=setTimeout(()=>syncNow(), 2500);
 }
-function saveCfg(){try{localStorage.setItem(SS,JSON.stringify(cfg));}catch(e){}}
+function saveCfg(){try{localStorage.setItem(SS,JSON.stringify(cfg));_idbSave('dq5_s',JSON.stringify(cfg));}catch(e){}}
 
 /* ══ THEME ══ */
 function applyTheme(t){
@@ -18712,9 +18712,9 @@ setTimeout(function(){
       if(v&&v!=='[]'&&v!=='null'){
         localStorage.setItem(SK,v);
         _idbGet('dq5_b').then(function(b){if(b)localStorage.setItem('dq5_b',b);});
-        console.log('[DayQ] IDB restore after boot');
-        // reload تا data اعمال بشه
-        setTimeout(function(){location.reload();},100);
+        _idbGet('dq5_s').then(function(s){if(s)localStorage.setItem('dq5_s',s);});
+        console.log('[DayQ] IDB restore: data recovered ✅');
+        setTimeout(function(){location.reload();},200);
       }
     }).catch(function(){});
   }
