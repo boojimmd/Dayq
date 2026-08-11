@@ -6635,7 +6635,7 @@ function loadAll(){
   }
 }
 let _batchSave=false;
-function saveAll(){
+function saveAll(){  _idbSave('dq5_t',JSON.stringify(tasks));  _idbSave('dq5_b',JSON.stringify(cfg));
   try{
     localStorage.setItem(SK,JSON.stringify(tasks));
     localStorage.setItem(SB,JSON.stringify(bagItems));
@@ -18650,7 +18650,62 @@ async function _asSubmit(){
   }
 }
 
-boot();
+/* ═══ IndexedDB Backup ═══ */
+var _idbDB=null;
+function _idbOpen(){
+  return new Promise(function(resolve){
+    if(_idbDB){resolve(_idbDB);return;}
+    try{
+      var req=indexedDB.open('dayq_v5',1);
+      req.onupgradeneeded=function(e){
+        var db=e.target.result;
+        if(!db.objectStoreNames.contains('backup'))
+          db.createObjectStore('backup',{keyPath:'k'});
+      };
+      req.onsuccess=function(e){_idbDB=e.target.result;resolve(_idbDB);};
+      req.onerror=function(){resolve(null);};
+    }catch(e){resolve(null);}
+  });
+}
+function _idbSave(key,val){
+  _idbOpen().then(function(db){
+    if(!db)return;
+    try{var tx=db.transaction('backup','readwrite');tx.objectStore('backup').put({k:key,v:val,ts:Date.now()});}catch(e){}
+  });
+}
+function _idbGet(key){
+  return _idbOpen().then(function(db){
+    return new Promise(function(resolve){
+      if(!db){resolve(null);return;}
+      try{
+        var req=db.transaction('backup','readonly').objectStore('backup').get(key);
+        req.onsuccess=function(){resolve(req.result?req.result.v:null);};
+        req.onerror=function(){resolve(null);};
+      }catch(e){resolve(null);}
+    });
+  });
+}
+function _idbRestoreCheck(onDone){
+  var SK='dq5_t';
+  var raw=localStorage.getItem(SK);
+  if(raw&&raw!=='[]'&&raw!=='null'){onDone(false);return;}
+  _idbGet(SK).then(function(v){
+    if(v&&v!=='[]'&&v!=='null'){
+      localStorage.setItem(SK,v);
+      _idbGet('dq5_b').then(function(b){if(b)localStorage.setItem('dq5_b',b);
+        _idbGet('dq5_s').then(function(s){if(s)localStorage.setItem('dq5_s',s);
+          console.log('[DayQ] IndexedDB restore: data recovered \u2705');
+          onDone(true);
+        });
+      });
+    }else{onDone(false);}
+  }).catch(function(){onDone(false);});
+}
+
+_idbRestoreCheck(function(restored){
+  if(restored)console.log('[DayQ] will reload with restored data');
+  boot();
+});
 
 </script>
 
