@@ -4648,22 +4648,17 @@ body:has(#tmSokoPanel.open) #ov {
 }
 
 
-/* ── iOS PWA Standalone scroll fix ──
-   وقتی content کمتر از viewport باشه، iOS Standalone scroll رو block میکنه
-   این fix مطمئن میشه page همیشه scrollable هست */
-.page {
-  min-height: calc(100dvh - var(--nav-h) + 1px) !important;
-}
-/* iOS standalone: force scroll recognition */
+/* ── iOS PWA Standalone — Home page scroll fix ── */
 @media all and (display-mode: standalone) {
+  /* force GPU compositing — iOS scroll recognition */
   .page {
-    -webkit-overflow-scrolling: touch !important;
-    overflow-y: scroll !important;
-    min-height: calc(100svh - var(--nav-h) + 2px) !important;
+    -webkit-transform: translate3d(0,0,0);
+    transform: translate3d(0,0,0);
   }
-  body {
-    overscroll-behavior: none;
-    -webkit-overflow-scrolling: touch;
+  /* tlist همیشه بزرگ‌تر از viewport باشه */
+  .tlist {
+    min-height: 60vh;
+    padding-bottom: 160px !important;
   }
 }
 
