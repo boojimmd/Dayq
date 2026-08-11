@@ -6783,7 +6783,7 @@ function goPage(n){
     const panel=document.getElementById('dpanel');
     if(panel) panel.style.display=(n==='Home'&&!document.body.classList.contains('dp-closed'))?'flex':'none';
   }
-  if(n==='Me')       { updateMeStats(); if(window.innerWidth>=900) renderMeDashboard(); }
+  if(n==='Me')       { setGreeting(); syncProfile(); updateMeStats(); if(window.innerWidth>=900) renderMeDashboard(); }
   if(n==='Bag')       { renderBag(); }
   if(n==='Birthdays') { renderBirthdayPage(); }
   if(n==='Projects'){loadProjects();renderProjects();if(window.innerWidth>=900)projDesktopInit();}
