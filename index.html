@@ -18543,6 +18543,129 @@ function tmSubmitRet(){
   toast_('','\u06af\u0632\u0627\u0631\u0634 \u062b\u0628\u062a \u0634\u062f \u2705');
 }
 
+function _renderThread(c,role,el,taskObj){
+  if(!el)return;
+  if(!c||!c.length){el.innerHTML='<div class="tm-thread-empty">هنوز پیامی نیست</div>';el.scrollTop=0;return;}
+  var readBy=(taskObj&&taskObj.readBy)||{};
+  var html='',lastDay='';
+  c.forEach(function(x,xi){
+    x = Object.assign({},x,{from:x.from||x.role||''});
+    var ts=_commentTime(x.ts||x.at||0);
+    var d=ts?new Date(ts):null;
+    // date divider
+    if(d&&!isNaN(d.getTime())){
+      var dk=d.toDateString();
+      if(dk!==lastDay){
+        lastDay=dk;
+        var now=new Date();
+        var lbl=d.toDateString()===now.toDateString()?'امروز':
+                new Date(now-86400000).toDateString()===d.toDateString()?'دیروز':
+                (function(){try{var j=gregorianToJalali(d.getFullYear(),d.getMonth()+1,d.getDate());return j[2]+'/'+j[1]+'/'+(j[0]%100);}catch(e){return d.getDate()+'/'+(d.getMonth()+1);}})();
+        html+='<div class="ttd-day-div"><span>'+lbl+'</span></div>';
+      }
+    }
+    if((x.from||x.role)==='system'){
+      html+='<div class="ttd-sys-msg">'+esc(x.text)+'</div>';return;
+    }
+    var isOwn=((x.from||x.role)===role);
+    var sndr=isOwn?'':((x.from||x.role)==='manager'?'مدیر':'کارمند');
+    var hm='';
+    if(d&&!isNaN(d.getTime())){
+      hm=d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');
+    }
+    // read receipt
+    var tick='';
+    if(isOwn){
+      var otherKeys=Object.keys(readBy).filter(function(k){return k!==tm.uuid;});
+      var readTs=otherKeys.length?readBy[otherKeys[0]]:0;
+      tick=readTs&&ts&&readTs>ts?'<span class="ttd-tick ttd-tick-read">✓✓</span>':'<span class="ttd-tick">✓</span>';
+    }
+    html+='<div class="ttd-bubble from-'+(x.from||x.role)+(isOwn?' is-own':'')+'">'+
+      '<div class="ttd-bubble-body">'+esc(x.text)+'</div>'+
+      '<div class="ttd-bubble-foot">'+
+        (sndr?'<span class="ttd-bubble-sender">'+sndr+'</span>':'')+
+        (hm?'<span class="ttd-bubble-time">'+hm+'</span>':'')+
+        tick+
+      '</div></div>';
+  });
+  el.innerHTML=html;
+  setTimeout(function(){el.scrollTop=el.scrollHeight;
+  // mark last bubble as new for faster animation
+  var _last=el.querySelector('.ttd-bubble:last-child');
+  if(_last){_last.classList.add('is-new');}},50);
+}
+function _commentTime(ts){if(!ts&&ts!==0)return '';var d=new Date(ts);if(isNaN(d.getTime()))return '';return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');}
+async function _ttdSendComment(){
+  var inp=document.querySelector('#ttdCommentSection .ttd-reply-inp');
+  if(!inp||!inp.value.trim()||!_ttdTaskId)return;
+  var text=inp.value.trim(),btn=document.querySelector('#ttdCommentSection .ttd-reply-send');
+  if(btn)btn.disabled=true;
+  var task=(tm.inbox||[]).find(function(t){return t.id===_ttdTaskId;});
+  try{await tmAPI('POST','/task/comment',{taskId:_ttdTaskId,text,from:'member'});}
+  catch(e){if(btn)btn.disabled=false;inp.value=text;toast_('','❌ خطا در ارسال پیام',2500);return;}
+  if(task){
+    if(!task.comments)task.comments=[];
+    task.comments.push({from:'member',text,ts:Date.now(),at:Date.now()});
+  }
+  inp.value='';inp.style.height='auto';
+  var thr=document.getElementById('ttdThreadMsgs');
+  if(thr&&task&&typeof _renderThread==='function')_renderThread(task.comments||[],'member',thr,task);
+  if(thr)thr.scrollTop=thr.scrollHeight;
+  if(btn)btn.disabled=false;
+}
+async function tmApproveTask(taskId,approve){
+  // exit animation روی task card
+  try{var _rows=document.querySelectorAll('[onclick*="'+taskId+'"]');
+  _rows.forEach(function(r){var card=r.closest('.tm-task-row');if(card){card.classList.add('task-exiting');}});}catch(_e){}
+  try{
+    await tmAPI('PUT','/task/update',{taskId:taskId,status:approve?'done':'in_progress'});
+    // system comment
+    var msg=approve?'تسک تأیید شد ✅':'تسک برای اصلاح برگشت شد ↩';
+    try{await tmAPI('POST','/task/comment',{taskId:taskId,text:msg});}catch(_){}
+    toast_(svgIco('check'),approve?'تسک تأیید شد ✅':'تسک برگشت داده شد');
+    setTimeout(function(){closeAll();if(typeof tmSyncBackground==='function')tmSyncBackground();},600);
+  }catch(e){toast_('','❌ خطا',2500);}
+}
+function _idbRestoreCheck(onDone){
+  var SK='dq5_t';
+  var raw=localStorage.getItem(SK);
+  if(raw&&raw!=='[]'&&raw!=='null'){onDone(false);return;}
+  _idbGet(SK).then(function(v){
+    if(v&&v!=='[]'&&v!=='null'){
+      localStorage.setItem(SK,v);
+      _idbGet('dq5_b').then(function(b){if(b)localStorage.setItem('dq5_b',b);});
+      _idbGet('dq5_s').then(function(s){if(s)localStorage.setItem('dq5_s',s);});
+      console.log('[DayQ] IDB restore ✅');
+      onDone(true);
+    }else{onDone(false);}
+  }).catch(function(){onDone(false);});
+}
+function _calRender(){if(typeof calInit==='function')calInit();}
+function _calSetFilter(f){if(typeof calInit==='function')calInit();}
+function _doSearch(q){
+  if(!q){var ov=document.getElementById('searchOverlay');if(ov)ov.style.display='none';return;}
+  var results=tasks.filter(function(t){return !t.archived&&(t.text||'').toLowerCase().includes(q.toLowerCase());});
+  var el=document.getElementById('searchResults');
+  if(!el)return;
+  el.innerHTML=results.slice(0,30).map(function(t){
+    return '<div class="s-item" onclick="closeAll()" style="padding:10px 16px;border-bottom:1px solid var(--b2);cursor:pointer;direction:rtl"><div style="font-size:var(--fs-xs)">'+esc(t.text||'')+'</div></div>';
+  }).join('')||('<div style="text-align:center;padding:var(--sp4);color:var(--t3);font-size:var(--fs-xs)">یافت نشد</div>');
+}
+function tmOpenMemberTasks(uuid){
+  var members=(tm.snapshot&&tm.snapshot.members)||[];
+  var m=members.find(function(x){return x.uuid===uuid;});
+  if(!m)return;
+  toast_('',esc(m.name||'')+' تسک: '+(m.tasks||[]).length);
+}
+function _openFirstUnread(){
+  var unread=(tm.inbox||[]).filter(function(t){
+    if(!t.comments||!t.comments.length)return false;
+    var last=t.comments[t.comments.length-1];
+    var ts=last.ts||last.at||0;
+    return (last.from||last.role)==='manager'&&(!t.lastReadAt||ts>t.lastReadAt);
+  });
+  if(unread.length)openTeamTaskDetail(unread[0].id);
+}
 boot();
 
 </script>
