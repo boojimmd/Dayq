@@ -7019,15 +7019,15 @@ function goPage(n){
   if(window.innerWidth>=900){
     document.body.classList.toggle('show-dpanel',
       n==='Home' && !document.body.classList.contains('dp-closed'));
+    // calDayPanelDesktop فقط روی Calendar نشون داده بشه
+    var _calDP=document.getElementById('calDayPanelDesktop');
+    if(_calDP)_calDP.style.display=n==='Calendar'&&window.innerWidth>=900?'flex':'none';
   }
   if(n==='Me')       { setGreeting(); syncProfile(); updateMeStats(); if(window.innerWidth>=900) renderMeDashboard(); }
   if(n==='Bag')       { renderBag(); }
   if(n==='Birthdays') { renderBirthdayPage(); }
   if(n==='Projects'){loadProjects();renderProjects();if(window.innerWidth>=900)projDesktopInit();}
   if(n==='Calendar'){calInit();
-    if(window.innerWidth>=900){
-      document.getElementById('calDayPanelDesktop').style.display='flex';
-    }
     setTimeout(()=>showCoachMark('calMonthLabel','این سه دکمه، سه‌جور نمایش متفاوت‌اند — ماهانه، هفتگی، یا فهرست ساده','calview','below'),400);
   }
   if(window.innerWidth>=900) dsbUpdate();
