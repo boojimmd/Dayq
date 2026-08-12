@@ -4648,19 +4648,17 @@ body:has(#tmSokoPanel.open) #ov {
 }
 
 
-/* ── iOS PWA Standalone scroll fix ── */
+/* ── iOS PWA Standalone — Home page scroll fix ── */
 @media all and (display-mode: standalone) {
-  /* GPU compositing — iOS scroll activation */
+  /* force GPU compositing — iOS scroll recognition */
   .page {
     -webkit-transform: translate3d(0,0,0);
     transform: translate3d(0,0,0);
-    /* prevent spring-back bounce */
-    overscroll-behavior-y: none;
-    -webkit-overflow-scrolling: touch;
   }
-  /* no fake min-height — فقط padding واقعی */
+  /* tlist همیشه بزرگ‌تر از viewport باشه */
   .tlist {
-    padding-bottom: 200px !important;
+    min-height: 60vh;
+    padding-bottom: 160px !important;
   }
 }
 
