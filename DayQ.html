@@ -18627,18 +18627,21 @@ async function tmApproveTask(taskId,approve){
   }catch(e){toast_('','❌ خطا',2500);}
 }
 function _idbRestoreCheck(onDone){
-  var SK='dq5_t';
+  var SK='dq5_t', SS='dq5_s', SB='dq5_b', SD='dq5_bd';
   var raw=localStorage.getItem(SK);
-  if(raw&&raw!=='[]'&&raw!=='null'){onDone(false);return;}
-  _idbGet(SK).then(function(v){
-    if(v&&v!=='[]'&&v!=='null'){
-      localStorage.setItem(SK,v);
-      _idbGet('dq5_b').then(function(b){if(b)localStorage.setItem('dq5_b',b);});
-      _idbGet('dq5_s').then(function(s){if(s)localStorage.setItem('dq5_s',s);});
-      console.log('[DayQ] IDB restore ✅');
+  var isEmpty=!raw||raw==='[]'||raw==='null';
+  if(!isEmpty){onDone(false);return;}
+  Promise.all([_idbGet(SK),_idbGet(SS),_idbGet(SB),_idbGet(SD)])
+    .then(function(vals){
+      var tasks=vals[0],cfg=vals[1],bag=vals[2],bd=vals[3];
+      if(!tasks||tasks==='[]'){onDone(false);return;}
+      if(tasks)localStorage.setItem(SK,tasks);
+      if(cfg)localStorage.setItem(SS,cfg);
+      if(bag)localStorage.setItem(SB,bag);
+      if(bd)localStorage.setItem(SD,bd);
+      console.log('[DayQ] ✅ IDB restore: data recovered');
       onDone(true);
-    }else{onDone(false);}
-  }).catch(function(){onDone(false);});
+    }).catch(function(){onDone(false);});
 }
 function _calRender(){if(typeof calInit==='function')calInit();}
 function _calSetFilter(f){if(typeof calInit==='function')calInit();}
@@ -19187,6 +19190,16 @@ function tmRenderSidebar(tab) {
 }
 
 boot();
+// IDB safety check: 50ms بعد از boot
+setTimeout(function(){
+  _idbRestoreCheck(function(restored){
+    if(restored){
+      // data از IDB برگشت — reload تا اعمال بشه
+      console.log('[DayQ] reloading with restored data...');
+      setTimeout(function(){window.location.reload();},100);
+    }
+  });
+},50);
 
 </script>
 
