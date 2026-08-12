@@ -9325,6 +9325,7 @@ function _sheetDragInit(el){
   });
 }
 function closeAll(){
+  var _asSh=document.getElementById("shTmAssign");if(_asSh)_asSh.remove();
   if(window._mgPollId){clearInterval(window._mgPollId);window._mgPollId=null;}
   if(window._empPollId){clearInterval(window._empPollId);window._empPollId=null;}
   document.getElementById('ov').classList.remove('open');
@@ -19514,6 +19515,7 @@ function _skSidebarMember(n){
   }).join('');
 }
 
+var _asState={member:"",priority:"normal",broadcast:false};
 boot();
 // IDB safety check: 50ms بعد از boot
 setTimeout(function(){
