@@ -4662,6 +4662,116 @@ body:has(#tmSokoPanel.open) #ov {
   }
 }
 
+
+/* ═══════════════════════════════════════════════
+   PHASE 3 — Complete CSS Restore
+   ═══════════════════════════════════════════════ */
+
+/* ── Animations (Emil Kowalski) ── */
+@keyframes paneIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes bubbleIn{from{opacity:0;transform:translateY(6px) scale(0.97)}to{opacity:1;transform:none}}
+@keyframes tmUrgFadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes badgePop{0%{transform:scale(1)}40%{transform:scale(1.4)}100%{transform:scale(1)}}
+@keyframes taskExit{0%{opacity:1;transform:none;max-height:100px}40%{opacity:0;transform:translateX(20px) scale(0.98);max-height:100px}100%{opacity:0;transform:translateX(20px);max-height:0;margin:0;padding:0}}
+@keyframes memberCardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ── Badge pop ── */
+.badge-pop{animation:badgePop 300ms cubic-bezier(0.34,1.3,0.64,1)}
+.tm-task-row.task-exiting{animation:taskExit 280ms cubic-bezier(0.4,0,1,1) forwards;pointer-events:none;overflow:hidden}
+
+/* ── Urgency task rows ── */
+.tm-urg-row{animation:tmUrgFadeUp 220ms var(--ease-out,cubic-bezier(0.23,1,0.32,1)) both}
+.tm-member-card{animation:memberCardIn 200ms cubic-bezier(0.23,1,0.32,1) both}
+.tm-member-card:nth-child(1){animation-delay:0ms}
+.tm-member-card:nth-child(2){animation-delay:50ms}
+.tm-member-card:nth-child(3){animation-delay:100ms}
+.tm-member-card:nth-child(4){animation-delay:150ms}
+.tm-member-card:nth-child(n+5){animation-delay:180ms}
+
+/* ── Status buttons (employee sheet) ── */
+.ttd-st-btn{transition:background 150ms cubic-bezier(0.23,1,0.32,1),color 150ms cubic-bezier(0.23,1,0.32,1),border-color 150ms cubic-bezier(0.23,1,0.32,1),box-shadow 150ms cubic-bezier(0.23,1,0.32,1)}
+.ttd-st-btn.active-st{background:var(--t1)!important;color:var(--bg1)!important;border-color:var(--t1)!important;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.ttd-st-btn[data-st="blocked"]:not(.active-st){color:var(--red)!important;border-color:rgba(229,62,90,.25)!important;background:rgba(229,62,90,.05)!important}
+
+/* ── Chat bubbles (RTL) ── */
+.ttd-thread{display:flex;flex-direction:column;gap:6px;padding:8px 4px;direction:rtl}
+.ttd-bubble{max-width:78%;padding:8px 12px 5px;animation:bubbleIn 180ms cubic-bezier(0.23,1,0.32,1) both}
+.ttd-bubble:nth-child(1){animation-delay:0ms}
+.ttd-bubble:nth-child(2){animation-delay:40ms}
+.ttd-bubble:nth-child(3){animation-delay:80ms}
+.ttd-bubble:nth-child(n+4){animation-delay:120ms}
+.ttd-bubble.is-new{animation-delay:0ms!important}
+.ttd-bubble.is-own{align-self:flex-start!important;background:var(--a)!important;color:#fff!important;border:none!important;border-radius:16px 4px 16px 16px!important;margin-left:15%!important}
+.ttd-bubble:not(.is-own){align-self:flex-end!important;background:var(--bg2)!important;color:var(--t1)!important;border:1px solid var(--b1)!important;border-radius:4px 16px 16px 16px!important;margin-right:15%!important}
+.ttd-bubble-body{font-size:var(--fs-xs);line-height:1.55;word-break:break-word}
+.ttd-bubble-foot{display:flex;align-items:center;justify-content:flex-end;gap:4px;margin-top:3px}
+.ttd-bubble-time{font-size:10px;opacity:.65;white-space:nowrap}
+.ttd-bubble.is-own .ttd-bubble-time{color:rgba(255,255,255,.8)}
+.ttd-day-div{text-align:center;font-size:11px;color:var(--t3);padding:4px 0;display:flex;align-items:center;gap:8px;direction:ltr}
+.ttd-day-div::before,.ttd-day-div::after{content:'';flex:1;height:1px;background:var(--b2)}
+.ttd-sys-msg{text-align:center;font-size:11px;color:var(--t3);background:var(--bg2);border-radius:12px;padding:3px 12px;margin:4px auto;max-width:80%}
+.ttd-reply-inp{flex:1!important;background:var(--bg2)!important;border:1px solid var(--b1)!important;border-radius:20px!important;padding:9px 14px!important;font-size:var(--fs-xs)!important;font-family:var(--f)!important;direction:rtl;outline:none!important;resize:none!important;line-height:1.4!important;transition:border-color 150ms ease}
+.ttd-reply-inp:focus{border-color:var(--a)!important}
+.ttd-reply-send{width:36px!important;height:36px!important;border-radius:50%!important;background:var(--a)!important;border:none!important;cursor:pointer!important;display:flex!important;align-items:center!important;justify-content:center!important;flex-shrink:0!important;transition:opacity 150ms ease}
+.ttd-reply-send:active{opacity:.8}
+
+/* ── Empty State ── */
+.soko-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:var(--sp6) var(--sp4);text-align:center;gap:var(--sp3);animation:paneIn 250ms cubic-bezier(0.23,1,0.32,1) both}
+.soko-empty-icon{font-size:40px;line-height:1;opacity:.75}
+.soko-empty-title{font-size:var(--fs-sm);font-weight:700;color:var(--t1);margin:0}
+.soko-empty-body{font-size:var(--fs-xs);color:var(--t3);line-height:1.65;max-width:210px;margin:0}
+.soko-empty-action{margin-top:var(--sp2);height:36px;padding:0 var(--sp4);border-radius:var(--r5);background:var(--a);color:#fff;border:none;font-size:var(--fs-xs);font-weight:700;font-family:var(--f);cursor:pointer;transition:opacity 120ms ease}
+
+/* ── Assign Task Sheet ── */
+.as-label{font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.03em;margin-bottom:6px;display:block}
+.as-required{color:var(--red);margin-right:2px}
+.as-member-grid{display:flex;flex-wrap:wrap;gap:8px}
+.as-member-chip{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 12px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--bg2);color:var(--t2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;transition:all 150ms cubic-bezier(0.23,1,0.32,1)}
+.as-member-chip.sel{border-color:var(--a);background:rgba(0,184,122,.1);color:var(--a)}
+.as-chip-count{font-size:10px;opacity:.6;background:var(--bg3);border-radius:var(--r5);padding:0 5px;height:18px;display:inline-flex;align-items:center}
+.as-pri-row{display:flex;gap:8px}
+.as-pri-btn{flex:1;height:36px;border-radius:var(--r2);border:1px solid var(--b1);background:var(--bg2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;color:var(--t2);transition:all 150ms cubic-bezier(0.23,1,0.32,1)}
+.as-pri-btn.sel{border-color:var(--t1);background:var(--t1);color:var(--bg1)}
+.as-pri-btn[data-p="high"].sel{border-color:var(--amber);background:rgba(217,119,6,.1);color:var(--amber)}
+.as-pri-btn[data-p="urgent"].sel{border-color:var(--red);background:rgba(229,62,90,.1);color:var(--red)}
+.as-dl-row{display:flex;gap:6px;margin-bottom:6px}
+.as-dl-btn{flex:1;height:30px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--bg2);font-size:11px;font-weight:600;font-family:var(--f);cursor:pointer;color:var(--t2);transition:all 120ms ease}
+.as-dl-btn.sel{border-color:var(--a);color:var(--a);background:rgba(0,184,122,.06)}
+.as-dl-btn:active{transform:scale(.97)}
+.as-input{width:100%;height:40px;padding:0 12px;background:var(--bg2);border:1.5px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-xs);font-family:var(--f);color:var(--t1);outline:none;box-sizing:border-box;transition:border-color 150ms ease;direction:rtl}
+.as-input:focus{border-color:var(--a)}
+.as-textarea{width:100%;padding:10px 12px;min-height:64px;background:var(--bg2);border:1.5px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-xs);font-family:var(--f);color:var(--t1);outline:none;box-sizing:border-box;resize:none;transition:border-color 150ms ease;direction:rtl;line-height:1.5}
+.as-textarea:focus{border-color:var(--a)}
+.as-broadcast{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:var(--r2);background:var(--bg2);border:1px solid var(--b1);cursor:pointer;transition:all 150ms ease;font-size:var(--fs-xs);font-weight:600;color:var(--t2)}
+.as-broadcast.on{background:rgba(37,99,235,.06);border-color:rgba(37,99,235,.3);color:var(--blue)}
+.as-submit{width:100%;height:48px;border-radius:var(--r2);border:none;background:var(--ag);color:#fff;font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer;transition:opacity 150ms ease,transform 100ms ease}
+.as-submit:disabled{opacity:.5;cursor:not-allowed}
+.as-submit:not(:disabled):active{transform:scale(.98)}
+.as-err{font-size:var(--fs-xs);color:var(--red);min-height:16px;text-align:right;animation:paneIn 150ms ease both}
+
+/* ── Soko hardcoded color fix ── */
+.tm-panel-sidebar{background:var(--bg0)!important}
+@media(prefers-color-scheme:dark){.tm-panel-sidebar{background:var(--bg0)!important}}
+
+/* ── Button press feedback ── */
+.tm-btn:active,.tm-soko-btn:active,.ttd-st-btn:active{transform:scale(.96)!important}
+.tm-btn,.tm-soko-btn{transition:transform 100ms cubic-bezier(0.23,1,0.32,1),background 150ms cubic-bezier(0.23,1,0.32,1)}
+
+/* ── Blocked section ── */
+#ttdBlockedSection{background:rgba(229,62,90,.04);border:1px solid rgba(229,62,90,.15);border-radius:var(--r2);padding:var(--sp3)}
+.blocked-reasons label{display:flex;align-items:center;gap:8px;padding:6px 0;cursor:pointer;direction:rtl;font-size:var(--fs-xs);color:var(--t2)}
+.blocked-reasons input[type=radio]{accent-color:var(--red);width:16px;height:16px;flex-shrink:0}
+
+/* ── Tab pane animation ── */
+.tm-tab-pane.active{animation:paneIn 180ms cubic-bezier(0.23,1,0.32,1) both!important}
+
+/* ── Reduce motion ── */
+@media(prefers-reduced-motion:reduce){
+  .ttd-bubble,.tm-urg-row,.tm-member-card,.soko-empty,.badge-pop,.task-exiting{animation:none!important}
+  .ttd-bubble{opacity:1;transform:none}
+  .tm-urg-row{opacity:1;transform:none}
+}
+
 </style>
 </head>
 <body>
