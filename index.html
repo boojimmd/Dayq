@@ -18689,6 +18689,503 @@ async function _mgSendComment(){
   if(btn)btn.disabled=false;
   setTimeout(tmSyncBackground,1500);
 }
+async function _tmBuildXLSX(period) {
+  const members = (tm.snapshot.members||[]).filter(m=>!m.isManager&&m.role!=='manager');
+  const teamName = tm.teamName || 'تیم';
+
+  // ── Sheets data ──
+  const sheets = [
+    _tmSheetStatus(members, teamName),
+    _tmSheetTasks(members, teamName),
+    _tmSheetSummary(members, teamName, period),
+  ];
+
+  // ── Build XLSX XML ──
+  const styles = _tmXlsxStyles();
+  const wb = _tmXlsxWorkbook(sheets);
+  const cts = _tmXlsxContentTypes(sheets.length);
+  const rels = _tmXlsxRels();
+  const wbRels = _tmXlsxWbRels(sheets.length);
+  const ss = _tmXlsxSharedStrings(sheets);
+
+  // ── ZIP assembly ──
+  const files = {
+    '[Content_Types].xml': cts,
+    '_rels/.rels': rels,
+    'xl/workbook.xml': wb,
+    'xl/_rels/workbook.xml.rels': wbRels,
+    'xl/styles.xml': styles,
+    'xl/sharedStrings.xml': ss.xml,
+  };
+  sheets.forEach((sh, i) => {
+    files[`xl/worksheets/sheet${i+1}.xml`] = _tmXlsxSheet(sh, ss.map, i+1);
+  });
+
+  return await _tmZipToBlob(files);
+}
+function _tmDlSheet(tid,title,cur){
+  var od=document.getElementById('shTmDl');if(od)od.remove();
+  var s=document.createElement('div');s.className='sheet';s.id='shTmDl';
+  s.dataset.tid=tid;
+  var bs='flex:1;height:38px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--bg2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer';
+  s.innerHTML='<div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl">تمدید ددلاین</div><button class="sh-x" onclick="closeAll()">✕</button></div></div>'+
+    '<div class="sh-body" style="gap:var(--sp3)">'+
+    '<div style="font-size:var(--fs-xs);color:var(--t3)">'+esc(title)+'</div>'+
+    '<div style="display:flex;gap:6px">'+
+    '<button data-days="1" onclick="_tmDlShortBtn(this)" style="'+bs+'">فردا</button>'+
+    '<button data-days="3" onclick="_tmDlShortBtn(this)" style="'+bs+'">3 روز</button>'+
+    '<button data-days="7" onclick="_tmDlShortBtn(this)" style="'+bs+'">هفته</button>'+
+    '</div>'+
+    '<input id="tmDlInp" value="'+cur+'" placeholder="1404-06-15" style="width:100%;padding:10px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:1.1rem;text-align:center;direction:ltr;outline:none"/>'+
+    '<div id="tmDlErr" style="color:var(--red);font-size:var(--fs-xs);text-align:center;min-height:14px"></div>'+
+    '<button onclick="_tmDlOkBtn()" style="width:100%;height:46px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">تایید</button></div>';
+  document.body.appendChild(s);
+  _sokoSheetOpen('shTmDl');
+}
+async function _tmMemberAction(uuid,action,val){if(action==='remove'){if(!await _tmConfirmSheet('حذف عضو','این عضو دیگه دسترسی نخواهد داشت','حذف','var(--red)'))return;try{await tmAPI('POST','/member/remove',{memberUuid:uuid});toast_(svgIco('check'),'عضو حذف شد');await tmSyncBackground();tmRefreshInfoSheet();}catch(e){toast_(svgIco('x'),e.message);}}else if(action==='toggle'){try{await tmAPI('PUT','/member/status',{memberUuid:uuid,status:val?'active':'inactive'});await tmSyncBackground();tmRefreshInfoSheet();}catch(e){toast_(svgIco('x'),e.message);}}else if(action==='pin'){if(!await _tmConfirmSheet('ریست PIN','یه PIN موقت ساخته میشه','ریست','var(--amber)'))return;try{var d=await tmAPI('POST','/member/pin-reset',{memberUuid:uuid});_tmTempPin&&_tmTempPin(d.tempPin);}catch(e){toast_(svgIco('x'),e.message);}}else if(action==='thread'){tmOpenTaskThread(uuid);}}
+function _tmRenderStatusFiltered(f) {
+  const el = document.getElementById('tmSokoStatusContent');
+  if (!el || !tm.snapshot) return;
+  const allMembers = (tm.snapshot.members || []).filter(m => !m.isManager && m.role !== 'manager');
+  const members = f === 'all' ? allMembers : allMembers.filter(m => m.alert === f);
+  // re-use the render logic by temporarily overriding snapshot
+  const _orig = tm.snapshot.members;
+  tm.snapshot.members = [...members, ...(tm.snapshot.members||[]).filter(m => m.isManager)];
+  tmRenderSokoStatus();
+  tm.snapshot.members = _orig;
+}
+function _tmSbFilter(f) {
+  _tmSbActiveFilter = f;
+  ['All','Blocked','Ok'].forEach(k => {
+    const btn = document.getElementById('sbf'+k);
+    if (btn) btn.classList.toggle('active', k.toLowerCase()===f);
+  });
+  const el = document.getElementById('tmSokoStatusContent');
+  if (!el||!tm.snapshot) return;
+  const all = (tm.snapshot.members||[]).filter(m=>!m.isManager&&m.role!=='manager');
+  const filtered = f==='all'?all:all.filter(m=>m.alert===f);
+  const orig = tm.snapshot.members;
+  tm.snapshot.members = [...filtered,...(tm.snapshot.members||[]).filter(m=>m.isManager)];
+  tmRenderSokoStatus();
+  tm.snapshot.members = orig;
+}
+function _tmSetReportPeriod(p) {
+  _tmReportPeriod = p;
+  _tmSbReport(document.getElementById('tmPanelSidebar'));
+  tmLoadReport(p === 'weekly' ? 'weekly' : 'monthly');
+}
+function _tmSheetStatus(members, teamName) {
+  const MONTHS = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+  const rows = [
+    [{ v: `گزارش وضعیت تیم — ${teamName}`, s:'title', span:6 }],
+    [{ v: `تاریخ: ${mrTodayKey()}`, s:'sub', span:6 }],
+    [],
+    [
+      { v:'ردیف',          s:'hdr' },
+      { v:'نام',           s:'hdr' },
+      { v:'نقش',           s:'hdr' },
+      { v:'وضعیت',         s:'hdr' },
+      { v:'تسک فعال',      s:'hdr' },
+      { v:'تکمیل‌شده',     s:'hdr' },
+      { v:'درصد موفقیت',   s:'hdr' },
+    ],
+    ...members.map((m, i) => {
+      const total = (m.activeTasks||0) + (m.doneTasks||0);
+      const pct = total > 0 ? Math.round((m.doneTasks||0)/total*100) : 0;
+      const statusLabel = m.alert==='blocked' ? '🚫 متوقف' : m.alert==='stale' ? '⏳ بی‌تحرکی' : '✅ فعال';
+      const rowStyle = m.alert==='blocked' ? 'red' : m.alert==='stale' ? 'amber' : (i%2===0 ? 'even' : 'odd');
+      return [
+        { v: i+1,                s:rowStyle, t:'n' },
+        { v: m.name||'',         s:rowStyle },
+        { v: m.role||'عضو تیم',  s:rowStyle },
+        { v: statusLabel,        s:m.alert==='blocked'?'red':m.alert==='stale'?'amber':rowStyle },
+        { v: m.activeTasks||0,   s:rowStyle, t:'n' },
+        { v: m.doneTasks||0,     s:rowStyle, t:'n' },
+        { v: pct,                s:rowStyle, t:'n', fmt:'0"%"' },
+      ];
+    }),
+    [],
+    [{ v:'تهیه‌شده توسط DayQ Soko', s:'footer', span:7 }],
+  ];
+  return { name:'وضعیت اعضا', rows, cols:[5, 20, 15, 15, 12, 12, 12] };
+}
+function _tmSheetSummary(members, teamName, period) {
+  const total  = members.reduce((s,m)=>s+(m.activeTasks||0),0);
+  const done   = members.reduce((s,m)=>s+(m.doneTasks||0),0);
+  const blocked= members.filter(m=>m.alert==='blocked').length;
+  const stale  = members.filter(m=>m.alert==='stale').length;
+  const score  = (total+done)>0 ? Math.round(done/(total+done)*100) : 0;
+
+  const rows = [
+    [{ v:`خلاصه مدیریتی — ${teamName}`, s:'title', span:2 }],
+    [{ v:`دوره: ${period==='weekly'?'هفتگی':'ماهانه'}`, s:'sub', span:2 }],
+    [{ v:`تاریخ: ${mrTodayKey()}`, s:'sub', span:2 }],
+    [],
+    [{ v:'شاخص', s:'hdr' }, { v:'مقدار', s:'hdr' }],
+    [{ v:'تعداد اعضای فعال', s:'odd' },  { v:members.length, s:'odd',  t:'n' }],
+    [{ v:'تسک‌های فعال',     s:'even' }, { v:total,          s:'even', t:'n' }],
+    [{ v:'تسک‌های تکمیل',   s:'odd' },  { v:done,           s:'odd',  t:'n' }],
+    [{ v:'اعضا با مشکل',     s:'red' },  { v:blocked,        s:'red',  t:'n' }],
+    [{ v:'اعضا بی‌تحرک',    s:'amber' }, { v:stale,          s:'amber',t:'n' }],
+    [{ v:'درصد موفقیت کلی',  s:'green' },{ v:score,          s:'green',t:'n', fmt:'0"%"' }],
+    [],
+    [{ v:'عملکرد اعضا', s:'title', span:2 }],
+    [],
+    [{ v:'نام', s:'hdr' }, { v:'درصد موفقیت', s:'hdr' }],
+    ...members.map((m,i)=>{
+      const t=(m.activeTasks||0)+(m.doneTasks||0);
+      const p=t>0?Math.round((m.doneTasks||0)/t*100):0;
+      const s=p>=80?'green':p>=50?'amber':'red';
+      return [{ v:m.name, s:i%2===0?'even':'odd'}, { v:p, s, t:'n', fmt:'0"%"' }];
+    }),
+    [],
+    [{ v:'تهیه‌شده توسط DayQ Soko', s:'footer', span:2 }],
+  ];
+  return { name:'خلاصه مدیریتی', rows, cols:[25, 15] };
+}
+function _tmSheetTasks(members, teamName) {
+  const allTasks = [];
+  members.forEach(m => {
+    (m.tasks||[]).forEach(t => allTasks.push({...t, memberName:m.name}));
+  });
+  // اگه tasks در snapshot نیستن، از inbox استفاده کن
+  const inbox = tm.inbox || [];
+
+  const rows = [
+    [{ v:`لیست تسک‌های تیمی — ${teamName}`, s:'title', span:6 }],
+    [],
+    [
+      { v:'ردیف',      s:'hdr' },
+      { v:'عنوان',     s:'hdr' },
+      { v:'مسئول',     s:'hdr' },
+      { v:'اولویت',    s:'hdr' },
+      { v:'ددلاین',    s:'hdr' },
+      { v:'وضعیت',     s:'hdr' },
+    ],
+    ...(inbox.length ? inbox : allTasks).map((t, i) => {
+      const priMap = { high:'🔴 فوری', med:'🟡 مهم', urgent:'🔴 فوری', low:'⚪ عادی' };
+      const stMap  = { pending:'شروع نشده', in_progress:'در حال انجام', done:'✅ انجام شد', blocked:'🚫 متوقف', waiting:'منتظرم' };
+      const rowStyle = t.status==='done' ? 'done' : t.status==='blocked' ? 'red' : i%2===0 ? 'even' : 'odd';
+      return [
+        { v:i+1,                                     s:rowStyle, t:'n' },
+        { v:t.title||'',                             s:rowStyle },
+        { v:t.memberName||t.assignedTo||'',          s:rowStyle },
+        { v:priMap[t.priority]||t.priority||'',      s:rowStyle },
+        { v:t.deadline||'',                          s:rowStyle },
+        { v:stMap[t.status]||t.status||'',           s:rowStyle },
+      ];
+    }),
+    [],
+    [{ v:'تهیه‌شده توسط DayQ Soko', s:'footer', span:6 }],
+  ];
+  return { name:'تسک‌ها', rows, cols:[5, 30, 15, 12, 12, 15] };
+}
+async function _tmTryPushToMember(memberUuid,taskTitle,broadcast){
+  try{
+    var w=(tm.workerUrl||cfg.pushWorkerUrl||'').trim().replace(/\/+$/,'');
+    if(!w||!tm.token)return;
+    await fetch(w+'/task/notify',{method:'POST',
+      headers:{'Content-Type':'application/json','X-DayQ-Token':tm.token},
+      body:JSON.stringify({to:broadcast?'all':memberUuid,title:'📋 تسک جدید',body:taskTitle})
+    });
+  }catch(e){}
+}
+function _tmUpdateHdrKpi() {
+  if (!tm.snapshot) return;
+  const members = (tm.snapshot.members||[]).filter(m=>!m.isManager&&m.role!=='manager');
+  const tasks = members.reduce((s,m)=>s+(m.activeTasks||0),0);
+  const alerts = members.filter(m=>m.alert==='blocked').length;
+  const done = members.reduce((s,m)=>s+(m.doneTasks||0),0);
+  const score = (tasks+done)>0?Math.round(done/(tasks+done)*100):null;
+  const t=document.getElementById('tmHdrTask'); if(t) t.textContent=num(tasks);
+  const a=document.getElementById('tmHdrAlert'); if(a) a.textContent=num(alerts);
+  const s=document.getElementById('tmHdrScore'); if(s) s.textContent=score!==null?num(score)+'٪':'—';
+  const sub=document.getElementById('tmSokoPanelSub');
+  if(sub) sub.textContent=(tm.teamName||'')+(members.length?` · ${num(members.length)} نفر`:'');
+}
+function _tmValidateSubmit(){const btn=document.getElementById('tmASubmitBtn');if(!btn)return;const inp=document.getElementById('tmANlpInp');const hasText=inp&&inp.value.trim().length>0;const hasMember=_tmAssignMember||_tmAssignBroadcast;if(!hasText){btn.disabled=true;btn.textContent='عنوان تسک رو بنویس';btn.style.opacity='.45';}else if(!hasMember){btn.disabled=true;btn.textContent='یه عضو انتخاب کن';btn.style.opacity='.45';}else{btn.disabled=false;btn.textContent='ارسال تسک';btn.style.opacity='1';}}
+function _tmXlsxContentTypes(n) {
+  let sheets = '';
+  for(let i=1;i<=n;i++) sheets+=`<Override PartName="/xl/worksheets/sheet${i}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`;
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+<Default Extension="xml" ContentType="application/xml"/>
+<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
+<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>
+${sheets}</Types>`;
+}
+function _tmXlsxRels() {
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+</Relationships>`;
+}
+function _tmXlsxSharedStrings(sheets) {
+  const map = new Map();
+  const strs = [];
+  const collect = (v) => {
+    if(typeof v !== 'string' || !v) return;
+    if(!map.has(v)) { map.set(v, strs.length); strs.push(v); }
+  };
+  sheets.forEach(s => s.rows.forEach(r => r.forEach(c => collect(c.v))));
+  const xml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="${strs.length}" uniqueCount="${strs.length}">
+${strs.map(s=>`<si><t xml:space="preserve">${_xmlEsc(s)}</t></si>`).join('')}
+</sst>`;
+  return { xml, map };
+}
+function _tmXlsxSheet(sheet, ssMap, idx) {
+  const STYLE_MAP = { title:2, sub:3, hdr:1, red:4, amber:5, green:6, even:7, odd:8, done:9, footer:10 };
+  const COL_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const colWidth = sheet.cols || [];
+  const colDefs = colWidth.map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('');
+
+  let rows = '';
+  let merges = [];
+
+  sheet.rows.forEach((row, ri) => {
+    if (!row || !row.length) return;
+    const rowNum = ri + 1;
+    let cells = '';
+    let ci = 0;
+    row.forEach(cell => {
+      const col = COL_LETTERS[ci];
+      const addr = `${col}${rowNum}`;
+      const sIdx = STYLE_MAP[cell.s] || 0;
+      let cellXml = '';
+      if (cell.span > 1) {
+        const endCol = COL_LETTERS[ci + cell.span - 1];
+        merges.push(`<mergeCell ref="${addr}:${endCol}${rowNum}"/>`);
+      }
+      if (cell.t === 'n' || typeof cell.v === 'number') {
+        cellXml = `<c r="${addr}" s="${sIdx}" t="n"><v>${cell.v||0}</v></c>`;
+      } else if (cell.v) {
+        const ssIdx = ssMap.get(String(cell.v));
+        cellXml = `<c r="${addr}" s="${sIdx}" t="s"><v>${ssIdx??0}</v></c>`;
+      } else {
+        cellXml = `<c r="${addr}" s="${sIdx}"/>`;
+      }
+      cells += cellXml;
+      ci++;
+    });
+    rows += `<row r="${rowNum}" ht="${ri===0?20:15}" customHeight="1">${cells}</row>`;
+  });
+
+  const mergeEl = merges.length ? `<mergeCells count="${merges.length}">${merges.join('')}</mergeCells>` : '';
+
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+<sheetView workbookViewId="0" rightToLeft="1"/>
+<sheetFormatPr defaultRowHeight="15" customHeight="1"/>
+<cols>${colDefs}</cols>
+<sheetData>${rows}</sheetData>
+${mergeEl}
+</worksheet>`;
+}
+function _tmXlsxStyles() {
+  // Colors
+  const C = {
+    blue:   '1e40af', blueLt:'dbeafe',
+    red:    'dc2626', redLt: 'fee2e2',
+    amber:  'd97706', ambLt: 'fef3c7',
+    green:  '15803d', grnLt: 'dcfce7',
+    gray:   '64748b', grayLt:'f8fafc',
+    white:  'ffffff', black: '111827',
+    done:   'f0fdf4', even:  'f8fafc',
+    footer: '94a3b8',
+  };
+
+  // font, fill, border, xf indexes:
+  // fonts: 0=normal, 1=bold, 2=bold-large, 3=gray
+  // fills: 0=none, 1=gray(system), 2=blue-hdr, 3=red, 4=amber, 5=green, 6=even, 7=done
+  // borders: 0=none, 1=thin-all
+  // xf: 0=normal, 1=hdr, 2=title, 3=sub, 4=red, 5=amber, 6=green, 7=even, 8=odd, 9=done, 10=footer
+
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+<fonts>
+  <font><sz val="10"/><name val="Tahoma"/><color rgb="FF${C.black}"/></font>
+  <font><b/><sz val="10"/><name val="Tahoma"/><color rgb="FF${C.black}"/></font>
+  <font><b/><sz val="14"/><name val="Tahoma"/><color rgb="FF${C.blue}"/></font>
+  <font><sz val="9"/><name val="Tahoma"/><color rgb="FF${C.footer}"/></font>
+  <font><b/><sz val="10"/><name val="Tahoma"/><color rgb="FF${C.white}"/></font>
+</fonts>
+<fills>
+  <fill><patternFill patternType="none"/></fill>
+  <fill><patternFill patternType="gray125"/></fill>
+  <fill><patternFill patternType="solid"><fgColor rgb="FF${C.blue}"/></patternFill></fill>
+  <fill><patternFill patternType="solid"><fgColor rgb="FF${C.redLt}"/></patternFill></fill>
+  <fill><patternFill patternType="solid"><fgColor rgb="FF${C.ambLt}"/></patternFill></fill>
+  <fill><patternFill patternType="solid"><fgColor rgb="FF${C.grnLt}"/></patternFill></fill>
+  <fill><patternFill patternType="solid"><fgColor rgb="FF${C.even}"/></patternFill></fill>
+  <fill><patternFill patternType="solid"><fgColor rgb="FF${C.done}"/></patternFill></fill>
+  <fill><patternFill patternType="solid"><fgColor rgb="FFdbeafe"/></patternFill></fill>
+</fills>
+<borders>
+  <border><left/><right/><top/><bottom/><diagonal/></border>
+  <border>
+    <left style="thin"><color rgb="FFe2e8f0"/></left>
+    <right style="thin"><color rgb="FFe2e8f0"/></right>
+    <top style="thin"><color rgb="FFe2e8f0"/></top>
+    <bottom style="thin"><color rgb="FFe2e8f0"/></bottom>
+  </border>
+  <border>
+    <left style="medium"><color rgb="FF${C.blue}"/></left>
+    <right style="medium"><color rgb="FF${C.blue}"/></right>
+    <top style="medium"><color rgb="FF${C.blue}"/></top>
+    <bottom style="medium"><color rgb="FF${C.blue}"/></bottom>
+  </border>
+</borders>
+<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+<cellXfs>
+  <!-- 0: normal --><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0"><alignment readingOrder="2" wrapText="1"/></xf>
+  <!-- 1: header --><xf numFmtId="0" fontId="4" fillId="2" borderId="2" xfId="0"><alignment horizontal="center" vertical="center" readingOrder="2"/></xf>
+  <!-- 2: title --><xf numFmtId="0" fontId="2" fillId="8" borderId="0" xfId="0"><alignment readingOrder="2"/></xf>
+  <!-- 3: sub --><xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0"><alignment readingOrder="2"/></xf>
+  <!-- 4: red --><xf numFmtId="0" fontId="1" fillId="3" borderId="1" xfId="0"><alignment readingOrder="2"/></xf>
+  <!-- 5: amber --><xf numFmtId="0" fontId="1" fillId="4" borderId="1" xfId="0"><alignment readingOrder="2"/></xf>
+  <!-- 6: green --><xf numFmtId="0" fontId="1" fillId="5" borderId="1" xfId="0"><alignment readingOrder="2"/></xf>
+  <!-- 7: even --><xf numFmtId="0" fontId="0" fillId="6" borderId="1" xfId="0"><alignment readingOrder="2"/></xf>
+  <!-- 8: odd --><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0"><alignment readingOrder="2"/></xf>
+  <!-- 9: done --><xf numFmtId="0" fontId="0" fillId="7" borderId="1" xfId="0"><alignment readingOrder="2"/></xf>
+  <!-- 10: footer --><xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0"><alignment readingOrder="2"/></xf>
+</cellXfs>
+</styleSheet>`;
+}
+function _tmXlsxWbRels(n) {
+  let rels = `<Relationship Id="rId${n+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+<Relationship Id="rId${n+2}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>`;
+  for(let i=1;i<=n;i++) rels+=`<Relationship Id="rId${i}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i}.xml"/>`;
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+${rels}</Relationships>`;
+}
+function _tmXlsxWorkbook(sheets) {
+  const sheetEls = sheets.map((s,i)=>`<sheet name="${_xmlEsc(s.name)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('');
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
+  xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+<sheets>${sheetEls}</sheets></workbook>`;
+}
+async function _tmZipToBlob(files) {
+  // ساخت ZIP دستی — Local File Headers + Central Directory
+  const enc = new TextEncoder();
+  const parts = [];
+  const central = [];
+  let offset = 0;
+
+  for (const [name, content] of Object.entries(files)) {
+    const nameBytes = enc.encode(name);
+    const data = enc.encode(content);
+
+    // Compress with DeflateRaw
+    const cs = new CompressionStream('deflate-raw');
+    const writer = cs.writable.getWriter();
+    writer.write(data); writer.close();
+    const compressed = new Uint8Array(await new Response(cs.readable).arrayBuffer());
+
+    // CRC-32
+    const crc = _crc32(data);
+    const now = new Date();
+    const dosDate = ((now.getFullYear()-1980)<<9)|((now.getMonth()+1)<<5)|now.getDate();
+    const dosTime = (now.getHours()<<11)|(now.getMinutes()<<5)|(now.getSeconds()>>1);
+
+    // Local file header
+    const lfh = new DataView(new ArrayBuffer(30 + nameBytes.length));
+    lfh.setUint32(0, 0x04034b50, true);  // signature
+    lfh.setUint16(4, 20, true);           // version needed
+    lfh.setUint16(6, 0x800, true);        // flags (UTF-8)
+    lfh.setUint16(8, 8, true);            // deflate
+    lfh.setUint16(10, dosTime, true);
+    lfh.setUint16(12, dosDate, true);
+    lfh.setUint32(14, crc, true);
+    lfh.setUint32(18, compressed.length, true);
+    lfh.setUint32(22, data.length, true);
+    lfh.setUint16(26, nameBytes.length, true);
+    lfh.setUint16(28, 0, true);
+    new Uint8Array(lfh.buffer).set(nameBytes, 30);
+
+    parts.push(new Uint8Array(lfh.buffer), compressed);
+
+    // Central directory entry
+    const cde = new DataView(new ArrayBuffer(46 + nameBytes.length));
+    cde.setUint32(0, 0x02014b50, true);
+    cde.setUint16(4, 20, true);
+    cde.setUint16(6, 20, true);
+    cde.setUint16(8, 0x800, true);
+    cde.setUint16(10, 8, true);
+    cde.setUint16(12, dosTime, true);
+    cde.setUint16(14, dosDate, true);
+    cde.setUint32(16, crc, true);
+    cde.setUint32(20, compressed.length, true);
+    cde.setUint32(24, data.length, true);
+    cde.setUint16(28, nameBytes.length, true);
+    cde.setUint32(42, offset, true);
+    new Uint8Array(cde.buffer).set(nameBytes, 46);
+    central.push(new Uint8Array(cde.buffer));
+
+    offset += 30 + nameBytes.length + compressed.length;
+  }
+
+  // End of central directory
+  const cdSize = central.reduce((s,a)=>s+a.length, 0);
+  const eocd = new DataView(new ArrayBuffer(22));
+  eocd.setUint32(0, 0x06054b50, true);
+  eocd.setUint16(8, central.length, true);
+  eocd.setUint16(10, central.length, true);
+  eocd.setUint32(12, cdSize, true);
+  eocd.setUint32(16, offset, true);
+
+  const allParts = [...parts, ...central, new Uint8Array(eocd.buffer)];
+  const total = allParts.reduce((s,a)=>s+a.length, 0);
+  const out = new Uint8Array(total);
+  let pos = 0;
+  for(const p of allParts) { out.set(p, pos); pos += p.length; }
+
+  return new Blob([out], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+}
+function _ttdRefreshThread(){
+  var t=(tm.inbox||[]).find(function(x){return x.id===_ttdTaskId;});
+  var el=document.getElementById('ttdThreadMsgs');
+  if(el&&typeof _renderThread==='function')_renderThread(t?t.comments||[]:[],'member',el,t);
+}
+function _xmlEsc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+async function tmExportReport(period) {
+  if (!tm.snapshot) { toast_(svgIco('x'), 'ابتدا سکو رو sync کن'); return; }
+
+  const btn = document.querySelector('[onclick*="tmExportReport"]');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ در حال ساخت...'; }
+
+  try {
+    const blob = await _tmBuildXLSX(period);
+    const today = mrTodayKey();
+    const fname = `سکو-${tm.teamName||'تیم'}-${today}.xlsx`;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = fname;
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    toast_(svgIco('check'), 'فایل Excel دانلود شد');
+  } catch(e) {
+    toast_(svgIco('x'), 'خطا: ' + e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '📤 خروجی Excel'; }
+  }
+}
+function tmRenderSidebar(tab) {
+  const sb = document.getElementById('tmPanelSidebar');
+  if (!sb) return;
+  if (tab === 'status')        _tmSbStatus(sb);
+  else if (tab === 'projects') _tmSbProjects(sb);
+  else if (tab === 'report')   _tmSbReport(sb);
+  else sb.innerHTML = '';
+}
+
 boot();
 
 </script>
@@ -19646,1989 +20143,3 @@ boot();
     </button>
   </div>
 </div>
-<script>function tmOpenTaskThread(taskId){
-  // DEBUG
-  var members=(tm.snapshot&&tm.snapshot.members)||[],allTasks=[];
-  members.forEach(function(m){(m.tasks||[]).forEach(function(t){allTasks.push(Object.assign({},t,{memberName:m.name}));});});
-  var task=allTasks.find(function(t){return t.id===taskId;})||(tm.inbox||[]).find(function(t){return t.id===taskId;});
-  
-  // test div — همیشه نشون بده تا بفهمیم function صدا زده میشه
-  var dbg=document.createElement('div');
-  dbg.style.cssText='position:fixed;top:10px;right:10px;z-index:99999;background:red;color:white;padding:10px;border-radius:8px;font-size:14px;direction:rtl';
-  dbg.textContent='called: '+(task?task.title:'NOT FOUND')+' ('+taskId.slice(0,8)+')';
-  document.body.appendChild(dbg);
-  setTimeout(function(){dbg.remove();},4000);
-  
-  if(!task)return;
-  _mgThreadTaskId=taskId;
-  var existing=document.getElementById('shTaskThread');
-  if(existing)existing.remove();
-  var s=document.createElement('div');
-  s.className='sheet';s.id='shTaskThread';
-  s.innerHTML='<div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl">'+esc(task.title||'گفتگو')+'</div><button class="sh-x" onclick="closeAll()">X</button></div></div><div class="sh-body" style="padding:16px"><div id="mgThreadMsgs" class="ttd-thread" style="min-height:100px"></div><textarea class="ttd-reply-inp" rows="2" placeholder="پاسخ بده..." style="width:100%;margin-top:8px"></textarea></div>';
-  document.body.appendChild(s);
-  var ov=document.getElementById('ov');
-  if(ov){ov.classList.add('open');ov.style.zIndex='2050';}
-  s.classList.add('open');
-  s.style.zIndex='2100';
-  if(typeof _renderThread==='function'){
-    var tel=document.getElementById('mgThreadMsgs');
-    if(tel)_renderThread(task.comments||[],'manager',tel,task);
-  }
-}
-function _tmDlSheet(tid,title,cur){
-  var od=document.getElementById('shTmDl');if(od)od.remove();
-  var s=document.createElement('div');s.className='sheet';s.id='shTmDl';
-  s.dataset.tid=tid;
-  var bs='flex:1;height:38px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--bg2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer';
-  s.innerHTML='<div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl">تمدید ددلاین</div><button class="sh-x" onclick="closeAll()">✕</button></div></div>'+
-    '<div class="sh-body" style="gap:var(--sp3)">'+
-    '<div style="font-size:var(--fs-xs);color:var(--t3)">'+esc(title)+'</div>'+
-    '<div style="display:flex;gap:6px">'+
-    '<button data-days="1" onclick="_tmDlShortBtn(this)" style="'+bs+'">فردا</button>'+
-    '<button data-days="3" onclick="_tmDlShortBtn(this)" style="'+bs+'">3 روز</button>'+
-    '<button data-days="7" onclick="_tmDlShortBtn(this)" style="'+bs+'">هفته</button>'+
-    '</div>'+
-    '<input id="tmDlInp" value="'+cur+'" placeholder="1404-06-15" style="width:100%;padding:10px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:1.1rem;text-align:center;direction:ltr;outline:none"/>'+
-    '<div id="tmDlErr" style="color:var(--red);font-size:var(--fs-xs);text-align:center;min-height:14px"></div>'+
-    '<button onclick="_tmDlOkBtn()" style="width:100%;height:46px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">تایید</button></div>';
-  document.body.appendChild(s);
-  _sokoSheetOpen('shTmDl');
-}
-// ── Toggle member tasks expand ─────────────────────────────────
-
-
-/* ════ End NLP Assign ════ */
-
-/* ════════════════════════════════════════════════════════════
-   Missing Features Implementation
-   ════════════════════════════════════════════════════════════ */
-
-// ── ۱. Team Task Detail Panel ─────────────────────────────
-// let _ttdTaskId = null; // already declared in script1
-
-
-
-
-
-
-// hook کردن به task card های تیمی در home
-(function(){
-  const _origRenderInbox = window.tmRenderInboxSection;
-  if (_origRenderInbox) {
-
-  }
-})();
-
-// ── ۲. Team Projects در تب پروژه‌ها ─────────────────────
-
-
-// hook به renderProjects
-(function(){
-  const _orig = window.renderProjects;
-  if (_orig) {
-    window.renderProjects = function() {
-      _orig.apply(this, arguments);
-      tmRenderProjectsSection();
-    };
-  }
-  // همچنین هر بار که تب projects باز میشه
-  const _origSetTab = window.setTab;
-  if (_origSetTab) {
-    window.setTab = function(tab, el) {
-      _origSetTab.apply(this, arguments);
-      if (tab === 'projects') setTimeout(tmRenderProjectsSection, 50);
-    };
-  }
-})();
-
-// ── ۳. Calendar Filter ─────────────────────────────────────
-let _calFilter = 'all'; // 'all' | 'personal' | 'team'
-
-function _calSetFilter(f) {
-  _calFilter = f;
-  ['all','personal','team'].forEach(k => {
-    const btn = document.getElementById(`ctf-${k}`);
-    if (!btn) return;
-    btn.style.background = k === f ? 'var(--t1)' : 'none';
-    btn.style.color      = k === f ? 'var(--bg1)' : 'var(--t3)';
-  });
-  renderCal(); // re-render با filter جدید
-}
-
-// نمایش فیلتر فقط اگه عضو تیم هستیم
-(function(){
-  const _origApplyUI = (typeof tmApplyUI !== "undefined") ? tmApplyUI : null;
-
-})();
-
-// hook به renderCal برای اعمال filter
-(function(){
-  const _origRenderCal = window.renderCal;
-  if (!_origRenderCal) return;
-  window.renderCal = function() {
-    _origRenderCal.apply(this, arguments);
-    if (_calFilter === 'all') return;
-    // پنهان/نمایان کردن نشانگرهای تقویم
-    const isTeam = _calFilter === 'team';
-    document.querySelectorAll('.cal-dot-personal').forEach(d => {
-      d.style.display = isTeam ? 'none' : '';
-    });
-    document.querySelectorAll('.cal-dot-team').forEach(d => {
-      d.style.display = isTeam ? '' : 'none';
-    });
-  };
-})();
-
-// ── ۴. EOD (Triage) — گزینه‌های تسک تیمی ──────────────────
-(function(){
-  const _origRenderTriage = window._renderTriageList;
-  if (!_origRenderTriage) return;
-  window._renderTriageList = function() {
-    _origRenderTriage.apply(this, arguments);
-    // بعد از render، بررسی تسک‌های تیمی و اضافه کردن دکمه‌ها
-    setTimeout(() => {
-      const inboxTasks = tm.inbox ? tm.inbox.filter(t => !t.deleted && t.status !== 'done') : [];
-      if (!inboxTasks.length) return;
-      // پیدا کردن container
-      const list = document.getElementById('triageList');
-      if (!list) return;
-      // اضافه کردن یه بخش جداگانه در پایین triage برای تسک‌های تیمی
-      const existing = document.getElementById('trTeamSection');
-      if (existing) existing.remove();
-      const section = document.createElement('div');
-      section.id = 'trTeamSection';
-      section.innerHTML = `
-        <div style="margin-top:var(--sp4);padding-top:var(--sp3);border-top:1px solid var(--b2)">
-          <div style="font-size:var(--fs-xs);color:var(--blue);font-weight:700;margin-bottom:var(--sp2);text-align:right">📥 از مدیر (${inboxTasks.length} تسک)</div>
-          ${inboxTasks.slice(0,3).map(t => `
-            <div style="background:var(--bluem);border:1px solid rgba(59,130,246,.2);border-radius:var(--r2);padding:var(--sp2) var(--sp3);margin-bottom:6px">
-              <div style="font-size:var(--fs-xs);font-weight:600;color:var(--t1);margin-bottom:6px;text-align:right">${esc(t.title)}</div>
-              <div style="display:flex;gap:6px">
-                <button onclick="tmAPI('PUT','/task/update',{taskId:'${t.id}',status:'in_progress'}).then(()=>toast_(svgIco('check'),'وضعیت آپدیت شد'))" style="flex:1;height:28px;border:1px solid var(--b1);border-radius:var(--r1);background:var(--bg2);font-size:var(--fs-2xs);font-weight:600;font-family:var(--f);color:var(--t2);cursor:pointer">درحالم</button>
-                <button onclick="openTeamTaskDetail('${t.id}')" style="flex:1;height:28px;border:1px solid rgba(59,130,246,.3);border-radius:var(--r1);background:var(--bluem);font-size:var(--fs-2xs);font-weight:600;font-family:var(--f);color:var(--blue);cursor:pointer">جزئیات</button>
-              </div>
-            </div>
-          `).join('')}
-          ${inboxTasks.length > 3 ? `<div style="font-size:var(--fs-2xs);color:var(--t3);text-align:center">+${inboxTasks.length-3} تسک دیگه</div>` : ''}
-        </div>`;
-      list.appendChild(section);
-    }, 100);
-  };
-})();
-
-// ── ۵. سکو گزارش تب — render کامل ────────────────────────
-
-
-
-
-/* ════ End Missing Features ════ */
-
-
-/* ════ Focus Management for team modals ════ */
-(function(){
-  const _origTmModal = window.tmModal;
-  if (!_origTmModal) return;
-
-})();
-/* ════ End Focus Management ════ */
-/* ════════════════════════════════════════════════════════════════
-   DayQ Team — Assign NLP + Smart Deadline + Projects Full
-   ════════════════════════════════════════════════════════════════ */
-
-// ── State ─────────────────────────────────────────────────────
-_tmAssignParsed = null;
-_tmAssignMember = '';
-_tmAssignBroadcast = false;
-
-// ── Deadline display helper (از nlpShowPreview الگو گرفته) ────
-
-
-// ── Shortcut deadline calculator ───────────────────────────────
-
-
-// ── Open Assign Modal (NLP version) ───────────────────────────
-
-
-// ── NLP input handler ─────────────────────────────────────────
-
-
-// ── Update preview chips ───────────────────────────────────────
-
-
-// ── Deadline shortcut chips ────────────────────────────────────
-
-
-// ── Member chips update ────────────────────────────────────────
-
-
-
-
-
-
-// ── Priority override ─────────────────────────────────────────
-_tmAssignPriOverride = null;
-
-
-// ── Submit ────────────────────────────────────────────────────
-
-
-
-
-// ── Projects tab — task list واقعی ────────────────────────────
-
-// ── Toggle member tasks expand ─────────────────────────────────
-
-
-/* ════ End NLP Assign ════ */
-
-/* ════════════════════════════════════════════════════════════
-   Missing Features Implementation
-   ════════════════════════════════════════════════════════════ */
-
-// ── ۱. Team Task Detail Panel ─────────────────────────────
-_ttdTaskId = null;
-
-
-
-
-
-
-// hook کردن به task card های تیمی در home
-(function(){
-  const _origRenderInbox = window.tmRenderInboxSection;
-  if (_origRenderInbox) {
-
-  }
-})();
-
-// ── ۲. Team Projects در تب پروژه‌ها ─────────────────────
-
-
-// hook به renderProjects
-(function(){
-  const _orig = window.renderProjects;
-  if (_orig) {
-    window.renderProjects = function() {
-      _orig.apply(this, arguments);
-      tmRenderProjectsSection();
-    };
-  }
-  // همچنین هر بار که تب projects باز میشه
-  const _origSetTab = window.setTab;
-  if (_origSetTab) {
-    window.setTab = function(tab, el) {
-      _origSetTab.apply(this, arguments);
-      if (tab === 'projects') setTimeout(tmRenderProjectsSection, 50);
-    };
-  }
-})();
-
-// ── ۳. Calendar Filter ─────────────────────────────────────
-_calFilter = 'all'; // 'all' | 'personal' | 'team'
-
-function _calSetFilter(f) {
-  _calFilter = f;
-  ['all','personal','team'].forEach(k => {
-    const btn = document.getElementById(`ctf-${k}`);
-    if (!btn) return;
-    btn.style.background = k === f ? 'var(--t1)' : 'none';
-    btn.style.color      = k === f ? 'var(--bg1)' : 'var(--t3)';
-  });
-  renderCal(); // re-render با filter جدید
-}
-
-// نمایش فیلتر فقط اگه عضو تیم هستیم
-(function(){
-  const _origApplyUI = (typeof tmApplyUI !== "undefined") ? tmApplyUI : null;
-  tmApplyUI = function() {
-    if (_origApplyUI) _origApplyUI.apply(this, arguments);
-    const filterEl = document.getElementById('calTeamFilter');
-    if (filterEl) filterEl.style.display = tm.code ? '' : 'none';
-  };
-})();
-
-// hook به renderCal برای اعمال filter
-(function(){
-  const _origRenderCal = window.renderCal;
-  if (!_origRenderCal) return;
-  window.renderCal = function() {
-    _origRenderCal.apply(this, arguments);
-    if (_calFilter === 'all') return;
-    // پنهان/نمایان کردن نشانگرهای تقویم
-    const isTeam = _calFilter === 'team';
-    document.querySelectorAll('.cal-dot-personal').forEach(d => {
-      d.style.display = isTeam ? 'none' : '';
-    });
-    document.querySelectorAll('.cal-dot-team').forEach(d => {
-      d.style.display = isTeam ? '' : 'none';
-    });
-  };
-})();
-
-// ── ۴. EOD (Triage) — گزینه‌های تسک تیمی ──────────────────
-(function(){
-  const _origRenderTriage = window._renderTriageList;
-  if (!_origRenderTriage) return;
-  window._renderTriageList = function() {
-    _origRenderTriage.apply(this, arguments);
-    // بعد از render، بررسی تسک‌های تیمی و اضافه کردن دکمه‌ها
-    setTimeout(() => {
-      const inboxTasks = tm.inbox ? tm.inbox.filter(t => !t.deleted && t.status !== 'done') : [];
-      if (!inboxTasks.length) return;
-      // پیدا کردن container
-      const list = document.getElementById('triageList');
-      if (!list) return;
-      // اضافه کردن یه بخش جداگانه در پایین triage برای تسک‌های تیمی
-      const existing = document.getElementById('trTeamSection');
-      if (existing) existing.remove();
-      const section = document.createElement('div');
-      section.id = 'trTeamSection';
-      section.innerHTML = `
-        <div style="margin-top:var(--sp4);padding-top:var(--sp3);border-top:1px solid var(--b2)">
-          <div style="font-size:var(--fs-xs);color:var(--blue);font-weight:700;margin-bottom:var(--sp2);text-align:right">📥 از مدیر (${inboxTasks.length} تسک)</div>
-          ${inboxTasks.slice(0,3).map(t => `
-            <div style="background:var(--bluem);border:1px solid rgba(59,130,246,.2);border-radius:var(--r2);padding:var(--sp2) var(--sp3);margin-bottom:6px">
-              <div style="font-size:var(--fs-xs);font-weight:600;color:var(--t1);margin-bottom:6px;text-align:right">${esc(t.title)}</div>
-              <div style="display:flex;gap:6px">
-                <button onclick="tmAPI('PUT','/task/update',{taskId:'${t.id}',status:'in_progress'}).then(()=>toast_(svgIco('check'),'وضعیت آپدیت شد'))" style="flex:1;height:28px;border:1px solid var(--b1);border-radius:var(--r1);background:var(--bg2);font-size:10px;font-weight:600;font-family:var(--f);color:var(--t2);cursor:pointer">درحالم</button>
-                <button onclick="openTeamTaskDetail('${t.id}')" style="flex:1;height:28px;border:1px solid rgba(59,130,246,.3);border-radius:var(--r1);background:var(--bluem);font-size:10px;font-weight:600;font-family:var(--f);color:var(--blue);cursor:pointer">جزئیات</button>
-              </div>
-            </div>
-          `).join('')}
-          ${inboxTasks.length > 3 ? `<div style="font-size:10px;color:var(--t3);text-align:center">+${inboxTasks.length-3} تسک دیگه</div>` : ''}
-        </div>`;
-      list.appendChild(section);
-    }, 100);
-  };
-})();
-
-// ── ۵. سکو گزارش تب — render کامل ────────────────────────
-
-
-
-
-/* ════ End Missing Features ════ */
-
-
-/* ════ Bug Fixes — Assign Modal ════ */
-
-// Fix 1: member filter — exclude self + manager
-
-
-// Fix 2: state reset کامل
-const _origTmAssignTask = window.tmAssignTask;
-
-
-// Fix 3: NLP preview با deadline hint
-
-/* ════ End Bug Fixes ════ */
-
-
-/* ════ Focus Management ════ */
-(function(){
-  const _origTmM = window.tmModal;
-  if (!_origTmM) return;
-
-})();
-/* ════ End Focus Management ════ */
-
-/* ════ End Team JS ════ */
-
-
-/* ════ Submit Validation ════ */
-
-/* ════ End Submit Validation ════ */
-
-/* ════ DayQ Soko — Team JS ════ */
-
-// ═════════════════════════════════════════════
-// Fix 4: tmApplyUI روی دسکتاپ — مطمئن شدن
-// ════════════════════════════════════════════
-// وقتی صفحه لود می‌شه، یه بار دیگه tmApplyUI اجرا کن
-// با delay تا اطمینان حاصل بشه DOM ساخته شده
-window.addEventListener('load', () => {
-  if (tm.code) {
-    setTimeout(() => {
-      tmApplyUI();
-      if (tm.role === 'manager') {
-        tmRenderTodaySection();
-        tmUpdateSokoCard();
-      }
-      if (tm.role === 'member') {
-        tmRenderInbox();
-        tmRenderAnnouncements();
-      }
-    }, 500);
-  }
-});
-
-/* ════ END CRITICAL FIXES ════ */
-
-
-/* ════ Direct Login — ورود با کد+PIN ════ */
-
-
-async function tmDoDirectLogin() {
-  const code = document.getElementById('tmDLCode').value.trim().toUpperCase();
-  const pin  = document.getElementById('tmDLPin').value.trim();
-  const errEl = document.getElementById('tmDLErr');
-  if (!code) { errEl.textContent = 'کد تیم رو وارد کن'; return; }
-  if (!/^\d{4}$/.test(pin)) { errEl.textContent = 'PIN باید ۴ رقم باشد'; return; }
-
-  const base = (cfg.pushWorkerUrl||'').trim().replace(/\/+$/, '');
-  if (!base) { errEl.textContent = 'ابتدا Worker Push رو در اتصال تنظیم کن'; return; }
-
-  const btn = document.getElementById('tmDLBtn');
-  btn.disabled = true; btn.textContent = 'در حال ورود...';
-
-  try {
-    const res = await fetch(base + '/team/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ teamCode: code, pin })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'خطا');
-
-    tm.code       = code;
-    tm.uuid       = data.uuid;
-    tm.role       = data.role;
-    tm.token      = data.token;
-    tm.workerUrl  = data.workerUrl || base;
-    tm.teamName   = data.teamName;
-    tm.memberName = data.name;
-    tm.memberRole = data.memberRole;
-    tmSaveState();
-    tmCloseModal();
-    tmApplyUI();
-    tmSyncBackground();
-    toast_(svgIco('check'), 'وارد تیم ' + data.teamName + ' شدی');
-  } catch(e) {
-    const msg = e.message.includes('PIN') ? 'PIN اشتباهه'
-      : e.message.includes('نامعتبر') ? 'کد تیم نامعتبره'
-      : e.message.includes('pattern') || e.message.includes('fetch') ? 'آدرس Worker رو چک کن'
-      : e.message;
-    errEl.textContent = msg;
-  } finally {
-    btn.disabled = false; btn.textContent = 'ورود';
-  }
-}
-/* ════ End Direct Login ════ */
-
-
-/* ════ UX Polish — Optional & User-Friendly ════ */
-
-// آپدیت سطر تیم در اتصال
-
-
-// ── ۲. Team Projects در تب پروژه‌ها ─────────────────────
-
-
-// hook به renderProjects
-(function(){
-  const _orig = window.renderProjects;
-  if (_orig) {
-    window.renderProjects = function() {
-      _orig.apply(this, arguments);
-      tmRenderProjectsSection();
-    };
-  }
-  // همچنین هر بار که تب projects باز میشه
-  const _origSetTab = window.setTab;
-  if (_origSetTab) {
-    window.setTab = function(tab, el) {
-      _origSetTab.apply(this, arguments);
-      if (tab === 'projects') setTimeout(tmRenderProjectsSection, 50);
-    };
-  }
-})();
-
-// ── ۳. Calendar Filter ─────────────────────────────────────
-
-
-function _calSetFilter(f) {
-  _calFilter = f;
-  ['all','personal','team'].forEach(k => {
-    const btn = document.getElementById(`ctf-${k}`);
-    if (!btn) return;
-    btn.style.background = k === f ? 'var(--t1)' : 'none';
-    btn.style.color      = k === f ? 'var(--bg1)' : 'var(--t3)';
-  });
-  renderCal(); // re-render با filter جدید
-}
-
-// نمایش فیلتر فقط اگه عضو تیم هستیم
-// calTeamFilter hook removed
-
-
-
-// ── ۴. EOD (Triage) — گزینه‌های تسک تیمی ──────────────────
-(function(){
-  const _origRenderTriage = window._renderTriageList;
-  if (!_origRenderTriage) return;
-  window._renderTriageList = function() {
-    _origRenderTriage.apply(this, arguments);
-    // بعد از render، بررسی تسک‌های تیمی و اضافه کردن دکمه‌ها
-    setTimeout(() => {
-      const inboxTasks = tm.inbox ? tm.inbox.filter(t => !t.deleted && t.status !== 'done') : [];
-      if (!inboxTasks.length) return;
-      // پیدا کردن container
-      const list = document.getElementById('triageList');
-      if (!list) return;
-      // اضافه کردن یه بخش جداگانه در پایین triage برای تسک‌های تیمی
-      const existing = document.getElementById('trTeamSection');
-      if (existing) existing.remove();
-      const section = document.createElement('div');
-      section.id = 'trTeamSection';
-      section.innerHTML = `
-        <div style="margin-top:var(--sp4);padding-top:var(--sp3);border-top:1px solid var(--b2)">
-          <div style="font-size:var(--fs-xs);color:var(--blue);font-weight:700;margin-bottom:var(--sp2);text-align:right">📥 از مدیر (${inboxTasks.length} تسک)</div>
-          ${inboxTasks.slice(0,3).map(t => `
-            <div style="background:var(--bluem);border:1px solid rgba(59,130,246,.2);border-radius:var(--r2);padding:var(--sp2) var(--sp3);margin-bottom:6px">
-              <div style="font-size:var(--fs-xs);font-weight:600;color:var(--t1);margin-bottom:6px;text-align:right">${esc(t.title)}</div>
-              <div style="display:flex;gap:6px">
-                <button onclick="tmAPI('PUT','/task/update',{taskId:'${t.id}',status:'in_progress'}).then(()=>toast_(svgIco('check'),'وضعیت آپدیت شد'))" style="flex:1;height:28px;border:1px solid var(--b1);border-radius:var(--r1);background:var(--bg2);font-size:var(--fs-2xs);font-weight:600;font-family:var(--f);color:var(--t2);cursor:pointer">درحالم</button>
-                <button onclick="openTeamTaskDetail('${t.id}')" style="flex:1;height:28px;border:1px solid rgba(59,130,246,.3);border-radius:var(--r1);background:var(--bluem);font-size:var(--fs-2xs);font-weight:600;font-family:var(--f);color:var(--blue);cursor:pointer">جزئیات</button>
-              </div>
-            </div>
-          `).join('')}
-          ${inboxTasks.length > 3 ? `<div style="font-size:var(--fs-2xs);color:var(--t3);text-align:center">+${inboxTasks.length-3} تسک دیگه</div>` : ''}
-        </div>`;
-      list.appendChild(section);
-    }, 100);
-  };
-})();
-
-// ── ۵. سکو گزارش تب — render کامل ────────────────────────
-
-
-
-
-/* ════ End Missing Features ════ */
-
-
-/* ════ Focus Management for team modals ════ */
-(function(){
-  const _origTmModal = window.tmModal;
-  if (!_origTmModal) return;
-
-})();
-/* ════ End Focus Management ════ */
-/* ════════════════════════════════════════════════════════════════
-   DayQ Team — Assign NLP + Smart Deadline + Projects Full
-   ════════════════════════════════════════════════════════════════ */
-
-// ── State ─────────────────────────────────────────────────────
-_tmAssignParsed = null;
-_tmAssignMember = '';
-_tmAssignBroadcast = false;
-
-// ── Deadline display helper (از nlpShowPreview الگو گرفته) ────
-function _tmFmtDeadline(dl) {
-  if (!dl) return null;
-  const [jy,jm,jd] = dl.split('-').map(Number);
-  const MONTHS = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
-  const today = mrTodayKey();
-  const [ty,tm,td] = today.split('-').map(Number);
-  const diff = _jalToDays(jy,jm,jd) - _jalToDays(ty,tm,td);
-  if (diff === 0) return { label:'امروز',  color:'var(--red)',   days: 0 };
-  if (diff === 1) return { label:'فردا',   color:'var(--amber)', days: 1 };
-  if (diff === 2) return { label:'پس‌فردا', color:'var(--amber)', days: 2 };
-  if (diff < 0)   return { label:`${Math.abs(diff)} روز پیش`, color:'var(--red)', days: diff };
-  if (diff <= 7)  return { label:`${num(jd)} ${MONTHS[jm-1]}`, color:'var(--a)', days: diff };
-  return { label:`${num(jd)} ${MONTHS[jm-1]}`, color:'var(--t2)', days: diff };
-}
-
-// ── Shortcut deadline calculator ───────────────────────────────
-function _tmDeadlineShortcut(text) {
-  const p = nlpParse(text);
-  return p ? p.deadline : null;
-}
-
-// ── Open Assign Modal (NLP version) ───────────────────────────
-
-
-// ── NLP input handler ─────────────────────────────────────────
-function _tmAssignNlpInput(val) {
-  _tmAssignParsed = val.trim().length > 2 ? nlpParse(val) : null;
-  _tmUpdateAssignPreview();
-  // auto-grow textarea
-  const inp = document.getElementById('tmANlpInp');
-  if (inp) { inp.style.height = 'auto'; inp.style.height = Math.min(inp.scrollHeight, 100) + 'px'; }
-}
-
-// ── Update preview chips ───────────────────────────────────────
-
-
-// ── Deadline shortcut chips ────────────────────────────────────
-function _tmSetDeadlineShortcut(text) {
-  const inp = document.getElementById('tmANlpInp');
-  if (!inp) return;
-  // اگه input خالیه، text رو بذار وگرنه deadline رو append کن
-  const current = inp.value.trim();
-  // حذف deadline قبلی از متن (اگه بود)
-  const cleaned = current.replace(/(فردا|پس‌فردا|این هفته|هفته دیگه|ماه دیگه|جمعه|پنجشنبه|شنبه|یکشنبه|دوشنبه|سه‌شنبه|چهارشنبه)(\s+)/g, '').trim();
-  inp.value = (cleaned ? cleaned + ' ' : '') + text;
-  inp.style.height = 'auto';
-  inp.style.height = Math.min(inp.scrollHeight, 100) + 'px';
-  _tmAssignNlpInput(inp.value);
-  inp.focus();
-}
-
-// ── Member chips update ────────────────────────────────────────
-
-
-function _tmSelectMember(uuid) {
-  if (_tmAssignBroadcast) return;
-  _tmAssignMember = (_tmAssignMember === uuid) ? '' : uuid;
-  _tmUpdateAssignMemberChips();
-}
-
-function _tmToggleBroadcast() {
-  if (_tmAssignBroadcast) {
-    _tmAssignBroadcast = false;
-    _tmValidateSubmit();
-  const btn = document.getElementById('tmABroadcastBtn');
-  if (btn) {
-    btn.style.background = _tmAssignBroadcast ? 'var(--bluem)' : 'var(--bg2)';
-    btn.style.color = _tmAssignBroadcast ? 'var(--blue)' : 'var(--t2)';
-    btn.style.borderColor = _tmAssignBroadcast ? 'rgba(59,130,246,.3)' : 'var(--b1)';
-    btn.textContent = _tmAssignBroadcast ? '📡 همه اعضا (فعال)' : '📡 ارسال به همه';
-  }
-  if (_tmAssignBroadcast) {
-    _tmAssignMember = '';
-    _tmUpdateAssignMemberChips();
-  }
-}
-
-// ── Priority override ─────────────────────────────────────────
-_tmAssignPriOverride = null;
-function _tmSetPri(pri) {
-  _tmAssignPriOverride = (_tmAssignPriOverride === pri) ? null : pri;
-  document.querySelectorAll('.tm-pri-chip').forEach(c => {
-    const active = c.dataset.pri === _tmAssignPriOverride;
-    c.style.opacity = active ? '1' : '.5';
-    c.style.transform = active ? 'scale(1.05)' : 'scale(1)';
-  });
-}
-
-// ── Submit ────────────────────────────────────────────────────
-tmDoAssign = async function() {
-  const inp = document.getElementById('tmANlpInp');
-  const errEl = document.getElementById('tmAErr');
-  const rawText = inp?.value?.trim() || '';
-  const parsed = rawText.length > 1 ? (nlpParse(rawText) || {}) : {};
-  const title = parsed.cleanText || rawText;
-  const deadline = parsed.deadline || '';
-  const priority = _tmAssignPriOverride || parsed.priority || 'high';
-
-  if (!title) { errEl.textContent = 'عنوان تسک رو بنویس'; return; }
-  if (!deadline) { errEl.textContent = 'ددلاین رو مشخص کن — مثال: فردا، جمعه، هفته دیگه'; return; }
-  if (!_tmAssignBroadcast && !_tmAssignMember) {
-    errEl.textContent = 'یه عضو انتخاب کن یا «ارسال به همه» رو بزن';
-    return;
-  }
-
-  const btn = document.getElementById('tmASubmitBtn');
-  if (btn) { btn.disabled = true; btn.textContent = 'در حال ارسال...'; }
-  errEl.textContent = '';
-
-  try {
-    const endpoint = _tmAssignBroadcast ? '/task/broadcast' : '/task/assign';
-    const body = { title, deadline, priority, category: parsed.cat || '' };
-    if (!_tmAssignBroadcast) body.assignedTo = _tmAssignMember;
-
-    const res = await tmAPI('POST', endpoint, body);
-    tmCloseModal();
-    _tmAssignPriOverride = null;
-    toast_(svgIco('check'), _tmAssignBroadcast
-      ? `تسک به همه اعضا ارسال شد`
-      : `تسک به ${_tmMemberName(_tmAssignMember)} ارسال شد`);
-    tmSyncBackground();
-  } catch(e) {
-    errEl.textContent = e.message;
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'ارسال تسک'; }
-  }
-};
-
-function _tmMemberName(uuid) {
-  const m = (tm.snapshot?.members||[]).find(x => x.uuid === uuid);
-  return m ? m.name : 'عضو';
-}
-
-// ── Projects tab — task list واقعی ────────────────────────────
-
-
-// ── Toggle member tasks expand ─────────────────────────────────
-async function _tmToggleMemberTasks(uuid) {
-  const el = document.getElementById(`tmMemberTasks_${uuid}`);
-  const arrow = document.getElementById(`tmProjArrow_${uuid}`);
-  if (!el) return;
-
-  const isOpen = el.style.display !== 'none';
-  el.style.display = isOpen ? 'none' : 'block';
-  if (arrow) arrow.style.transform = isOpen ? 'rotate(-90deg)' : 'rotate(0deg)';
-  if (isOpen) return;
-
-  // fetch tasks
-  try {
-    const data = await tmAPI('GET', `/task/inbox?member=${uuid}`);
-    const tasks = (data.tasks || []).filter(t => !t.deleted);
-    if (!tasks.length) {
-      el.innerHTML = '<div style="font-size:var(--fs-xs);color:var(--t3);padding:var(--sp2) 0">تسک فعالی ندارد</div>';
-      return;
-    }
-    const STATUS_MAP = {
-      pending:     { label:'شروع نشده',     color:'var(--t3)' },
-      in_progress: { label:'در حال انجام',    color:'var(--blue)' },
-      waiting:     { label:'منتظرم',   color:'var(--amber)' },
-      blocked:     { label:'مشکل',     color:'var(--red)' },
-      done:        { label:'تکمیل شد', color:'var(--a)' },
-    };
-    el.innerHTML = tasks.slice(0, 5).map(t => {
-      const st = STATUS_MAP[t.status] || STATUS_MAP.pending;
-      const over = t.deadline && t.deadline < mrTodayKey() && t.status !== 'done';
-      return `<div style="display:flex;align-items:center;gap:var(--sp2);padding:6px 0;border-bottom:1px solid var(--b2)">
-        <span style="font-size:10px;font-weight:700;color:${st.color};flex-shrink:0">${st.label}</span>
-        <span style="font-size:var(--fs-xs);color:var(--t1);flex:1;text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(t.title)}</span>
-        ${t.deadline ? `<span style="font-size:10px;color:${over?'var(--red)':'var(--t3)'};flex-shrink:0">${t.deadline.slice(5)}</span>` : ''}
-      </div>`;
-    }).join('') + (tasks.length > 5 ? `<div style="font-size:10px;color:var(--t3);text-align:center;padding-top:4px">+${tasks.length-5} تسک دیگه</div>` : '');
-  } catch(e) {
-    el.innerHTML = `<div style="font-size:var(--fs-xs);color:var(--red)">${e.message}</div>`;
-  }
-}
-
-/* ════ End NLP Assign ════ */
-
-/* ════════════════════════════════════════════════════════════
-   Missing Features Implementation
-   ════════════════════════════════════════════════════════════ */
-
-// ── ۱. Team Task Detail Panel ─────────────────────────────
-_ttdTaskId = null;
-
-
-function _ttdSetStatus(st) {
-  document.querySelectorAll('.ttd-st-btn').forEach(btn => {
-    const active = btn.dataset.st === st;
-    btn.style.background = active ? 'var(--t1)' : 'var(--bg2)';
-    btn.style.color = active ? 'var(--bg1)' : 'var(--t2)';
-    btn.style.borderColor = active ? 'var(--t1)' : 'var(--b1)';
-  });
-  // اگه blocked شد، note رو focus کن
-  if (st === 'blocked') {
-    setTimeout(() => {
-      const n = document.getElementById('ttdNote');
-      if (n && !n.value) {
-        n.placeholder = 'مشکل رو توضیح بده — مدیر باید بدونه';
-        n.focus();
-      }
-    }, 200);
-  }
-}
-
-async function _ttdSave(){
-  if(!_ttdTaskId)return;
-  var activeBtn=document.querySelector('.ttd-st-btn.active-st')||document.querySelector('.ttd-st-btn[data-active="1"]');
-  var status=activeBtn?activeBtn.dataset.st:((_ttdTaskId?((tm.inbox||[]).find(function(x){return x.id===_ttdTaskId;})||{}).status||'in_progress':'in_progress'));
-  var note=document.getElementById('ttdNote')?document.getElementById('ttdNote').value.trim():'';
-  var errEl=document.getElementById('ttdErr');
-  var btn=document.getElementById('ttdSaveBtn');
-  var bCr=document.querySelector('input[name="blockedReason"]:checked');
-  var bRt=bCr&&bCr.value!=='other'?bCr.value:'';
-  var blockedNote=bRt?(bRt+(note?': '+note:'')):note;
-  if(status==='blocked'&&!blockedNote){if(errEl)errEl.textContent='دلیل توقف رو انتخاب کن یا توضیح بنویس';return;}
-  if(btn){btn.disabled=true;btn.textContent='در حال ذخیره...';}
-  try{
-    await tmAPI('PUT','/task/update',{taskId:_ttdTaskId,status,memberNote:status==='blocked'?blockedNote:note});
-    var t=(tm.inbox||[]).find(function(x){return x.id===_ttdTaskId;});
-    if(t){t.status=status;t.memberNote=note;t.seenAt=Date.now();}
-    toast_(svgIco('check'),'وضعیت ذخیره شد');
-    tmApplyUI();
-    setTimeout(tmSyncBackground,1500);
-  }catch(e){if(errEl)errEl.textContent=e.message;}
-  finally{if(btn){btn.disabled=false;btn.textContent='ذخیره';}}
-}
-// hook کردن به task card های تیمی در home
-(function(){
-  const _origRenderInbox = window.tmRenderInboxSection;
-  if (_origRenderInbox) {
-    window.tmRenderInboxSection = function() {
-      _origRenderInbox.apply(this, arguments);
-      // اضافه کردن click handler به تسک‌های تیمی
-      setTimeout(() => {
-        document.querySelectorAll('.tm-task-card[data-team-task-id]').forEach(el => {
-          el.onclick = () => openTeamTaskDetail(el.dataset.teamTaskId);
-        });
-      }, 100);
-    };
-  }
-})();
-
-// ── ۲. Team Projects در تب پروژه‌ها ─────────────────────
-function tmRenderProjectsSection() {
-  const el = document.getElementById('tmProjInProjects');
-  const listEl = document.getElementById('tmProjInProjectsList');
-  if (!el || !listEl) return;
-
-  const isMember = tm.role === 'member' && tm.code;
-  if (!isMember) { el.style.display = 'none'; return; }
-
-  el.style.display = '';
-  const inbox = (tm.inbox || []).filter(t => !t.deleted);
-  if (!inbox.length) {
-    listEl.innerHTML = '<div style="color:var(--t3);font-size:var(--fs-xs);text-align:center;padding:var(--sp3)">هنوز تسک تیمی نداری</div>';
-    return;
-  }
-
-  // گروه‌بندی بر اساس category
-  const groups = {};
-  inbox.forEach(t => {
-    const g = t.category || 'عمومی';
-    if (!groups[g]) groups[g] = [];
-    groups[g].push(t);
-  });
-
-  const STATUS_COLOR = { pending:'var(--t3)', in_progress:'var(--blue)', done:'var(--a)', blocked:'var(--red)', waiting:'var(--amber)' };
-  const STATUS_LABEL = { pending:'شروع نشده', in_progress:'در حال انجام', done:'✓', blocked:'🚫', waiting:'منتظرم' };
-
-  listEl.innerHTML = Object.entries(groups).map(([cat, tasks]) => {
-    const done = tasks.filter(t => t.status === 'done').length;
-    const pct = Math.round(done / tasks.length * 100);
-    return `<div style="background:var(--bluem);border:1px solid rgba(59,130,246,.2);border-radius:var(--r3);padding:var(--sp3);margin-bottom:var(--sp2)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp2)">
-        <span style="font-size:var(--fs-xs);color:var(--blue);font-weight:700">${pct}٪</span>
-        <span style="font-size:var(--fs-sm);font-weight:700;color:var(--t1)">👥 ${esc(cat)}</span>
-      </div>
-      <div style="height:3px;background:rgba(59,130,246,.15);border-radius:var(--r5);margin-bottom:var(--sp3);overflow:hidden">
-        <div style="height:100%;border-radius:var(--r5);background:var(--blue);transform:scaleX(${pct/100});transform-origin:right;transition:transform 600ms cubic-bezier(0.23,1,0.32,1)"></div>
-      </div>
-      ${tasks.slice(0,3).map(t =>
-        `<div onclick="openTeamTaskDetail('${t.id}')" style="display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:1px solid rgba(59,130,246,.1);cursor:pointer">
-          <span style="font-size:10px;font-weight:700;color:${STATUS_COLOR[t.status]||'var(--t3)'}">${STATUS_LABEL[t.status]||''}</span>
-          <span style="font-size:var(--fs-xs);color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:70%">${esc(t.title)}</span>
-        </div>`
-      ).join('')}
-      ${tasks.length > 3 ? `<div style="font-size:10px;color:var(--t3);text-align:center;padding-top:4px">+${tasks.length-3} تسک دیگه</div>` : ''}
-    </div>`;
-  }).join('');
-}
-
-// hook به renderProjects
-(function(){
-  const _orig = window.renderProjects;
-  if (_orig) {
-    window.renderProjects = function() {
-      _orig.apply(this, arguments);
-      tmRenderProjectsSection();
-    };
-  }
-  // همچنین هر بار که تب projects باز میشه
-  const _origSetTab = window.setTab;
-  if (_origSetTab) {
-    window.setTab = function(tab, el) {
-      _origSetTab.apply(this, arguments);
-      if (tab === 'projects') setTimeout(tmRenderProjectsSection, 50);
-    };
-  }
-})();
-
-// ── ۳. Calendar Filter ─────────────────────────────────────
-_calFilter = 'all'; // 'all' | 'personal' | 'team'
-
-function _calSetFilter(f) {
-  _calFilter = f;
-  ['all','personal','team'].forEach(k => {
-    const btn = document.getElementById(`ctf-${k}`);
-    if (!btn) return;
-    btn.style.background = k === f ? 'var(--t1)' : 'none';
-    btn.style.color      = k === f ? 'var(--bg1)' : 'var(--t3)';
-  });
-  renderCal(); // re-render با filter جدید
-}
-
-// نمایش فیلتر فقط اگه عضو تیم هستیم
-
-
-// hook به renderCal برای اعمال filter
-(function(){
-  const _origRenderCal = window.renderCal;
-  if (!_origRenderCal) return;
-  window.renderCal = function() {
-    _origRenderCal.apply(this, arguments);
-    if (_calFilter === 'all') return;
-    // پنهان/نمایان کردن نشانگرهای تقویم
-    const isTeam = _calFilter === 'team';
-    document.querySelectorAll('.cal-dot-personal').forEach(d => {
-      d.style.display = isTeam ? 'none' : '';
-    });
-    document.querySelectorAll('.cal-dot-team').forEach(d => {
-      d.style.display = isTeam ? '' : 'none';
-    });
-  };
-})();
-
-// ── ۴. EOD (Triage) — گزینه‌های تسک تیمی ──────────────────
-(function(){
-  const _origRenderTriage = window._renderTriageList;
-  if (!_origRenderTriage) return;
-  window._renderTriageList = function() {
-    _origRenderTriage.apply(this, arguments);
-    // بعد از render، بررسی تسک‌های تیمی و اضافه کردن دکمه‌ها
-    setTimeout(() => {
-      const inboxTasks = tm.inbox ? tm.inbox.filter(t => !t.deleted && t.status !== 'done') : [];
-      if (!inboxTasks.length) return;
-      // پیدا کردن container
-      const list = document.getElementById('triageList');
-      if (!list) return;
-      // اضافه کردن یه بخش جداگانه در پایین triage برای تسک‌های تیمی
-      const existing = document.getElementById('trTeamSection');
-      if (existing) existing.remove();
-      const section = document.createElement('div');
-      section.id = 'trTeamSection';
-      section.innerHTML = `
-        <div style="margin-top:var(--sp4);padding-top:var(--sp3);border-top:1px solid var(--b2)">
-          <div style="font-size:var(--fs-xs);color:var(--blue);font-weight:700;margin-bottom:var(--sp2);text-align:right">📥 از مدیر (${inboxTasks.length} تسک)</div>
-          ${inboxTasks.slice(0,3).map(t => `
-            <div style="background:var(--bluem);border:1px solid rgba(59,130,246,.2);border-radius:var(--r2);padding:var(--sp2) var(--sp3);margin-bottom:6px">
-              <div style="font-size:var(--fs-xs);font-weight:600;color:var(--t1);margin-bottom:6px;text-align:right">${esc(t.title)}</div>
-              <div style="display:flex;gap:6px">
-                <button onclick="tmAPI('PUT','/task/update',{taskId:'${t.id}',status:'in_progress'}).then(()=>toast_(svgIco('check'),'وضعیت آپدیت شد'))" style="flex:1;height:28px;border:1px solid var(--b1);border-radius:var(--r1);background:var(--bg2);font-size:10px;font-weight:600;font-family:var(--f);color:var(--t2);cursor:pointer">درحالم</button>
-                <button onclick="openTeamTaskDetail('${t.id}')" style="flex:1;height:28px;border:1px solid rgba(59,130,246,.3);border-radius:var(--r1);background:var(--bluem);font-size:10px;font-weight:600;font-family:var(--f);color:var(--blue);cursor:pointer">جزئیات</button>
-              </div>
-            </div>
-          `).join('')}
-          ${inboxTasks.length > 3 ? `<div style="font-size:10px;color:var(--t3);text-align:center">+${inboxTasks.length-3} تسک دیگه</div>` : ''}
-        </div>`;
-      list.appendChild(section);
-    }, 100);
-  };
-})();
-
-// ── ۵. سکو گزارش تب — render کامل ────────────────────────
-window.tmRenderReport = function() {
-  const el = document.getElementById('tmSokoReportContent');
-  if (!el) return;
-  if (!tm.snapshot) {
-    el.innerHTML = '<div style="padding:var(--sp5);text-align:center"><div class="tm-skeleton" style="height:60px;border-radius:var(--r2);margin-bottom:var(--sp2)"></div><div class="tm-skeleton" style="height:100px;border-radius:var(--r2)"></div></div>';
-    return;
-  }
-  const members = (tm.snapshot.members || []).filter(m => m.status === 'active');
-  const total = members.reduce((s, m) => s + (m.activeTasks||0), 0);
-  const done = members.reduce((s, m) => s + (m.doneTasks||0), 0);
-  const blocked = members.filter(m => m.alert === 'blocked').length;
-  const stale = members.filter(m => m.alert === 'stale').length;
-
-  el.innerHTML = `<div style='direction:rtl;text-align:right'>
-    <!-- آمار کلی -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--sp2);padding:var(--sp3) var(--sp4);border-bottom:1px solid var(--b2)">
-      ${[
-        {l:'تسک فعال', v:total, c:'var(--t1)'},
-        {l:'تمام‌شده', v:done,  c:'var(--a)'},
-        {l:'مشکل',   v:blocked, c:'var(--red)'},
-      ].map(s => `
-        <div style="text-align:center;background:var(--bg2);border-radius:var(--r2);padding:var(--sp3)">
-          <div style="font-size:var(--fs-lg);font-weight:800;color:${s.c};font-variant-numeric:tabular-nums">${s.v}</div>
-          <div style="font-size:10px;color:var(--t3);margin-top:2px">${s.l}</div>
-        </div>`).join('')}
-    </div>
-
-    <!-- عملکرد اعضا -->
-    <div style="padding:var(--sp3) var(--sp4)">
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp3)">عملکرد این هفته</div>
-      ${members.length ? members.map(m => {
-        const mDone = m.doneTasks || 0;
-        const mTotal = (m.activeTasks||0) + mDone;
-        const score = mTotal > 0 ? Math.round(mDone / mTotal * 100) : 0;
-        const scoreColor = score >= 80 ? 'var(--a)' : score >= 50 ? 'var(--amber)' : 'var(--red)';
-        return `
-          <div style="background:var(--bg2);border-radius:var(--r2);padding:var(--sp3);margin-bottom:var(--sp2)">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:var(--sp2)">
-              <div style="font-size:var(--fs-md);font-weight:800;color:${scoreColor};font-variant-numeric:tabular-nums">${score}٪</div>
-              <div style="text-align:right">
-                <div style="font-size:var(--fs-sm);font-weight:700;color:var(--t1)">${esc(m.name)}</div>
-                <div style="font-size:10px;color:var(--t3)">${mDone} از ${mTotal} تسک</div>
-              </div>
-            </div>
-            <div style="height:4px;background:var(--bg3);border-radius:var(--r5);overflow:hidden">
-              <div style="height:100%;border-radius:var(--r5);background:${scoreColor};transform:scaleX(${score/100});transform-origin:right;transition:transform 600ms cubic-bezier(0.23,1,0.32,1)"></div>
-            </div>
-            ${m.alert !== 'ok' ? `<div style="font-size:10px;margin-top:4px;color:${m.alert==='blocked'?'var(--red)':'var(--amber)'}">${m.alert==='blocked'?'🚫 مشکل دارد':'⏳ بی‌تحرکی'}</div>` : ''}
-          </div>`;
-      }).join('') : '<div style="color:var(--t3);font-size:var(--fs-xs);text-align:center;padding:var(--sp4)">عضوی ندارد</div>'}
-    </div>
-
-    <!-- toggle هفتگی / ماهانه -->
-    <div style="padding:0 var(--sp4) var(--sp5);display:flex;gap:var(--sp2);justify-content:center">
-      <button onclick="tmLoadReport('weekly')"  style="height:28px;padding:0 12px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--t1);color:var(--bg1);font-size:11px;font-weight:600;font-family:var(--f);cursor:pointer">هفتگی</button>
-      <button onclick="tmLoadReport('monthly')" style="height:28px;padding:0 12px;border-radius:var(--r5);border:1px solid var(--b1);background:var(--bg2);color:var(--t2);font-size:11px;font-weight:600;font-family:var(--f);cursor:pointer">ماهانه</button>
-    </div>`;
-};
-
-async function tmLoadReport(period) {
-  try {
-    const data = await tmAPI('GET', `/report/${period}`);
-    if (data && data.members) {
-      // آپدیت snapshot
-      tm.snapshot = { ...tm.snapshot, members: data.members };
-      tmRenderReport();
-    }
-  } catch(e) {
-    console.warn('tmLoadReport:', e.message);
-  }
-}
-
-/* ════ End Missing Features ════ */
-
-
-/* ════ Bug Fixes — Assign Modal ════ */
-
-// Fix 1: member filter — exclude self + manager
-function _tmUpdateAssignMemberChips() {
-  const el = document.getElementById('tmAMemberChips');
-  if (!el) return;
-  const members = (tm.snapshot?.members || []).filter(m =>
-    m.uuid !== tm.uuid &&
-    !m.isManager &&
-    m.role !== 'manager' &&
-    (m.status === 'active' || m.status === 'approved')
-  );
-  if (!members.length) {
-    el.innerHTML = '<div style="color:var(--t3);font-size:var(--fs-xs)">هنوز عضو فعالی نداری</div>';
-    return;
-  }
-  el.innerHTML = members.map(m => {
-    const active = _tmAssignMember === m.uuid;
-    const st = m.alert === 'blocked' ? 'block' : m.alert === 'stale' ? 'warn' : 'ok';
-    return `<button
-      class="tm-member-chip${active ? ' active' : ''}"
-      data-uuid="${m.uuid}"
-      onclick="_tmSelectMember('${m.uuid}')"
-    >${tmDot(st)}<span>${esc(m.name)}</span></button>`;
-  }).join('');
-}
-
-// Fix 2: state reset کامل
-window.tmAssignTask = function(preUuid = '') {
-  _tmAssignParsed = null;
-  _tmAssignMember = preUuid || '';
-  _tmAssignBroadcast = false;
-  _tmAssignPriOverride = null;
-
-  // reset inputs
-  const inp = document.getElementById('tmANlpInp');
-  if (inp) { inp.value = ''; inp.style.height = 'auto'; }
-  const preview = document.getElementById('tmAPreview');
-  if (preview) preview.innerHTML = '';
-  const err = document.getElementById('tmAErr');
-  if (err) err.textContent = '';
-  const hint = document.getElementById('tmADlHint');
-  if (hint) hint.textContent = '';
-
-  // reset priority chips
-  document.querySelectorAll('.tm-pri-chip').forEach(c => {
-    c.style.opacity = '.5';
-    c.style.transform = '';
-  });
-
-  // reset broadcast btn
-  const broadBtn = document.getElementById('tmABroadcastBtn');
-  if (broadBtn) {
-    broadBtn.style.background = 'var(--bg2)';
-    broadBtn.style.color = 'var(--t2)';
-    broadBtn.style.borderColor = 'var(--b1)';
-    broadBtn.textContent = '📡 ارسال به همه';
-  }
-
-  _tmUpdateAssignMemberChips();
-  tmModal('tmModalAssign', true);
-  setTimeout(() => { const i = document.getElementById('tmANlpInp'); if(i) i.focus(); }, 300);
-};
-
-// Fix 3: NLP preview با deadline hint
-function _tmUpdateAssignPreview() {
-  const p = document.getElementById('tmAPreview');
-  const hint = document.getElementById('tmADlHint');
-  if (!p) return;
-  if (!_tmAssignParsed || !((_tmAssignParsed.detected||[]).length)) {
-    p.innerHTML = '';
-    if (hint) hint.textContent = '';
-    return;
-  }
-  const chips = [];
-  if (_tmAssignParsed.deadline) {
-    const d = _tmFmtDeadline(_tmAssignParsed.deadline);
-    if (d) {
-      chips.push(`<span class="tm-nlp-chip" style="background:var(--am);color:var(--a)">📅 ${d.label}</span>`);
-      if (hint) {
-        const [jy,jm,jd] = _tmAssignParsed.deadline.split('-');
-        hint.textContent = num(jd) + '/' + num(jm) + '/' + num(jy);
-      }
-    }
-  } else if (hint) hint.textContent = '';
-  const PRI = { high:['🔴 فوری','var(--red)'], med:['🟡 مهم','var(--amber)'], low:['⚪ عادی','var(--t3)'] };
-  if ((_tmAssignParsed.detected||[]).includes('pri') && _tmAssignParsed.priority) {
-    const [lbl, col] = PRI[_tmAssignParsed.priority] || [_tmAssignParsed.priority,'var(--t2)'];
-    chips.push(`<span class="tm-nlp-chip" style="background:${col}22;color:${col}">${lbl}</span>`);
-  }
-  p.innerHTML = chips.join('');
-}
-/* ════ End Bug Fixes ════ */
-
-
-/* ════ Focus Management ════ */
-(function(){
-  const _origTmM = window.tmModal;
-  if (!_origTmM) return;
-  window.tmModal = function(id, open) {
-    _origTmM.apply(this, arguments);
-    if (open) setTimeout(() => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      const first = el.querySelector('input:not([disabled]),textarea:not([disabled])');
-      if (first) first.focus();
-    }, 320);
-  };
-})();
-/* ════ End Focus Management ════ */
-
-/* ════ Soko Desktop Sidebar ════ */
-
-// ── Sidebar render per tab ──────────────────────────────────
-
-// ── Status sidebar ──────────────────────────────────────────
-/* removed duplicate _tmSbStatus */
-
-// ── Status filter ───────────────────────────────────────────
-let _tmSbActiveFilter = 'all';
-
-
-function _tmRenderStatusFiltered(f) {
-  const el = document.getElementById('tmSokoStatusContent');
-  if (!el || !tm.snapshot) return;
-  const allMembers = (tm.snapshot.members || []).filter(m => !m.isManager && m.role !== 'manager');
-  const members = f === 'all' ? allMembers : allMembers.filter(m => m.alert === f);
-  // re-use the render logic by temporarily overriding snapshot
-  const _orig = tm.snapshot.members;
-  tm.snapshot.members = [...members, ...(tm.snapshot.members||[]).filter(m => m.isManager)];
-  tmRenderSokoStatus();
-  tm.snapshot.members = _orig;
-}
-
-// ── Projects sidebar ────────────────────────────────────────
-function _tmSbProjects(sb) {
-  const projects = tm.snapshot?.projects || [];
-  sb.innerHTML = `
-    <div class="tm-sb-section">
-      <div class="tm-sb-lbl">پروژه‌ها</div>
-      <button class="tm-sb-btn" onclick="tmNewProject && tmNewProject()">
-        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        پروژه جدید
-      </button>
-    </div>
-    ${projects.length ? `
-    <div class="tm-sb-divider"></div>
-    <div class="tm-sb-section">
-      ${projects.map(p => `
-        <button class="tm-sb-filter" onclick="">
-          <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.name)}</span>
-          <span style="color:var(--t3)">${num(p.taskCount||0)}</span>
-        </button>`).join('')}
-    </div>` : ''}
-
-    <div class="tm-sb-divider"></div>
-    <div class="tm-sb-section">
-      <div class="tm-sb-lbl">اعضا</div>
-      ${(tm.snapshot?.members||[]).filter(m=>!m.isManager).map(m => `
-        <button class="tm-sb-filter" onclick="tmAssignTask('${m.uuid}')">
-          <span>${esc(m.name)}</span>
-          <span style="color:var(--t3)">${num(m.activeTasks||0)}</span>
-        </button>`).join('')}
-    </div>
-  `;
-}
-
-// ── Report sidebar ──────────────────────────────────────────
-let _tmReportPeriod = 'weekly';
-function _tmSbReport(sb) {
-  sb.innerHTML = `
-    <div class="tm-sb-section">
-      <div class="tm-sb-lbl">بازه زمانی</div>
-      <button class="tm-sb-filter ${_tmReportPeriod==='weekly'?'active':''}" onclick="_tmSetReportPeriod('weekly')">
-        این هفته
-      </button>
-      <button class="tm-sb-filter ${_tmReportPeriod==='monthly'?'active':''}" onclick="_tmSetReportPeriod('monthly')">
-        این ماه
-      </button>
-      <button class="tm-sb-filter ${_tmReportPeriod==='prev_month'?'active':''}" onclick="_tmSetReportPeriod('prev_month')">
-        ماه گذشته
-      </button>
-    </div>
-    <div class="tm-sb-divider"></div>
-    <button class="tm-sb-btn" onclick="tmExportReport && tmExportReport(_tmReportPeriod)">
-      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-      خروجی Excel
-    </button>
-  `;
-}
-
-function _tmSetReportPeriod(p) {
-  _tmReportPeriod = p;
-  _tmSbReport(document.getElementById('tmPanelSidebar'));
-  tmLoadReport(p === 'weekly' ? 'weekly' : 'monthly');
-}
-
-// ── Header KPI آپدیت ────────────────────────────────────────
-
-// ── Hook tmSetSokoTab ───────────────────────────────────────
-(function(){
-    // همچنین بعد از snapshot
-  const _origSync = window.tmSyncBackground;
-  if (_origSync) {
-
-  }
-})();
-
-/* ════ End Soko Desktop Sidebar ════ */
-
-/* ════ Excel Export — سکو ════ */
-
-async function tmExportReport(period) {
-  if (!tm.snapshot) { toast_(svgIco('x'), 'ابتدا سکو رو sync کن'); return; }
-
-  const btn = document.querySelector('[onclick*="tmExportReport"]');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ در حال ساخت...'; }
-
-  try {
-    const blob = await _tmBuildXLSX(period);
-    const today = mrTodayKey();
-    const fname = `سکو-${tm.teamName||'تیم'}-${today}.xlsx`;
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = fname;
-    document.body.appendChild(a); a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast_(svgIco('check'), 'فایل Excel دانلود شد');
-  } catch(e) {
-    toast_(svgIco('x'), 'خطا: ' + e.message);
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = '📤 خروجی Excel'; }
-  }
-}
-
-// ── XLSX builder ────────────────────────────────────────────
-async function _tmBuildXLSX(period) {
-  const members = (tm.snapshot.members||[]).filter(m=>!m.isManager&&m.role!=='manager');
-  const teamName = tm.teamName || 'تیم';
-
-  // ── Sheets data ──
-  const sheets = [
-    _tmSheetStatus(members, teamName),
-    _tmSheetTasks(members, teamName),
-    _tmSheetSummary(members, teamName, period),
-  ];
-
-  // ── Build XLSX XML ──
-  const styles = _tmXlsxStyles();
-  const wb = _tmXlsxWorkbook(sheets);
-  const cts = _tmXlsxContentTypes(sheets.length);
-  const rels = _tmXlsxRels();
-  const wbRels = _tmXlsxWbRels(sheets.length);
-  const ss = _tmXlsxSharedStrings(sheets);
-
-  // ── ZIP assembly ──
-  const files = {
-    '[Content_Types].xml': cts,
-    '_rels/.rels': rels,
-    'xl/workbook.xml': wb,
-    'xl/_rels/workbook.xml.rels': wbRels,
-    'xl/styles.xml': styles,
-    'xl/sharedStrings.xml': ss.xml,
-  };
-  sheets.forEach((sh, i) => {
-    files[`xl/worksheets/sheet${i+1}.xml`] = _tmXlsxSheet(sh, ss.map, i+1);
-  });
-
-  return await _tmZipToBlob(files);
-}
-
-// ── Sheet: وضعیت اعضا ───────────────────────────────────────
-function _tmSheetStatus(members, teamName) {
-  const MONTHS = ['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
-  const rows = [
-    [{ v: `گزارش وضعیت تیم — ${teamName}`, s:'title', span:6 }],
-    [{ v: `تاریخ: ${mrTodayKey()}`, s:'sub', span:6 }],
-    [],
-    [
-      { v:'ردیف',          s:'hdr' },
-      { v:'نام',           s:'hdr' },
-      { v:'نقش',           s:'hdr' },
-      { v:'وضعیت',         s:'hdr' },
-      { v:'تسک فعال',      s:'hdr' },
-      { v:'تکمیل‌شده',     s:'hdr' },
-      { v:'درصد موفقیت',   s:'hdr' },
-    ],
-    ...members.map((m, i) => {
-      const total = (m.activeTasks||0) + (m.doneTasks||0);
-      const pct = total > 0 ? Math.round((m.doneTasks||0)/total*100) : 0;
-      const statusLabel = m.alert==='blocked' ? '🚫 متوقف' : m.alert==='stale' ? '⏳ بی‌تحرکی' : '✅ فعال';
-      const rowStyle = m.alert==='blocked' ? 'red' : m.alert==='stale' ? 'amber' : (i%2===0 ? 'even' : 'odd');
-      return [
-        { v: i+1,                s:rowStyle, t:'n' },
-        { v: m.name||'',         s:rowStyle },
-        { v: m.role||'عضو تیم',  s:rowStyle },
-        { v: statusLabel,        s:m.alert==='blocked'?'red':m.alert==='stale'?'amber':rowStyle },
-        { v: m.activeTasks||0,   s:rowStyle, t:'n' },
-        { v: m.doneTasks||0,     s:rowStyle, t:'n' },
-        { v: pct,                s:rowStyle, t:'n', fmt:'0"%"' },
-      ];
-    }),
-    [],
-    [{ v:'تهیه‌شده توسط DayQ Soko', s:'footer', span:7 }],
-  ];
-  return { name:'وضعیت اعضا', rows, cols:[5, 20, 15, 15, 12, 12, 12] };
-}
-
-// ── Sheet: لیست تسک‌ها ──────────────────────────────────────
-function _tmSheetTasks(members, teamName) {
-  const allTasks = [];
-  members.forEach(m => {
-    (m.tasks||[]).forEach(t => allTasks.push({...t, memberName:m.name}));
-  });
-  // اگه tasks در snapshot نیستن، از inbox استفاده کن
-  const inbox = tm.inbox || [];
-
-  const rows = [
-    [{ v:`لیست تسک‌های تیمی — ${teamName}`, s:'title', span:6 }],
-    [],
-    [
-      { v:'ردیف',      s:'hdr' },
-      { v:'عنوان',     s:'hdr' },
-      { v:'مسئول',     s:'hdr' },
-      { v:'اولویت',    s:'hdr' },
-      { v:'ددلاین',    s:'hdr' },
-      { v:'وضعیت',     s:'hdr' },
-    ],
-    ...(inbox.length ? inbox : allTasks).map((t, i) => {
-      const priMap = { high:'🔴 فوری', med:'🟡 مهم', urgent:'🔴 فوری', low:'⚪ عادی' };
-      const stMap  = { pending:'شروع نشده', in_progress:'در حال انجام', done:'✅ انجام شد', blocked:'🚫 متوقف', waiting:'منتظرم' };
-      const rowStyle = t.status==='done' ? 'done' : t.status==='blocked' ? 'red' : i%2===0 ? 'even' : 'odd';
-      return [
-        { v:i+1,                                     s:rowStyle, t:'n' },
-        { v:t.title||'',                             s:rowStyle },
-        { v:t.memberName||t.assignedTo||'',          s:rowStyle },
-        { v:priMap[t.priority]||t.priority||'',      s:rowStyle },
-        { v:t.deadline||'',                          s:rowStyle },
-        { v:stMap[t.status]||t.status||'',           s:rowStyle },
-      ];
-    }),
-    [],
-    [{ v:'تهیه‌شده توسط DayQ Soko', s:'footer', span:6 }],
-  ];
-  return { name:'تسک‌ها', rows, cols:[5, 30, 15, 12, 12, 15] };
-}
-
-// ── Sheet: خلاصه مدیریتی ───────────────────────────────────
-function _tmSheetSummary(members, teamName, period) {
-  const total  = members.reduce((s,m)=>s+(m.activeTasks||0),0);
-  const done   = members.reduce((s,m)=>s+(m.doneTasks||0),0);
-  const blocked= members.filter(m=>m.alert==='blocked').length;
-  const stale  = members.filter(m=>m.alert==='stale').length;
-  const score  = (total+done)>0 ? Math.round(done/(total+done)*100) : 0;
-
-  const rows = [
-    [{ v:`خلاصه مدیریتی — ${teamName}`, s:'title', span:2 }],
-    [{ v:`دوره: ${period==='weekly'?'هفتگی':'ماهانه'}`, s:'sub', span:2 }],
-    [{ v:`تاریخ: ${mrTodayKey()}`, s:'sub', span:2 }],
-    [],
-    [{ v:'شاخص', s:'hdr' }, { v:'مقدار', s:'hdr' }],
-    [{ v:'تعداد اعضای فعال', s:'odd' },  { v:members.length, s:'odd',  t:'n' }],
-    [{ v:'تسک‌های فعال',     s:'even' }, { v:total,          s:'even', t:'n' }],
-    [{ v:'تسک‌های تکمیل',   s:'odd' },  { v:done,           s:'odd',  t:'n' }],
-    [{ v:'اعضا با مشکل',     s:'red' },  { v:blocked,        s:'red',  t:'n' }],
-    [{ v:'اعضا بی‌تحرک',    s:'amber' }, { v:stale,          s:'amber',t:'n' }],
-    [{ v:'درصد موفقیت کلی',  s:'green' },{ v:score,          s:'green',t:'n', fmt:'0"%"' }],
-    [],
-    [{ v:'عملکرد اعضا', s:'title', span:2 }],
-    [],
-    [{ v:'نام', s:'hdr' }, { v:'درصد موفقیت', s:'hdr' }],
-    ...members.map((m,i)=>{
-      const t=(m.activeTasks||0)+(m.doneTasks||0);
-      const p=t>0?Math.round((m.doneTasks||0)/t*100):0;
-      const s=p>=80?'green':p>=50?'amber':'red';
-      return [{ v:m.name, s:i%2===0?'even':'odd'}, { v:p, s, t:'n', fmt:'0"%"' }];
-    }),
-    [],
-    [{ v:'تهیه‌شده توسط DayQ Soko', s:'footer', span:2 }],
-  ];
-  return { name:'خلاصه مدیریتی', rows, cols:[25, 15] };
-}
-
-// ── XLSX XML builders ───────────────────────────────────────
-function _tmXlsxStyles() {
-  // Colors
-  const C = {
-    blue:   '1e40af', blueLt:'dbeafe',
-    red:    'dc2626', redLt: 'fee2e2',
-    amber:  'd97706', ambLt: 'fef3c7',
-    green:  '15803d', grnLt: 'dcfce7',
-    gray:   '64748b', grayLt:'f8fafc',
-    white:  'ffffff', black: '111827',
-    done:   'f0fdf4', even:  'f8fafc',
-    footer: '94a3b8',
-  };
-
-  // font, fill, border, xf indexes:
-  // fonts: 0=normal, 1=bold, 2=bold-large, 3=gray
-  // fills: 0=none, 1=gray(system), 2=blue-hdr, 3=red, 4=amber, 5=green, 6=even, 7=done
-  // borders: 0=none, 1=thin-all
-  // xf: 0=normal, 1=hdr, 2=title, 3=sub, 4=red, 5=amber, 6=green, 7=even, 8=odd, 9=done, 10=footer
-
-  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
-<fonts>
-  <font><sz val="10"/><name val="Tahoma"/><color rgb="FF${C.black}"/></font>
-  <font><b/><sz val="10"/><name val="Tahoma"/><color rgb="FF${C.black}"/></font>
-  <font><b/><sz val="14"/><name val="Tahoma"/><color rgb="FF${C.blue}"/></font>
-  <font><sz val="9"/><name val="Tahoma"/><color rgb="FF${C.footer}"/></font>
-  <font><b/><sz val="10"/><name val="Tahoma"/><color rgb="FF${C.white}"/></font>
-</fonts>
-<fills>
-  <fill><patternFill patternType="none"/></fill>
-  <fill><patternFill patternType="gray125"/></fill>
-  <fill><patternFill patternType="solid"><fgColor rgb="FF${C.blue}"/></patternFill></fill>
-  <fill><patternFill patternType="solid"><fgColor rgb="FF${C.redLt}"/></patternFill></fill>
-  <fill><patternFill patternType="solid"><fgColor rgb="FF${C.ambLt}"/></patternFill></fill>
-  <fill><patternFill patternType="solid"><fgColor rgb="FF${C.grnLt}"/></patternFill></fill>
-  <fill><patternFill patternType="solid"><fgColor rgb="FF${C.even}"/></patternFill></fill>
-  <fill><patternFill patternType="solid"><fgColor rgb="FF${C.done}"/></patternFill></fill>
-  <fill><patternFill patternType="solid"><fgColor rgb="FFdbeafe"/></patternFill></fill>
-</fills>
-<borders>
-  <border><left/><right/><top/><bottom/><diagonal/></border>
-  <border>
-    <left style="thin"><color rgb="FFe2e8f0"/></left>
-    <right style="thin"><color rgb="FFe2e8f0"/></right>
-    <top style="thin"><color rgb="FFe2e8f0"/></top>
-    <bottom style="thin"><color rgb="FFe2e8f0"/></bottom>
-  </border>
-  <border>
-    <left style="medium"><color rgb="FF${C.blue}"/></left>
-    <right style="medium"><color rgb="FF${C.blue}"/></right>
-    <top style="medium"><color rgb="FF${C.blue}"/></top>
-    <bottom style="medium"><color rgb="FF${C.blue}"/></bottom>
-  </border>
-</borders>
-<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
-<cellXfs>
-  <!-- 0: normal --><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0"><alignment readingOrder="2" wrapText="1"/></xf>
-  <!-- 1: header --><xf numFmtId="0" fontId="4" fillId="2" borderId="2" xfId="0"><alignment horizontal="center" vertical="center" readingOrder="2"/></xf>
-  <!-- 2: title --><xf numFmtId="0" fontId="2" fillId="8" borderId="0" xfId="0"><alignment readingOrder="2"/></xf>
-  <!-- 3: sub --><xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0"><alignment readingOrder="2"/></xf>
-  <!-- 4: red --><xf numFmtId="0" fontId="1" fillId="3" borderId="1" xfId="0"><alignment readingOrder="2"/></xf>
-  <!-- 5: amber --><xf numFmtId="0" fontId="1" fillId="4" borderId="1" xfId="0"><alignment readingOrder="2"/></xf>
-  <!-- 6: green --><xf numFmtId="0" fontId="1" fillId="5" borderId="1" xfId="0"><alignment readingOrder="2"/></xf>
-  <!-- 7: even --><xf numFmtId="0" fontId="0" fillId="6" borderId="1" xfId="0"><alignment readingOrder="2"/></xf>
-  <!-- 8: odd --><xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0"><alignment readingOrder="2"/></xf>
-  <!-- 9: done --><xf numFmtId="0" fontId="0" fillId="7" borderId="1" xfId="0"><alignment readingOrder="2"/></xf>
-  <!-- 10: footer --><xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0"><alignment readingOrder="2"/></xf>
-</cellXfs>
-</styleSheet>`;
-}
-
-function _tmXlsxWorkbook(sheets) {
-  const sheetEls = sheets.map((s,i)=>`<sheet name="${_xmlEsc(s.name)}" sheetId="${i+1}" r:id="rId${i+1}"/>`).join('');
-  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"
-  xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
-<sheets>${sheetEls}</sheets></workbook>`;
-}
-
-function _tmXlsxContentTypes(n) {
-  let sheets = '';
-  for(let i=1;i<=n;i++) sheets+=`<Override PartName="/xl/worksheets/sheet${i}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`;
-  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
-<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
-<Default Extension="xml" ContentType="application/xml"/>
-<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
-<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
-<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>
-${sheets}</Types>`;
-}
-
-function _tmXlsxRels() {
-  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
-</Relationships>`;
-}
-
-function _tmXlsxWbRels(n) {
-  let rels = `<Relationship Id="rId${n+1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
-<Relationship Id="rId${n+2}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/>`;
-  for(let i=1;i<=n;i++) rels+=`<Relationship Id="rId${i}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i}.xml"/>`;
-  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-${rels}</Relationships>`;
-}
-
-function _tmXlsxSharedStrings(sheets) {
-  const map = new Map();
-  const strs = [];
-  const collect = (v) => {
-    if(typeof v !== 'string' || !v) return;
-    if(!map.has(v)) { map.set(v, strs.length); strs.push(v); }
-  };
-  sheets.forEach(s => s.rows.forEach(r => r.forEach(c => collect(c.v))));
-  const xml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="${strs.length}" uniqueCount="${strs.length}">
-${strs.map(s=>`<si><t xml:space="preserve">${_xmlEsc(s)}</t></si>`).join('')}
-</sst>`;
-  return { xml, map };
-}
-
-function _tmXlsxSheet(sheet, ssMap, idx) {
-  const STYLE_MAP = { title:2, sub:3, hdr:1, red:4, amber:5, green:6, even:7, odd:8, done:9, footer:10 };
-  const COL_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  const colWidth = sheet.cols || [];
-  const colDefs = colWidth.map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('');
-
-  let rows = '';
-  let merges = [];
-
-  sheet.rows.forEach((row, ri) => {
-    if (!row || !row.length) return;
-    const rowNum = ri + 1;
-    let cells = '';
-    let ci = 0;
-    row.forEach(cell => {
-      const col = COL_LETTERS[ci];
-      const addr = `${col}${rowNum}`;
-      const sIdx = STYLE_MAP[cell.s] || 0;
-      let cellXml = '';
-      if (cell.span > 1) {
-        const endCol = COL_LETTERS[ci + cell.span - 1];
-        merges.push(`<mergeCell ref="${addr}:${endCol}${rowNum}"/>`);
-      }
-      if (cell.t === 'n' || typeof cell.v === 'number') {
-        cellXml = `<c r="${addr}" s="${sIdx}" t="n"><v>${cell.v||0}</v></c>`;
-      } else if (cell.v) {
-        const ssIdx = ssMap.get(String(cell.v));
-        cellXml = `<c r="${addr}" s="${sIdx}" t="s"><v>${ssIdx??0}</v></c>`;
-      } else {
-        cellXml = `<c r="${addr}" s="${sIdx}"/>`;
-      }
-      cells += cellXml;
-      ci++;
-    });
-    rows += `<row r="${rowNum}" ht="${ri===0?20:15}" customHeight="1">${cells}</row>`;
-  });
-
-  const mergeEl = merges.length ? `<mergeCells count="${merges.length}">${merges.join('')}</mergeCells>` : '';
-
-  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
-<sheetView workbookViewId="0" rightToLeft="1"/>
-<sheetFormatPr defaultRowHeight="15" customHeight="1"/>
-<cols>${colDefs}</cols>
-<sheetData>${rows}</sheetData>
-${mergeEl}
-</worksheet>`;
-}
-
-// ── ZIP builder (بدون library) ──────────────────────────────
-async function _tmZipToBlob(files) {
-  // ساخت ZIP دستی — Local File Headers + Central Directory
-  const enc = new TextEncoder();
-  const parts = [];
-  const central = [];
-  let offset = 0;
-
-  for (const [name, content] of Object.entries(files)) {
-    const nameBytes = enc.encode(name);
-    const data = enc.encode(content);
-
-    // Compress with DeflateRaw
-    const cs = new CompressionStream('deflate-raw');
-    const writer = cs.writable.getWriter();
-    writer.write(data); writer.close();
-    const compressed = new Uint8Array(await new Response(cs.readable).arrayBuffer());
-
-    // CRC-32
-    const crc = _crc32(data);
-    const now = new Date();
-    const dosDate = ((now.getFullYear()-1980)<<9)|((now.getMonth()+1)<<5)|now.getDate();
-    const dosTime = (now.getHours()<<11)|(now.getMinutes()<<5)|(now.getSeconds()>>1);
-
-    // Local file header
-    const lfh = new DataView(new ArrayBuffer(30 + nameBytes.length));
-    lfh.setUint32(0, 0x04034b50, true);  // signature
-    lfh.setUint16(4, 20, true);           // version needed
-    lfh.setUint16(6, 0x800, true);        // flags (UTF-8)
-    lfh.setUint16(8, 8, true);            // deflate
-    lfh.setUint16(10, dosTime, true);
-    lfh.setUint16(12, dosDate, true);
-    lfh.setUint32(14, crc, true);
-    lfh.setUint32(18, compressed.length, true);
-    lfh.setUint32(22, data.length, true);
-    lfh.setUint16(26, nameBytes.length, true);
-    lfh.setUint16(28, 0, true);
-    new Uint8Array(lfh.buffer).set(nameBytes, 30);
-
-    parts.push(new Uint8Array(lfh.buffer), compressed);
-
-    // Central directory entry
-    const cde = new DataView(new ArrayBuffer(46 + nameBytes.length));
-    cde.setUint32(0, 0x02014b50, true);
-    cde.setUint16(4, 20, true);
-    cde.setUint16(6, 20, true);
-    cde.setUint16(8, 0x800, true);
-    cde.setUint16(10, 8, true);
-    cde.setUint16(12, dosTime, true);
-    cde.setUint16(14, dosDate, true);
-    cde.setUint32(16, crc, true);
-    cde.setUint32(20, compressed.length, true);
-    cde.setUint32(24, data.length, true);
-    cde.setUint16(28, nameBytes.length, true);
-    cde.setUint32(42, offset, true);
-    new Uint8Array(cde.buffer).set(nameBytes, 46);
-    central.push(new Uint8Array(cde.buffer));
-
-    offset += 30 + nameBytes.length + compressed.length;
-  }
-
-  // End of central directory
-  const cdSize = central.reduce((s,a)=>s+a.length, 0);
-  const eocd = new DataView(new ArrayBuffer(22));
-  eocd.setUint32(0, 0x06054b50, true);
-  eocd.setUint16(8, central.length, true);
-  eocd.setUint16(10, central.length, true);
-  eocd.setUint32(12, cdSize, true);
-  eocd.setUint32(16, offset, true);
-
-  const allParts = [...parts, ...central, new Uint8Array(eocd.buffer)];
-  const total = allParts.reduce((s,a)=>s+a.length, 0);
-  const out = new Uint8Array(total);
-  let pos = 0;
-  for(const p of allParts) { out.set(p, pos); pos += p.length; }
-
-  return new Blob([out], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-}
-
-// ── CRC-32 ──────────────────────────────────────────────────
-const _crc32 = (() => {
-  const t = new Uint32Array(256);
-  for(let i=0;i<256;i++){
-    let c=i;
-    for(let j=0;j<8;j++) c=c&1?(0xEDB88320^(c>>>1)):(c>>>1);
-    t[i]=c;
-  }
-  return (data) => {
-    let c=0xFFFFFFFF;
-    for(const b of data) c=t[(c^b)&0xff]^(c>>>8);
-    return (c^0xFFFFFFFF)>>>0;
-  };
-})();
-
-// ── XML escape ──────────────────────────────────────────────
-function _xmlEsc(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-/* ════ End Excel Export ════ */
-
-
-// z-index via CSS body.tm-panel-open
-
-
-/* ════ Z-index: sheets over soko panel ════ */
-(function(){
-  const _orig = window.openSheet;
-  if (!_orig) return;
-  window.openSheet = function(id) {
-    _orig.apply(this, arguments);
-    const panel = document.getElementById('tmSokoPanel');
-    if (!panel || !panel.classList.contains('open')) return;
-    // panel باز هست — sheet و ov باید بالاتر باشن
-    const sh = document.getElementById(id);
-    if (sh) sh.style.zIndex = '2100';
-    const ov = document.getElementById('ov');
-    if (ov) ov.style.zIndex = '2050';
-  };
-  const _origClose = window.closeAll;
-  if (!_origClose) return;
-  window.closeAll = function() {
-    _origClose.apply(this, arguments);
-    document.querySelectorAll('.sheet').forEach(s => s.style.zIndex = '');
-    const ov = document.getElementById('ov');
-    if (ov) ov.style.zIndex = '';
-  };
-})();
-/* ════ End Z-index ════ */
-
-/* ════ End Team JS ════ */
-
-function _tmValidateSubmit(){const btn=document.getElementById('tmASubmitBtn');if(!btn)return;const inp=document.getElementById('tmANlpInp');const hasText=inp&&inp.value.trim().length>0;const hasMember=_tmAssignMember||_tmAssignBroadcast;if(!hasText){btn.disabled=true;btn.textContent='عنوان تسک رو بنویس';btn.style.opacity='.45';}else if(!hasMember){btn.disabled=true;btn.textContent='یه عضو انتخاب کن';btn.style.opacity='.45';}else{btn.disabled=false;btn.textContent='ارسال تسک';btn.style.opacity='1';}}
-
-
-/* ════ Soko Desktop Sidebar ════ */
-function tmRenderSidebar(tab) {
-  const sb = document.getElementById('tmPanelSidebar');
-  if (!sb) return;
-  if (tab === 'status')        _tmSbStatus(sb);
-  else if (tab === 'projects') _tmSbProjects(sb);
-  else if (tab === 'report')   _tmSbReport(sb);
-  else sb.innerHTML = '';
-}
-
-/* removed duplicate _tmSbStatus */
-
-function _tmSbFilter(f) {
-  _tmSbActiveFilter = f;
-  ['All','Blocked','Ok'].forEach(k => {
-    const btn = document.getElementById('sbf'+k);
-    if (btn) btn.classList.toggle('active', k.toLowerCase()===f);
-  });
-  const el = document.getElementById('tmSokoStatusContent');
-  if (!el||!tm.snapshot) return;
-  const all = (tm.snapshot.members||[]).filter(m=>!m.isManager&&m.role!=='manager');
-  const filtered = f==='all'?all:all.filter(m=>m.alert===f);
-  const orig = tm.snapshot.members;
-  tm.snapshot.members = [...filtered,...(tm.snapshot.members||[]).filter(m=>m.isManager)];
-  tmRenderSokoStatus();
-  tm.snapshot.members = orig;
-}
-
-
-
-function _tmUpdateHdrKpi() {
-  if (!tm.snapshot) return;
-  const members = (tm.snapshot.members||[]).filter(m=>!m.isManager&&m.role!=='manager');
-  const tasks = members.reduce((s,m)=>s+(m.activeTasks||0),0);
-  const alerts = members.filter(m=>m.alert==='blocked').length;
-  const done = members.reduce((s,m)=>s+(m.doneTasks||0),0);
-  const score = (tasks+done)>0?Math.round(done/(tasks+done)*100):null;
-  const t=document.getElementById('tmHdrTask'); if(t) t.textContent=num(tasks);
-  const a=document.getElementById('tmHdrAlert'); if(a) a.textContent=num(alerts);
-  const s=document.getElementById('tmHdrScore'); if(s) s.textContent=score!==null?num(score)+'٪':'—';
-  const sub=document.getElementById('tmSokoPanelSub');
-  if(sub) sub.textContent=(tm.teamName||'')+(members.length?` · ${num(members.length)} نفر`:'');
-}
-
-(function(){
-  const _origSetTab = window.tmSetSokoTab;
-;
-  const _origSync = window.tmSyncBackground;
-  if (_origSync) {
-    window.tmSyncBackground = async function() {
-      await _origSync.apply(this, arguments);
-      _tmUpdateHdrKpi();
-      tmRenderSidebar(tm.sokoTab || 'status');
-    };
-  }
-})();
-/* ════ End Soko Desktop Sidebar ════ */
-
-}
-
-
-var _mgThreadTaskId=null;
-function _commentTime(ts){if(!ts&&ts!==0)return '';var d=new Date(ts);if(isNaN(d.getTime()))return '';return d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');}
-function _renderThread(c,role,el,taskObj){
-  if(!el)return;
-  if(!c||!c.length){el.innerHTML='<div class="tm-thread-empty">هنوز پیامی نیست</div>';el.scrollTop=0;return;}
-  var readBy=(taskObj&&taskObj.readBy)||{};
-  var html='',lastDay='';
-  c.forEach(function(x,xi){
-    x = Object.assign({},x,{from:x.from||x.role||''});
-    var ts=x.ts||x.at||0;
-    var d=ts?new Date(ts):null;
-    // date divider
-    if(d&&!isNaN(d.getTime())){
-      var dk=d.toDateString();
-      if(dk!==lastDay){
-        lastDay=dk;
-        var now=new Date();
-        var lbl=d.toDateString()===now.toDateString()?'امروز':
-                new Date(now-86400000).toDateString()===d.toDateString()?'دیروز':
-                (function(){try{var j=gregorianToJalali(d.getFullYear(),d.getMonth()+1,d.getDate());return j[2]+'/'+j[1]+'/'+(j[0]%100);}catch(e){return d.getDate()+'/'+(d.getMonth()+1);}})();
-        html+='<div class="ttd-day-div"><span>'+lbl+'</span></div>';
-      }
-    }
-    if((x.from||x.role)==='system'){
-      html+='<div class="ttd-sys-msg">'+esc(x.text)+'</div>';return;
-    }
-    var isOwn=((x.from||x.role)===role);
-    var sndr=isOwn?'':((x.from||x.role)==='manager'?'مدیر':'کارمند');
-    var hm='';
-    if(d&&!isNaN(d.getTime())){
-      hm=d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0');
-    }
-    // read receipt
-    var tick='';
-    if(isOwn){
-      var otherKeys=Object.keys(readBy).filter(function(k){return k!==tm.uuid;});
-      var readTs=otherKeys.length?readBy[otherKeys[0]]:0;
-      tick=readTs&&ts&&readTs>ts?'<span class="ttd-tick ttd-tick-read">✓✓</span>':'<span class="ttd-tick">✓</span>';
-    }
-    html+='<div class="ttd-bubble from-'+(x.from||x.role)+(isOwn?' is-own':'')+'">'+
-      '<div class="ttd-bubble-body">'+esc(x.text)+'</div>'+
-      '<div class="ttd-bubble-foot">'+
-        (sndr?'<span class="ttd-bubble-sender">'+sndr+'</span>':'')+
-        (hm?'<span class="ttd-bubble-time">'+hm+'</span>':'')+
-        tick+
-      '</div></div>';
-  });
-  el.innerHTML=html;
-  setTimeout(function(){el.scrollTop=el.scrollHeight;},50);
-}function _ttdRefreshThread(){
-  var t=(tm.inbox||[]).find(function(x){return x.id===_ttdTaskId;});
-  var el=document.getElementById('ttdThreadMsgs');
-  if(el&&typeof _renderThread==='function')_renderThread(t?t.comments||[]:[],'member',el,t);
-}async function _ttdSendComment(){
-  var inp=document.querySelector('#ttdCommentSection .ttd-reply-inp');
-  if(!inp||!inp.value.trim()||!_ttdTaskId)return;
-  var text=inp.value.trim(),btn=document.querySelector('#ttdCommentSection .ttd-reply-send');
-  if(btn)btn.disabled=true;
-  var task=(tm.inbox||[]).find(function(t){return t.id===_ttdTaskId;});
-  try{await tmAPI('POST','/task/comment',{taskId:_ttdTaskId,text,from:'member'});}
-  catch(e){if(btn)btn.disabled=false;inp.value=text;toast_('','❌ خطا در ارسال پیام',2500);return;}
-  if(task){
-    if(!task.comments)task.comments=[];
-    task.comments.push({from:'member',text,ts:Date.now(),at:Date.now()});
-  }
-  inp.value='';inp.style.height='auto';
-  var thr=document.getElementById('ttdThreadMsgs');
-  if(thr&&task&&typeof _renderThread==='function')_renderThread(task.comments||[],'member',thr,task);
-  if(thr)thr.scrollTop=thr.scrollHeight;
-  if(btn)btn.disabled=false;
-}async function _mgSendComment(){
-  var inp=document.querySelector('#shTaskThread .ttd-reply-inp');
-  if(!inp||!inp.value.trim()||!_mgThreadTaskId)return;
-  var text=inp.value.trim(),btn=document.querySelector('#shTaskThread .ttd-reply-send');
-  if(btn)btn.disabled=true;
-  try{await tmAPI('POST','/task/comment',{taskId:_mgThreadTaskId,text,from:'manager'});}
-  catch(e){if(btn)btn.disabled=false;inp.value=text;toast_('','❌ خطا در ارسال پیام',2500);return;}
-  var members=(tm.snapshot&&tm.snapshot.members)||[];
-  var task=null;
-  for(var i=0;i<members.length;i++){
-    var t=(members[i].tasks||[]).find(function(t){return t.id===_mgThreadTaskId;});
-    if(t){
-      if(!t.comments)t.comments=[];
-      t.comments.push({from:'manager',text,ts:Date.now(),at:Date.now()});
-      task=t;break;
-    }
-  }
-  inp.value='';inp.style.height='auto';
-  var tel=document.getElementById('mgThreadMsgs');
-  if(tel&&task&&typeof _renderThread==='function')_renderThread(task.comments||[],'manager',tel,task);
-  if(btn)btn.disabled=false;
-  setTimeout(tmSyncBackground,1500);
-}async function _tmMemberAction(uuid,action,val){if(action==='remove'){if(!await _tmConfirmSheet('حذف عضو','این عضو دیگه دسترسی نخواهد داشت','حذف','var(--red)'))return;try{await tmAPI('POST','/member/remove',{memberUuid:uuid});toast_(svgIco('check'),'عضو حذف شد');await tmSyncBackground();tmRefreshInfoSheet();}catch(e){toast_(svgIco('x'),e.message);}}else if(action==='toggle'){try{await tmAPI('PUT','/member/status',{memberUuid:uuid,status:val?'active':'inactive'});await tmSyncBackground();tmRefreshInfoSheet();}catch(e){toast_(svgIco('x'),e.message);}}else if(action==='pin'){if(!await _tmConfirmSheet('ریست PIN','یه PIN موقت ساخته میشه','ریست','var(--amber)'))return;try{var d=await tmAPI('POST','/member/pin-reset',{memberUuid:uuid});_tmTempPin&&_tmTempPin(d.tempPin);}catch(e){toast_(svgIco('x'),e.message);}}else if(action==='thread'){tmOpenTaskThread(uuid);}}
-
-
-// ── تابع باز کردن تسک‌های عضو در مدیر ──
-function tmOpenMemberTasks(uuid) {
-  const members = (tm.snapshot && tm.snapshot.members) || [];
-  const m = members.find(x => x.uuid === uuid);
-  if (!m) return;
-  const tasks = (m.tasks || []).filter(t => !t.deleted && t.status !== 'done');
-  if (!tasks.length) { toast_(svgIco('check'), 'این عضو تسک فعالی ندارد'); return; }
-  // نمایش در shTaskThread
-  _mgThreadTaskId = null;
-  const sheet = document.getElementById('shTaskThread');
-  if (!sheet) return;
-  const ttl = document.getElementById('mgThreadTitle');
-  if (ttl) ttl.textContent = 'تسک‌های ' + esc(m.name);
-  const meta = document.getElementById('mgThreadMeta');
-  if (meta) {
-    meta.innerHTML = tasks.map(t => {
-      const ST = {pending:'⏳ باید',in_progress:'🔵 درحال',blocked:'🔴 مشکل',done:'✅'};
-      return '<div style="display:flex;align-items:center;gap:var(--sp2);padding:var(--sp2) 0;border-bottom:1px solid var(--b2);width:100%;cursor:pointer" onclick="tmOpenTaskThread(\''+t.id+'\')">' +
-        '<span style="font-size:var(--fs-xs);flex:1">' + esc(t.title) + '</span>' +
-        '<span style="font-size:var(--fs-2xs);color:var(--t3)">' + (ST[t.status]||t.status) + '</span></div>';
-    }).join('');
-  }
-  const threadEl = document.getElementById('mgThreadMsgs');
-  if (threadEl) threadEl.innerHTML = '<div class="tm-thread-empty">برای گفتگو روی تسک کلیک کن</div>';
-  const noteEl = document.getElementById('mgThreadNote');
-  if (noteEl) noteEl.style.display = 'none';
-  openSheet('shTaskThread');
-}
-
-
-function tmOpenDirectLogin(preCode){
-  openSheet('shTmDirectLogin');
-  var c=document.getElementById('tmDLCode');
-  if(c&&preCode)c.value=preCode;
-  var p=document.getElementById('tmDLPin');
-  if(p)setTimeout(function(){p.focus();},350);
-}
-
-
-async function _tmTryPushToMember(memberUuid,taskTitle,broadcast){
-  try{
-    var w=(tm.workerUrl||cfg.pushWorkerUrl||'').trim().replace(/\/+$/,'');
-    if(!w||!tm.token)return;
-    await fetch(w+'/task/notify',{method:'POST',
-      headers:{'Content-Type':'application/json','X-DayQ-Token':tm.token},
-      body:JSON.stringify({to:broadcast?'all':memberUuid,title:'📋 تسک جدید',body:taskTitle})
-    });
-  }catch(e){}
-}
-
-
-// ── تابع باز کردن تسک‌های عضو در مدیر ──
-function tmOpenMemberTasks(uuid) {
-  const members = (tm.snapshot && tm.snapshot.members) || [];
-  const m = members.find(x => x.uuid === uuid);
-  if (!m) return;
-  const tasks = (m.tasks || []).filter(t => !t.deleted && t.status !== 'done');
-  if (!tasks.length) { toast_(svgIco('check'), 'این عضو تسک فعالی ندارد'); return; }
-  // نمایش در shTaskThread
-  _mgThreadTaskId = null;
-  const sheet = document.getElementById('shTaskThread');
-  if (!sheet) return;
-  const ttl = document.getElementById('mgThreadTitle');
-  if (ttl) ttl.textContent = 'تسک‌های ' + esc(m.name);
-  const meta = document.getElementById('mgThreadMeta');
-  if (meta) {
-    meta.innerHTML = tasks.map(t => {
-      const ST = {pending:'⏳ باید',in_progress:'🔵 درحال',blocked:'🔴 مشکل',done:'✅'};
-      return '<div style="display:flex;align-items:center;gap:var(--sp2);padding:var(--sp2) 0;border-bottom:1px solid var(--b2);width:100%;cursor:pointer" onclick="tmOpenTaskThread(\''+t.id+'\')">' +
-        '<span style="font-size:var(--fs-xs);flex:1">' + esc(t.title) + '</span>' +
-        '<span style="font-size:var(--fs-2xs);color:var(--t3)">' + (ST[t.status]||t.status) + '</span></div>';
-    }).join('');
-  }
-  const threadEl = document.getElementById('mgThreadMsgs');
-  if (threadEl) threadEl.innerHTML = '<div class="tm-thread-empty">برای گفتگو روی تسک کلیک کن</div>';
-  const noteEl = document.getElementById('mgThreadNote');
-  if (noteEl) noteEl.style.display = 'none';
-  openSheet('shTaskThread');
-}
-
-
-function tmOpenDirectLogin(preCode){
-  openSheet('shTmDirectLogin');
-  var c=document.getElementById('tmDLCode');
-  if(c&&preCode)c.value=preCode;
-  var p=document.getElementById('tmDLPin');
-  if(p)setTimeout(function(){p.focus();},350);
-}
-
-
-async function _tmTryPushToMember(memberUuid,taskTitle,broadcast){
-  try{
-    var w=(tm.workerUrl||cfg.pushWorkerUrl||'').trim().replace(/\/+$/,'');
-    if(!w||!tm.token)return;
-    await fetch(w+'/task/notify',{method:'POST',
-      headers:{'Content-Type':'application/json','X-DayQ-Token':tm.token},
-      body:JSON.stringify({to:broadcast?'all':memberUuid,title:'📋 تسک جدید',body:taskTitle})
-    });
-  }catch(e){}
-}
