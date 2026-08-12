@@ -19311,6 +19311,143 @@ boot();
     </button>
   </div>
 </div>
+
+<div class="sheet" id="shTmDirectLogin">
+  <div class="sh-handle"></div>
+  <div class="sh-head"><div class="sh-tr">
+    <div class="sh-ttl">ورود با کد و PIN</div>
+    <button class="sh-x" onclick="closeAll()">&#215;</button>
+  </div></div>
+  <div class="sh-body" style="gap:var(--sp4)">
+    <div>
+      <div style="font-size:11px;color:var(--t3);margin-bottom:6px;text-align:right">کد تیم</div>
+      <input id="tmDLCode" type="text" maxlength="8"
+        style="width:100%;height:44px;background:var(--bg2);border:1.5px solid var(--b1);border-radius:var(--r2);padding:0 12px;font-size:var(--fs-md);font-family:var(--f);letter-spacing:0.15em;text-align:center;direction:ltr;outline:none;box-sizing:border-box;text-transform:uppercase"
+        placeholder="XXXXXXXX"
+        oninput="this.value=this.value.toUpperCase()"
+        onkeydown="if(event.key==='Enter')document.getElementById('tmDLPin').focus()"/>
+    </div>
+    <div>
+      <div style="font-size:11px;color:var(--t3);margin-bottom:6px;text-align:right">PIN</div>
+      <input id="tmDLPin" type="password" maxlength="8" inputmode="numeric"
+        style="width:100%;height:44px;background:var(--bg2);border:1.5px solid var(--b1);border-radius:var(--r2);padding:0 12px;font-size:var(--fs-md);font-family:var(--f);letter-spacing:0.2em;text-align:center;direction:ltr;outline:none;box-sizing:border-box"
+        placeholder="••••"
+        onkeydown="if(event.key==='Enter')tmDoDirectLogin()"/>
+    </div>
+    <div id="tmDLErr" style="font-size:var(--fs-xs);color:var(--red);min-height:16px;text-align:right"></div>
+    <button id="tmDLBtn" onclick="tmDoDirectLogin()"
+      style="width:100%;height:44px;background:var(--ag);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">
+      &#128273; ورود
+    </button>
+  </div>
+</div>
+
+<div class="sheet" id="shWorkHours">
+  <div class="sh-handle"></div>
+  <div class="sh-head"><div class="sh-tr">
+    <div class="sh-ttl">ساعات کاری</div>
+    <button class="sh-x" onclick="closeAll()">&#215;</button>
+  </div></div>
+  <div class="sh-body" style="gap:var(--sp4)">
+    <div style="font-size:var(--fs-xs);color:var(--t3);direction:rtl">شروع و پایان ساعات کاری رو تنظیم کن.</div>
+    <div style="display:flex;gap:var(--sp3);align-items:center;direction:rtl">
+      <div style="flex:1">
+        <div style="font-size:11px;color:var(--t3);margin-bottom:6px">شروع</div>
+        <input id="workStartInput" type="time" value="09:00"
+          style="width:100%;height:40px;background:var(--bg2);border:1.5px solid var(--b1);border-radius:var(--r2);padding:0 12px;font-size:var(--fs-sm);font-family:var(--f);outline:none;box-sizing:border-box;direction:ltr"/>
+      </div>
+      <div style="flex:1">
+        <div style="font-size:11px;color:var(--t3);margin-bottom:6px">پایان</div>
+        <input id="workEndInput" type="time" value="18:00"
+          style="width:100%;height:40px;background:var(--bg2);border:1.5px solid var(--b1);border-radius:var(--r2);padding:0 12px;font-size:var(--fs-sm);font-family:var(--f);outline:none;box-sizing:border-box;direction:ltr"/>
+      </div>
+    </div>
+    <div id="workHoursSub" style="font-size:var(--fs-xs);color:var(--t3);min-height:14px"></div>
+    <button onclick="saveWorkHours?saveWorkHours():closeAll()"
+      style="width:100%;height:44px;background:var(--ag);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">
+      ذخیره
+    </button>
+  </div>
+</div>
+
+<div class="sheet" id="shArchive">
+  <div class="sh-handle"></div>
+  <div class="sh-head"><div class="sh-tr">
+    <div class="sh-ttl">آرشیو</div>
+    <button class="sh-x" onclick="closeAll()">&#215;</button>
+  </div></div>
+  <div class="sh-body">
+    <input id="archiveSearchInp" type="search" placeholder="جستجو در آرشیو..."
+      style="width:100%;height:40px;background:var(--bg2);border:1.5px solid var(--b1);border-radius:var(--r2);padding:0 12px;font-size:var(--fs-xs);font-family:var(--f);direction:rtl;outline:none;box-sizing:border-box"
+      oninput="typeof searchArchive==='function'&&searchArchive(this.value)"/>
+    <div id="archiveList" style="margin-top:var(--sp3)"></div>
+  </div>
+</div>
+
+<div class="sheet" id="shTimer">
+  <div class="sh-handle"></div>
+  <div class="sh-head"><div class="sh-tr">
+    <div class="sh-ttl">تایمر</div>
+    <button class="sh-x" onclick="closeAll()">&#215;</button>
+  </div></div>
+  <div class="sh-body" style="gap:var(--sp4)">
+    <input id="timerInput" type="text" placeholder="نام تایمر..."
+      style="width:100%;height:40px;background:var(--bg2);border:1.5px solid var(--b1);border-radius:var(--r2);padding:0 12px;font-size:var(--fs-xs);font-family:var(--f);direction:rtl;outline:none;box-sizing:border-box"/>
+    <button onclick="typeof startTimer==='function'&&startTimer(document.getElementById('timerInput').value)"
+      style="width:100%;height:44px;background:var(--ag);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">
+      &#9654; شروع
+    </button>
+  </div>
+</div>
+
+<div class="sheet" id="shTmConfirm">
+  <div class="sh-handle"></div>
+  <div class="sh-head"><div class="sh-tr">
+    <div class="sh-ttl">تأیید عضویت</div>
+    <button class="sh-x" onclick="closeAll()">&#215;</button>
+  </div></div>
+  <div class="sh-body" style="gap:var(--sp4)">
+    <div id="tmCodeDisplay" style="font-size:var(--fs-xs);color:var(--t2);direction:rtl;line-height:1.7"></div>
+    <div id="tmDLErr2" style="font-size:var(--fs-xs);color:var(--red);min-height:16px"></div>
+    <button onclick="typeof tmConfirmJoin==='function'&&tmConfirmJoin()"
+      style="width:100%;height:44px;background:var(--ag);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">
+      تأیید &#10003;
+    </button>
+  </div>
+</div>
+
+<div class="sheet" id="shTmPin">
+  <div class="sh-handle"></div>
+  <div class="sh-head"><div class="sh-tr">
+    <div class="sh-ttl">PIN تیم</div>
+    <button class="sh-x" onclick="closeAll()">&#215;</button>
+  </div></div>
+  <div class="sh-body" style="gap:var(--sp4)">
+    <div style="font-size:var(--fs-xs);color:var(--t3);direction:rtl">یه PIN 4 رقمی برای تیمت انتخاب کن.</div>
+    <input id="tmPinInp" type="password" maxlength="8" inputmode="numeric" placeholder="••••"
+      style="width:100%;height:48px;background:var(--bg2);border:1.5px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-xl);letter-spacing:0.3em;text-align:center;direction:ltr;outline:none;box-sizing:border-box;font-family:var(--f)"/>
+    <button onclick="typeof tmSavePin==='function'&&tmSavePin()"
+      style="width:100%;height:44px;background:var(--ag);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">
+      ذخیره PIN
+    </button>
+  </div>
+</div>
+
+<div class="sheet" id="shTmRet">
+  <div class="sh-handle"></div>
+  <div class="sh-head"><div class="sh-tr">
+    <div class="sh-ttl">گزارش بازگشت</div>
+    <button class="sh-x" onclick="closeAll()">&#215;</button>
+  </div></div>
+  <div class="sh-body" style="gap:var(--sp4)">
+    <textarea id="tmRetN" rows="4" placeholder="توضیح..."
+      style="width:100%;padding:10px;background:var(--bg2);border:1.5px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-xs);font-family:var(--f);resize:none;direction:rtl;outline:none;box-sizing:border-box"></textarea>
+    <button onclick="typeof tmSubmitRet==='function'&&tmSubmitRet()"
+      style="width:100%;height:44px;background:var(--ag);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">
+      ارسال
+    </button>
+  </div>
+</div>
 <script>function tmOpenTaskThread(taskId){
   // DEBUG
   var members=(tm.snapshot&&tm.snapshot.members)||[],allTasks=[];
