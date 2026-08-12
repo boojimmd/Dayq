@@ -18782,8 +18782,8 @@ function _idbRestoreCheck(onDone){
       onDone(true);
     }).catch(function(){onDone(false);});
 }
-function _calRender(){if(typeof calInit==='function')calInit();}
-function _calSetFilter(f){if(typeof calInit==='function')calInit();}
+function _calRender(){if(typeof renderCal==='function')renderCal();else if(typeof calInit==='function')calInit();}
+function _calSetFilter(f){if(typeof setCalView==='function'&&f)setCalView(f);else if(typeof renderCal==='function')renderCal();}
 function _doSearch(q){
   if(!q){var ov=document.getElementById('searchOverlay');if(ov)ov.style.display='none';return;}
   var results=tasks.filter(function(t){return !t.archived&&(t.text||'').toLowerCase().includes(q.toLowerCase());});
