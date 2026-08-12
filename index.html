@@ -15954,7 +15954,7 @@ async function tmUpdateTaskStatus(newStatus) {
     tmRenderInbox();
     toast_(svgIco('check'), newStatus==='done'?'✅ تموم شد!':newStatus==='blocked'?'🚫 مشکل گزارش شد':'آپدیت شد');
     // sync مجدد
-    setTimeout(tmSyncBackground,1500);
+    setTimeout(function(){if(typeof tmSyncBackground==="function")tmSyncBackground().then(function(){if(typeof tmUpdateSokoBadge==="function")tmUpdateSokoBadge();}).catch(function(){});},1500);
   } catch(e) {
     toast_(svgIco('flag'), 'خطا: ' + e.message);
   }
