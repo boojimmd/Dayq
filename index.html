@@ -2086,7 +2086,8 @@ select.fi{
   .dp-list .cmd-shortcut-hint{max-width:none;margin-left:18px;margin-right:18px;}
 
   /* ─── Detail panel — fixed سمت چپ، مثل nav sidebar ─── */
-  #dpanel{
+  @media(min-width:900px){
+  body.show-dpanel #dpanel{
     display:flex;
     flex-direction:column;
     position:fixed;
@@ -2097,13 +2098,15 @@ select.fi{
     padding-top:calc(var(--topbar-h) + 12px);
     box-sizing:border-box;
     overflow-y:auto;
-    scrollbar-width:none;
-    border-right:1px solid var(--b1);
-    background:var(--bg1); /* solid — بدون blur */
-    z-index:30;
-    /* will-change: contents برای GPU layer */
-    contain:layout style;
+    background:var(--bg1);
+    border-right:1px solid var(--b2);
+    z-index:10;
+    gap:var(--sp3);
+    padding-left:var(--sp4);
+    padding-right:var(--sp4);
+    padding-bottom:var(--sp6);
   }
+}
   #dpanel::-webkit-scrollbar{display:none;}
 
   .dp-empty{
@@ -2996,7 +2999,7 @@ select.fi{
   .dp-toggle-btn.panel-open{background:var(--am);border-color:rgba(0,184,122,.25);color:var(--a);}
 
   /* وقتی پنل بسته ─── */
-  body.dp-closed #dpanel{display:none !important;}
+  body.dp-closed /* dpanel: controlled by body.show-dpanel */
   body.dp-closed #pageHome{padding-left:0 !important;}
   body.dp-closed .topbar{left:0 !important;}
 
@@ -7014,8 +7017,8 @@ function goPage(n){
     }
   }
   if(window.innerWidth>=900){
-    const panel=document.getElementById('dpanel');
-    if(panel) panel.style.display=(n==='Home'&&!document.body.classList.contains('dp-closed'))?'flex':'none';
+    document.body.classList.toggle('show-dpanel',
+      n==='Home' && !document.body.classList.contains('dp-closed'));
   }
   if(n==='Me')       { setGreeting(); syncProfile(); updateMeStats(); if(window.innerWidth>=900) renderMeDashboard(); }
   if(n==='Bag')       { renderBag(); }
