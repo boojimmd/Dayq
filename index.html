@@ -4772,6 +4772,32 @@ body:has(#tmSokoPanel.open) #ov {
   .tm-urg-row{opacity:1;transform:none}
 }
 
+
+/* ══ Skeleton Shimmer (Taste-Skill) ══ */
+@keyframes skShimmer{
+  0%{background-position:200% center}
+  100%{background-position:-200% center}
+}
+.sk{
+  background:linear-gradient(90deg,var(--bg2) 25%,var(--b1) 50%,var(--bg2) 75%);
+  background-size:400% 100%;
+  animation:skShimmer 1.4s ease infinite;
+  border-radius:var(--r2);
+}
+.sk-line{height:12px;border-radius:6px}
+.sk-line.h8{height:8px}
+.sk-line.h16{height:16px}
+.sk-line.h20{height:20px}
+.sk-circle{border-radius:50%}
+.sk-card{
+  padding:var(--sp3) var(--sp4);
+  border-bottom:1px solid var(--b2);
+  display:flex;flex-direction:column;gap:8px;
+}
+@media(prefers-reduced-motion:reduce){
+  .sk{animation:none;background:var(--bg2);}
+}
+
 </style>
 </head>
 <body>
@@ -15061,6 +15087,9 @@ async function tmSyncBackground(){
   if(!tm.code||!tm.token)return;
   if(_syncRunning)return;
   _syncRunning=true;
+  // skeleton during first sync
+  var _inboxEl=document.getElementById('tmInboxList');
+  if(_inboxEl&&_inboxEl.innerHTML==='')_inboxEl.innerHTML=_skInboxCard(3);
   try{
     if(tm.role==='member'){
       var data=await tmAPI('GET','/task/inbox');
@@ -15163,6 +15192,8 @@ function tmRenderTodaySection() {
 function tmRenderInbox(){
   var el=document.getElementById('tmInboxList');
   if(!el)return;
+  // skeleton در اولین load
+  if(!tm.inbox&&el.innerHTML===''){el.innerHTML=_skInboxCard(3);return;}
   var active=(tm.inbox||[]).filter(function(t){return !t.deleted&&t.status!=='done';});
   var cntEl=document.getElementById('tmInboxCount');
   if(!active.length){
@@ -19322,6 +19353,7 @@ async function tmExportReport(period) {
 function tmRenderSidebar(tab) {
   const sb = document.getElementById('tmPanelSidebar');
   if (!sb) return;
+  if (!tm.snapshot && sb.innerHTML === '') { sb.innerHTML = _skSidebarMember(4); return; }
   if (tab === 'status')        _tmSbStatus(sb);
   else if (tab === 'projects') _tmSbProjects(sb);
   else if (tab === 'report')   _tmSbReport(sb);
@@ -19375,6 +19407,45 @@ function tmUpdateSokoBadge(){
     }
   });
 }
+
+/* skeleton helper */
+function _skLines(n,widths){
+  return Array.from({length:n},function(_,i){
+    var w=widths?widths[i]||widths[widths.length-1]:'80%';
+    return '<div class="sk sk-line" style="width:'+w+'"></div>';
+  }).join('');
+}
+function _skInboxCard(n){
+  n=n||3;
+  return Array.from({length:n},function(){
+    return '<div class="sk-card">'+
+      '<div style="display:flex;align-items:center;gap:8px">'+
+        '<div class="sk sk-circle" style="width:28px;height:28px;flex-shrink:0"></div>'+
+        '<div class="sk sk-line h16" style="width:55%;flex:1"></div>'+
+        '<div class="sk sk-line h8" style="width:48px"></div>'+
+      '</div>'+
+      _skLines(1,['70%'])+
+      '<div style="display:flex;gap:6px">'+
+        '<div class="sk sk-line h8" style="width:52px;border-radius:10px"></div>'+
+        '<div class="sk sk-line h8" style="width:40px;border-radius:10px"></div>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+function _skSidebarMember(n){
+  n=n||4;
+  return Array.from({length:n},function(){
+    return '<div style="padding:var(--sp3) var(--sp4);border-bottom:1px solid var(--b2);display:flex;align-items:center;gap:10px">'+
+      '<div class="sk sk-circle" style="width:32px;height:32px;flex-shrink:0"></div>'+
+      '<div style="flex:1;display:flex;flex-direction:column;gap:6px">'+
+        '<div class="sk sk-line h12" style="width:60%"></div>'+
+        '<div class="sk sk-line h8" style="width:40%"></div>'+
+      '</div>'+
+      '<div class="sk sk-line h8" style="width:24px;border-radius:10px"></div>'+
+    '</div>';
+  }).join('');
+}
+
 boot();
 // IDB safety check: 50ms بعد از boot
 setTimeout(function(){
