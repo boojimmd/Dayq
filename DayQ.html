@@ -18492,6 +18492,57 @@ function _idbGet(key){
   });
 }
 
+
+function searchArchive(query){
+  var q=(query||'').trim().toLowerCase();
+  var archived=tasks.filter(function(t){return t.archived;});
+  var results=q?archived.filter(function(t){
+    return (t.text||'').toLowerCase().includes(q)||
+           (t.note||'').toLowerCase().includes(q)||
+           (t.project||'').toLowerCase().includes(q);
+  }):archived;
+  var el=document.getElementById('archiveList');
+  if(!el)return;
+  if(!results.length){
+    el.innerHTML='<div style="text-align:center;padding:var(--sp4);color:var(--t3);font-size:var(--fs-xs)">'+(q?'\u0646\u062a\u06cc\u062c\u0647\u200c\u0627\u06cc \u06cc\u0627\u0641\u062a \u0646\u0634\u062f':'\u0622\u0631\u0634\u06cc\u0648 \u062e\u0627\u0644\u06cc\u0647')+' \ud83d\udce6</div>';
+    return;
+  }
+  el.innerHTML=results.slice(0,50).map(function(t){
+    var date=t.completedAt?new Date(t.completedAt).toLocaleDateString('fa-IR'):'';
+    return '<div style="padding:10px 0;border-bottom:1px solid var(--b2);direction:rtl">'+
+      '<div style="font-size:var(--fs-xs);color:var(--t1);font-weight:600">'+esc(t.text||'')+'</div>'+
+      '<div style="font-size:11px;color:var(--t3);margin-top:2px">'+
+        (t.project?esc(t.project)+' \u00b7 ':'')+date+
+      '</div></div>';
+  }).join('');
+}
+async function _tmRtOk(taskId){
+  var note=(document.getElementById('tmRetN')||{}).value||'';
+  var btn=document.querySelector('#shTmRet button:last-child');
+  if(btn)btn.disabled=true;
+  try{
+    await tmAPI('POST','/task/return',{taskId:taskId,note:note});
+    toast_(typeof svgIco==='function'?svgIco('check'):'','\u062a\u0633\u06a9 \u0628\u0631\u06af\u0634\u062a \u062f\u0627\u062f\u0647 \u0634\u062f \u21a9');
+    closeAll();
+    if(typeof tmSyncBackground==='function')tmSyncBackground();
+  }catch(e){
+    toast_('','\u062e\u0637\u0627: '+(e.message||''),2500);
+    if(btn)btn.disabled=false;
+  }
+}
+function tmConfirmJoin(){closeAll();}
+function tmSavePin(){
+  var pin=(document.getElementById('tmPinInp')||{}).value||'';
+  if(pin.length<4){toast_('','\u062d\u062f\u0627\u0642\u0644 \u06f4 \u0631\u0642\u0645',2000);return;}
+  closeAll();
+  toast_('','PIN \u0630\u062e\u06cc\u0631\u0647 \u0634\u062f \u2705');
+}
+function tmSubmitRet(){
+  var note=(document.getElementById('tmRetN')||{}).value||'';
+  closeAll();
+  toast_('','\u06af\u0632\u0627\u0631\u0634 \u062b\u0628\u062a \u0634\u062f \u2705');
+}
+
 boot();
 
 </script>
@@ -19353,7 +19404,7 @@ boot();
     <div style="display:flex;gap:var(--sp3);align-items:center;direction:rtl">
       <div style="flex:1">
         <div style="font-size:11px;color:var(--t3);margin-bottom:6px">شروع</div>
-        <input id="workStartInput" type="time" value="09:00"
+        <input id="eveningStartInput" type="time" value="09:00"
           style="width:100%;height:40px;background:var(--bg2);border:1.5px solid var(--b1);border-radius:var(--r2);padding:0 12px;font-size:var(--fs-sm);font-family:var(--f);outline:none;box-sizing:border-box;direction:ltr"/>
       </div>
       <div style="flex:1">
@@ -19387,15 +19438,16 @@ boot();
 <div class="sheet" id="shTimer">
   <div class="sh-handle"></div>
   <div class="sh-head"><div class="sh-tr">
-    <div class="sh-ttl">تایمر</div>
+    <div class="sh-ttl">ساعت شروع کار</div>
     <button class="sh-x" onclick="closeAll()">&#215;</button>
   </div></div>
   <div class="sh-body" style="gap:var(--sp4)">
-    <input id="timerInput" type="text" placeholder="نام تایمر..."
-      style="width:100%;height:40px;background:var(--bg2);border:1.5px solid var(--b1);border-radius:var(--r2);padding:0 12px;font-size:var(--fs-xs);font-family:var(--f);direction:rtl;outline:none;box-sizing:border-box"/>
-    <button onclick="typeof startTimer==='function'&&startTimer(document.getElementById('timerInput').value)"
+    <div style="font-size:var(--fs-xs);color:var(--t3);direction:rtl">ساعت شروع بازدیدهای روزانه</div>
+    <input id="timerInput" type="time"
+      style="width:100%;height:48px;background:var(--bg2);border:1.5px solid var(--b1);border-radius:var(--r2);padding:0 12px;font-size:var(--fs-xl);font-family:var(--f);text-align:center;direction:ltr;outline:none;box-sizing:border-box"/>
+    <button onclick="saveTimer()"
       style="width:100%;height:44px;background:var(--ag);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">
-      &#9654; شروع
+      ذخیره
     </button>
   </div>
 </div>
