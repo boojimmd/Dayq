@@ -6650,7 +6650,7 @@ function loadAll(){
   }
 }
 let _batchSave=false;
-function saveAll(){
+function saveAll(){  _idbSave('dq5_t',JSON.stringify(tasks));  _idbSave('dq5_s',JSON.stringify(cfg));
   try{
     localStorage.setItem(SK,JSON.stringify(tasks));
     localStorage.setItem(SB,JSON.stringify(bagItems));
@@ -6688,7 +6688,7 @@ function _debouncedSync(){
   clearTimeout(_debSyncT);
   _debSyncT=setTimeout(()=>syncNow(), 2500);
 }
-function saveCfg(){try{localStorage.setItem(SS,JSON.stringify(cfg));}catch(e){}}
+function saveCfg(){try{localStorage.setItem(SS,JSON.stringify(cfg));_idbSave('dq5_s',JSON.stringify(cfg));}catch(e){}}
 
 /* ══ THEME ══ */
 function applyTheme(t){
@@ -18456,6 +18456,42 @@ function _tmSbReport(sb){
   h+='</div>';
   sb.innerHTML=h;
 }
+/* ═══ IndexedDB Backup ═══ */
+var _idbDB=null;
+function _idbOpen(){
+  return new Promise(function(resolve){
+    if(_idbDB){resolve(_idbDB);return;}
+    try{
+      var req=indexedDB.open('dayq_v5',1);
+      req.onupgradeneeded=function(e){
+        var db=e.target.result;
+        if(!db.objectStoreNames.contains('backup'))
+          db.createObjectStore('backup',{keyPath:'k'});
+      };
+      req.onsuccess=function(e){_idbDB=e.target.result;resolve(_idbDB);};
+      req.onerror=function(){resolve(null);};
+    }catch(e){resolve(null);}
+  });
+}
+function _idbSave(key,val){
+  _idbOpen().then(function(db){
+    if(!db)return;
+    try{var tx=db.transaction('backup','readwrite');tx.objectStore('backup').put({k:key,v:val,ts:Date.now()});}catch(e){}
+  });
+}
+function _idbGet(key){
+  return _idbOpen().then(function(db){
+    return new Promise(function(resolve){
+      if(!db){resolve(null);return;}
+      try{
+        var req=db.transaction('backup','readonly').objectStore('backup').get(key);
+        req.onsuccess=function(){resolve(req.result?req.result.v:null);};
+        req.onerror=function(){resolve(null);};
+      }catch(e){resolve(null);}
+    });
+  });
+}
+
 boot();
 
 </script>
