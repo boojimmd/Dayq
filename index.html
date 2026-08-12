@@ -4919,6 +4919,74 @@ button:not(:disabled):active,
   }
 }
 
+
+/* ══════════════════════════════════════════════════
+   SIDEBAR DESIGN SYSTEM — یکپارچه برای همه sidebar‌ها
+   Token: --sb-bg, --sb-border, --sb-shadow
+   ══════════════════════════════════════════════════ */
+:root {
+  --sb-bg:      var(--bg1);              /* پس‌زمینه همه sidebar‌ها */
+  --sb-border:  var(--b1);              /* رنگ border یکسان */
+  --sb-shadow:  none;                    /* سایه — فعلاً بدون سایه */
+  --sb-padding: var(--sp4);             /* padding داخلی */
+  --sb-radius:  0;                       /* sidebar‌ها sharp هستن */
+}
+
+/* ── خانه — #dpanel ── */
+body.show-dpanel #dpanel {
+  background: var(--sb-bg) !important;
+  border-right: 1px solid var(--sb-border) !important;
+  box-shadow: var(--sb-shadow) !important;
+}
+
+/* ── تقویم — #calDayPanelDesktop ── */
+#calDayPanelDesktop {
+  background: var(--sb-bg) !important;
+  border-right: 1px solid var(--sb-border) !important;
+  box-shadow: var(--sb-shadow) !important;
+}
+
+/* ── Soko مدیر — .tm-panel-sidebar ── */
+.tm-panel-sidebar {
+  background: var(--sb-bg) !important;
+  border-right: 1px solid var(--sb-border) !important;
+  border-left: none !important;
+  box-shadow: var(--sb-shadow) !important;
+  /* حذف backdrop-filter — ناهماهنگ بود */
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* ── Nav — .nav ── */
+.nav {
+  background: var(--sb-bg) !important;
+  border-left: 1px solid var(--sb-border) !important;
+  box-shadow: var(--sb-shadow) !important;
+}
+
+/* ── Section headers در همه sidebar‌ها ── */
+.dp-section-title,
+.sb-cal-title,
+.tm-panel-section-title,
+.tm-sidebar-section {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--t3);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0 var(--sb-padding);
+  margin-bottom: var(--sp2);
+}
+
+/* ── Dividers در همه sidebar‌ها ── */
+.dp-divider,
+.sb-divider,
+.tm-sidebar-divider {
+  height: 1px;
+  background: var(--b1);
+  margin: var(--sp3) 0;
+}
+
 </style>
 </head>
 <body>
