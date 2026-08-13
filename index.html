@@ -4855,22 +4855,18 @@ body:has(#tmSokoPanel.open) #ov {
 /* ══ Taste-Skill v2: Dashboard Data Typography ══ */
 
 /* KPI numbers — tabular + numeric features */
+/* KPI: فقط Soko KPI، نه calendar */
 .tm-kpi-val,
 .tm-kpi-num,
 .tm-member-count,
 .tm-task-count,
-[class*="kpi-"],
-.progress-pct,
-.streak-num {
+.progress-pct {
   font-variant-numeric: tabular-nums;
-  font-feature-settings: "tnum" 1;
-  letter-spacing: -0.01em;
 }
 
-/* Sidebar KPI numbers — monospace برای stability */
+/* Sidebar KPI: فقط tabular-nums، نه monospace font */
 .tm-hdr-kpi .kpi-val,
 .tm-panel-kpi {
-  font-family: ui-monospace, 'SF Mono', 'Cascadia Code', monospace;
   font-variant-numeric: tabular-nums;
 }
 
