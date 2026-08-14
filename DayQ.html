@@ -18342,60 +18342,68 @@ function openTeamTaskDetail(taskId){
     }).catch(function(){});
   },5000);
 }
-function _ttdSetStatus(st){_ttdUpdateBlockedUI(st);
-  document.querySelectorAll('.ttd-st-btn').forEach(btn => {
-    const active = btn.dataset.st === st;
-    btn.style.background = active ? 'var(--t1)' : 'var(--bg2)';
-    btn.style.color = active ? 'var(--bg1)' : 'var(--t2)';
-    btn.style.borderColor = active ? 'var(--t1)' : 'var(--b1)';
+function _ttdSetStatus(st){
+  _ttdUpdateBlockedUI(st);
+  document.querySelectorAll('.ttd-st-btn').forEach(function(btn){
+    var active=btn.dataset.st===st;
+    btn.classList.toggle('active-st',active);
+    // reset inline styles که ممکنه از قبل مونده باشن
+    btn.style.background='';
+    btn.style.color='';
+    btn.style.borderColor='';
   });
-  // اگه blocked شد، note رو focus کن
-  if (st === 'blocked') {
-    setTimeout(() => {
-      const n = document.getElementById('ttdNote');
-      if (n && !n.value) {
-        n.placeholder = 'مشکل رو توضیح بده — مدیر باید بدونه';
+  if(st==='blocked'){
+    setTimeout(function(){
+      var n=document.getElementById('ttdNote');
+      if(n&&!n.value){
+        n.placeholder='\u0645\u0634\u06a9\u0644 \u0631\u0648 \u062a\u0648\u0636\u06cc\u062d \u0628\u062f\u0647 \u2014 \u0645\u062f\u06cc\u0631 \u0628\u0627\u06cc\u062f \u0628\u062f\u0648\u0646\u0647';
         n.focus();
       }
-    }, 200);
+    },200);
   }
 }
 
-async function _ttdSave() {
-  if (!_ttdTaskId) return;
-  const activeBtn = document.querySelector('.ttd-st-btn.active-st') || document.querySelector('.ttd-st-btn[data-active="1"]');
-  const status = activeBtn ? activeBtn.dataset.st : (_ttdTaskId ? ((tm.inbox||[]).find(function(x){return x.id===_ttdTaskId;})||{}).status||'in_progress' : 'in_progress');
-  const note = document.getElementById('ttdNote')?.value.trim() || '';
-  const errEl = document.getElementById('ttdErr');
-  const btn = document.getElementById('ttdSaveBtn');
+async function _ttdSave(){
+  if(!_ttdTaskId)return;
+  // status از class نه از inline style
+  var activeBtn=document.querySelector('.ttd-st-btn.active-st');
+  var status=activeBtn?activeBtn.dataset.st:
+    ((tm.inbox||[]).find(function(x){return x.id===_ttdTaskId;})||{}).status||'in_progress';
+  var note=(document.getElementById('ttdNote')||{value:''}).value.trim()||'';
+  var errEl=document.getElementById('ttdErr');
+  var btn=document.getElementById('ttdSaveBtn');
+  if(errEl)errEl.textContent='';
 
+  // blocked reason
   var _bCr=document.querySelector('input[name="blockedReason"]:checked');
-  var _bRt=_bCr&&_bCr.value!=='other'?_bCr.value:'';
-  var blockedFinalNote=_bRt?(_bRt+(note?': '+note:'')):note;
-  if (status === 'blocked' && !blockedFinalNote) {
-    errEl.textContent = 'دلیل توقف رو انتخاب کن یا توضیح بنویس';
+  var _bRt=_bCr&&_bCr.value!=='3'?(['منتظر اطلاعات از مدیر','نیاز به تأیید دارم','ابزار یا دسترسی ندارم'][parseInt(_bCr.value)]||''):note;
+  var blockedNote=_bRt?(_bRt+(note?' — '+note:'')):note;
+
+  if(status==='blocked'&&!blockedNote){
+    if(errEl)errEl.textContent='\u062f\u0644\u06cc\u0644 \u062a\u0648\u0642\u0641 \u0631\u0648 \u0627\u0646\u062a\u062e\u0627\u0628 \u06a9\u0646 \u06cc\u0627 \u062a\u0648\u0636\u06cc\u062d \u0628\u0646\u0648\u06cc\u0633';
     return;
   }
 
-  btn.disabled = true; btn.textContent = 'در حال ذخیره...';
-  try {
-    await tmAPI('PUT', '/task/update', {
-      taskId: _ttdTaskId,
-      status,
-      memberNote: status==='blocked'?blockedFinalNote:note,
+  if(btn){btn.disabled=true;btn.textContent='\u062f\u0631 \u062d\u0627\u0644 \u0630\u062e\u06cc\u0631\u0647...';}
+  try{
+    await tmAPI('PUT','/task/update',{
+      taskId:_ttdTaskId,
+      status:status,
+      memberNote:note,
+      blockedNote:status==='blocked'?blockedNote:'',
     });
     // آپدیت local inbox
-    if (tm.inbox) {
-      const t = tm.inbox.find(x => x.id === _ttdTaskId);
-      if (t) { t.status = status; t.memberNote = note; t.seenAt=Date.now(); }
+    if(tm.inbox){
+      var t=tm.inbox.find(function(x){return x.id===_ttdTaskId;});
+      if(t){t.status=status;t.memberNote=note;t.blockedNote=blockedNote;t.seenAt=Date.now();}
     }
-    toast_(svgIco('check'),'وضعیت ذخیره شد');
-    tmApplyUI();
-    setTimeout(tmSyncBackground,1500);
-  } catch(e) {
-    errEl.textContent = e.message;
-  } finally {
-    btn.disabled = false; btn.textContent = 'ذخیره وضعیت';
+    toast_(typeof svgIco==='function'?svgIco('check'):'','\u0648\u0636\u0639\u06cc\u062a \u0630\u062e\u06cc\u0631\u0647 \u0634\u062f \u2705');
+    if(typeof tmApplyUI==='function')tmApplyUI();
+    if(typeof tmSyncBackground==='function')setTimeout(tmSyncBackground,1500);
+  }catch(e){
+    if(errEl)errEl.textContent=e.message||'\u062e\u0637\u0627 \u062f\u0631 \u0630\u062e\u06cc\u0631\u0647';
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='\u0630\u062e\u06cc\u0631\u0647 \u0648\u0636\u0639\u06cc\u062a';}
   }
 }
 
