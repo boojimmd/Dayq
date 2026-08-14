@@ -696,7 +696,7 @@ export default {
       if (!session || session.role !== 'manager')
         return errRes('دسترسی نامعتبر', 403, cors);
 
-      const { assignedTo, title, priority, deadline, category, checklist, needsVerify, broadcastId } = await req.json();
+      const { assignedTo, title, description, priority, deadline, category, checklist, needsVerify, broadcastId } = await req.json();
       const { teamCode } = session;
 
       if (!title || !deadline || !assignedTo)
@@ -709,6 +709,7 @@ export default {
         needsVerify: !!needsVerify, broadcastId: broadcastId || null,
         assignedTo, assignedBy: session.uuid,
         assignedAt: Date.now(), lastActivityAt: Date.now(),
+        description: description || '',
         status: 'pending', blockedNote: '', managerNote: '',
         memberNote: '', reassignHistory: [], verifiedAt: null, deleted: false
       };
