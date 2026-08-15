@@ -5063,6 +5063,62 @@ body.show-dpanel #dpanel {
   line-height: 1.7;
 }
 
+
+/* ══ Focus Ring System — گرد، همه جا ══ */
+
+/* همه inputs/textareas: outline رو حذف کن */
+input, textarea, select {
+  outline: none;
+}
+
+/* focus با box-shadow — گوشه‌های گرد دنبال border-radius میره */
+input:focus, textarea:focus, select:focus {
+  box-shadow: 0 0 0 2px rgba(74,222,128,.25);
+}
+
+/* .sh-inp — کلاس شیت‌ها (override existing) */
+.sh-inp {
+  width: 100% !important;
+  background: var(--bg2) !important;
+  border: 1px solid var(--b1) !important;
+  border-radius: var(--r2) !important;
+  padding: 10px 12px !important;
+  font-size: var(--fs-sm) !important;
+  font-family: var(--f) !important;
+  color: var(--t1) !important;
+  outline: none !important;
+  box-sizing: border-box !important;
+  transition: border-color 150ms ease, box-shadow 150ms ease !important;
+}
+.sh-inp:focus {
+  border-color: var(--a) !important;
+  box-shadow: 0 0 0 3px rgba(74,222,128,.18) !important;
+}
+
+/* textarea داخل شیت */
+.sh-body textarea:not(.ttd-reply-inp):not(.as-textarea) {
+  outline: none;
+  border-radius: var(--r2);
+}
+.sh-body textarea:not(.ttd-reply-inp):not(.as-textarea):focus {
+  border-color: var(--a);
+  box-shadow: 0 0 0 3px rgba(74,222,128,.18);
+}
+
+/* .as-input و .as-textarea — assign sheet */
+.as-input:focus, .as-textarea:focus {
+  border-color: var(--a) !important;
+  box-shadow: 0 0 0 3px rgba(74,222,128,.18) !important;
+  outline: none !important;
+}
+
+/* .fi — NLP input (already good, reinforce) */
+.fi:focus {
+  outline: none;
+  border-color: var(--a);
+  box-shadow: 0 0 0 3px rgba(74,222,128,.18);
+}
+
 </style>
 </head>
 <body>
