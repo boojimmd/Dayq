@@ -6696,6 +6696,7 @@ const iconMap={};ICONS.forEach(i=>iconMap[i.id]=i);
 function svgIco(id,w=16){const ic=iconMap[id]||iconMap.check;return`<svg viewBox="0 0 24 24" width="${w}" height="${w}" fill="none" stroke="${ic.c}" stroke-linecap="round" stroke-linejoin="round">${ic.s}</svg>`;}
 
 /* ══ STATE ══ */
+<script>
 const SK='dq5_t',SB='dq5_b',SS='dq5_s',SD='dq5_bd';
 let birthdays=[];
 let tasks=[],bagItems=[];
@@ -15918,11 +15919,13 @@ function tmAssignTask(preUuid){
   _asState={member:preUuid||'',priority:'normal',broadcast:false};
   var old=document.getElementById('shTmAssign');if(old)old.remove();
   var members=((tm.snapshot&&tm.snapshot.members)||[]).filter(function(m){
-    return !m.isManager&&m.role!=='manager'&&m.status!=='pending';
+    return !m.isManager&&m.role!=='manager'&&m.status!=='pending'&&m.status!=='inactive';
   });
+  if(members.length===1&&!_asState.member)_asState.member=members[0].uuid;
   var dl=(function(){
-    var p=mrTodayKey().split('-').map(Number),d=p[2]+1,mo=p[1],y=p[0];
-    var dim=[0,31,31,31,31,31,31,30,30,30,30,30,29];
+    var p=mrTodayKey().split('-').map(Number),y=p[0],mo=p[1],d=p[2]+1;
+    var isLeap=[1,5,9,13,17,22,26].indexOf((y-474)%2820%128%29+1)!==-1;
+    var dim=[0,31,31,31,31,31,31,30,30,30,30,30,isLeap?30:29];
     if(d>dim[mo]){d=1;mo++;if(mo>12){mo=1;y++;}}
     return y+'-'+(mo<10?'0'+mo:mo)+'-'+(d<10?'0'+d:d);
   })();
@@ -15948,7 +15951,7 @@ function tmAssignTask(preUuid){
       '</div>'+
       '<div>'+
         '<div class="as-label">\u0639\u0646\u0648\u0627\u0646 <span class="as-required">*</span></div>'+
-        '<input id="asTitle" class="as-input" type="text" placeholder="\u0639\u0646\u0648\u0627\u0646 \u062a\u0633\u06a9..." autocomplete="off" onkeydown="if(event.key===\'Enter\'){event.preventDefault();_asSubmit();}"/>'+
+        '<input id="asTitle" class="as-input" type="text" maxlength="120" placeholder="\u0639\u0646\u0648\u0627\u0646 \u062a\u0633\u06a9..." autocomplete="off" onkeydown="if(event.key===\'Enter\'){event.preventDefault();_asSubmit();}"/>'+
       '</div>'+
       '<div>'+
         '<div class="as-label">\u0627\u0648\u0644\u0648\u06cc\u062a</div>'+
@@ -15970,7 +15973,7 @@ function tmAssignTask(preUuid){
       '</div>'+
       '<div>'+
         '<div class="as-label">\u062a\u0648\u0636\u06cc\u062d <span style="color:var(--t3);font-weight:400">(\u0627\u062e\u062a\u06cc\u0627\u0631\u06cc)</span></div>'+
-        '<textarea id="asDesc" class="as-textarea" rows="2" placeholder="\u062c\u0632\u0626\u06cc\u0627\u062a \u0628\u06cc\u0634\u062a\u0631..."></textarea>'+
+        '<textarea id="asDesc" class="as-textarea" rows="2" placeholder="\u062c\u0632\u0626\u06cc\u0627\u062a \u0628\u06cc\u0634\u062a\u0631..." onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();_asSubmit();}"></textarea>'+
       '</div>'+
       '<div class="as-err" id="asErr"></div>'+
       '<button class="as-submit" id="asSubmit" onclick="_asSubmit()">\u2709\ufe0f \u0627\u0631\u0633\u0627\u0644 \u062a\u0633\u06a9</button>'+
@@ -19622,38 +19625,25 @@ function tmRenderSidebar(tab) {
 }
 
 async function _asSubmit(){
-  var titleEl=document.getElementById('asTitle');
-  var dlEl=document.getElementById('asDeadline');
-  var descEl=document.getElementById('asDesc');
-  var errEl=document.getElementById('asErr');
+  var titleEl=document.getElementById('asTitle'),dlEl=document.getElementById('asDeadline');
+  var descEl=document.getElementById('asDesc'),errEl=document.getElementById('asErr');
   var btn=document.getElementById('asSubmit');
   var title=(titleEl?titleEl.value:'').trim();
   var deadline=(dlEl?dlEl.value:'').trim();
   var desc=(descEl?descEl.value:'').trim();
   if(errEl)errEl.textContent='';
-  // validation با focus
-  if(!title){
-    if(errEl)errEl.textContent='عنوان تسک را بنویس';
-    if(titleEl)titleEl.focus();
-    return;
-  }
+  if(!title){if(errEl)errEl.textContent='\u0639\u0646\u0648\u0627\u0646 \u062a\u0633\u06a9 \u0631\u0627 \u0628\u0646\u0648\u06cc\u0633';if(titleEl)titleEl.focus();return;}
   if(!deadline||!/^\d{4}-\d{2}-\d{2}$/.test(deadline)){
-    if(errEl)errEl.textContent='ددلاین را به فرمت صحیح وارد کن (مثال: 1403-07-20)';
-    if(dlEl)dlEl.focus();
-    return;
-  }
-  // چک: deadline نباید قبل از امروز باشه
-  var today=mrTodayKey();
-  if(deadline<today){
-    if(errEl)errEl.textContent='ددلاین نمیتونه قبل از امروز باشه';
-    if(dlEl)dlEl.focus();
-    return;
-  }
+    if(errEl)errEl.textContent='\u0641\u0631\u0645\u062a: 1403-07-20';if(dlEl)dlEl.focus();return;}
+  var dp=deadline.split('-').map(Number);
+  if(dp[1]<1||dp[1]>12||dp[2]<1||dp[2]>31){
+    if(errEl)errEl.textContent='\u062f\u062f\u0644\u0627\u06cc\u0646 \u0646\u0627\u0645\u0639\u062a\u0628\u0631';if(dlEl)dlEl.focus();return;}
+  if(deadline<mrTodayKey()){
+    if(errEl)errEl.textContent='\u062f\u062f\u0644\u0627\u06cc\u0646 \u0646\u0645\u06cc\u062a\u0648\u0646\u0647 \u0642\u0628\u0644 \u0627\u0632 \u0627\u0645\u0631\u0648\u0632 \u0628\u0627\u0634\u0647';if(dlEl)dlEl.focus();return;}
   if(!_asState.broadcast&&!_asState.member){
-    if(errEl)errEl.textContent='یک عضو انتخاب کن یا Broadcast فعال کن';
-    return;
-  }
-  if(btn){btn.disabled=true;btn.textContent='در حال ارسال...';}
+    if(errEl)errEl.textContent='\u06cc\u06a9 \u0639\u0636\u0648 \u0627\u0646\u062a\u062e\u0627\u0628 \u06a9\u0646 \u06cc\u0627 Broadcast \u0641\u0639\u0627\u0644 \u06a9\u0646';return;}
+  if(btn){btn.disabled=true;btn.textContent='\u062f\u0631 \u062d\u0627\u0644 \u0627\u0631\u0633\u0627\u0644...';}
+  var wasBroadcast=_asState.broadcast;
   try{
     if(_asState.broadcast){
       await tmAPI('POST','/task/broadcast',{title:title,description:desc,deadline:deadline,priority:_asState.priority});
@@ -19661,12 +19651,14 @@ async function _asSubmit(){
       await tmAPI('POST','/task/assign',{title:title,description:desc,deadline:deadline,assignedTo:_asState.member,priority:_asState.priority});
       if(typeof _tmTryPushToMember==='function')_tmTryPushToMember(_asState.member,title,false);
     }
+    _asState={member:'',priority:'normal',broadcast:false};
     closeAll();
-    toast_(typeof svgIco==='function'?svgIco('check'):'',_asState.broadcast?'?? ارسال شد':'تسک ارسال شد ✅');
+    toast_(typeof svgIco==='function'?svgIco('check'):'',wasBroadcast?'\ud83d\udce1 \u0627\u0631\u0633\u0627\u0644 \u0634\u062f':'\u062a\u0633\u06a9 \u0627\u0631\u0633\u0627\u0644 \u0634\u062f \u2705');
     if(typeof tmSyncBackground==='function')tmSyncBackground();
   }catch(e){
-    if(errEl)errEl.textContent=e.message||'خطا';
-    if(btn){btn.disabled=false;btn.textContent='✉️ ارسال تسک';}
+    if(errEl)errEl.textContent=e.message||'\u062e\u0637\u0627';
+  }finally{
+    if(btn){btn.disabled=false;btn.textContent='\u2709\ufe0f \u0627\u0631\u0633\u0627\u0644 \u062a\u0633\u06a9';}
   }
 }
 function tmUpdateSokoBadge(){
@@ -19854,10 +19846,6 @@ setTimeout(function(){
   });
 },50);
 
-
-;
-  if(inp)inp.value=y+'-'+(mo<10?'0'+mo:mo)+'-'+(d<10?'0'+d:d);
-}
 
 boot();
 // IDB safety check: 50ms بعد از boot
