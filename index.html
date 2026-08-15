@@ -16574,6 +16574,7 @@ function tmExtendDeadline(tid,mu){
             <div class="triage-meta">تسک تیمی</div>
             <div class="triage-actions">
               <button class="triage-btn done" onclick="tmUpdateTaskStatus('done');closeAll()">✓ انجام شد</button>
+              <button class="triage-btn" onclick="tmReassignTask(document.getElementById('tmDetailSheet')?.dataset.taskId);closeAll()" style="background:var(--bg2);border:1px solid var(--b1);color:var(--t2);font-size:var(--fs-2xs)">⇄ انتقال</button>
               <button class="triage-btn tmrw" onclick="tmUpdateTaskStatus('in_progress')">⏳ درحالم</button>
               <button class="triage-btn drp" onclick="tmUpdateTaskStatus('blocked')">متوقف شده 🚫</button>
             </div>
