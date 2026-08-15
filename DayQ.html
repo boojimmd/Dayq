@@ -15629,7 +15629,7 @@ function tmOpenTeamSettings() {
               '<button style="width:100%;height:44px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer" onclick="closeAll();setTimeout(function(){tmOpenDirectLogin(tm.code);},150)">🔑 ورود با کد و PIN</button>' +
             '</div>'
           : '')) +
-      '<button class="tm-btn danger" style="width:100%;justify-content:center;margin-top:var(--sp2);direction:rtl" onclick="tmLeaveTeam()">ترک تیم</button>';
+      '<button class="tm-btn danger" style="width:100%;justify-content:center;margin-top:var(--sp2);direction:rtl" onclick="tmLeaveTeam()">ترک تیم</button>' +      (tm.role==='manager'        ? '<button class="tm-btn" style="width:100%;justify-content:center;margin-top:8px;direction:rtl;color:var(--amber)" onclick="tmResetCode()">🔑 ریست کد تیم</button>'        : '');
   }, 80);
 }
 
@@ -19704,6 +19704,32 @@ function _skSidebarMember(n){
 }
 
 var _asState={member:"",priority:"normal",broadcast:false};
+async function tmResetCode(){
+  if(!tm.code||tm.role!=='manager'){toast_(svgIco('x'),'فقط مدیر');return;}
+  if(!confirm('کد تیم ریست بشه؟ همه اعضا باید دوباره وارد بشن!')){return;}
+  try{
+    var res=await tmAPI('POST','/team/reset-code',{});
+    var newCode=res.newCode||res.code||'';
+    if(!newCode){toast_(svgIco('x'),'خطا در ریست کد');return;}
+    tm.code=newCode;
+    localStorage.setItem(TM_SK.code,newCode);
+    // نمایش کد جدید
+    var msg=document.createElement('div');
+    msg.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--bg1);border:2px solid var(--a);border-radius:var(--r4);padding:var(--sp5);z-index:9999;text-align:center;min-width:280px;box-shadow:0 8px 32px rgba(0,0,0,.15)';
+    msg.innerHTML='<div style="font-size:var(--fs-lg);font-weight:700;margin-bottom:var(--sp3)">✅ کد جدید تیم</div>'+
+      '<div style="font-family:var(--mono);font-size:var(--fs-xl);background:var(--bg2);padding:var(--sp3) var(--sp4);border-radius:var(--r2);letter-spacing:2px;margin-bottom:var(--sp4)">'+esc(newCode)+'</div>'+
+      '<div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp4)">این کد رو به اعضا بده — کد قدیمی دیگه کار نمیکنه</div>'+
+      '<button onclick="this.parentElement.remove();tmShareCode()" style="width:100%;height:44px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">🔗 اشتراک‌گذاری کد جدید</button>';
+    document.body.appendChild(msg);
+    toast_(svgIco('check'),'کد تیم ریست شد ✅');
+  }catch(e){toast_(svgIco('x'),e.message||'خطا');}
+}
+function tmShowAnnoReceipts(){
+  var el=document.getElementById('tmAnnoReceiptsPanel');
+  if(!el)return;
+  el.innerHTML=typeof tmRenderAnnoReceipts==='function'?tmRenderAnnoReceipts():'<div style="color:var(--t3)">اطلاعیه‌ای نداری</div>';
+  el.style.display=el.style.display==='none'?'':'none';
+}
 boot();
 // IDB safety check: 50ms بعد از boot
 setTimeout(function(){
@@ -20199,7 +20225,14 @@ setTimeout(function(){
   <div class="sh-handle"></div>
   <div class="sh-head">
     <div class="sh-tr">
-      <div class="sh-ttl">درخواست‌های عضویت</div>
+      <div class="sh-ttl">درخواست‌های عضویت
+    <!-- Receipts panel -->
+    <div style="margin-top:var(--sp3)">
+      <button onclick="tmShowAnnoReceipts()" style="width:100%;height:36px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-xs);font-family:var(--f);cursor:pointer;color:var(--t2)">
+        👁 وضعیت خوانده شدن
+      </button>
+      <div id="tmAnnoReceiptsPanel" style="display:none;margin-top:var(--sp2)"></div>
+    </div></div>
       <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
   </div>
