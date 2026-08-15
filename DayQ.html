@@ -20570,216 +20570,97 @@ setTimeout(function(){
       <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
   </div>
-  <div class="sh-body tm-join-body" id="ttdBody">
-    <!-- meta -->
+  <div class="sh-body" id="ttdBody" style="display:flex;flex-direction:column;gap:var(--sp3)">
+
+    <!-- ── meta: deadline + مدیر + اولویت ── -->
     <div style="background:var(--bluem);border:1px solid rgba(59,130,246,.2);border-radius:var(--r2);padding:var(--sp3)">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
         <div id="ttdDeadline" style="font-size:var(--fs-xs);color:var(--blue);font-weight:600"></div>
-        <div style="display:flex;gap:var(--sp2)">
+        <div style="display:flex;gap:var(--sp2);align-items:center">
           <div id="ttdManager" style="font-size:var(--fs-xs);color:var(--t3)"></div>
-          <div id="ttdPriority" style="font-size:var(--fs-xs);font-weight:700;color:var(--red)"></div>
+          <div id="ttdPriority" style="font-size:var(--fs-xs);font-weight:700"></div>
         </div>
       </div>
     </div>
-    <!-- description اگه مدیر نوشته -->
+
+    <!-- ── توضیح مدیر ── -->
     <div id="ttdDescBlock" style="display:none;background:var(--bg2);border-radius:var(--r2);padding:var(--sp3)">
       <div style="font-size:var(--fs-2xs);color:var(--t3);margin-bottom:4px;font-weight:600">توضیح مدیر 📋</div>
-      <div id="ttdDesc" style="font-size:var(--fs-xs);color:var(--t1);direction:rtl;line-height:1.6"></div>
+      <div id="ttdDesc" style="font-size:var(--fs-xs);color:var(--t1);direction:rtl;line-height:1.7"></div>
     </div>
 
-    <!-- وضعیت -->
+    <!-- ── وضعیت ── -->
     <div>
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:8px">تیم</div>
-      <!-- وضعیت in_review: read-only banner -->
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:8px;font-weight:600">وضعیت تسک</div>
+      <!-- banner وقتی in_review -->
       <div id="ttdReviewBanner" style="display:none;background:rgba(99,102,241,.08);border:1px solid rgba(99,102,241,.2);border-radius:var(--r2);padding:var(--sp3);text-align:center">
         <div style="font-size:var(--fs-sm);font-weight:700;color:#6366f1">⏳ منتظر تأیید مدیر</div>
         <div style="font-size:var(--fs-xs);color:var(--t3);margin-top:4px">مدیر تسک رو بررسی میکنه</div>
       </div>
-      <!-- دکمه‌های عادی -->
+      <!-- دکمه‌های وضعیت -->
       <div style="display:flex;gap:6px" id="ttdStatusBtns">
         <button onclick="_ttdSetStatus('in_progress')" class="ttd-st-btn" data-st="in_progress">🔵 در انجام</button>
-        <button onclick="_ttdSetStatus('waiting')" class="ttd-st-btn" data-st="waiting">⏳ منتظرم</button>
-        <button onclick="_ttdSetStatus('blocked')"    class="ttd-st-btn" data-st="blocked">🚫 متوقف</button>
+        <button onclick="_ttdSetStatus('waiting')"     class="ttd-st-btn" data-st="waiting">⏳ منتظرم</button>
+        <button onclick="_ttdSetStatus('blocked')"     class="ttd-st-btn" data-st="blocked">🚫 متوقف</button>
       </div>
     </div>
 
-    <!-- متوقف — دلیل انتخاب -->
+    <!-- ── دلیل توقف ── -->
     <div id="ttdBlockedSection" style="display:none;background:rgba(229,62,90,.05);border:1px solid rgba(229,62,90,.2);border-radius:var(--r2);padding:var(--sp3)">
       <div style="font-size:var(--fs-xs);font-weight:700;color:var(--red);margin-bottom:var(--sp2)">🚫 چرا متوقف شده؟</div>
       <div style="display:flex;flex-direction:column;gap:8px">
         <label style="display:flex;align-items:center;gap:var(--sp2);font-size:var(--fs-xs);cursor:pointer"><input type="radio" name="blockedReason" value="منتظر اطلاعات از مدیر هستم"> منتظر اطلاعات از مدیر</label>
         <label style="display:flex;align-items:center;gap:var(--sp2);font-size:var(--fs-xs);cursor:pointer"><input type="radio" name="blockedReason" value="نیاز به تأیید دارم"> نیاز به تأیید دارم</label>
         <label style="display:flex;align-items:center;gap:var(--sp2);font-size:var(--fs-xs);cursor:pointer"><input type="radio" name="blockedReason" value="ابزار یا دسترسی ندارم"> ابزار یا دسترسی ندارم</label>
-        <label style="display:flex;align-items:center;gap:var(--sp2);font-size:var(--fs-xs);cursor:pointer"><input type="radio" name="blockedReason" value="other"> توضیح دیگه</label>
+        <label style="display:flex;align-items:center;gap:var(--sp2);font-size:var(--fs-xs);cursor:pointer"><input type="radio" name="blockedReason" value="other"> دلیل دیگه‌ای</label>
       </div>
     </div>
-    <!-- یادداشت برای مدیر -->
+
+    <!-- ── یادداشت برای مدیر ── -->
     <div>
-      <div id="ttdNoteLabel" style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px">توضیح (با ذخیره ارسال میشه)</div>
-      <textarea id="ttdNote" rows="2"
-        placeholder="توضیح بده..."
-        style="width:100%;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 12px;font-size:var(--fs-xs);font-family:var(--f);color:var(--t1);direction:rtl;resize:none;outline:none"></textarea>
+      <div id="ttdNoteLabel" style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px">یادداشت برای مدیر <span style="color:var(--t3);font-weight:400">(اختیاری)</span></div>
+      <textarea id="ttdNote" rows="2" class="as-textarea"
+        placeholder="توضیح بده یا سوال بپرس..."></textarea>
     </div>
 
-    <!-- چک‌لیست مدیر (read-only اگه باشه) -->
+    <!-- ── چک‌لیست (read-only) ── -->
     <div id="ttdChecklist" style="display:none">
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px">چک‌لیست</div>
-      <div id="ttdChecklistItems"></div>
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px;font-weight:600">چک‌لیست مدیر</div>
+      <div id="ttdChecklistItems" style="display:flex;flex-direction:column;gap:6px"></div>
     </div>
 
+    <!-- ── خطا ── -->
     <div id="ttdErr" style="font-size:var(--fs-xs);color:var(--red);min-height:14px;text-align:center"></div>
-    <div id="ttdCommentSection" style="margin-bottom:var(--sp3)"><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2);text-align:right">پیام با مدیر</div><div class="ttd-thread" id="ttdThreadMsgs"></div><div style="display:flex;gap:var(--sp2);align-items:flex-end;padding-top:var(--sp2);border-top:1px solid var(--b2);margin-top:var(--sp2)"><textarea class="ttd-reply-inp" rows="1" placeholder="پیام بنویس..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();_ttdSendComment()}"></textarea><button class="ttd-reply-send" onclick="_ttdSendComment()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button></div></div>
-    <div style="display:flex;gap:var(--sp2)">
-      <button id="ttdSaveBtn" onclick="_ttdSave()" style="flex:1;height:46px;background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">ذخیره</button>
 
-    <!-- گفتگو با مدیر -->
-    <div style="margin-top:4px">
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px;text-align:right">گفتگو</div>
-      <div id="ttdThreadMsgs" class="ttd-thread" style="min-height:80px;max-height:35vh;overflow-y:auto;margin-bottom:8px"></div>
+    <!-- ── گفتگو با مدیر ── -->
+    <div id="ttdCommentSection">
+      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2);font-weight:600">💬 گفتگو با مدیر</div>
+      <div class="ttd-thread" id="ttdThreadMsgs" style="min-height:60px;max-height:30vh;overflow-y:auto;margin-bottom:8px"></div>
       <div style="display:flex;gap:8px;align-items:flex-end;padding-top:8px;border-top:1px solid var(--b2)">
-        <textarea id="ttdReplyInp" class="ttd-reply-inp" rows="1"
-          placeholder="پیام به مدیر..."
+        <textarea class="ttd-reply-inp" rows="1"
+          placeholder="پیام بنویس... (Enter=ارسال)"
+          oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"
           onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();_ttdSendComment();}"></textarea>
         <button class="ttd-reply-send" onclick="_ttdSendComment()">
-          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/></svg>
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/></svg>
         </button>
       </div>
     </div>
+
+    <!-- ── دکمه‌های اقدام ── -->
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button id="ttdSaveBtn" onclick="_ttdSave()"
+        style="width:100%;height:44px;background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">
+        💾 ذخیره وضعیت
+      </button>
       <button id="ttdReviewBtn" onclick="_ttdSubmitForReview()"
-        style="width:100%;height:46px;margin-top:8px;background:var(--ag);color:#fff;border:none;border-radius:var(--r3);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:opacity 150ms">
+        style="width:100%;height:48px;background:var(--ag);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">
         ✅ ارسال برای بررسی مدیر
       </button>
     </div>
-  </div>
-</div>
 
-<div class="sheet" id="shTaskThread">
-  <div class="sh-handle"></div>
-  <div class="sh-head">
-    <div class="sh-tr">
-      <div class="sh-ttl" id="mgThreadTitle">گفتگو</div>
-      <button class="sh-x" onclick="closeAll()"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-    </div>
-    <div id="mgThreadMeta" style="font-size:var(--fs-xs);color:var(--t3);padding:4px 0 8px;direction:rtl"></div>
   </div>
-  <div id="mgThreadActions" style="display:none;padding:8px 16px;background:var(--bg1);border-bottom:1px solid var(--b2);gap:8px;align-items:center"></div>
-  <div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)">
-    <div id="mgThreadNote" style="display:none;background:var(--ambm);border:1px solid rgba(217,119,6,.2);border-radius:var(--r2);padding:var(--sp3)">
-      <div style="font-size:var(--fs-2xs);color:var(--amber);font-weight:700;margin-bottom:4px">📋 یادداشت</div>
-      <div class="mg-note-text" style="font-size:var(--fs-xs);color:var(--t1);direction:rtl"></div>
-    </div>
-    <div>
-      <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp2);text-align:right">گفتگو</div>
-      <div class="ttd-thread tm-mgr-view" id="mgThreadMsgs" style="min-height:120px;max-height:40vh;overflow-y:auto"></div>
-      <div style="display:flex;gap:var(--sp2);align-items:flex-end;padding-top:var(--sp2);border-top:1px solid var(--b2);margin-top:var(--sp2)">
-        <textarea class="ttd-reply-inp" rows="1" placeholder="پاسخ بده..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();_mgSendComment()}"></textarea>
-        <button class="ttd-reply-send" onclick="_mgSendComment()"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
-      </div>
-    </div>
-  </div>
-</div>
-<div class="sheet" id="shPush">
-  <div class="sh-handle"></div>
-  <div class="sh-head">
-    <div class="sh-tr">
-      <div class="sh-ttl">یادآوری Push</div>
-      <button class="sh-x" onclick="closeAll()">&#215;</button>
-    </div>
-  </div>
-  <div class="sh-body" style="gap:var(--sp4)">
-    <div style="font-size:var(--fs-xs);color:var(--t3);direction:rtl;line-height:1.7">
-      آدرس Worker تیم رو وارد کن تا اعلان‌های Push فعال بشه.
-    </div>
-    <div>
-      <div style="font-size:11px;color:var(--t3);margin-bottom:6px">Worker URL</div>
-      <input id="pushUrlInp" type="url" style="width:100%;height:40px;padding:0 12px;background:var(--bg2);border:1.5px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-xs);font-family:var(--f);direction:ltr;outline:none;box-sizing:border-box" placeholder="https://dayq-push.xxx.workers.dev"/>
-    </div>
-    <button onclick="savePushSettings()" style="width:100%;height:44px;background:var(--ag);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">
-      &#128276; فعال کردن Push
-    </button>
-  </div>
-</div>
-
-<div class="sheet" id="shTmDirectLogin">
-  <div class="sh-handle"></div>
-  <div class="sh-head"><div class="sh-tr">
-    <div class="sh-ttl">ورود با کد و PIN</div>
-    <button class="sh-x" onclick="closeAll()">&#215;</button>
-  </div></div>
-  <div class="sh-body" style="gap:var(--sp4)">
-    <div>
-      <div style="font-size:11px;color:var(--t3);margin-bottom:6px;text-align:right">کد تیم</div>
-      <input id="tmDLCode" type="text" maxlength="8"
-        style="width:100%;height:44px;background:var(--bg2);border:1.5px solid var(--b1);border-radius:var(--r2);padding:0 12px;font-size:var(--fs-md);font-family:var(--f);letter-spacing:0.15em;text-align:center;direction:ltr;outline:none;box-sizing:border-box;text-transform:uppercase"
-        placeholder="XXXXXXXX"
-        oninput="this.value=this.value.toUpperCase()"
-        onkeydown="if(event.key==='Enter')document.getElementById('tmDLPin').focus()"/>
-    </div>
-    <div>
-      <div style="font-size:11px;color:var(--t3);margin-bottom:6px;text-align:right">PIN</div>
-      <input id="tmDLPin" type="password" maxlength="8" inputmode="numeric"
-        style="width:100%;height:44px;background:var(--bg2);border:1.5px solid var(--b1);border-radius:var(--r2);padding:0 12px;font-size:var(--fs-md);font-family:var(--f);letter-spacing:0.2em;text-align:center;direction:ltr;outline:none;box-sizing:border-box"
-        placeholder="••••"
-        onkeydown="if(event.key==='Enter')tmDoDirectLogin()"/>
-    </div>
-    <div id="tmDLErr" style="font-size:var(--fs-xs);color:var(--red);min-height:16px;text-align:right"></div>
-    <button id="tmDLBtn" onclick="tmDoDirectLogin()"
-      style="width:100%;height:44px;background:var(--ag);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">
-      &#128273; ورود
-    </button>
-  </div>
-</div>
-
-<div class="sheet" id="shWorkHours">
-  <div class="sh-handle"></div>
-  <div class="sh-head"><div class="sh-tr">
-    <div class="sh-ttl">ساعات کاری</div>
-    <button class="sh-x" onclick="closeAll()">&#215;</button>
-  </div></div>
-  <div class="sh-body" style="gap:var(--sp4)">
-    <div style="font-size:var(--fs-xs);color:var(--t3);direction:rtl">شروع و پایان ساعات کاری رو تنظیم کن.</div>
-    <div style="display:flex;gap:var(--sp3);align-items:center;direction:rtl">
-      <div style="flex:1">
-        <div style="font-size:11px;color:var(--t3);margin-bottom:6px">شروع</div>
-        <input id="eveningStartInput" type="time" value="09:00"
-          style="width:100%;height:40px;background:var(--bg2);border:1.5px solid var(--b1);border-radius:var(--r2);padding:0 12px;font-size:var(--fs-sm);font-family:var(--f);outline:none;box-sizing:border-box;direction:ltr"/>
-      </div>
-      <div style="flex:1">
-        <div style="font-size:11px;color:var(--t3);margin-bottom:6px">پایان</div>
-        <input id="workEndInput" type="time" value="18:00"
-          style="width:100%;height:40px;background:var(--bg2);border:1.5px solid var(--b1);border-radius:var(--r2);padding:0 12px;font-size:var(--fs-sm);font-family:var(--f);outline:none;box-sizing:border-box;direction:ltr"/>
-      </div>
-    </div>
-    <div id="workHoursSub" style="font-size:var(--fs-xs);color:var(--t3);min-height:14px"></div>
-    <button onclick="saveWorkHours?saveWorkHours():closeAll()"
-      style="width:100%;height:44px;background:var(--ag);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">
-      ذخیره
-    </button>
-  </div>
-</div>
-
-<div class="sheet" id="shArchive">
-  <div class="sh-handle"></div>
-  <div class="sh-head"><div class="sh-tr">
-    <div class="sh-ttl">آرشیو</div>
-    <button class="sh-x" onclick="closeAll()">&#215;</button>
-  </div></div>
-  <div class="sh-body">
-    <input id="archiveSearchInp" type="search" placeholder="جستجو در آرشیو..."
-      style="width:100%;height:40px;background:var(--bg2);border:1.5px solid var(--b1);border-radius:var(--r2);padding:0 12px;font-size:var(--fs-xs);font-family:var(--f);direction:rtl;outline:none;box-sizing:border-box"
-      oninput="typeof searchArchive==='function'&&searchArchive(this.value)"/>
-    <div id="archiveList" style="margin-top:var(--sp3)"></div>
-  </div>
-</div>
-
-<div class="sheet" id="shTimer">
-  <div class="sh-handle"></div>
-  <div class="sh-head"><div class="sh-tr">
-    <div class="sh-ttl">ساعت شروع کار</div>
-    <button class="sh-x" onclick="closeAll()">&#215;</button>
-  </div></div>
-  <div class="sh-body" style="gap:var(--sp4)">
-    <div style="font-size:var(--fs-xs);color:var(--t3);direction:rtl">ساعت شروع بازدیدهای روزانه</div>
+</div>"font-size:var(--fs-xs);color:var(--t3);direction:rtl">ساعت شروع بازدیدهای روزانه</div>
     <input id="timerInput" type="time"
       style="width:100%;height:48px;background:var(--bg2);border:1.5px solid var(--b1);border-radius:var(--r2);padding:0 12px;font-size:var(--fs-xl);font-family:var(--f);text-align:center;direction:ltr;outline:none;box-sizing:border-box"/>
     <button onclick="saveTimer()"
