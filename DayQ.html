@@ -19777,6 +19777,40 @@ async function _rasSubmit(taskId){
     if(btn){btn.disabled=false;btn.textContent='⇄ انتقال ده';}
   }
 }
+/* ── Assign Sheet Helpers ── */
+function _asPickMember(btn){
+  _asState.member=btn.dataset.uuid||'';
+  _asState.broadcast=false;
+  var bc=document.getElementById('asBroadcast');
+  if(bc){bc.style.background='';bc.style.color='';bc.style.borderColor='';bc.style.fontWeight='';}
+  document.querySelectorAll('#asMemberGrid .as-member-chip').forEach(function(b){b.classList.toggle('sel',b===btn);});
+}
+function _asToggleBroadcast(){
+  _asState.broadcast=!_asState.broadcast;
+  var bc=document.getElementById('asBroadcast');
+  if(_asState.broadcast){
+    _asState.member='';
+    document.querySelectorAll('#asMemberGrid .as-member-chip').forEach(function(b){b.classList.remove('sel');});
+    if(bc){bc.style.background='var(--t1)';bc.style.color='var(--bg1)';bc.style.borderColor='var(--t1)';bc.style.fontWeight='700';}
+  }else{
+    if(bc){bc.style.background='';bc.style.color='';bc.style.borderColor='';bc.style.fontWeight='';}
+  }
+}
+function _asPri(btn){
+  _asState.priority=btn.dataset.p||'normal';
+  document.querySelectorAll('.as-pri-btn').forEach(function(b){b.classList.toggle('sel',b===btn);});
+}
+function _asDl(btn){
+  var days=parseInt(btn.dataset.days)||1;
+  document.querySelectorAll('.as-dl-btn').forEach(function(b){b.classList.toggle('sel',b===btn);});
+  var p=mrTodayKey().split('-').map(Number);
+  var y=p[0],mo=p[1],d=p[2]+days;
+  var dim=[0,31,31,31,31,31,31,30,30,30,30,30,29];
+  while(d>dim[mo]){d-=dim[mo];mo++;if(mo>12){mo=1;y++;}}
+  var inp=document.getElementById('asDeadline');
+  if(inp)inp.value=y+'-'+(mo<10?'0'+mo:mo)+'-'+(d<10?'0'+d:d);
+}
+
 boot();
 // IDB safety check: 50ms بعد از boot
 setTimeout(function(){
