@@ -19730,6 +19730,52 @@ function tmShowAnnoReceipts(){
   el.innerHTML=typeof tmRenderAnnoReceipts==='function'?tmRenderAnnoReceipts():'<div style="color:var(--t3)">اطلاعیه‌ای نداری</div>';
   el.style.display=el.style.display==='none'?'':'none';
 }
+function tmReassignTask(taskId){
+  if(!taskId)return;
+  var members=((tm.snapshot&&tm.snapshot.members)||[]).filter(function(m){return !m.isManager&&m.status==='active';});
+  if(!members.length){toast_(svgIco('x'),'عضوی فعال نداری');return;}
+  var old=document.getElementById('shTmReassign');if(old)old.remove();
+  var s=document.createElement('div');s.className='sheet';s.id='shTmReassign';
+  var mHtml=members.map(function(m){
+    return '<button class="as-member-chip" data-uuid="'+esc(m.uuid)+'" onclick="_rasPickMember(this)">'+esc(m.name||'')+'</button>';
+  }).join('');
+  s.innerHTML=
+    '<div class="sh-handle"></div>'+
+    '<div class="sh-head"><div class="sh-tr"><div class="sh-ttl">انتقال تسک</div><button class="sh-x" onclick="closeAll()">×</button></div></div>'+
+    '<div class="sh-body" style="gap:12px">'+
+      '<div class="as-label">به کدام عضو؟</div>'+
+      '<div class="as-member-grid" id="rasMemberGrid">'+mHtml+'</div>'+
+      '<div><div class="as-label">دلیل <span style="color:var(--t3)">اختیاری</span></div>'+
+      '<input id="rasReason" class="as-input" type="text" placeholder="مثلا: تغییر مسئولیت..." autocomplete="off"/></div>'+
+      '<div class="as-err" id="rasErr"></div>'+
+      '<button class="as-submit" id="rasSubmit" data-tid="'+taskId+'" onclick="_rasSubmit(this.dataset.tid)">⇄ انتقال ده</button>'+
+    '</div>';
+  document.body.appendChild(s);
+  var ov=document.getElementById('ov');
+  if(ov){ov.classList.add('open');ov.style.zIndex='2050';}
+  s.classList.add('open');s.style.zIndex='2100';
+}
+var _rasState={member:''};
+function _rasPickMember(btn){
+  _rasState.member=btn.dataset.uuid||'';
+  document.querySelectorAll('#rasMemberGrid .as-member-chip').forEach(function(b){b.classList.toggle('sel',b===btn);});
+}
+async function _rasSubmit(taskId){
+  if(!_rasState.member){var e=document.getElementById('rasErr');if(e)e.textContent='یک عضو انتخاب کن';return;}
+  var reason=(document.getElementById('rasReason')||{value:''}).value.trim();
+  var btn=document.getElementById('rasSubmit');
+  if(btn){btn.disabled=true;btn.textContent='در حال...';}
+  try{
+    await tmAPI('PUT','/task/reassign',{taskId:taskId,newAssignee:_rasState.member,reason:reason});
+    toast_(svgIco('check'),'تسک منتقل شد ✅');
+    closeAll();
+    setTimeout(function(){if(typeof tmSyncBackground==='function')tmSyncBackground();},800);
+  }catch(e){
+    var errEl=document.getElementById('rasErr');
+    if(errEl)errEl.textContent=e.message||'خطا';
+    if(btn){btn.disabled=false;btn.textContent='⇄ انتقال ده';}
+  }
+}
 boot();
 // IDB safety check: 50ms بعد از boot
 setTimeout(function(){
