@@ -5068,6 +5068,31 @@ input:focus, textarea:focus, select:focus {
 input, textarea, select { outline: none; }
 .p-inp { outline: none; border-radius: var(--r2); }
 
+
+/* ── Chip buttons (pill, small) ── */
+.btn-chip {
+  height: 26px; padding: 0 10px;
+  border-radius: var(--r5);
+  font-size: var(--fs-xs); font-weight: 600;
+  font-family: var(--f); cursor: pointer;
+  border: 1px solid var(--b1);
+  background: var(--bg2); color: var(--t2);
+  display: inline-flex; align-items: center; gap: 4px;
+  transition: opacity var(--dur-fast);
+}
+.btn-chip:active { opacity: .8; }
+.btn-chip.active, .btn-chip-active {
+  background: var(--t1); color: var(--bg1); border-color: var(--t1);
+}
+.btn-chip-primary { background: var(--a); color: #fff; border-color: var(--a); }
+
+/* ── Color variants ── */
+.btn-amber { background: var(--ambm); color: var(--amber); border: 1px solid var(--amber-20); }
+.btn-blue  { background: var(--bluem); color: var(--blue);  border: 1px solid rgba(59,130,246,.3); }
+.btn-pill  { border-radius: var(--r5) !important; }
+
+/* ── Flex buttons ── */
+.btn-flex  { flex: 1; }
 </style>
 </head>
 <body>
@@ -15484,9 +15509,9 @@ function tmRenderInbox(){
     var sc=t.status==='in_progress'?'var(--blue)':t.status==='blocked'?'var(--red)':t.status==='in_review'?'#6366f1':'var(--t4)';
     var qa='';
     if(t.status==='pending'){
-      qa='<button onclick="event.stopPropagation();_ttdQuickStatus(\''+t.id+'\',\'in_progress\')" style="height:26px;padding:0 8px;border-radius:var(--r5);border:1px solid var(--b1);background:transparent;font-size:10px;font-weight:600;font-family:var(--f);color:var(--t2);cursor:pointer">▶ شروع</button>';
+      qa='<button class="btn-chip" onclick="event.stopPropagation();_ttdQuickStatus(\''+t.id+'\',\'in_progress\')">▶ شروع</button>';
     }else if(t.status==='in_progress'){
-      qa='<button onclick="event.stopPropagation();_ttdQuickStatus(\''+t.id+'\',\'in_review\')" style="height:26px;padding:0 8px;border-radius:var(--r5);border:none;background:var(--a);color:#fff;font-size:10px;font-weight:700;font-family:var(--f);cursor:pointer">📤 بررسی</button>';
+      qa='<button class="btn-chip btn-chip-primary" onclick="event.stopPropagation();_ttdQuickStatus(\''+t.id+'\',\'in_review\')">📤 بررسی</button>';
     }
     var seen=t.seenAt?'<span style="color:var(--a);font-size:9px">✓</span>':'<span style="color:var(--t4);font-size:9px">○</span>';
     var dl=t.deadline?'<span style="font-size:var(--fs-2xs);color:'+dc+'">'+tmHumanDeadline(t.deadline)+'</span>':'';
@@ -15687,7 +15712,7 @@ function tmOpenTeamSettings() {
           ? '<div style="background:rgba(217,119,6,.08);border:1px solid rgba(217,119,6,.25);border-radius:var(--r2);padding:var(--sp3);margin-bottom:var(--sp3);text-align:center">' +
               '<div style="font-size:var(--fs-xs);color:var(--amber);font-weight:700;margin-bottom:6px">⚠️ هنوز وارد نشدی</div>' +
               '<div style="font-size:var(--fs-2xs);color:var(--t3);margin-bottom:var(--sp3)">برای دیدن تسک‌ها باید با PIN وارد بشی</div>' +
-              '<button style="width:100%;height:44px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer" onclick="closeAll();setTimeout(function(){tmOpenDirectLogin(tm.code);},150)">🔑 ورود با کد و PIN</button>' +
+              '<button class="btn btn-lg btn-primary btn-full" onclick="closeAll();setTimeout(function(){tmOpenDirectLogin(tm.code);},150)">🔑 ورود با کد و PIN</button>' +
             '</div>'
           : '')) +
       '<button class="tm-btn danger" style="width:100%;justify-content:center;margin-top:var(--sp2);direction:rtl" onclick="tmLeaveTeam()">ترک تیم</button>' +      (tm.role==='manager'        ? '<button class="tm-btn" style="width:100%;justify-content:center;margin-top:8px;direction:rtl;color:var(--amber)" onclick="tmResetCode()">🔑 ریست کد تیم</button>'        : '');
@@ -15719,7 +15744,7 @@ function tmRefreshInfoSheet() {
     <div style="background:rgba(217,119,6,.08);border:1px solid rgba(217,119,6,.2);border-radius:var(--r2);padding:var(--sp3);margin-bottom:var(--sp3);text-align:center">
       <div style="font-size:var(--fs-xs);color:var(--amber);font-weight:700;margin-bottom:6px">⚠️ هنوز وارد نشدی</div>
       <div style="font-size:var(--fs-2xs);color:var(--t3);margin-bottom:var(--sp3)">برای دیدن تسک‌ها باید با PIN وارد بشی</div>
-      <button style="width:100%;height:44px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer" onclick="closeAll();setTimeout(function(){tmOpenDirectLogin('${tm.code||''}');},150)">🔑 ورود با کد و PIN</button>
+      <button class="btn btn-lg btn-primary btn-full" onclick="closeAll();setTimeout(function(){tmOpenDirectLogin('${tm.code||''}');},150)">🔑 ورود با کد و PIN</button>
     </div>
     ` : ''}
     `}
@@ -18225,7 +18250,7 @@ tmRenderTeamProjects = function() {
 
       <!-- action buttons -->
       <div style="display:flex;gap:var(--sp2);margin-top:var(--sp2)">
-        <button onclick="tmAssignTask('${m.uuid}')" style="height:28px;padding:0 10px;border-radius:var(--r1);background:var(--bg2);border:1px solid var(--b1);color:var(--t2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;display:inline-flex;align-items:center;gap:4px">
+        <button class="btn btn-sm btn-secondary" onclick="tmAssignTask('${m.uuid}')">
           ${tmIco('plus',11)} تسک
         </button>
         ${m.alert !== 'ok' ? `
@@ -18830,8 +18855,8 @@ function reviewTaskRow(t){
     '<div style="flex:1;min-width:0"><div style="font-size:var(--fs-sm);font-weight:600;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(t.title)+'</div>'+
     '<div style="font-size:var(--fs-xs);color:var(--t3);margin-top:2px">'+esc(t.memberName||'')+(t.memberNote?(' · '+esc(t.memberNote.slice(0,30))):'')+'</div></div>'+
     '<div style="display:flex;gap:6px;flex-shrink:0">'+
-    '<button onclick="event.stopPropagation();_tmApproveTask(\''+t.id+'\')" style="height:32px;padding:0 10px;background:var(--a);color:#fff;border:none;border-radius:var(--r5);font-size:var(--fs-2xs);font-weight:700;font-family:var(--f);cursor:pointer">تأیید ✅</button>'+
-    '<button onclick="event.stopPropagation();_tmReturnTask(\''+t.id+'\')" style="height:32px;padding:0 10px;background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r5);font-size:var(--fs-2xs);font-weight:700;font-family:var(--f);cursor:pointer">↩️ برگشت</button>'+
+    '<button class="btn btn-sm btn-primary btn-pill" onclick="event.stopPropagation();_tmApproveTask(\''+t.id+'\')">تأیید ✅</button>'+
+    '<button class="btn btn-sm btn-secondary btn-pill" onclick="event.stopPropagation();_tmReturnTask(\''+t.id+'\')">↩️ برگشت</button>'+
     '</div></div>';
 }
 function reviewGroup(tasks){
@@ -18848,7 +18873,7 @@ async function _tmApproveTask(taskId){
 function _tmReturnTask(tid){
   var old=document.getElementById('shTmRet');if(old)old.remove();
   var s=document.createElement('div');s.className='sheet';s.id='shTmRet';
-  var opts=['<button onclick="_tmRP(this)" data-v="کامل نشده" style="height:40px;border-radius:var(--r2);border:1px solid var(--b1);background:var(--bg2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;width:100%;text-align:right;padding:0 var(--sp3)">کامل نشده</button>',
+  var opts=['<button class="btn btn-md btn-secondary" onclick="_tmRP(this)" data-v="کامل نشده">کامل نشده</button>',
     '<button onclick="_tmRP(this)" data-v="نیاز به اصلاح" style="height:40px;border-radius:var(--r2);border:1px solid var(--b1);background:var(--bg2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer;width:100%;text-align:right;padding:0 var(--sp3)">نیاز به اصلاح</button>'].join('');
   s.innerHTML='<div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl">برگشت تسک</div><button class="sh-x" onclick="closeAll()">X</button></div></div><div class="sh-body" style="gap:var(--sp3)"><div style="display:flex;flex-direction:column;gap:6px">'+opts+'</div><textarea id="tmRetN" rows="2" placeholder="توضیح..." style="width:100%;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px;font-size:var(--fs-xs);font-family:var(--f);direction:rtl;resize:none;outline:none"></textarea><button onclick="_tmRtOk('+JSON.dumps(tid)+')" style="width:100%;height:46px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">برگشت بده</button></div>';
   s.style.zIndex='1200';document.body.appendChild(s);openSheet('shTmRet');
