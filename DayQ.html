@@ -5154,6 +5154,36 @@ order-bottom: none; }
   }
   /* header panel — padding بیشتر */
   .tm-panel-hdr { padding:var(--sp5) 32px 0; }
+}
+/* ── Input variants (extracted from inline) ── */
+.inp-base {
+  width: 100%;
+  background: var(--bg2);
+  border: 1px solid var(--b1);
+  border-radius: var(--r2);
+  padding: 10px 12px;
+  font-size: var(--fs-sm);
+  font-family: var(--f);
+  color: var(--t1);
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color var(--dur-fast);
+}
+.inp-lg {
+  height: 48px;
+  padding: 0 16px;
+  border-width: 1.5px;
+}
+.inp-textarea {
+  width: 100%;
+  background: none;
+  border: none;
+  resize: none;
+  font-size: var(--fs-md);
+  font-family: var(--f);
+  color: var(--t1);
+  outline: none;
+  line-height: var(--lh-relaxed);
 }</style>
 </head>
 <body>
@@ -20859,8 +20889,8 @@ setTimeout(function(){
 
 
 <!-- ══ MISSING SHEETS ══ -->
-<div class="sheet" id="shTimer"><div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl">ساعت شروع کار</div><button class="sh-x" onclick="closeAll()">×</button></div></div><div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)"><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px;font-weight:600">ساعت بازدید</div><input id="timerInput" type="time" style="width:100%;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 12px;font-size:var(--fs-sm);font-family:var(--f);color:var(--t1);outline:none;box-sizing:border-box" style="direction:ltr"/></div><button class="btn btn-lg btn-primary btn-full" onclick="saveTimer()">💾 ذخیره</button></div></div>
-<div class="sheet" id="shWorkHours"><div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl">ساعت کاری</div><button class="sh-x" onclick="closeAll()">×</button></div></div><div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)"><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px;font-weight:600">پایان ساعت کاری</div><input id="workEndInput" type="time" style="width:100%;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 12px;font-size:var(--fs-sm);font-family:var(--f);color:var(--t1);outline:none;box-sizing:border-box" style="direction:ltr"/></div><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px;font-weight:600">شروع عصر</div><input id="eveningStartInput" type="time" style="width:100%;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 12px;font-size:var(--fs-sm);font-family:var(--f);color:var(--t1);outline:none;box-sizing:border-box" style="direction:ltr"/></div><button class="btn btn-lg btn-primary btn-full" onclick="saveWorkHours()">💾 ذخیره</button></div></div>
-<div class="sheet" id="shArchive"><div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl">آرشیو</div><button class="sh-x" onclick="closeAll()">×</button></div></div><div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)"><input id="archiveSearchInp" type="text" placeholder="جستجو..." style="width:100%;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 12px;font-size:var(--fs-sm);font-family:var(--f);color:var(--t1);outline:none;box-sizing:border-box" oninput="renderArchiveList()" autocomplete="off"/><div id="archiveList" style="display:flex;flex-direction:column;gap:6px;max-height:60vh;overflow-y:auto"></div></div></div>
-<div class="sheet" id="shTmDirectLogin"><div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl">ورود به تیم</div><button class="sh-x" onclick="closeAll()">×</button></div></div><div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)"><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px;font-weight:600">کد تیم *</div><input id="tmDLCode" type="text" placeholder="کد تیم..." style="width:100%;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 12px;font-size:var(--fs-sm);font-family:var(--f);color:var(--t1);outline:none;box-sizing:border-box" style="direction:ltr;text-transform:uppercase;letter-spacing:2px" autocomplete="off" maxlength="8" onkeydown="if(event.key==='Enter')document.getElementById('tmDLPin').focus()"/></div><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px;font-weight:600">PIN شما *</div><input id="tmDLPin" type="password" placeholder="PIN..." style="width:100%;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 12px;font-size:var(--fs-sm);font-family:var(--f);color:var(--t1);outline:none;box-sizing:border-box" style="direction:ltr;letter-spacing:4px" maxlength="8" onkeydown="if(event.key==='Enter')tmDoDirectLogin()"/></div><div id="tmDLErr" style="font-size:var(--fs-xs);color:var(--red);min-height:14px;text-align:center"></div><button class="btn btn-lg btn-primary btn-full" id="tmDLBtn"   onclick="tmDoDirectLogin()">🔑 ورود</button><div style="font-size:var(--fs-2xs);color:var(--t3);text-align:center;line-height:1.6">کد تیم و PIN که موقع عضویت تنظیم کردی رو وارد کن</div></div></div>
-<div class="sheet" id="shPush"><div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl">تنظیمات Push</div><button class="sh-x" onclick="closeAll()">×</button></div></div><div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)"><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px;font-weight:600">آدرس Worker</div><input id="pushUrlInp" type="url" placeholder="https://..." style="width:100%;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 12px;font-size:var(--fs-sm);font-family:var(--f);color:var(--t1);outline:none;box-sizing:border-box" style="direction:ltr;font-size:var(--fs-sm)" autocomplete="off" onkeydown="if(event.key==='Enter')savePushSettings()"/></div><button class="btn btn-lg btn-primary btn-full" onclick="savePushSettings()">💾 ذخیره</button></div></div>
+<div class="sheet" id="shTimer"><div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl">ساعت شروع کار</div><button class="sh-x" onclick="closeAll()">×</button></div></div><div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)"><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px;font-weight:600">ساعت بازدید</div><input id="timerInput" type="time" class="inp-base" style="direction:ltr"/></div><button class="btn btn-lg btn-primary btn-full" onclick="saveTimer()">💾 ذخیره</button></div></div>
+<div class="sheet" id="shWorkHours"><div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl">ساعت کاری</div><button class="sh-x" onclick="closeAll()">×</button></div></div><div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)"><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px;font-weight:600">پایان ساعت کاری</div><input id="workEndInput" type="time" class="inp-base" style="direction:ltr"/></div><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px;font-weight:600">شروع عصر</div><input id="eveningStartInput" type="time" class="inp-base" style="direction:ltr"/></div><button class="btn btn-lg btn-primary btn-full" onclick="saveWorkHours()">💾 ذخیره</button></div></div>
+<div class="sheet" id="shArchive"><div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl">آرشیو</div><button class="sh-x" onclick="closeAll()">×</button></div></div><div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)"><input id="archiveSearchInp" type="text" placeholder="جستجو..." class="inp-base" oninput="renderArchiveList()" autocomplete="off"/><div id="archiveList" style="display:flex;flex-direction:column;gap:6px;max-height:60vh;overflow-y:auto"></div></div></div>
+<div class="sheet" id="shTmDirectLogin"><div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl">ورود به تیم</div><button class="sh-x" onclick="closeAll()">×</button></div></div><div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)"><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px;font-weight:600">کد تیم *</div><input id="tmDLCode" type="text" placeholder="کد تیم..." class="inp-base" style="direction:ltr;text-transform:uppercase;letter-spacing:2px" autocomplete="off" maxlength="8" onkeydown="if(event.key==='Enter')document.getElementById('tmDLPin').focus()"/></div><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px;font-weight:600">PIN شما *</div><input id="tmDLPin" type="password" placeholder="PIN..." class="inp-base" style="direction:ltr;letter-spacing:4px" maxlength="8" onkeydown="if(event.key==='Enter')tmDoDirectLogin()"/></div><div id="tmDLErr" style="font-size:var(--fs-xs);color:var(--red);min-height:14px;text-align:center"></div><button class="btn btn-lg btn-primary btn-full" id="tmDLBtn"   onclick="tmDoDirectLogin()">🔑 ورود</button><div style="font-size:var(--fs-2xs);color:var(--t3);text-align:center;line-height:1.6">کد تیم و PIN که موقع عضویت تنظیم کردی رو وارد کن</div></div></div>
+<div class="sheet" id="shPush"><div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl">تنظیمات Push</div><button class="sh-x" onclick="closeAll()">×</button></div></div><div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)"><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px;font-weight:600">آدرس Worker</div><input id="pushUrlInp" type="url" placeholder="https://..." class="inp-base" style="direction:ltr;font-size:var(--fs-sm)" autocomplete="off" onkeydown="if(event.key==='Enter')savePushSettings()"/></div><button class="btn btn-lg btn-primary btn-full" onclick="savePushSettings()">💾 ذخیره</button></div></div>
