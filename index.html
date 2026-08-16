@@ -330,7 +330,7 @@ input,textarea{user-select:text;-webkit-user-select:text;}
 /* visualViewport keyboard fix برای qcap */
 .qcap{margin:0 18px 10px;display:flex;align-items:center;gap:var(--sp3);background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r2);padding:var(--sp3) var(--sp4);transition:var(--dur-base) var(--ease-std);cursor:text;}
 .qcap:focus-within{
-  box-shadow:0 0 0 3px rgba(74,222,128,.22);
+  box-shadow:0 0 0 3px rgba(74,222,128,.22), 0 4px 20px rgba(74,222,128,.12);
   transform:translateY(-1px);
 }
 .qcap svg{width:15px;height:15px;stroke:var(--t3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0;}
@@ -742,7 +742,7 @@ input,textarea{user-select:text;-webkit-user-select:text;}
 .th-pill{flex:1;padding:var(--sp2) var(--sp2);min-height:40px;border-radius:var(--r1);text-align:center;font-size:var(--fs-xs);font-weight:600;background:var(--bg2);color:var(--t2);border:1px solid transparent;transition:.18s;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;touch-action:manipulation;}
 .th-pill.sel{border-color:var(--a);color:var(--a);background:var(--am);}
 .icon-pick.sel{border-color:var(--a)!important;background:var(--am);}
-.p-inp{background:transparent;border:none;font-size:.83rem;font-weight:500;width:100%;color:var(--t1);outline:none;border-radius:var(--r2);}
+.p-inp{background:transparent;border:none;font-size:.83rem;font-weight:500;width:100%;color:var(--t1);}
 .p-inp::placeholder{color:var(--t3);}
 .d-btn{width:100%;padding:var(--sp3);text-align:center;font-size:.83rem;font-weight:600;color:var(--red);cursor:pointer;border-radius:var(--r2);background:var(--redm);border:1px solid rgba(229,62,90,.16);margin-bottom:7px;display:block;transition:var(--dur-fast) var(--ease-out);}
 .d-btn:active{opacity:.7;}
@@ -820,7 +820,7 @@ input,textarea{user-select:text;-webkit-user-select:text;}
 .sh-x{width:28px;height:28px;border-radius:var(--r1);background:var(--bg2);display:flex;align-items:center;justify-content:center;font-size:var(--fs-sm);color:var(--t2);font-weight:700;transition:var(--dur-fast) var(--ease-out);}
 .sh-x:active{background:var(--bg3);}
 .sh-iw{display:flex;align-items:center;gap:9px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:var(--sp3) var(--sp4);transition:var(--dur-fast) var(--ease-out);}
-.sh-iw:focus-within{box-shadow:0 0 0 3px rgba(74,222,128,.22);}
+
 .sh-iw svg{width:14px;height:14px;stroke:var(--t3);fill:none;stroke-width:2;stroke-linecap:round;flex-shrink:0;}
 .sh-inp{flex:1;background:transparent;border:none;font-size:var(--fs-md);font-weight:500;color:var(--t1);}
 .sh-inp::placeholder{color:var(--t3);}
@@ -838,7 +838,7 @@ select.fi{
   background-size:15px;
   padding-left:32px;
 }
-
+.fi:focus{outline:none;}
 .fi::placeholder{color:var(--t3);}
 .icon-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:var(--sp1);}
 .ico-cell{aspect-ratio:1;border-radius:var(--r1);background:var(--bg2);border:1px solid transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:var(--dur-fast) var(--ease-out);}
@@ -859,7 +859,7 @@ select.fi{
 [data-theme="dark"] .sh-sub{color:#080c10;}
 .sh-sub:active{transform:scale(.97);}
 .t-big{width:100%;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:13px;font-size:var(--fs-2xl);font-weight:800;text-align:center;font-family:var(--mono);color:var(--a);direction:ltr;margin-bottom:11px;transition:var(--dur-fast) var(--ease-out);}
-
+.t-big:focus{outline:none;}
 .qtime-row{display:flex;gap:var(--sp2);}
 .qt{flex:1;padding:10px 0;border-radius:var(--r1);background:var(--bg2);border:1px solid var(--b1);font-size:var(--fs-sm);font-weight:700;color:var(--t2);text-align:center;transition:var(--dur-fast) var(--ease-out);font-family:var(--mono);}
 .qt:active{background:var(--am);color:var(--a);}
@@ -980,7 +980,7 @@ select.fi{
 .remind-custom-row{display:flex;gap:var(--sp2);align-items:center;margin-bottom:14px;}
 .remind-custom-lbl{font-size:var(--fs-sm);color:var(--t2);font-weight:600;flex-shrink:0;}
 .remind-time-inp{flex:1;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r1);padding:var(--sp2) var(--sp3);font-size:var(--fs-md);color:var(--t1);direction:ltr;transition:var(--dur-fast) var(--ease-out);}
-
+.remind-time-inp:focus{outline:none;}
 .remind-clear{width:100%;padding:11px;border-radius:var(--r2);background:var(--redm);color:var(--red);font-size:var(--fs-sm);font-weight:700;border:1px solid rgba(229,62,90,.2);transition:var(--dur-fast) var(--ease-out);margin-top:4px;}
 .remind-clear:active{opacity:.7;}
 
@@ -1164,7 +1164,7 @@ select.fi{
 
 /* ══════════ ADD TASK — deadline field ══════════ */
 .date-inp{width:100%;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r1);padding:var(--sp3) var(--sp4);font-size:var(--fs-md);color:var(--t1);transition:var(--dur-fast) var(--ease-out);direction:ltr;font-family:var(--mono);}
-
+.date-inp:focus{outline:none;}
 
 /* status pills in add sheet */
 .status-row{display:flex;gap:var(--sp2);}
@@ -1283,7 +1283,7 @@ select.fi{
   font-family:var(--mono);color:var(--t1);
   width:100%;
 }
-.jal-selected-display:focus-within{box-shadow:0 0 0 3px rgba(74,222,128,.22);}
+.jal-selected-display:focus-within,.jal-selected-display:hover{border-color:var(--a);}
 .jal-cal-inline.open + * .jal-selected-display,
 .jal-field .jal-selected-display.picking{border-radius:9px 9px 0 0;border-bottom-color:var(--b2);}
 .jal-selected-display.has-val{border-color:var(--a);}
@@ -1330,7 +1330,7 @@ select.fi{
 .note-ta{width:100%;background:var(--bg2);border:1px solid var(--b1);
   border-radius:var(--r2);padding:13px;font-size:var(--fs-md);color:var(--t1);
   resize:none;min-height:120px;transition:var(--dur-fast) var(--ease-out);line-height:1.7;}
-
+.note-ta:focus{outline:none;}
 .note-ta::placeholder{color:var(--t3);}
 /* note indicator on card */
 .tc-note-dot{width:5px;height:5px;border-radius:50%;
@@ -2184,7 +2184,7 @@ select.fi{
 
   .dp-section-lbl{font-size:var(--fs-xs);font-weight:700;color:var(--t3);margin-bottom:4px;}
   .dp-notes-ta{width:100%;min-height:88px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 12px;font-size:var(--fs-sm);color:var(--t1);font-family:var(--f);resize:none;line-height:1.6;transition:border-color var(--dur-fast);}
-  
+  .dp-notes-ta:focus{outline:none;}
   .dp-notes-ta::placeholder{color:var(--t3);}
 
   .dp-timer-box{background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 14px;display:flex;align-items:center;gap:12px;}
@@ -4155,7 +4155,7 @@ select.fi{
   #calTeamFilter { margin-bottom:8px; }
 }
 
-.ttd-thread{display:flex;flex-direction:column;gap:var(--sp2);min-height:40px;max-height:220px;overflow-y:auto;scrollbar-width:none;padding:var(--sp2) 0;}.ttd-thread::-webkit-scrollbar{display:none;}.ttd-bubble{max-width:78%;padding:var(--sp2) var(--sp3);font-size:var(--fs-xs);line-height:1.5;direction:rtl;word-break:break-word;}.ttd-bubble.from-member{align-self:flex-end;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2) var(--r2) 4px var(--r2);color:var(--t1);}.ttd-bubble.from-manager{align-self:flex-start;background:var(--bluem);border:1px solid rgba(59,130,246,.15);border-radius:var(--r2) var(--r2) var(--r2) 4px;color:var(--blue);}.ttd-bubble-meta{font-size:var(--fs-2xs);color:var(--t3);margin-top:3px;}.ttd-reply-inp{flex:1;min-height:36px;max-height:90px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:8px var(--sp3);font-family:var(--f);font-size:var(--fs-xs);color:var(--t1);direction:rtl;resize:none;outline:none;}.ttd-reply-inp::placeholder{color:var(--t4);}.ttd-reply-send{width:36px;height:36px;flex-shrink:0;background:var(--a);color:var(--bg1);border:none;border-radius:var(--r2);cursor:pointer;display:flex;align-items:center;justify-content:center;}.ttd-reply-send:active{transform:scale(.94);}.tm-mgr-view .from-member{align-self:flex-start;border-radius:var(--r2) var(--r2) var(--r2) 4px;background:var(--bg2);border:1px solid var(--b1);color:var(--t1);}.tm-mgr-view .from-manager{align-self:flex-end;border-radius:var(--r2) var(--r2) 4px var(--r2);background:var(--bluem);border:1px solid rgba(59,130,246,.15);color:var(--blue);}.tm-thread-empty{text-align:center;padding:var(--sp4) 0;color:var(--t3);font-size:var(--fs-xs);}
+.ttd-thread{display:flex;flex-direction:column;gap:var(--sp2);min-height:40px;max-height:220px;overflow-y:auto;scrollbar-width:none;padding:var(--sp2) 0;}.ttd-thread::-webkit-scrollbar{display:none;}.ttd-bubble{max-width:78%;padding:var(--sp2) var(--sp3);font-size:var(--fs-xs);line-height:1.5;direction:rtl;word-break:break-word;}.ttd-bubble.from-member{align-self:flex-end;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2) var(--r2) 4px var(--r2);color:var(--t1);}.ttd-bubble.from-manager{align-self:flex-start;background:var(--bluem);border:1px solid rgba(59,130,246,.15);border-radius:var(--r2) var(--r2) var(--r2) 4px;color:var(--blue);}.ttd-bubble-meta{font-size:var(--fs-2xs);color:var(--t3);margin-top:3px;}.ttd-reply-inp{flex:1;min-height:36px;max-height:90px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:8px var(--sp3);font-family:var(--f);font-size:var(--fs-xs);color:var(--t1);direction:rtl;resize:none;outline:none;}.ttd-reply-inp:focus{outline:none;}.ttd-reply-inp::placeholder{color:var(--t4);}.ttd-reply-send{width:36px;height:36px;flex-shrink:0;background:var(--a);color:var(--bg1);border:none;border-radius:var(--r2);cursor:pointer;display:flex;align-items:center;justify-content:center;}.ttd-reply-send:active{transform:scale(.94);}.tm-mgr-view .from-member{align-self:flex-start;border-radius:var(--r2) var(--r2) var(--r2) 4px;background:var(--bg2);border:1px solid var(--b1);color:var(--t1);}.tm-mgr-view .from-manager{align-self:flex-end;border-radius:var(--r2) var(--r2) 4px var(--r2);background:var(--bluem);border:1px solid rgba(59,130,246,.15);color:var(--blue);}.tm-thread-empty{text-align:center;padding:var(--sp4) 0;color:var(--t3);font-size:var(--fs-xs);}
 
 /* ════ Calendar Desktop — Sidebar Fix ════ */
 @media(min-width:900px){
@@ -4763,7 +4763,7 @@ body:has(#tmSokoPanel.open) #ov {
 .ttd-day-div::before,.ttd-day-div::after{content:'';flex:1;height:1px;background:var(--b2)}
 .ttd-sys-msg{text-align:center;font-size:11px;color:var(--t3);background:var(--bg2);border-radius:12px;padding:3px 12px;margin:4px auto;max-width:80%}
 .ttd-reply-inp{flex:1!important;background:var(--bg2)!important;border:1px solid var(--b1)!important;border-radius:20px!important;padding:9px 14px!important;font-size:var(--fs-xs)!important;font-family:var(--f)!important;direction:rtl;outline:none!important;resize:none!important;line-height:1.4!important;transition:border-color 150ms ease}
-
+.ttd-reply-inp:focus{outline:none;}
 .ttd-reply-send{width:36px!important;height:36px!important;border-radius:50%!important;background:var(--a)!important;border:none!important;cursor:pointer!important;display:flex!important;align-items:center!important;justify-content:center!important;flex-shrink:0!important;transition:opacity 150ms ease}
 .ttd-reply-send:active{opacity:.8}
 
@@ -4791,9 +4791,9 @@ body:has(#tmSokoPanel.open) #ov {
 .as-dl-btn.sel{border-color:var(--a);color:var(--a);background:rgba(0,184,122,.06)}
 .as-dl-btn:active{transform:scale(.97)}
 .as-input{width:100%;height:40px;padding:0 12px;background:var(--bg2);border:1.5px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-xs);font-family:var(--f);color:var(--t1);outline:none;box-sizing:border-box;transition:border-color 150ms ease;direction:rtl}
-
+.as-input:focus{outline:none;}
 .as-textarea{width:100%;padding:10px 12px;min-height:64px;background:var(--bg2);border:1.5px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-xs);font-family:var(--f);color:var(--t1);outline:none;box-sizing:border-box;resize:none;transition:border-color 150ms ease;direction:rtl;line-height:1.5}
-
+.as-textarea:focus{outline:none;}
 .as-broadcast{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:var(--r2);background:var(--bg2);border:1px solid var(--b1);cursor:pointer;transition:all 150ms ease;font-size:var(--fs-xs);font-weight:600;color:var(--t2)}
 .as-broadcast.on{background:rgba(37,99,235,.06);border-color:rgba(37,99,235,.3);color:var(--blue)}
 .as-submit{width:100%;height:48px;border-radius:var(--r2);border:none;background:var(--ag);color:#fff;font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer;transition:opacity 150ms ease,transform 100ms ease}
@@ -5006,106 +5006,14 @@ body.show-dpanel #dpanel {
   transition: background 100ms ease, color 100ms ease, border-color 100ms ease;
 }
 
-/* ══════════════════════════════════════════
-   SHEET BUTTON SYSTEM — یکپارچه برای همه شیت‌ها
-   ══════════════════════════════════════════ */
-.sh-btn {
-  width: 100%; height: 46px;
-  border-radius: var(--r2);
-  font-size: var(--fs-sm); font-weight: 700;
-  font-family: var(--f); cursor: pointer;
-  border: none; display: flex;
-  align-items: center; justify-content: center;
-  gap: 6px; transition: opacity 120ms ease;
-}
-.sh-btn:active { opacity: 0.8; transform: scale(0.98); }
-.sh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-.sh-btn-primary  { background: var(--a);   color: #fff; }
-.sh-btn-green    { background: var(--ag);  color: #fff; }
-.sh-btn-secondary{ background: var(--bg2); color: var(--t1); border: 1px solid var(--b1) !important; }
-.sh-btn-danger   { background: rgba(229,62,90,.1); color: var(--red); border: 1px solid rgba(229,62,90,.3) !important; }
-.sh-btn-ghost    { background: transparent; color: var(--t2); border: 1px solid var(--b1) !important; }
-.sh-btn-sm       { height: 36px; font-size: var(--fs-xs); font-weight: 600; }
-
-/* ── Sheet input system ── */
-.sh-inp {
-  width: 100%; background: var(--bg2);
-  border: 1px solid var(--b1); border-radius: var(--r2);
-  padding: 10px 12px; font-size: var(--fs-sm);
-  font-family: var(--f); color: var(--t1);
-  outline: none; box-sizing: border-box;
-  transition: border-color 150ms ease;
-}
-
-.sh-inp[type="time"] { direction: ltr; }
-.sh-inp[type="url"], .sh-inp[type="password"] { direction: ltr; }
-
-/* ── Sheet label system ── */
-.sh-lbl {
-  font-size: var(--fs-xs); color: var(--t3);
-  margin-bottom: 6px; font-weight: 600;
-}
-.sh-lbl-req::after { content: ' *'; color: var(--red); }
-
-/* ── Sheet row (confirm dialogs) ── */
-.sh-confirm-row {
-  display: flex; gap: 8px;
-}
-.sh-confirm-row .sh-btn { flex: 1; }
-
-/* ── Sheet info box ── */
-.sh-info {
-  background: var(--bg2); border: 1px solid var(--b1);
-  border-radius: var(--r2); padding: var(--sp3);
-  font-size: var(--fs-xs); color: var(--t2);
-  line-height: 1.7;
-}
-
-
-/* ══ Focus Ring System ══ */
-input, textarea, select { outline: none; }
-
-/* فقط shadow سبز بیرونی — بدون تغییر border */
+/* ══ Focus: فقط shadow سبز بیرونی ══ */
 input:focus, textarea:focus, select:focus {
-  box-shadow: 0 0 0 3px rgba(74,222,128,.22);
-}
-
-.sh-inp {
-  width: 100% !important;
-  background: var(--bg2) !important;
-  border: 1px solid var(--b1) !important;
-  border-radius: var(--r2) !important;
-  padding: 10px 12px !important;
-  font-size: var(--fs-sm) !important;
-  font-family: var(--f) !important;
-  color: var(--t1) !important;
-  outline: none !important;
-  box-sizing: border-box !important;
-}
-.sh-inp:focus {
-  box-shadow: 0 0 0 3px rgba(74,222,128,.22) !important;
-}
-.as-input:focus, .as-textarea:focus {
-  box-shadow: 0 0 0 3px rgba(74,222,128,.22) !important;
-  outline: none !important;
-}
-.fi:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(74,222,128,.22);
 }
+input, textarea, select { outline: none; }
+.p-inp { outline: none; border-radius: var(--r2); }
 
-
-/* srow focus-within — shadow روی container نه input */
-.srow:focus-within {
-  box-shadow: 0 0 0 3px rgba(74,222,128,.22);
-  border-radius: var(--r2);
-  transition: box-shadow 150ms ease;
-}
-.p-inp:focus {
-  outline: none;
-  box-shadow: none;
-}
 </style>
 </head>
 <body>
@@ -15725,7 +15633,7 @@ function tmOpenTeamSettings() {
           ? '<div style="background:rgba(217,119,6,.08);border:1px solid rgba(217,119,6,.25);border-radius:var(--r2);padding:var(--sp3);margin-bottom:var(--sp3);text-align:center">' +
               '<div style="font-size:var(--fs-xs);color:var(--amber);font-weight:700;margin-bottom:6px">⚠️ هنوز وارد نشدی</div>' +
               '<div style="font-size:var(--fs-2xs);color:var(--t3);margin-bottom:var(--sp3)">برای دیدن تسک‌ها باید با PIN وارد بشی</div>' +
-              '<button class="sh-btn sh-btn-primary" onclick="closeAll();setTimeout(function(){tmOpenDirectLogin(tm.code);},150)">🔑 ورود با کد و PIN</button>' +
+              '<button style="width:100%;height:44px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer" onclick="closeAll();setTimeout(function(){tmOpenDirectLogin(tm.code);},150)">🔑 ورود با کد و PIN</button>' +
             '</div>'
           : '')) +
       '<button class="tm-btn danger" style="width:100%;justify-content:center;margin-top:var(--sp2);direction:rtl" onclick="tmLeaveTeam()">ترک تیم</button>' +      (tm.role==='manager'        ? '<button class="tm-btn" style="width:100%;justify-content:center;margin-top:8px;direction:rtl;color:var(--amber)" onclick="tmResetCode()">🔑 ریست کد تیم</button>'        : '');
@@ -15757,7 +15665,7 @@ function tmRefreshInfoSheet() {
     <div style="background:rgba(217,119,6,.08);border:1px solid rgba(217,119,6,.2);border-radius:var(--r2);padding:var(--sp3);margin-bottom:var(--sp3);text-align:center">
       <div style="font-size:var(--fs-xs);color:var(--amber);font-weight:700;margin-bottom:6px">⚠️ هنوز وارد نشدی</div>
       <div style="font-size:var(--fs-2xs);color:var(--t3);margin-bottom:var(--sp3)">برای دیدن تسک‌ها باید با PIN وارد بشی</div>
-      <button class="sh-btn sh-btn-primary" onclick="closeAll();setTimeout(function(){tmOpenDirectLogin('${tm.code||''}');},150)">🔑 ورود با کد و PIN</button>
+      <button style="width:100%;height:44px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer" onclick="closeAll();setTimeout(function(){tmOpenDirectLogin('${tm.code||''}');},150)">🔑 ورود با کد و PIN</button>
     </div>
     ` : ''}
     `}
@@ -18912,7 +18820,7 @@ function _tmTempPin(pin){
   '<div style="font-size:2.5rem;font-weight:800;letter-spacing:.4em;color:var(--t1)">'+pin+'</div>'+
   '<div style="font-size:var(--fs-2xs);color:var(--t3);margin-top:var(--sp2)">این رو به کارمند بده</div>'+
   '</div>'+
-  '<button onclick="_tmCopyPin(\''+pin+'\')" class="sh-btn sh-btn-primary">📋 کپی PIN</button>'+
+  '<button onclick="_tmCopyPin(\''+pin+'\')" style="width:100%;height:44px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">📋 کپی PIN</button>'+
   '</div>';
   s.style.zIndex='1200';document.body.appendChild(s);openSheet('shTmPin');
 }
@@ -19270,7 +19178,7 @@ function _tmDlSheet(tid,title,cur){
     '</div>'+
     '<input id="tmDlInp" value="'+cur+'" placeholder="1404-06-15" style="width:100%;padding:10px;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);font-size:1.1rem;text-align:center;direction:ltr;outline:none"/>'+
     '<div id="tmDlErr" style="color:var(--red);font-size:var(--fs-xs);text-align:center;min-height:14px"></div>'+
-    '<button onclick="_tmDlOkBtn()" class="sh-btn sh-btn-primary">تایید</button></div>';
+    '<button onclick="_tmDlOkBtn()" style="width:100%;height:46px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">تایید</button></div>';
   document.body.appendChild(s);
   _sokoSheetOpen('shTmDl');
 }
@@ -19832,7 +19740,7 @@ async function tmResetCode(){
     msg.innerHTML='<div style="font-size:var(--fs-lg);font-weight:700;margin-bottom:var(--sp3)">✅ کد جدید تیم</div>'+
       '<div style="font-family:var(--mono);font-size:var(--fs-xl);background:var(--bg2);padding:var(--sp3) var(--sp4);border-radius:var(--r2);letter-spacing:2px;margin-bottom:var(--sp4)">'+esc(newCode)+'</div>'+
       '<div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:var(--sp4)">این کد رو به اعضا بده — کد قدیمی دیگه کار نمیکنه</div>'+
-      '<button onclick="this.parentElement.remove();tmShareCode()" class="sh-btn sh-btn-primary">🔗 اشتراک‌گذاری کد جدید</button>';
+      '<button onclick="this.parentElement.remove();tmShareCode()" style="width:100%;height:44px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">🔗 اشتراک‌گذاری کد جدید</button>';
     document.body.appendChild(msg);
     toast_(svgIco('check'),'کد تیم ریست شد ✅');
   }catch(e){toast_(svgIco('x'),e.message||'خطا');}
@@ -20469,7 +20377,7 @@ setTimeout(function(){
         <div style="font-size:2rem;margin-bottom:var(--sp2)">👥</div>
         <div style="font-size:var(--fs-xs);color:var(--t3)">به تیم بپیوند یا تیم جدید بساز</div>
       </div>
-      <button onclick="tmOpenCreate()" class="sh-btn sh-btn-primary">+ ایجاد تیم جدید</button>
+      <button onclick="tmOpenCreate()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">+ ایجاد تیم جدید</button>
       <button onclick="tmOpenJoin()" style="width:100%;height:48px;background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">پیوستن با کد دعوت</button>
       <button onclick="tmOpenDirectLogin()" style="width:100%;height:44px;background:none;color:var(--blue);border:none;font-size:var(--fs-sm);font-weight:600;font-family:var(--f);cursor:pointer;text-decoration:underline">قبلاً عضو بودم — ورود مستقیم</button>
     </div>
@@ -20600,7 +20508,7 @@ setTimeout(function(){
           <div style="font-size:var(--fs-2xs);color:var(--t3);margin-top:4px">برای بازیابی در دستگاه جدید</div>
         </div>
         <div id="tmMJoinErr" style="font-size:var(--fs-xs);color:var(--red);text-align:center;min-height:16px;margin-bottom:8px"></div>
-        <button id="tmMJoinBtn" onclick="tmDoJoin()" class="sh-btn sh-btn-primary">ارسال درخواست</button>
+        <button id="tmMJoinBtn" onclick="tmDoJoin()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">ارسال درخواست</button>
       </div>
       <div id="tmMJoinSuccess" style="display:none;text-align:center;padding:var(--sp4) 0">
         <div style="font-size:3rem;margin-bottom:var(--sp3)">⏳</div>
@@ -20634,7 +20542,7 @@ setTimeout(function(){
         </div>
       </div>
       <div id="tmMInviteLink" style="font-size:var(--fs-xs);font-family:var(--mono);color:var(--blue);word-break:break-all;background:var(--bluem);padding:var(--sp2) var(--sp3);border-radius:var(--r2)"></div>
-      <button onclick="tmCloseModal();tmOpenSoko()" class="sh-btn sh-btn-primary">رفتن به سکو ←</button>
+      <button onclick="tmCloseModal();tmOpenSoko()" style="width:100%;height:48px;background:var(--t1);color:var(--bg1);border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">رفتن به سکو ←</button>
     </div>
   </div>
 </div>
@@ -20746,7 +20654,7 @@ setTimeout(function(){
     <!-- ── دکمه‌های اقدام ── -->
     <div style="display:flex;flex-direction:column;gap:8px">
       <button id="ttdSaveBtn" onclick="_ttdSave()"
-        class="sh-btn sh-btn-secondary">
+        style="width:100%;height:44px;background:var(--bg2);color:var(--t1);border:1px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-xs);font-weight:600;font-family:var(--f);cursor:pointer">
         💾 ذخیره وضعیت
       </button>
       <button id="ttdReviewBtn" onclick="_ttdSubmitForReview()"
@@ -20760,7 +20668,7 @@ setTimeout(function(){
     <input id="timerInput" type="time"
       style="width:100%;height:48px;background:var(--bg2);border:1.5px solid var(--b1);border-radius:var(--r2);padding:0 12px;font-size:var(--fs-xl);font-family:var(--f);text-align:center;direction:ltr;outline:none;box-sizing:border-box"/>
     <button onclick="saveTimer()"
-      class="sh-btn sh-btn-green">
+      style="width:100%;height:44px;background:var(--ag);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">
       ذخیره
     </button>
   </div>
@@ -20776,7 +20684,7 @@ setTimeout(function(){
     <div id="tmCodeDisplay" style="font-size:var(--fs-xs);color:var(--t2);direction:rtl;line-height:1.7"></div>
     <div id="tmDLErr2" style="font-size:var(--fs-xs);color:var(--red);min-height:16px"></div>
     <button onclick="typeof tmConfirmJoin==='function'&&tmConfirmJoin()"
-      class="sh-btn sh-btn-green">
+      style="width:100%;height:44px;background:var(--ag);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">
       تأیید &#10003;
     </button>
   </div>
@@ -20793,7 +20701,7 @@ setTimeout(function(){
     <input id="tmPinInp" type="password" maxlength="8" inputmode="numeric" placeholder="••••"
       style="width:100%;height:48px;background:var(--bg2);border:1.5px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-xl);letter-spacing:0.3em;text-align:center;direction:ltr;outline:none;box-sizing:border-box;font-family:var(--f)"/>
     <button onclick="typeof tmSavePin==='function'&&tmSavePin()"
-      class="sh-btn sh-btn-green">
+      style="width:100%;height:44px;background:var(--ag);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">
       ذخیره PIN
     </button>
   </div>
@@ -20809,7 +20717,7 @@ setTimeout(function(){
     <textarea id="tmRetN" rows="4" placeholder="توضیح..."
       style="width:100%;padding:10px;background:var(--bg2);border:1.5px solid var(--b1);border-radius:var(--r2);font-size:var(--fs-xs);font-family:var(--f);resize:none;direction:rtl;outline:none;box-sizing:border-box"></textarea>
     <button onclick="typeof tmSubmitRet==='function'&&tmSubmitRet()"
-      class="sh-btn sh-btn-green">
+      style="width:100%;height:44px;background:var(--ag);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">
       ارسال
     </button>
   </div>
@@ -20817,8 +20725,8 @@ setTimeout(function(){
 
 
 <!-- ══ MISSING SHEETS ══ -->
-<div class="sheet" id="shTimer"><div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl">ساعت شروع کار</div><button class="sh-x" onclick="closeAll()">×</button></div></div><div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)"><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px;font-weight:600">ساعت بازدید</div><input id="timerInput" type="time" class="sh-inp" style="direction:ltr"/></div><button class="sh-btn sh-btn-primary" onclick="saveTimer()">💾 ذخیره</button></div></div>
-<div class="sheet" id="shWorkHours"><div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl">ساعت کاری</div><button class="sh-x" onclick="closeAll()">×</button></div></div><div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)"><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px;font-weight:600">پایان ساعت کاری</div><input id="workEndInput" type="time" class="sh-inp" style="direction:ltr"/></div><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px;font-weight:600">شروع عصر</div><input id="eveningStartInput" type="time" class="sh-inp" style="direction:ltr"/></div><button class="sh-btn sh-btn-primary" onclick="saveWorkHours()">💾 ذخیره</button></div></div>
-<div class="sheet" id="shArchive"><div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl">آرشیو</div><button class="sh-x" onclick="closeAll()">×</button></div></div><div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)"><input id="archiveSearchInp" type="text" placeholder="جستجو..." class="sh-inp" oninput="renderArchiveList()" autocomplete="off"/><div id="archiveList" style="display:flex;flex-direction:column;gap:6px;max-height:60vh;overflow-y:auto"></div></div></div>
-<div class="sheet" id="shTmDirectLogin"><div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl">ورود به تیم</div><button class="sh-x" onclick="closeAll()">×</button></div></div><div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)"><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px;font-weight:600">کد تیم *</div><input id="tmDLCode" type="text" placeholder="کد تیم..." class="sh-inp" style="direction:ltr;text-transform:uppercase;letter-spacing:2px" autocomplete="off" maxlength="8" onkeydown="if(event.key==='Enter')document.getElementById('tmDLPin').focus()"/></div><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px;font-weight:600">PIN شما *</div><input id="tmDLPin" type="password" placeholder="PIN..." class="sh-inp" style="direction:ltr;letter-spacing:4px" maxlength="8" onkeydown="if(event.key==='Enter')tmDoDirectLogin()"/></div><div id="tmDLErr" style="font-size:var(--fs-xs);color:var(--red);min-height:14px;text-align:center"></div><button id="tmDLBtn" class="sh-btn sh-btn-primary" onclick="tmDoDirectLogin()">🔑 ورود</button><div style="font-size:var(--fs-2xs);color:var(--t3);text-align:center;line-height:1.6">کد تیم و PIN که موقع عضویت تنظیم کردی رو وارد کن</div></div></div>
-<div class="sheet" id="shPush"><div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl">تنظیمات Push</div><button class="sh-x" onclick="closeAll()">×</button></div></div><div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)"><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px;font-weight:600">آدرس Worker</div><input id="pushUrlInp" type="url" placeholder="https://..." class="sh-inp" style="direction:ltr;font-size:12px" autocomplete="off" onkeydown="if(event.key==='Enter')savePushSettings()"/></div><button class="sh-btn sh-btn-primary" onclick="savePushSettings()">💾 ذخیره</button></div></div>
+<div class="sheet" id="shTimer"><div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl">ساعت شروع کار</div><button class="sh-x" onclick="closeAll()">×</button></div></div><div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)"><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px;font-weight:600">ساعت بازدید</div><input id="timerInput" type="time" style="width:100%;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 12px;font-size:var(--fs-sm);font-family:var(--f);color:var(--t1);outline:none;box-sizing:border-box" style="direction:ltr"/></div><button style="width:100%;height:46px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer;margin-top:8px" onclick="saveTimer()">💾 ذخیره</button></div></div>
+<div class="sheet" id="shWorkHours"><div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl">ساعت کاری</div><button class="sh-x" onclick="closeAll()">×</button></div></div><div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)"><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px;font-weight:600">پایان ساعت کاری</div><input id="workEndInput" type="time" style="width:100%;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 12px;font-size:var(--fs-sm);font-family:var(--f);color:var(--t1);outline:none;box-sizing:border-box" style="direction:ltr"/></div><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px;font-weight:600">شروع عصر</div><input id="eveningStartInput" type="time" style="width:100%;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 12px;font-size:var(--fs-sm);font-family:var(--f);color:var(--t1);outline:none;box-sizing:border-box" style="direction:ltr"/></div><button style="width:100%;height:46px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer;margin-top:8px" onclick="saveWorkHours()">💾 ذخیره</button></div></div>
+<div class="sheet" id="shArchive"><div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl">آرشیو</div><button class="sh-x" onclick="closeAll()">×</button></div></div><div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)"><input id="archiveSearchInp" type="text" placeholder="جستجو..." style="width:100%;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 12px;font-size:var(--fs-sm);font-family:var(--f);color:var(--t1);outline:none;box-sizing:border-box" oninput="renderArchiveList()" autocomplete="off"/><div id="archiveList" style="display:flex;flex-direction:column;gap:6px;max-height:60vh;overflow-y:auto"></div></div></div>
+<div class="sheet" id="shTmDirectLogin"><div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl">ورود به تیم</div><button class="sh-x" onclick="closeAll()">×</button></div></div><div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)"><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px;font-weight:600">کد تیم *</div><input id="tmDLCode" type="text" placeholder="کد تیم..." style="width:100%;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 12px;font-size:var(--fs-sm);font-family:var(--f);color:var(--t1);outline:none;box-sizing:border-box" style="direction:ltr;text-transform:uppercase;letter-spacing:2px" autocomplete="off" maxlength="8" onkeydown="if(event.key==='Enter')document.getElementById('tmDLPin').focus()"/></div><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px;font-weight:600">PIN شما *</div><input id="tmDLPin" type="password" placeholder="PIN..." style="width:100%;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 12px;font-size:var(--fs-sm);font-family:var(--f);color:var(--t1);outline:none;box-sizing:border-box" style="direction:ltr;letter-spacing:4px" maxlength="8" onkeydown="if(event.key==='Enter')tmDoDirectLogin()"/></div><div id="tmDLErr" style="font-size:var(--fs-xs);color:var(--red);min-height:14px;text-align:center"></div><button id="tmDLBtn" style="width:100%;height:46px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer;margin-top:8px" onclick="tmDoDirectLogin()">🔑 ورود</button><div style="font-size:var(--fs-2xs);color:var(--t3);text-align:center;line-height:1.6">کد تیم و PIN که موقع عضویت تنظیم کردی رو وارد کن</div></div></div>
+<div class="sheet" id="shPush"><div class="sh-handle"></div><div class="sh-head"><div class="sh-tr"><div class="sh-ttl">تنظیمات Push</div><button class="sh-x" onclick="closeAll()">×</button></div></div><div class="sh-body" style="display:flex;flex-direction:column;gap:var(--sp3)"><div><div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:6px;font-weight:600">آدرس Worker</div><input id="pushUrlInp" type="url" placeholder="https://..." style="width:100%;background:var(--bg2);border:1px solid var(--b1);border-radius:var(--r2);padding:10px 12px;font-size:var(--fs-sm);font-family:var(--f);color:var(--t1);outline:none;box-sizing:border-box" style="direction:ltr;font-size:12px" autocomplete="off" onkeydown="if(event.key==='Enter')savePushSettings()"/></div><button style="width:100%;height:46px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer;margin-top:8px" onclick="savePushSettings()">💾 ذخیره</button></div></div>
