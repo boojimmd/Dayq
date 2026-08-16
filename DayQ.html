@@ -287,7 +287,7 @@ html{
   transition:background-color 150ms ease-out,color 150ms ease-out;
 }
 body{
-  display:block !important;
+  display:block;
   font-family:var(--f);
   background:var(--bg0);
   color:var(--t1);
@@ -1192,7 +1192,7 @@ select.fi{
 .tc-status.doing svg,.tc-status.done-s svg{opacity:1;transform:scale(1);}
 
 /* done card — green tint */
-.tc.done-c{background:var(--am)!important;border-color:rgba(0,184,122,.18)!important;opacity:1!important;}
+.tc.done-c{background:var(--am)!important;border-color:rgba(0,184,122,.18)!important;opacity:1;}
 .tc.done-c .tc-txt{color:var(--a2);text-decoration:line-through;text-decoration-color:rgba(0,184,122,.4);}
 @keyframes doneSlide{from{transform:translateX(0);opacity:1;}to{transform:translateX(6px);opacity:.5;}}
 .tc.done-anim{animation:doneSlide .35s var(--ease) forwards;}
@@ -1868,9 +1868,9 @@ select.fi{
 
 @media print{
   .nav,.topbar,.qcap,.qcapToolbar,.nlpPreview,.tc-del,.tc-remind,
-  .mirror-wrap,.widget-row,.morning-intent,.overdue-modal{display:none!important;}
+  .mirror-wrap,.widget-row,.morning-intent,.overdue-modal{display:none;}
   .page{position:static!important;height:auto!important;overflow:visible!important;}
-  .tlist{display:block!important;}
+  .tlist{display:block;}
   .tc-wrap{break-inside:avoid;border:1px solid #ccc;margin-bottom:8px;border-radius:var(--r1);}
   body{background:#fff!important;color:#000!important;}
 }
@@ -3248,9 +3248,9 @@ select.fi{
 
 
 /* آیتم‌هایی که فقط در sidebar دسکتاپ نشان داده می‌شوند */
-.ni-desktop-only{display:none !important;}
+.ni-desktop-only{display:none;}
 @media(min-width:900px){
-  .ni-desktop-only{display:flex !important;}
+  .ni-desktop-only{display:flex;}
 }
 
 
@@ -3877,7 +3877,7 @@ select.fi{
   #tmSokoStatusContent > *, .tm-today-body{
     animation:none !important;
     transition:opacity 150ms linear !important;
-    transform:none !important;
+    transform:none;
   }
 }
 
@@ -3908,8 +3908,8 @@ select.fi{
 
 /* badge «از مدیر» — smaller, subtle */
 .tm-badge {
-  font-size:var(--fs-2xs) !important;
-  font-weight: 600 !important;
+  font-size:var(--fs-2xs);
+  font-weight: 600;
   padding: 1px 6px !important;
   opacity: .8;
 }
@@ -4169,7 +4169,7 @@ select.fi{
 
 
 
-  #tmHdrKpi { display:flex !important; }
+  #tmHdrKpi { display:flex; }
   /* هدر: border پایین + padding مناسب */
   /* Header الان داخل main هست — نه full-width */
   .tm-panel-main > .tm-panel-hdr {
@@ -4215,7 +4215,7 @@ select.fi{
 @media(min-width:900px){
   /* تقویم: block layout ساده */
   #pageCalendar.page.active {
-    display:block !important;
+    display:block;
     padding-left:280px;
     box-sizing:border-box;
   }
@@ -4317,8 +4317,8 @@ select.fi{
   flex-direction:column;
 }
 @media(min-width:900px){
-  .tm-panel-body{ flex-direction:row !important; overflow:hidden !important; }
-  .tm-panel-sidebar{ display:flex !important; }
+  .tm-panel-body{ flex-direction:row; overflow:hidden !important; }
+  .tm-panel-sidebar{ display:flex; }
 }
 /* ════ End Soko Panel Layout ════ */
 
@@ -4468,7 +4468,7 @@ select.fi{
     animation: none !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
-    transition: none !important;
+    transition: none;
   }
 }
 
@@ -4559,15 +4559,15 @@ select.fi{
 
 /* Panel: flex column, full screen */
 #tmSokoPanel {
-  display: flex !important;
-  flex-direction: column !important;
+  display: flex;
+  flex-direction: column;
   overflow: hidden !important;
 }
 
 /* Header: NEVER sticky (overflow:hidden parent breaks sticky) */
 #tmSokoPanel > .tm-panel-hdr {
   flex-shrink: 0 !important;
-  position: relative !important;  /* NOT sticky */
+  position: relative;  /* NOT sticky */
   z-index: 2 !important;
   min-height: auto !important;
 }
@@ -4576,25 +4576,25 @@ select.fi{
 #tmSokoPanel > .tm-panel-body {
   flex: 1 !important;
   overflow: hidden !important;
-  min-height: 0 !important;
-  display: flex !important;
+  min-height: 0;
+  display: flex;
 }
 
 /* Main: scrollable */
 #tmSokoPanel .tm-panel-main {
   flex: 1 !important;
-  overflow-y: auto !important;
-  min-height: 0 !important;
+  overflow-y: auto;
+  min-height: 0;
   padding: 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Panes: take full height of main */
 #tmSokoPanel .tm-tab-pane {
   flex: 1 !important;
-  overflow-y: auto !important;
-  min-height: 0 !important;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 /* ══════════════════════════════════════════════ */
@@ -4606,8 +4606,8 @@ select.fi{
 
 /* Panel خودش */
 #tmSokoPanel {
-  display: flex !important;
-  flex-direction: column !important;
+  display: flex;
+  flex-direction: column;
   overflow: hidden !important;
   background: var(--bg0) !important;
 }
@@ -4615,7 +4615,7 @@ select.fi{
 /* Header: fixed height, never collapse */
 #tmSokoPanel > .tm-panel-hdr {
   flex: 0 0 auto !important;
-  position: relative !important;
+  position: relative;
   z-index: 2 !important;
   background: var(--bg0) !important;
   backdrop-filter: none !important;
@@ -4626,37 +4626,37 @@ select.fi{
 #tmSokoPanel > .tm-panel-body {
   flex: 1 1 0 !important;
   overflow: hidden !important;
-  display: flex !important;
-  flex-direction: row !important;
-  min-height: 0 !important;
+  display: flex;
+  flex-direction: row;
+  min-height: 0;
 }
 
 /* Main: flex:1 scroll */
 #tmSokoPanel .tm-panel-main {
   flex: 1 1 0 !important;
-  overflow-y: auto !important;
-  min-height: 0 !important;
+  overflow-y: auto;
+  min-height: 0;
   min-width: 0 !important;
   padding: 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
+  display: flex;
+  flex-direction: column;
   order: 1 !important;
 }
 
 /* Tab panes */
 #tmSokoPanel .tm-tab-pane {
   flex: 1 1 0 !important;
-  overflow-y: auto !important;
-  min-height: 0 !important;
+  overflow-y: auto;
+  min-height: 0;
 }
 
 /* Sidebar: OPAQUE — no bleed-through */
 #tmSokoPanel .tm-panel-sidebar {
   flex: 0 0 200px !important;
   width: 200px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  overflow-y: auto !important;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
   background: var(--bg1) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
@@ -4715,7 +4715,7 @@ select.fi{
 .ttd-bubble.is-own.from-manager {
   background: var(--a) !important; color: #fff !important;
   border-radius: 12px 12px 2px 12px !important;
-  border: none !important;
+  border: none;
 }
 .ttd-bubble.is-own.from-member {
   background: var(--a) !important; color: #fff !important;
@@ -4728,7 +4728,7 @@ select.fi{
 }
 .ttd-bubble.is-own .ttd-bubble-time { color: rgba(255,255,255,.75) !important; }
 .ttd-bubble.is-own .ttd-tick { color: rgba(255,255,255,.7) !important; }
-.ttd-bubble.is-own .ttd-tick-read { color: #fff !important; opacity: 1 !important; }
+.ttd-bubble.is-own .ttd-tick-read { color: #fff !important; opacity: 1 ; }
 
 
 /* inbox unread message banner */
@@ -4807,7 +4807,7 @@ body:has(#tmSokoPanel.open) #ov {
 .ttd-bubble:nth-child(3){animation-delay:80ms}
 .ttd-bubble:nth-child(n+4){animation-delay:120ms}
 .ttd-bubble.is-new{animation-delay:0ms!important}
-.ttd-bubble.is-own{align-self:flex-start!important;background:var(--a)!important;color:#fff!important;border:none!important;border-radius:var(--r3) 4px 16px 16px!important;margin-left:15%!important}
+.ttd-bubble.is-own{align-self:flex-start!important;background:var(--a)!important;color:#fff!important;border:none;border-radius:var(--r3) 4px 16px 16px!important;margin-left:15%!important}
 .ttd-bubble:not(.is-own){align-self:flex-end!important;background:var(--bg2)!important;color:var(--t1)!important;border:1px solid var(--b1)!important;border-radius:var(--r1) 16px 16px 16px!important;margin-right:15%!important}
 .ttd-bubble-body{font-size:var(--fs-xs);line-height:var(--lh-base)5;word-break:break-word}
 .ttd-bubble-foot{display:flex;align-items:center;justify-content:flex-end;gap:var(--sp1);margin-top:3px}
@@ -4816,9 +4816,9 @@ body:has(#tmSokoPanel.open) #ov {
 .ttd-day-div{text-align:center;font-size:var(--fs-xs);color:var(--t3);padding:var(--sp1) 0;display:flex;align-items:center;gap:var(--sp2);direction:ltr}
 .ttd-day-div::before,.ttd-day-div::after{content:'';flex:1;height:1px;background:var(--b2)}
 .ttd-sys-msg{text-align:center;font-size:var(--fs-xs);color:var(--t3);background:var(--bg2);border-radius:var(--r2);padding:3px 12px;margin:4px auto;max-width:80%}
-.ttd-reply-inp{flex:1!important;background:var(--bg2)!important;border:1px solid var(--b1)!important;border-radius:20px!important;padding:9px 14px!important;font-size:var(--fs-xs)!important;font-family:var(--f)!important;direction:rtl;outline:none!important;resize:none!important;line-height:var(--lh-tight)!important;transition:border-color 150ms ease}
+.ttd-reply-inp{flex:1!important;background:var(--bg2)!important;border:1px solid var(--b1)!important;border-radius:20px!important;padding:9px 14px!important;font-size:var(--fs-xs);font-family:var(--f);direction:rtl;outline:none;resize:none!important;line-height:var(--lh-tight);transition:border-color 150ms ease}
 .ttd-reply-inp:focus{outline:none;}
-.ttd-reply-send{width:36px!important;height:36px!important;border-radius:50%!important;background:var(--a)!important;border:none!important;cursor:pointer!important;display:flex!important;align-items:center!important;justify-content:center!important;flex-shrink:0!important;transition:opacity 150ms ease}
+.ttd-reply-send{width:36px!important;height:36px!important;border-radius:50%!important;background:var(--a)!important;border:none;cursor:pointer;display:flex;align-items:center!important;justify-content:center!important;flex-shrink:0!important;transition:opacity 150ms ease}
 .ttd-reply-send:active{opacity:.8}
 
 /* ── Empty State ── */
@@ -5035,7 +5035,7 @@ body.show-dpanel #dpanel {
 /* ══ Calendar digit fix — Persian numerals ══ */
 .jdp-day, .jci-day, .cal-day, .wv-day-num,
 .cal-month-day, .sb-day, .cal-header-day {
-  font-family: var(--f) !important;
+  font-family: var(--f);
 }
 
 
@@ -5089,7 +5089,7 @@ input, textarea, select { outline: none; }
 /* ── Color variants ── */
 .btn-amber { background: var(--ambm); color: var(--amber); border: 1px solid var(--amber-20); }
 .btn-blue  { background: var(--bluem); color: var(--blue);  border: 1px solid rgba(59,130,246,.3); }
-.btn-pill  { border-radius: var(--r5) !important; }
+.btn-pill  { border-radius: var(--r5); }
 
 /* ── Flex buttons ── */
 .btn-flex  { flex: 1; }
@@ -5169,7 +5169,24 @@ input, textarea, select { outline: none; }
 }
 .pg-row:last-child { border-bottom: none; }
 order-bottom: none; }
-</style>
+
+/* ── Extracted long inline styles ── */
+.tc-blocked-note {
+  margin: 2px 18px 6px;
+  padding: var(--sp3) var(--sp3);
+  background: var(--bg2);
+  border-radius: var(--r2);
+  border: 1px solid var(--b1);
+  font-size: var(--fs-xs);
+}
+.reset-code-modal {
+  position: absolute;
+  top: 18%;
+  left: calc((100vw - 220px) / 2);
+  transform: translateX(-50%);
+  width: min(540px, 90vw);
+  z-index: 9999;
+}</style>
 </head>
 <body>
 <div id="app">
