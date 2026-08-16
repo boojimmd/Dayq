@@ -3114,13 +3114,13 @@ select.fi{
   .topbar{right:190px;}
   .sheet{left:calc(280px + (100vw - 190px - 280px) / 2);}
   .toast{right:calc(190px + 16px);}
-  #dpanel{width:280px;}
+  
   .page{margin-right:190px;}
   #pageHome{margin-left:280px;margin-right:190px;}
 }
 
 @media(min-width:1200px) and (max-width:1399px){
-  #dpanel{width:300px;}
+  
   #pageHome{margin-left:300px;}
 }
 
@@ -5093,6 +5093,81 @@ input, textarea, select { outline: none; }
 
 /* ── Flex buttons ── */
 .btn-flex  { flex: 1; }
+
+/* ════════════════════════════════════════
+   DESKTOP SIDEBAR — unified system
+   nav (right) + dpanel (left) = همسان
+   ════════════════════════════════════════ */
+
+/* ── Shared sidebar tokens ── */
+:root {
+  --sidebar-bg:    var(--bg1);
+  --sidebar-border: var(--b1);
+  --sidebar-shadow: none;
+  --nav-width:  220px;
+  --panel-width: 260px;
+}
+
+/* ── Nav (right sidebar on desktop) ── */
+@media(min-width:900px) {
+  .nav {
+    background: var(--sidebar-bg);
+    border-left: 1px solid var(--sidebar-border);
+    border-top: none;
+  }
+}
+
+/* ── dpanel (left panel on desktop) ── */
+@media(min-width:900px) {
+  #dpanel {
+    width: var(--panel-width);
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--sidebar-border);
+    box-shadow: none;
+  }
+  body.show-dpanel #dpanel {
+    background: var(--sidebar-bg);
+    border-right: 1px solid var(--sidebar-border);
+  }
+}
+
+/* ════════════════════════════════════════
+   PAGE SHARED COMPONENTS
+   — یه convention برای همه صفحات —
+   ════════════════════════════════════════ */
+.pg-card {
+  background: var(--bg1);
+  border-radius: var(--r3);
+  border: 1px solid var(--b1);
+  padding: var(--sp4);
+  overflow: hidden;
+}
+.pg-section {
+  margin-bottom: var(--sp5);
+}
+.pg-section-lbl {
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  color: var(--t3);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin-bottom: var(--sp3);
+  padding: 0 var(--sp1);
+}
+.pg-empty {
+  text-align: center;
+  padding: var(--sp6) var(--sp4);
+  color: var(--t3);
+  font-size: var(--fs-sm);
+}
+.pg-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp3);
+  padding: var(--sp3) 0;
+  border-bottom: 1px solid var(--b2);
+}
+.pg-row:last-child { border-bottom: none; }
 </style>
 </head>
 <body>
