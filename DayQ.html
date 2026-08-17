@@ -6801,6 +6801,15 @@ function boot(){
   // quick capture
   const qi=document.getElementById('qcapInp');
   qi.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); quickCapture(); } if(e.key==='Escape'){ qi.blur(); document.getElementById('qcapToolbar').classList.remove('show'); const np=document.getElementById('nlpPreview');if(np){np.style.display='none';np.innerHTML='';} } });
+  // iOS: "Done" key fires compositionend/blur not keydown+Enter
+  let _qcBlurTimer=null;
+  qi.addEventListener('blur',()=>{
+    _qcBlurTimer=setTimeout(()=>{
+      const v=qi.value.trim();
+      if(v) quickCapture();
+    },150);
+  });
+  qi.addEventListener('focus',()=>{ if(_qcBlurTimer){clearTimeout(_qcBlurTimer);_qcBlurTimer=null;} });
   qi.addEventListener('focus', ()=>{qcShowToolbar();showCoachMark('qcapInp','فقط بنویس — تاریخ، ساعت، و اولویت را خودش از روی متن می‌فهمد','qcap','below');});
   qi.addEventListener('blur',  ()=>{ 
     qcHideToolbar(); 
@@ -8693,6 +8702,7 @@ function qcapKeyDown(e){
 }
 
 function quickCapture(){
+  try{
   let raw=document.getElementById('qcapInp').value.trim();
   // اگه input خالیه ولی NLP parse شده بود (مثلاً blur زودتر clear کرد)
   if(!raw && _nlpParsed && _nlpParsed.cleanText) raw=_nlpParsed.cleanText;
@@ -8762,6 +8772,7 @@ function quickCapture(){
     toast_(svgIco('check'),'«'+shortText+'» ثبت شد'+remindHint+(extras.length?' ('+extras.join(' ')+')':''));
   }
   if(cfg.confetti) spawnConfetti({clientX:window.innerWidth*.5,clientY:160});
+  }catch(e){console.error("[QC]",e);toast_(svgIco("x"),"خطا: "+e.message);}
 }
 function addTask(){
   const txt=document.getElementById('taskTitleInput').value.trim();if(!txt){document.getElementById('taskTitleInput').focus();return;}
