@@ -19842,19 +19842,6 @@ setTimeout(function(){
 },50);
 
 
-boot();
-// IDB safety check: 50ms بعد از boot
-setTimeout(function(){
-  _idbRestoreCheck(function(restored){
-    if(restored){
-      // data از IDB برگشت — reload تا اعمال بشه
-      console.log('[DayQ] reloading with restored data...');
-      setTimeout(function(){window.location.reload();},100);
-    }
-  });
-},50);
-
-
 </script>
 
 
