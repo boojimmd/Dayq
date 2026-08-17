@@ -1677,7 +1677,7 @@ select.fi{
 .tc-wrap.bulk-selected .bulk-chk svg{opacity:1;transform:scale(1);}
 
 /* Bulk mode — dim non-selected */
-.bulk-mode .tc-wrap:not(.bulk-selected) .tc{opacity:.55;}
+.bulk-mode .bulk-mode .tc-wrap:not(.bulk-selected) .tc{opacity:.55;}
 
 /* Action bar */
 .bulk-bar{
@@ -1817,7 +1817,7 @@ select.fi{
   .nav,.topbar,.qcap,.qcapToolbar,.nlpPreview,.tc-del,.tc-remind,
   .mirror-wrap,.widget-row,.morning-intent,.overdue-modal{display:none!important;}
   .page{position:static!important;height:auto!important;overflow:visible!important;}
-  .tlist{display:block!important;}
+  .tlist{display:flex!important;}
   .tc-wrap{break-inside:avoid;border:1px solid #ccc;margin-bottom:8px;border-radius:var(--r1);}
   body{background:#fff!important;color:#000!important;}
 }
@@ -6801,15 +6801,7 @@ function boot(){
   // quick capture
   const qi=document.getElementById('qcapInp');
   qi.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); quickCapture(); } if(e.key==='Escape'){ qi.blur(); document.getElementById('qcapToolbar').classList.remove('show'); const np=document.getElementById('nlpPreview');if(np){np.style.display='none';np.innerHTML='';} } });
-  // iOS: "Done" key fires compositionend/blur not keydown+Enter
-  let _qcBlurTimer=null;
-  qi.addEventListener('blur',()=>{
-    _qcBlurTimer=setTimeout(()=>{
-      const v=qi.value.trim();
-      if(v) quickCapture();
-    },150);
-  });
-  qi.addEventListener('focus',()=>{ if(_qcBlurTimer){clearTimeout(_qcBlurTimer);_qcBlurTimer=null;} });
+
   qi.addEventListener('focus', ()=>{qcShowToolbar();showCoachMark('qcapInp','فقط بنویس — تاریخ، ساعت، و اولویت را خودش از روی متن می‌فهمد','qcap','below');});
   qi.addEventListener('blur',  ()=>{ 
     qcHideToolbar(); 
