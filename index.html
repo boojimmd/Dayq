@@ -1109,7 +1109,7 @@ select.fi{
 .cal-wd{padding:9px 0;text-align:center;font-size:var(--fs-2xs);font-weight:700;color:var(--t3);letter-spacing:.03em;}
 .cal-wd:first-child{color:var(--red);}/* شنبه */
 .cal-days{display:grid;grid-template-columns:repeat(7,1fr);}
-.cal-day{padding:var(--sp2) 5px 6px;height:86px;position:relative;cursor:pointer;transition:var(--dur-fast) var(--ease-out);border-right:1px solid var(--b2);border-bottom:1px solid var(--b2);display:flex;flex-direction:column;align-items:flex-start;overflow:hidden;}
+.cal-day{padding:var(--sp2) 5px 6px;min-height:86px;height:auto;max-height:110px;position:relative;cursor:pointer;transition:var(--dur-fast) var(--ease-out);border-right:1px solid var(--b2);border-bottom:1px solid var(--b2);display:flex;flex-direction:column;align-items:flex-start;overflow:hidden;}
 .cal-day:nth-child(7n){border-right:none;}
 @media(hover:hover){.cal-day:hover{background:var(--bg2);}}
 .cal-day:active{background:var(--bg3);transform:scale(.97);}
@@ -1122,7 +1122,7 @@ select.fi{
 .cal-day.selected{background:var(--am);}
 .cal-day.today.selected .cal-day-num{box-shadow:0 0 0 3px var(--a-20);}
 .cal-day-num{font-size:1.05rem;font-weight:800;color:var(--t1);width:30px;height:30px;display:flex;align-items:center;justify-content:center;margin-bottom:4px;}
-.cal-day-holiday{font-size:.6rem;color:var(--red);font-weight:600;line-height:var(--lh-tight);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;margin-bottom:2px;}
+.cal-day-holiday{font-size:var(--fs-2xs);color:var(--red);font-weight:700;line-height:var(--lh-tight);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0;max-width:100%;margin-bottom:2px;}
 .cal-day-evts{display:flex;flex-direction:column;gap:1.5px;width:100%;align-items:stretch;overflow:hidden;}
 .cal-evt-chip{font-size:.56rem;font-weight:600;padding:1.5px 5px;border-radius:var(--r1);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:var(--lh-tight)5;text-align:right;flex-shrink:0;}
 .cal-evt-more{font-size:var(--fs-2xs);color:var(--t3);font-weight:700;padding:0 4px;}
@@ -4140,7 +4140,7 @@ round 120ms ease,transform 120ms ease,opacity 120ms ease; }
 
 
 /* ── تعطیل رسمی: سلول قرمز کمرنگ ── */
-.cal-day.is-holiday { background:color-mix(in srgb,var(--red) 6%,var(--bg1)); }
+.cal-day.is-holiday { background:color-mix(in srgb,var(--red) 8%,var(--bg1)); border-bottom: 2px solid rgba(229,62,90,.3); }
 .cal-day.is-holiday .cal-day-num { color:var(--red); font-weight:700; }
 
 
@@ -6866,11 +6866,7 @@ function _tmSbSel(uuid){
   {id:'flag',c:'var(--red)',s:`<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" stroke-width="1.5"/><line x1="4" y1="22" x2="4" y2="15" stroke-width="1.5"/>`},
 ];
 const iconMap={};ICONS.forEach(i=>iconMap[i.id]=i);
-function svgIco(id,w=16){const ic=iconMap[id]||iconMap.check;return`<svg viewBox="0 0 24 24" width="${w}" height="${w}" fill="none" stroke="${ic.c}" stroke-linecap="round" stroke-linejoin="round">${ic.s}</svg>`;}
-
-/* ══ STATE ══ */
-<script>
-const SK='dq5_t',SB='dq5_b',SS='dq5_s',SD='dq5_bd';
+function svgIco(id,w=16){const ic=iconMap[id]||iconMap.check;return`<svg viewBox="0 0 24 24" width="${w}" height="${w}" fill="none" stroke="$const SK='dq5_t',SB='dq5_b',SS='dq5_s',SD='dq5_bd';
 let birthdays=[];
 let tasks=[],bagItems=[];
 let cfg={theme:'auto',persian:true,confetti:false,name:'',company:'',city:'',visitTime:'09:00',mood:0,reflect:false,timeline:false,reflection:'',workEndTime:'18:00',eveningStart:'17:00',autoArchiveDays:30,autoArchiveOn:true,pushWorkerUrl:'',syncCode:''};
@@ -11705,20 +11701,26 @@ function refreshCalDayTasks(dateKey){
   }
 }
 function calAddTask(){
-  if(!calSelDate)return;
-  // open add task sheet with deadline pre-filled
-  loadProjects(); buildProjSelector();
-  selTaskStatus='todo'; selTaskProjId=''; resetJDPFields();
-  // pre-fill deadline
-  const [jy,jm,jd]=calSelDate.split('-').map(Number);
-  jciSelect('cmdDeadline',calSelDate,jd,jm,jy);
-  // rebuild icon grid fresh
-  buildIconGrid('iconGrid',false);
-  // reset status pills
-  document.querySelectorAll('.stp').forEach(b=>b.classList.remove('todo-s','doing-s','done-ss','sel-status'));
-  const tp=document.querySelector('.stp[data-st="todo"]');
-  if(tp)tp.classList.add('todo-s','sel-status');
-  openSheet('shTask');
+  if(!calSelDate){toast_(svgIco('x'),'ابتدا یک روز انتخاب کن');return;}
+  try{
+    loadProjects();
+    buildProjSelector();
+    selTaskStatus='todo';
+    selTaskProjId='';
+    resetJDPFields();
+    var parts=calSelDate.split('-').map(Number);
+    var jy=parts[0],jm=parts[1],jd=parts[2];
+    jciSelect('cmdDeadline',calSelDate,jd,jm,jy);
+    try{buildIconGrid('iconGrid',false);}catch(e2){}
+    document.querySelectorAll('.stp').forEach(function(b){b.classList.remove('todo-s','doing-s','done-ss','sel-status');});
+    var tp=document.querySelector('.stp[data-st="todo"]');
+    if(tp)tp.classList.add('todo-s','sel-status');
+    openSheet('shTask');
+  }catch(e){
+    console.error('[calAddTask]',e);
+    // fallback: فقط sheet رو باز کن
+    openSheet('shTask');
+  }
 }
 
 function isJalaliLeap(jy){
@@ -20027,6 +20029,13 @@ setTimeout(function(){
     if(restored){
       // data از IDB برگشت — reload تا اعمال بشه
       console.log('[DayQ] reloading with restored data...');
+      setTimeout(function(){window.location.reload();},100);
+    }
+  });
+},50);
+
+
+stored data...');
       setTimeout(function(){window.location.reload();},100);
     }
   });
