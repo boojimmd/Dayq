@@ -6788,6 +6788,14 @@ function boot(){
     if(lastPri){qcPri=lastPri;qcSetPri(lastPri,null);}
   }catch(e){}
   // ── Home init — همیشه در boot اجرا میشه ──
+  // force remove/add active cycle — مثل navigation واقعی
+  (function(){
+    var ph=document.getElementById('pageHome');
+    if(ph){
+      ph.classList.remove('active');
+      void ph.offsetWidth; // force reflow
+    }
+  })();
   goPage('Home');
   renderBag();updateMeStats();
   sbInit();
