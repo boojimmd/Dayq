@@ -6764,13 +6764,8 @@ function boot(){
   try{
     const lastTab=localStorage.getItem('dq5_lastTab');
     if(lastTab&&['all','today','tomorrow','done','waiting','projects'].includes(lastTab)){
-      curTab=lastTab;
-      // validate: اگه filter خالی بود به all برگرد
-      const _tabCheck=lastTab==='all'?tasks.filter(t=>!t.archived&&!t.someday):
-        lastTab==='today'?tasks.filter(t=>!t.done&&t.deadline===mrTodayKey()):
-        lastTab==='tomorrow'?tasks.filter(t=>!t.done&&t.deadline===getTomorrowKey()):
-        tasks;
-      if(_tabCheck.length===0&&tasks.length>0) curTab='all';
+      // همیشه با 'all' render کن — lastTab فقط برای انتخاب دکمه
+      curTab='all';
       const btn=document.querySelector(`.sg[data-tab="${lastTab}"]`);
       if(btn){document.querySelectorAll('.sg').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
     }
