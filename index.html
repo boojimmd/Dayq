@@ -6774,8 +6774,11 @@ function boot(){
     const lastPri=localStorage.getItem('dq5_lastPri');
     if(lastPri){qcPri=lastPri;qcSetPri(lastPri,null);}
   }catch(e){}
-  renderTasks();renderBag();updateMeStats();
+  // ابتدا goPage صدا زده میشه — بعد renderTasks
+  // (renderTasks باید بعد از active شدن pageHome صدا زده بشه)
+  renderBag();updateMeStats();
   sbInit();
+  setTimeout(()=>{ renderTasks(); },10);
   // re-render پس از اطمینان از آماده بودن DOM
   setTimeout(()=>renderTasks(),50);
   // DIAG: نمایش تعداد تسک روی صفحه
