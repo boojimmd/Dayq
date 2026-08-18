@@ -6994,6 +6994,16 @@ function boot(){
   setTimeout(_syncLayoutVars, 350); // بعد از لود کامل فونت، دوباره چک کن
   window.addEventListener('resize', _syncLayoutVars);
   window.addEventListener('orientationchange', ()=>setTimeout(_syncLayoutVars, 200));
+
+  // ── Final render: مطمئن شو تسک‌ها نمایش داده میشن ──
+  // دقیقاً مثل quickCapture: goPage سپس renderTasks
+  setTimeout(function(){
+    goPage('Home');
+    setTimeout(function(){
+      renderTasks();
+      applyWidgets();
+    }, 10);
+  }, 200);
   // focus timer
 }
 
