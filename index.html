@@ -6786,7 +6786,9 @@ function boot(){
     const lastPri=localStorage.getItem('dq5_lastPri');
     if(lastPri){qcPri=lastPri;qcSetPri(lastPri,null);}
   }catch(e){}
-  renderTasks();renderBag();updateMeStats();
+  // ── Home init — همیشه در boot اجرا میشه ──
+  goPage('Home');
+  renderBag();updateMeStats();
   sbInit();
 
   // overdue modal — فقط صبح (۶ تا ۱۲) نشون بده
@@ -7159,6 +7161,7 @@ function goPage(n){
     var _calDP=document.getElementById('calDayPanelDesktop');
     if(_calDP)_calDP.style.display=n==='Calendar'&&window.innerWidth>=900?'flex':'none';
   }
+  if(n==='Home')      { renderTasks(); applyWidgets(); updateMeta(); }
   if(n==='Me')       { setGreeting(); syncProfile(); updateMeStats(); if(window.innerWidth>=900) renderMeDashboard(); }
   if(n==='Bag')       { renderBag(); }
   if(n==='Birthdays') { renderBirthdayPage(); }
