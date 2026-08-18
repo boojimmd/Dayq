@@ -6765,6 +6765,12 @@ function boot(){
     const lastTab=localStorage.getItem('dq5_lastTab');
     if(lastTab&&['all','today','tomorrow','done','waiting','projects'].includes(lastTab)){
       curTab=lastTab;
+      // validate: اگه filter خالی بود به all برگرد
+      const _tabCheck=lastTab==='all'?tasks.filter(t=>!t.archived&&!t.someday):
+        lastTab==='today'?tasks.filter(t=>!t.done&&t.deadline===mrTodayKey()):
+        lastTab==='tomorrow'?tasks.filter(t=>!t.done&&t.deadline===getTomorrowKey()):
+        tasks;
+      if(_tabCheck.length===0&&tasks.length>0) curTab='all';
       const btn=document.querySelector(`.sg[data-tab="${lastTab}"]`);
       if(btn){document.querySelectorAll('.sg').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
     }
@@ -6775,6 +6781,8 @@ function boot(){
   }catch(e){}
   renderTasks();renderBag();updateMeStats();
   sbInit();
+  // re-render پس از اطمینان از آماده بودن DOM
+  setTimeout(()=>renderTasks(),50);
   // DIAG: نمایش تعداد تسک روی صفحه
   setTimeout(()=>{
     const list=document.getElementById("taskList");
