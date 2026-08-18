@@ -293,7 +293,7 @@ input,textarea{user-select:text;-webkit-user-select:text;}
   background:var(--bg0);
   z-index:1;
 }
-.page.active{display:block;animation:pIn .26s var(--spring);z-index:3;}
+.page.active{display:block;animation:pIn .26s var(--spring);z-index:3;opacity:1;}
 .page.leaving{display:block;animation:pOut .22s var(--ease) forwards;z-index:2;}
 .page::-webkit-scrollbar{display:none;}
 @keyframes pIn{from{opacity:0;transform:translateY(10px) scale(.985);}to{opacity:1;transform:none;}}
@@ -3087,7 +3087,7 @@ select.fi{
   from{opacity:1;transform:translateY(0);}
   to{opacity:0;transform:translateY(-6px);}
 }
-.page.active{animation:pIn var(--dur-base) var(--ease-out) both;}
+.page.active{animation:pIn var(--dur-base) var(--ease-out) forwards;}
 
 /* ── Toast ── */
 /* toast — transition به جای keyframe (Emil: keyframe روی rapidly-triggered reset می‌شه) */
