@@ -19096,19 +19096,30 @@ async function tmApproveTask(taskId,approve){
 }
 function _idbRestoreCheck(onDone){
   var SK='dq5_t', SS='dq5_s', SB='dq5_b', SD='dq5_bd';
-  var raw=localStorage.getItem(SK);
-  var isEmpty=!raw||raw==='[]'||raw==='null';
-  if(!isEmpty){onDone(false);return;}
+  // همیشه IDB رو چک کن — نه فقط وقتی localStorage خالیه
   Promise.all([_idbGet(SK),_idbGet(SS),_idbGet(SB),_idbGet(SD)])
     .then(function(vals){
-      var tasks=vals[0],cfg=vals[1],bag=vals[2],bd=vals[3];
-      if(!tasks||tasks==='[]'){onDone(false);return;}
-      if(tasks)localStorage.setItem(SK,tasks);
-      if(cfg)localStorage.setItem(SS,cfg);
-      if(bag)localStorage.setItem(SB,bag);
-      if(bd)localStorage.setItem(SD,bd);
-      console.log('[DayQ] ✅ IDB restore: data recovered');
-      onDone(true);
+      var idbTasks=vals[0],idbCfg=vals[1],idbBag=vals[2],idbBd=vals[3];
+      if(!idbTasks||idbTasks==='[]'||idbTasks==='null'){onDone(false);return;}
+      
+      // مقایسه تعداد تسک در localStorage vs IDB
+      var lsRaw=localStorage.getItem(SK);
+      var lsTasks=[];
+      try{lsTasks=JSON.parse(lsRaw)||[];}catch(e){}
+      var idbTasksArr=[];
+      try{idbTasksArr=JSON.parse(idbTasks)||[];}catch(e){}
+      
+      // اگه IDB تسک بیشتری داشت یا localStorage خالی بود
+      if(idbTasksArr.length>lsTasks.length||!lsRaw||lsRaw==='[]'){
+        if(idbTasks)localStorage.setItem(SK,idbTasks);
+        if(idbCfg)localStorage.setItem(SS,idbCfg);
+        if(idbBag)localStorage.setItem(SB,idbBag);
+        if(idbBd)localStorage.setItem(SD,idbBd);
+        console.log('[DayQ] IDB restore: '+idbTasksArr.length+' tasks vs localStorage '+lsTasks.length);
+        onDone(true);
+      } else {
+        onDone(false);
+      }
     }).catch(function(){onDone(false);});
 }
 function _calRender(){if(typeof renderCal==='function')renderCal();else if(typeof calInit==='function')calInit();}
