@@ -5019,7 +5019,35 @@ body.show-dpanel #dpanel {
   opacity:1 !important;
   display:flex !important;
 }
-#dtlView{display:none;} /* hidden by default, shown by team init */</style>
+#dtlView{display:none;} /* hidden by default, shown by team init */
+/* overdue-modal sheet fix */
+.overdue-sheet{
+  background:var(--bg1);
+  border-radius:var(--r4) var(--r4) 0 0;
+  width:100%;max-width:480px;
+  padding:var(--sp5) var(--sp4) calc(var(--sp5) + env(safe-area-inset-bottom,0px));
+  transform:translateY(100%);
+  transition:transform 280ms cubic-bezier(0.32,0.72,0,1);
+}
+.overdue-sheet.show-sheet{transform:translateY(0);}
+.ov-simple-q{
+  font-size:var(--fs-xl);font-weight:700;
+  margin-bottom:var(--sp5);
+  line-height:var(--lh-relaxed);
+  color:var(--t1);
+}
+.ov-simple-btns{display:flex;flex-direction:column;gap:var(--sp3);}
+.ov-simple-btn{
+  border:none;border-radius:var(--r2);
+  padding:14px;font-size:var(--fs-md);
+  font-weight:700;cursor:pointer;
+  font-family:var(--f);
+  transition:opacity var(--dur-fast);
+}
+.ov-simple-btn:active{opacity:.8;}
+.ov-simple-btn.yes{background:var(--am);color:var(--a);}
+.ov-simple-btn.pick{background:var(--bg2);color:var(--t1);border:1px solid var(--b1);}
+.ov-simple-btn.no{background:transparent;color:var(--t3);font-size:var(--fs-sm);padding:var(--sp2);}</style>
 </head>
 <body>
 <div id="app">
@@ -6694,18 +6722,7 @@ function _tmSbSel(uuid){
   {id:'drop',c:'var(--blue)',s:`<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" stroke-width="1.5"/>`},
   {id:'smile',c:'var(--amber)',s:`<circle cx="12" cy="12" r="10" stroke-width="1.5"/><path d="M8 14s1.5 2 4 2 4-2 4-2" stroke-width="1.5"/><line x1="9" y1="9" x2="9.01" y2="9" stroke-width="2.5"/><line x1="15" y1="9" x2="15.01" y2="9" stroke-width="2.5"/>`},
   {id:'camera',c:'var(--purple)',s:`<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" stroke-width="1.5"/><circle cx="12" cy="13" r="4" stroke-width="1.4"/>`},
-  {id:'pin',c:'var(--red)',s:`<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke-width="1.5"/><circle cx="12" cy="10" r="3" stroke-width="1.4"/>`},
-  {id:'book',c:'var(--blue)',s:`<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke-width="1.5"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke-width="1.5"/>`},
-  {id:'bell',c:'var(--amber)',s:`<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke-width="1.5"/><path d="M13.73 21a2 2 0 0 1-3.46 0" stroke-width="1.5"/>`},
-  {id:'medal',c:'var(--amber)',s:`<circle cx="12" cy="8" r="6" stroke-width="1.5"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11" stroke-width="1.5"/>`},
-  {id:'flag',c:'var(--red)',s:`<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" stroke-width="1.5"/><line x1="4" y1="22" x2="4" y2="15" stroke-width="1.5"/>`},
-];
-const iconMap={};ICONS.forEach(i=>iconMap[i.id]=i);
-function svgIco(id,w=16){const ic=iconMap[id]||iconMap.check;return`<svg viewBox="0 0 24 24" width="${w}" height="${w}" fill="none" stroke="${ic.c}" stroke-linecap="round" stroke-linejoin="round">${ic.s}</svg>`;}
-
-/* ══ STATE ══ */
-<script>
-const SK='dq5_t',SB='dq5_b',SS='dq5_s',SD='dq5_bd';
+  {id:'pin',c:'var(--red)',s:`<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke-width="1.5"/const SK='dq5_t',SB='dq5_b',SS='dq5_s',SD='dq5_bd';
 let birthdays=[];
 let tasks=[],bagItems=[];
 let cfg={theme:'auto',persian:true,confetti:false,name:'',company:'',city:'',visitTime:'09:00',mood:0,reflect:false,timeline:false,reflection:'',workEndTime:'18:00',eveningStart:'17:00',autoArchiveDays:30,autoArchiveOn:true,pushWorkerUrl:'',syncCode:''};
@@ -7410,19 +7427,20 @@ function showOverdueModal(){
   if(!overdue.length){ checkMorningIntent(); return; }
   const modal=document.getElementById('overdueModal');
   if(!modal) return;
-  // Simple one-question approach
-  const inner=document.createElement('div');
-  inner.className='ov-simple';
-  inner.innerHTML=`
-    <div class="ov-simple-q">${num(overdue.length)} کار از دیروز موند<br>همه رو به امروز منتقل کنم؟</div>
-    <div class="ov-simple-btns">
-      <button class="ov-simple-btn yes" onclick="overdueAllToday()">✓ بله، همه رو بیار امروز</button>
-      <button class="ov-simple-btn pick" onclick="overduePickMode()">انتخاب کنم</button>
-      <button class="ov-simple-btn no" onclick="closeOverdueModal()">رد کن</button>
+  // محتوا داخل کارت (overdue-sheet) — نه مستقیم روی overlay
+  modal.innerHTML=`
+    <div class="overdue-sheet">
+      <div class="ov-simple">
+        <div class="ov-simple-q">${num(overdue.length)} کار از دیروز موند<br>همه رو به امروز منتقل کنم؟</div>
+        <div class="ov-simple-btns">
+          <button class="ov-simple-btn yes" onclick="overdueAllToday()">✓ بله، همه رو بیار امروز</button>
+          <button class="ov-simple-btn pick" onclick="overduePickMode()">انتخاب کنم</button>
+          <button class="ov-simple-btn no" onclick="closeOverdueModal()">رد کن</button>
+        </div>
+      </div>
     </div>`;
-  modal.innerHTML='';
-  modal.appendChild(inner);
-  modal.style.display='flex';
+  modal.style.cssText='display:flex';
+  setTimeout(()=>modal.querySelector('.overdue-sheet')?.classList.add('show-sheet'),10);
 }
 function overdueAllToday(){
   const today=mrTodayKey();
@@ -19869,6 +19887,36 @@ function _asToggleBroadcast(){
 function _asPri(btn){
   _asState.priority=btn.dataset.p||'normal';
   document.querySelectorAll('.as-pri-btn').forEach(function(b){b.classList.toggle('sel',b===btn);});
+}
+function _asDl(btn){
+  var days=parseInt(btn.dataset.days)||1;
+  document.querySelectorAll('.as-dl-btn').forEach(function(b){b.classList.toggle('sel',b===btn);});
+  var p=mrTodayKey().split('-').map(Number);
+  var y=p[0],mo=p[1],d=p[2]+days;
+  // کبیسه جلالی: سال‌های کبیسه چرخه ۲۸ ساله
+  var leapYears=[1,5,9,13,17,22,26];
+  var leapInCycle=leapYears.indexOf((y-474)%2820%128%29+1);
+  var isLeap=leapInCycle!==-1;
+  var dim=[0,31,31,31,31,31,31,30,30,30,30,30,isLeap?30:29];
+  while(d>dim[mo]){d-=dim[mo];mo++;if(mo>12){mo=1;y++;var lY2=leapYears.indexOf((y-474)%2820%128%29+1);dim[12]=lY2!==-1?30:29;}}
+  var inp=document.getElementById('asDeadline');
+  if(inp)inp.value=y+'-'+(mo<10?'0'+mo:mo)+'-'+(d<10?'0'+d:d);
+}
+
+boot();
+// IDB safety check: 50ms بعد از boot
+setTimeout(function(){
+  _idbRestoreCheck(function(restored){
+    if(restored){
+      // data از IDB برگشت — reload تا اعمال بشه
+      console.log('[DayQ] reloading with restored data...');
+      setTimeout(function(){window.location.reload();},100);
+    }
+  });
+},50);
+
+
+);});
 }
 function _asDl(btn){
   var days=parseInt(btn.dataset.days)||1;
