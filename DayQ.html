@@ -2538,11 +2538,18 @@ select.fi{
 
   /* ══ BIRTHDAYS PAGE ══ */
   #pageBirthdays.page.active{
+    display:block;
+    padding-top:calc(var(--topbar-h)+20px);padding-bottom:48px;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  @media(min-width:900px){
+  #pageBirthdays.page.active{
     display:grid;
     grid-template-columns:1fr 280px;
     grid-template-rows:auto 1fr;
     align-items:start;min-height:100svh;
-    padding-top:calc(var(--topbar-h)+20px);padding-bottom:48px;
+  }
   }
   .bd-page-hdr{
     grid-column:1/-1;
