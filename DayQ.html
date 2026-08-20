@@ -2537,7 +2537,13 @@ select.fi{
   .proj-main-empty svg{opacity:.3;}
 
   /* ══ BIRTHDAYS PAGE ══ */
-  /* bd desktop grid → see @media(min-width:900px) */
+  #pageBirthdays.page.active{
+    display:grid;
+    grid-template-columns:1fr 280px;
+    grid-template-rows:auto 1fr;
+    align-items:start;min-height:100svh;
+    padding-top:calc(var(--topbar-h)+20px);padding-bottom:48px;
+  }
   .bd-page-hdr{
     grid-column:1/-1;
     display:flex;align-items:center;justify-content:space-between;
@@ -5041,32 +5047,7 @@ body.show-dpanel #dpanel {
 .ov-simple-btn:active{opacity:.8;}
 .ov-simple-btn.yes{background:var(--am);color:var(--a);}
 .ov-simple-btn.pick{background:var(--bg2);color:var(--t1);border:1px solid var(--b1);}
-.ov-simple-btn.no{background:transparent;color:var(--t3);font-size:var(--fs-sm);padding:var(--sp2);}
-/* ══ Birthday page — mobile first ══ */
-#pageBirthdays.page.active{
-  display:block;
-  overflow-y:auto;
-  -webkit-overflow-scrolling:touch;
-}
-#pageBirthdays .bd-sidebar{
-  display:none; /* روی موبایل مخفی */
-}
-
-/* desktop: two-column grid */
-@media(min-width:900px){
-  #pageBirthdays.page.active{
-    display:grid;
-    grid-template-columns:1fr 280px;
-    grid-template-rows:auto 1fr;
-    align-items:start;
-    overflow:hidden;
-  }
-  #pageBirthdays .bd-sidebar{
-    display:block;
-    overflow-y:auto;
-    height:100%;
-  }
-}</style>
+.ov-simple-btn.no{background:transparent;color:var(--t3);font-size:var(--fs-sm);padding:var(--sp2);}</style>
 </head>
 <body>
 <div id="app">
