@@ -19940,7 +19940,7 @@ function _asDl(btn){
   if(inp)inp.value=y+'-'+(mo<10?'0'+mo:mo)+'-'+(d<10?'0'+d:d);
 }
 
-boot();
+// boot already called above
 // IDB safety check: 50ms بعد از boot
 setTimeout(function(){
   _idbRestoreCheck(function(restored){
