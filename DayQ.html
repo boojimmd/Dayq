@@ -7196,7 +7196,8 @@ function goPage(n){
     var _calDP=document.getElementById('calDayPanelDesktop');
     if(_calDP)_calDP.style.display=n==='Calendar'&&window.innerWidth>=900?'flex':'none';
   }
-  if(n==='Home')      { renderTasks(); applyWidgets(); updateMeta(); }
+  if(n==='Home')      { renderTasks(); applyWidgets(); updateMeta();
+    if(tm&&tm.code&&tm.token) setTimeout(tmSyncBackground,200); }
   if(n==='Me')       { setGreeting(); syncProfile(); updateMeStats(); if(window.innerWidth>=900) renderMeDashboard(); }
   if(n==='Bag')       { renderBag(); }
   if(n==='Birthdays') { renderBirthdayPage(); }
@@ -15278,9 +15279,12 @@ async function tmInit() {
     tmSyncBackground();
     // هر ۲ دقیقه sync
     if (tm._syncTimer) clearInterval(tm._syncTimer);
-    tm._syncTimer = setInterval(function(){if(document.visibilityState!=='hidden')tmSyncBackground();},120000);
+    tm._syncTimer = setInterval(function(){if(document.visibilityState!=='hidden')tmSyncBackground();},30000);
     document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) tmSyncBackground();
+      if (!document.hidden){
+        // صبر کن device بیاد بالا بعد sync کن
+        setTimeout(tmSyncBackground, 500);
+      }
     });
   } else {
     tmApplyUI();
