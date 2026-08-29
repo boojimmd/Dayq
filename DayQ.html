@@ -293,7 +293,7 @@ input,textarea{user-select:text;-webkit-user-select:text;}
   background:var(--bg0);
   z-index:1;
 }
-.page.active{display:block;animation:pIn .26s var(--spring);z-index:3;opacity:1;}
+.page.active{display:block;animation:pIn .26s var(--spring);z-index:3;}
 .page.leaving{display:block;animation:pOut .22s var(--ease) forwards;z-index:2;}
 .page::-webkit-scrollbar{display:none;}
 @keyframes pIn{from{opacity:0;transform:translateY(10px) scale(.985);}to{opacity:1;transform:none;}}
@@ -471,7 +471,7 @@ input,textarea{user-select:text;-webkit-user-select:text;}
 /* TASK CARD — swipe to complete (Things 3 style) */
 /* stagger — Emil: 30-80ms بین هر item */
 @keyframes tcFadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:translateY(0);}}
-.tc-list-anim .tc-wrap{animation:none;opacity:1;}
+.tc-list-anim .tc-wrap{animation:tcFadeIn 200ms var(--ease-out) both;}
 .tc-list-anim .tc-wrap:nth-child(1){animation-delay:0ms}
 .tc-list-anim .tc-wrap:nth-child(2){animation-delay:40ms}
 .tc-list-anim .tc-wrap:nth-child(3){animation-delay:80ms}
@@ -1677,7 +1677,7 @@ select.fi{
 .tc-wrap.bulk-selected .bulk-chk svg{opacity:1;transform:scale(1);}
 
 /* Bulk mode — dim non-selected */
-.bulk-mode .bulk-mode .tc-wrap:not(.bulk-selected) .tc{opacity:.55;}
+.bulk-mode .tc-wrap:not(.bulk-selected) .tc{opacity:.55;}
 
 /* Action bar */
 .bulk-bar{
@@ -1817,7 +1817,7 @@ select.fi{
   .nav,.topbar,.qcap,.qcapToolbar,.nlpPreview,.tc-del,.tc-remind,
   .mirror-wrap,.widget-row,.morning-intent,.overdue-modal{display:none!important;}
   .page{position:static!important;height:auto!important;overflow:visible!important;}
-  .tlist{display:flex!important;}
+  .tlist{display:block!important;}
   .tc-wrap{break-inside:avoid;border:1px solid #ccc;margin-bottom:8px;border-radius:var(--r1);}
   body{background:#fff!important;color:#000!important;}
 }
@@ -2538,18 +2538,11 @@ select.fi{
 
   /* ══ BIRTHDAYS PAGE ══ */
   #pageBirthdays.page.active{
-    display:block;
-    padding-top:calc(var(--topbar-h)+20px);padding-bottom:48px;
-    overflow-y:auto;
-    -webkit-overflow-scrolling:touch;
-  }
-  @media(min-width:900px){
-  #pageBirthdays.page.active{
     display:grid;
     grid-template-columns:1fr 280px;
     grid-template-rows:auto 1fr;
     align-items:start;min-height:100svh;
-  }
+    padding-top:calc(var(--topbar-h)+20px);padding-bottom:48px;
   }
   .bd-page-hdr{
     grid-column:1/-1;
@@ -3094,7 +3087,7 @@ select.fi{
   from{opacity:1;transform:translateY(0);}
   to{opacity:0;transform:translateY(-6px);}
 }
-.page.active{animation:pIn var(--dur-base) var(--ease-out) forwards;}
+.page.active{animation:pIn var(--dur-base) var(--ease-out) both;}
 
 /* ── Toast ── */
 /* toast — transition به جای keyframe (Emil: keyframe روی rapidly-triggered reset می‌شه) */
@@ -5013,48 +5006,7 @@ body.show-dpanel #dpanel {
 .as-pri-btn, .as-dl-btn {
   transition: background 100ms ease, color 100ms ease, border-color 100ms ease;
 }
-
-/* ══ Force taskList visibility ══ */
-#taskList>.tc-wrap{
-  display:block !important;
-  opacity:1 !important;
-  visibility:visible !important;
-  transform:none !important;
-  height:auto !important;
-}
-#taskList>.tc-wrap>.tc{
-  opacity:1 !important;
-  display:flex !important;
-}
-#dtlView{display:none;} /* hidden by default, shown by team init */
-/* overdue-modal sheet fix */
-.overdue-sheet{
-  background:var(--bg1);
-  border-radius:var(--r4) var(--r4) 0 0;
-  width:100%;max-width:480px;
-  padding:var(--sp5) var(--sp4) calc(var(--sp5) + env(safe-area-inset-bottom,0px));
-  transform:translateY(100%);
-  transition:transform 280ms cubic-bezier(0.32,0.72,0,1);
-}
-.overdue-sheet.show-sheet{transform:translateY(0);}
-.ov-simple-q{
-  font-size:var(--fs-xl);font-weight:700;
-  margin-bottom:var(--sp5);
-  line-height:var(--lh-relaxed);
-  color:var(--t1);
-}
-.ov-simple-btns{display:flex;flex-direction:column;gap:var(--sp3);}
-.ov-simple-btn{
-  border:none;border-radius:var(--r2);
-  padding:14px;font-size:var(--fs-md);
-  font-weight:700;cursor:pointer;
-  font-family:var(--f);
-  transition:opacity var(--dur-fast);
-}
-.ov-simple-btn:active{opacity:.8;}
-.ov-simple-btn.yes{background:var(--am);color:var(--a);}
-.ov-simple-btn.pick{background:var(--bg2);color:var(--t1);border:1px solid var(--b1);}
-.ov-simple-btn.no{background:transparent;color:var(--t3);font-size:var(--fs-sm);padding:var(--sp2);}</style>
+</style>
 </head>
 <body>
 <div id="app">
@@ -5378,13 +5330,13 @@ body.show-dpanel #dpanel {
   
   <!-- ════ اطلاعیه‌ها (کارمند) ════ -->
   <div id="tmAnnosSection" style="display:none;padding:0 var(--sp4);margin-bottom:var(--sp2)"></div>
-<div id="timeBanner" onclick="document.getElementById('timeBanner').classList.remove('show')" style="display:none">
+<div id="timeBanner" onclick="document.getElementById('timeBanner').classList.remove('show')">
     <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
     <span id="timeBannerText"></span>
     <span class="tb-close">× بستن</span>
   </div>
   <!-- Day Timeline View — فاز ۵ دسکتاپ -->
-  <div class="dtl-view" id="dtlView" style="display:none">
+  <div class="dtl-view" id="dtlView">
     <div class="dtl-hdr">
       <span class="dtl-today-lbl" id="dtlDateLbl">امروز</span>
       <span class="dtl-timed-count" id="dtlTimedCount">۰ کار با زمان</span>
@@ -6729,7 +6681,18 @@ function _tmSbSel(uuid){
   {id:'drop',c:'var(--blue)',s:`<path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" stroke-width="1.5"/>`},
   {id:'smile',c:'var(--amber)',s:`<circle cx="12" cy="12" r="10" stroke-width="1.5"/><path d="M8 14s1.5 2 4 2 4-2 4-2" stroke-width="1.5"/><line x1="9" y1="9" x2="9.01" y2="9" stroke-width="2.5"/><line x1="15" y1="9" x2="15.01" y2="9" stroke-width="2.5"/>`},
   {id:'camera',c:'var(--purple)',s:`<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" stroke-width="1.5"/><circle cx="12" cy="13" r="4" stroke-width="1.4"/>`},
-  {id:'pin',c:'var(--red)',s:`<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke-width="1.5"/const SK='dq5_t',SB='dq5_b',SS='dq5_s',SD='dq5_bd';
+  {id:'pin',c:'var(--red)',s:`<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" stroke-width="1.5"/><circle cx="12" cy="10" r="3" stroke-width="1.4"/>`},
+  {id:'book',c:'var(--blue)',s:`<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" stroke-width="1.5"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" stroke-width="1.5"/>`},
+  {id:'bell',c:'var(--amber)',s:`<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" stroke-width="1.5"/><path d="M13.73 21a2 2 0 0 1-3.46 0" stroke-width="1.5"/>`},
+  {id:'medal',c:'var(--amber)',s:`<circle cx="12" cy="8" r="6" stroke-width="1.5"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11" stroke-width="1.5"/>`},
+  {id:'flag',c:'var(--red)',s:`<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" stroke-width="1.5"/><line x1="4" y1="22" x2="4" y2="15" stroke-width="1.5"/>`},
+];
+const iconMap={};ICONS.forEach(i=>iconMap[i.id]=i);
+function svgIco(id,w=16){const ic=iconMap[id]||iconMap.check;return`<svg viewBox="0 0 24 24" width="${w}" height="${w}" fill="none" stroke="${ic.c}" stroke-linecap="round" stroke-linejoin="round">${ic.s}</svg>`;}
+
+/* ══ STATE ══ */
+<script>
+const SK='dq5_t',SB='dq5_b',SS='dq5_s',SD='dq5_bd';
 let birthdays=[];
 let tasks=[],bagItems=[];
 let cfg={theme:'auto',persian:true,confetti:false,name:'',company:'',city:'',visitTime:'09:00',mood:0,reflect:false,timeline:false,reflection:'',workEndTime:'18:00',eveningStart:'17:00',autoArchiveDays:30,autoArchiveOn:true,pushWorkerUrl:'',syncCode:''};
@@ -7180,7 +7143,6 @@ function goPage(n){
     var _calDP=document.getElementById('calDayPanelDesktop');
     if(_calDP)_calDP.style.display=n==='Calendar'&&window.innerWidth>=900?'flex':'none';
   }
-  if(n==='Home')      { renderTasks(); applyWidgets(); updateMeta(); }
   if(n==='Me')       { setGreeting(); syncProfile(); updateMeStats(); if(window.innerWidth>=900) renderMeDashboard(); }
   if(n==='Bag')       { renderBag(); }
   if(n==='Birthdays') { renderBirthdayPage(); }
@@ -7420,20 +7382,19 @@ function showOverdueModal(){
   if(!overdue.length){ checkMorningIntent(); return; }
   const modal=document.getElementById('overdueModal');
   if(!modal) return;
-  // محتوا داخل کارت (overdue-sheet) — نه مستقیم روی overlay
-  modal.innerHTML=`
-    <div class="overdue-sheet">
-      <div class="ov-simple">
-        <div class="ov-simple-q">${num(overdue.length)} کار از دیروز موند<br>همه رو به امروز منتقل کنم؟</div>
-        <div class="ov-simple-btns">
-          <button class="ov-simple-btn yes" onclick="overdueAllToday()">✓ بله، همه رو بیار امروز</button>
-          <button class="ov-simple-btn pick" onclick="overduePickMode()">انتخاب کنم</button>
-          <button class="ov-simple-btn no" onclick="closeOverdueModal()">رد کن</button>
-        </div>
-      </div>
+  // Simple one-question approach
+  const inner=document.createElement('div');
+  inner.className='ov-simple';
+  inner.innerHTML=`
+    <div class="ov-simple-q">${num(overdue.length)} کار از دیروز موند<br>همه رو به امروز منتقل کنم؟</div>
+    <div class="ov-simple-btns">
+      <button class="ov-simple-btn yes" onclick="overdueAllToday()">✓ بله، همه رو بیار امروز</button>
+      <button class="ov-simple-btn pick" onclick="overduePickMode()">انتخاب کنم</button>
+      <button class="ov-simple-btn no" onclick="closeOverdueModal()">رد کن</button>
     </div>`;
-  modal.style.cssText='display:flex';
-  setTimeout(()=>modal.querySelector('.overdue-sheet')?.classList.add('show-sheet'),10);
+  modal.innerHTML='';
+  modal.appendChild(inner);
+  modal.style.display='flex';
 }
 function overdueAllToday(){
   const today=mrTodayKey();
@@ -7911,17 +7872,11 @@ function renderTasks(){
     const frag=document.createDocumentFragment(); // همه‌چی اول بیرون از DOM ساخته شود، بعد یک‌جا اضافه شود — برای روان‌ماندن با تعداد زیاد کار
     if(uDay.length){
       if(curTab==='all'||curTab==='today') frag.appendChild(mkHdr('در انتظار',uDay.length));
-      uDay.forEach(t=>{
-    try{frag.appendChild(mkCardWrap(t));}
-    catch(e){console.error("[mkCard ERR]",e.message,t);}
-  });
+      uDay.forEach(t=>frag.appendChild(mkCardWrap(t)));
     }
     if(uEve.length){
       frag.appendChild(mkHdr('این عصر 🌙',uEve.length));
-      uEve.forEach(t=>{
-    try{frag.appendChild(mkCardWrap(t));}
-    catch(e){console.error("[mkCard ERR eve]",e.message,t);}
-  });
+      uEve.forEach(t=>frag.appendChild(mkCardWrap(t)));
     }
     list.appendChild(frag);
   }
@@ -8014,15 +7969,6 @@ function mkCardWrap(task){
   wrap.appendChild(bgL);wrap.appendChild(bgR);wrap.appendChild(card);
   return wrap;
 }
-
-const iconMap={
-  check:{c:'#00b87a',s:'<polyline points="20 6 9 17 4 12"/>'},
-  star:{c:'#f59e0b',s:'<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>'},
-  flag:{c:'#ef4444',s:'<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>'},
-  clock:{c:'#6366f1',s:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'},
-  phone:{c:'#06b6d4',s:'<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.72 13.5a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.63 2.83h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 10.1a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>'},
-  pill:{c:'#10b981',s:'<path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/>'},
-};
 function mkCard(task){
   const d=document.createElement('div');
   const _pri=(task.priority||'low').charAt(0);
@@ -8747,7 +8693,6 @@ function qcapKeyDown(e){
 }
 
 function quickCapture(){
-  try{
   let raw=document.getElementById('qcapInp').value.trim();
   // اگه input خالیه ولی NLP parse شده بود (مثلاً blur زودتر clear کرد)
   if(!raw && _nlpParsed && _nlpParsed.cleanText) raw=_nlpParsed.cleanText;
@@ -8817,7 +8762,6 @@ function quickCapture(){
     toast_(svgIco('check'),'«'+shortText+'» ثبت شد'+remindHint+(extras.length?' ('+extras.join(' ')+')':''));
   }
   if(cfg.confetti) spawnConfetti({clientX:window.innerWidth*.5,clientY:160});
-  }catch(e){console.error("[QC]",e);toast_(svgIco("x"),"خطا: "+e.message);}
 }
 function addTask(){
   const txt=document.getElementById('taskTitleInput').value.trim();if(!txt){document.getElementById('taskTitleInput').focus();return;}
@@ -19113,33 +19057,19 @@ async function tmApproveTask(taskId,approve){
 }
 function _idbRestoreCheck(onDone){
   var SK='dq5_t', SS='dq5_s', SB='dq5_b', SD='dq5_bd';
-  // همیشه IDB رو چک کن — نه فقط وقتی localStorage خالیه
+  var raw=localStorage.getItem(SK);
+  var isEmpty=!raw||raw==='[]'||raw==='null';
+  if(!isEmpty){onDone(false);return;}
   Promise.all([_idbGet(SK),_idbGet(SS),_idbGet(SB),_idbGet(SD)])
     .then(function(vals){
-      var idbTasks=vals[0],idbCfg=vals[1],idbBag=vals[2],idbBd=vals[3];
-      if(!idbTasks||idbTasks==='[]'||idbTasks==='null'){onDone(false);return;}
-      
-      // مقایسه تعداد تسک در localStorage vs IDB
-      var lsRaw=localStorage.getItem(SK);
-      var lsTasks=[];
-      try{lsTasks=JSON.parse(lsRaw)||[];}catch(e){}
-      var idbTasksArr=[];
-      try{idbTasksArr=JSON.parse(idbTasks)||[];}catch(e){}
-      
-      // اگه IDB تسک بیشتری داشت یا localStorage خالی بود
-      // cfg مفقود است یا tasks ناقص — از IDB restore کن
-      var lsCfgRaw=localStorage.getItem(SS);
-      var cfgMissing=!lsCfgRaw||lsCfgRaw==='null'||lsCfgRaw==='{}';
-      if(idbTasksArr.length>lsTasks.length||!lsRaw||lsRaw==='[]'||cfgMissing){
-        if(idbTasks)localStorage.setItem(SK,idbTasks);
-        if(idbCfg)localStorage.setItem(SS,idbCfg);
-        if(idbBag)localStorage.setItem(SB,idbBag);
-        if(idbBd)localStorage.setItem(SD,idbBd);
-        console.log('[DayQ] IDB restore: '+idbTasksArr.length+' tasks vs localStorage '+lsTasks.length);
-        onDone(true);
-      } else {
-        onDone(false);
-      }
+      var tasks=vals[0],cfg=vals[1],bag=vals[2],bd=vals[3];
+      if(!tasks||tasks==='[]'){onDone(false);return;}
+      if(tasks)localStorage.setItem(SK,tasks);
+      if(cfg)localStorage.setItem(SS,cfg);
+      if(bag)localStorage.setItem(SB,bag);
+      if(bd)localStorage.setItem(SD,bd);
+      console.log('[DayQ] ✅ IDB restore: data recovered');
+      onDone(true);
     }).catch(function(){onDone(false);});
 }
 function _calRender(){if(typeof renderCal==='function')renderCal();else if(typeof calInit==='function')calInit();}
@@ -19911,23 +19841,6 @@ setTimeout(function(){
   });
 },50);
 
-
-);});
-}
-function _asDl(btn){
-  var days=parseInt(btn.dataset.days)||1;
-  document.querySelectorAll('.as-dl-btn').forEach(function(b){b.classList.toggle('sel',b===btn);});
-  var p=mrTodayKey().split('-').map(Number);
-  var y=p[0],mo=p[1],d=p[2]+days;
-  // کبیسه جلالی: سال‌های کبیسه چرخه ۲۸ ساله
-  var leapYears=[1,5,9,13,17,22,26];
-  var leapInCycle=leapYears.indexOf((y-474)%2820%128%29+1);
-  var isLeap=leapInCycle!==-1;
-  var dim=[0,31,31,31,31,31,31,30,30,30,30,30,isLeap?30:29];
-  while(d>dim[mo]){d-=dim[mo];mo++;if(mo>12){mo=1;y++;var lY2=leapYears.indexOf((y-474)%2820%128%29+1);dim[12]=lY2!==-1?30:29;}}
-  var inp=document.getElementById('asDeadline');
-  if(inp)inp.value=y+'-'+(mo<10?'0'+mo:mo)+'-'+(d<10?'0'+d:d);
-}
 
 boot();
 // IDB safety check: 50ms بعد از boot
