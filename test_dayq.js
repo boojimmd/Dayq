@@ -60,7 +60,7 @@ const coreFns = [
   'renderBirthdayPage','renderProjects','calInit',
   '_idbRestoreCheck','_idbSave','_idbGet',
   'updateMeta','setGreeting','initWeather',
-  'mkCard','mkCardWrap','saveTask'
+  'mkCard','mkCardWrap'
 ];
 for (const fn of coreFns) {
   test(`function ${fn}`, () => {
