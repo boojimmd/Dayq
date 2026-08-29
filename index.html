@@ -4649,7 +4649,9 @@ body:has(#tmSokoPanel.open) #ov {
 
 
 /* tasks فوری visible — بدون animation delay */
-.tc-list-anim .tc-wrap{animation:none !important;opacity:1 !important;}</style>
+.tc-list-anim .tc-wrap{animation:none !important;opacity:1 !important;}
+#shTeamTaskDetail:not(.open){opacity:0 !important;pointer-events:none !important;}
+</style>
 </head>
 <body>
 <div id="app">
