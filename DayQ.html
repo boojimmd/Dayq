@@ -19127,7 +19127,10 @@ function _idbRestoreCheck(onDone){
       try{idbTasksArr=JSON.parse(idbTasks)||[];}catch(e){}
       
       // اگه IDB تسک بیشتری داشت یا localStorage خالی بود
-      if(idbTasksArr.length>lsTasks.length||!lsRaw||lsRaw==='[]'){
+      // cfg مفقود است یا tasks ناقص — از IDB restore کن
+      var lsCfgRaw=localStorage.getItem(SS);
+      var cfgMissing=!lsCfgRaw||lsCfgRaw==='null'||lsCfgRaw==='{}';
+      if(idbTasksArr.length>lsTasks.length||!lsRaw||lsRaw==='[]'||cfgMissing){
         if(idbTasks)localStorage.setItem(SK,idbTasks);
         if(idbCfg)localStorage.setItem(SS,idbCfg);
         if(idbBag)localStorage.setItem(SB,idbBag);
