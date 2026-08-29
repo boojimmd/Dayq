@@ -19136,7 +19136,31 @@ function _tmSbReport(sb){
 }
 boot();
 
-</script>
+
+async function _mgSendComment(){
+  var inp=document.querySelector('#shTaskThread .ttd-reply-inp');
+  if(!inp||!inp.value.trim()||!_mgThreadTaskId)return;
+  var text=inp.value.trim(),btn=document.querySelector('#shTaskThread .ttd-reply-send');
+  if(btn)btn.disabled=true;
+  try{await tmAPI('POST','/task/comment',{taskId:_mgThreadTaskId,text,from:'manager'});}
+  catch(e){if(btn)btn.disabled=false;inp.value=text;toast_('','❌ خطا در ارسال پیام',2500);return;}
+  var members=(tm.snapshot&&tm.snapshot.members)||[];
+  var task=null;
+  for(var i=0;i<members.length;i++){
+    var t=(members[i].tasks||[]).find(function(t){return t.id===_mgThreadTaskId;});
+    if(t){
+      if(!t.comments)t.comments=[];
+      t.comments.push({from:'manager',text,ts:Date.now(),at:Date.now()});
+      task=t;break;
+    }
+  }
+  inp.value='';inp.style.height='auto';
+  var tel=document.getElementById('mgThreadMsgs');
+  if(tel&&task&&typeof _renderThread==='function')_renderThread(task.comments||[],'manager',tel,task);
+  if(btn)btn.disabled=false;
+  setTimeout(tmSyncBackground,1500);
+}
+function _calSetFilter(f){if(typeof setCalView==='function'&&f)setCalView(f);else if(typeof renderCal==='function')renderCal();}</script>
 
 
 <!-- JALALI DATE PICKER -->
