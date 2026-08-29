@@ -1833,6 +1833,21 @@ select.fi{
 }
 .cmd-shortcut-hint{display:none;}
 .cmd-shortcut-hint{display:none;}
+/* mobile: dpanel بدون sidebar styling — فقط محتوا */
+@media(max-width:899px){
+  #dpanel{
+    display:block !important;
+    position:static !important;
+    width:100% !important;
+    height:auto !important;
+    overflow:visible !important;
+    background:none !important;
+    border:none !important;
+    z-index:auto !important;
+    padding:0 !important;
+  }
+  .dp-prog-wrap,.dp-empty{display:none !important;}
+}
 #dpanel{display:none;}
 .tb-center{display:none;}
 .tb-prog-mini{display:none;}
