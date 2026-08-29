@@ -6801,8 +6801,7 @@ function boot(){
   try{
     const lastTab=localStorage.getItem('dq5_lastTab');
     if(lastTab&&['all','today','tomorrow','done','waiting','projects'].includes(lastTab)){
-      // همیشه با 'all' render کن — lastTab فقط برای انتخاب دکمه
-      curTab='all';
+      curTab=lastTab;
       const btn=document.querySelector(`.sg[data-tab="${lastTab}"]`);
       if(btn){document.querySelectorAll('.sg').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
     }
@@ -6811,19 +6810,8 @@ function boot(){
     const lastPri=localStorage.getItem('dq5_lastPri');
     if(lastPri){qcPri=lastPri;qcSetPri(lastPri,null);}
   }catch(e){}
-  // ── Home init — همیشه در boot اجرا میشه ──
-  // force remove/add active cycle — مثل navigation واقعی
-  (function(){
-    var ph=document.getElementById('pageHome');
-    if(ph){
-      ph.classList.remove('active');
-      void ph.offsetWidth; // force reflow
-    }
-  })();
-  goPage('Home');
-  renderBag();updateMeStats();
+  renderTasks();renderBag();updateMeStats();
   sbInit();
-
   // overdue modal — فقط صبح (۶ تا ۱۲) نشون بده
   const _h=new Date().getHours();
   if(_h>=6&&_h<12) setTimeout(showOverdueModal, 2000);
@@ -6850,7 +6838,6 @@ function boot(){
   // quick capture
   const qi=document.getElementById('qcapInp');
   qi.addEventListener('keydown', e=>{ if(e.key==='Enter'){ e.preventDefault(); quickCapture(); } if(e.key==='Escape'){ qi.blur(); document.getElementById('qcapToolbar').classList.remove('show'); const np=document.getElementById('nlpPreview');if(np){np.style.display='none';np.innerHTML='';} } });
-
   qi.addEventListener('focus', ()=>{qcShowToolbar();showCoachMark('qcapInp','فقط بنویس — تاریخ، ساعت، و اولویت را خودش از روی متن می‌فهمد','qcap','below');});
   qi.addEventListener('blur',  ()=>{ 
     qcHideToolbar(); 
@@ -7024,7 +7011,6 @@ function boot(){
   setTimeout(_syncLayoutVars, 350); // بعد از لود کامل فونت، دوباره چک کن
   window.addEventListener('resize', _syncLayoutVars);
   window.addEventListener('orientationchange', ()=>setTimeout(_syncLayoutVars, 200));
-
   // focus timer
 }
 
