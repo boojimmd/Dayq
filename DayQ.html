@@ -3034,7 +3034,7 @@ select.fi{
   from{opacity:1;transform:translateY(0);}
   to{opacity:0;transform:translateY(-6px);}
 }
-.page.active{animation:pIn var(--dur-base) var(--ease-out);}
+.page.active{animation:pIn var(--dur-base) var(--ease-out) both;}
 
 /* ── Toast ── */
 /* toast — transition به جای keyframe (Emil: keyframe روی rapidly-triggered reset می‌شه) */
@@ -6391,7 +6391,7 @@ const iconMap={};ICONS.forEach(i=>iconMap[i.id]=i);
 function svgIco(id,w=16){const ic=iconMap[id]||iconMap.check;return`<svg viewBox="0 0 24 24" width="${w}" height="${w}" fill="none" stroke="${ic.c}" stroke-linecap="round" stroke-linejoin="round">${ic.s}</svg>`;}
 
 /* ══ STATE ══ */
-constconst SK='dq5_t',SB='dq5_b',SS='dq5_s',SD='dq5_bd';
+const SK='dq5_t',SB='dq5_b',SS='dq5_s',SD='dq5_bd';
 let birthdays=[];
 let tasks=[],bagItems=[];
 let cfg={theme:'auto',persian:true,confetti:false,name:'',company:'',city:'',visitTime:'09:00',mood:0,reflect:false,timeline:false,reflection:'',workEndTime:'18:00',eveningStart:'17:00',autoArchiveDays:30,autoArchiveOn:true,pushWorkerUrl:'',syncCode:''};
@@ -18507,42 +18507,7 @@ function _tmSbReport(sb){
 }
 boot();
 
-
-function _idbRestoreCheck(onDone){
-  var SK='dq5_t', SS='dq5_s', SB='dq5_b', SD='dq5_bd';
-  var raw=localStorage.getItem(SK);
-  var isEmpty=!raw||raw==='[]'||raw==='null';
-  if(!isEmpty){onDone(false);return;}
-  Promise.all([_idbGet(SK),_idbGet(SS),_idbGet(SB),_idbGet(SD)])
-    .then(function(vals){
-      var tasks=vals[0],cfg=vals[1],bag=vals[2],bd=vals[3];
-      if(!tasks||tasks==='[]'){onDone(false);return;}
-      if(tasks)localStorage.setItem(SK,tasks);
-      if(cfg)localStorage.setItem(SS,cfg);
-      if(bag)localStorage.setItem(SB,bag);
-      if(bd)localStorage.setItem(SD,bd);
-      console.log('[DayQ] ✅ IDB restore: data recovered');
-      onDone(true);
-    }).catch(function(){onDone(false);});
-}
-function _idbSave(key,val){
-  _idbOpen().then(function(db){
-    if(!db)return;
-    try{var tx=db.transaction('backup','readwrite');tx.objectStore('backup').put({k:key,v:val,ts:Date.now()});}catch(e){}
-  });
-}
-function _idbGet(key){
-  return _idbOpen().then(function(db){
-    return new Promise(function(resolve){
-      if(!db){resolve(null);return;}
-      try{
-        var req=db.transaction('backup','readonly').objectStore('backup').get(key);
-        req.onsuccess=function(){resolve(req.result?req.result.v:null);};
-        req.onerror=function(){resolve(null);};
-      }catch(e){resolve(null);}
-    });
-  });
-}ipt>
+</script>
 
 
 <!-- JALALI DATE PICKER -->
