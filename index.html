@@ -3034,7 +3034,7 @@ select.fi{
   from{opacity:1;transform:translateY(0);}
   to{opacity:0;transform:translateY(-6px);}
 }
-.page.active{animation:pIn var(--dur-base) var(--ease-out) both;}
+.page.active{animation:pIn var(--dur-base) var(--ease-out);}
 
 /* ── Toast ── */
 /* toast — transition به جای keyframe (Emil: keyframe روی rapidly-triggered reset می‌شه) */
@@ -6301,7 +6301,8 @@ body:has(#tmSokoPanel.open) #ov {
     </div>
 
   </div>
-</div>"font-size:var(--fs-xs);color:var(--t3);direction:rtl">ساعت شروع بازدیدهای روزانه</div>
+</div>
+<div style="font-size:var(--fs-xs);color:var(--t3);direction:rtl">ساعت شروع بازدیدهای روزانه</div>
     <input id="timerInput" type="time"
       style="width:100%;height:48px;background:var(--bg2);border:1.5px solid var(--b1);border-radius:var(--r2);padding:0 12px;font-size:var(--fs-xl);font-family:var(--f);text-align:center;direction:ltr;outline:none;box-sizing:border-box"/>
     <button onclick="saveTimer()"
@@ -7020,6 +7021,17 @@ const iconMap={};ICONS.forEach(i=>iconMap[i.id]=i);
 function svgIco(id,w=16){const ic=iconMap[id]||iconMap.check;return`<svg viewBox="0 0 24 24" width="${w}" height="${w}" fill="none" stroke="${ic.c}" stroke-linecap="round" stroke-linejoin="round">${ic.s}</svg>`;}
 
 /* ══ STATE ══ */
+const
+const iconMap={
+  check:{c:"#00b87a",s:"<polyline points='20 6 9 17 4 12'/>"},
+  star:{c:"#f59e0b",s:"<polygon points='12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2'/>"},
+  flag:{c:"#ef4444",s:"<path d='M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z'/><line x1='4' y1='22' x2='4' y2='15'/>"},
+  pill:{c:"#10b981",s:"<path d='m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z'/>"},
+  clock:{c:"#6366f1",s:"<circle cx='12' cy='12' r='10'/><polyline points='12 6 12 12 16 14'/>"},
+  phone:{c:"#06b6d4",s:"<path d='M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.72 13.5 19.79 19.79 0 0 1 1.65 4.83 2 2 0 0 1 3.63 2.83h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 10.1a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z'/>"},
+  meeting:{c:"#8b5cf6",s:"<path d='M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'/><circle cx='9' cy='7' r='4'/><path d='M23 21v-2a4 4 0 0 0-3-3.87'/><path d='M16 3.13a4 4 0 0 1 0 7.75'/>"},
+  report:{c:"#f97316",s:"<path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/><line x1='16' y1='13' x2='8' y2='13'/><line x1='16' y1='17' x2='8' y2='17'/><polyline points='10 9 9 9 8 9'/>"},
+};
 const SK='dq5_t',SB='dq5_b',SS='dq5_s',SD='dq5_bd';
 let birthdays=[];
 let tasks=[],bagItems=[];
@@ -19178,7 +19190,36 @@ function _idbRestoreCheck(onDone){
       onDone(true);
     }).catch(function(){onDone(false);});
 }
-</script>
+
+async function _ttdSendComment(){
+  var inp=document.querySelector('#ttdCommentSection .ttd-reply-inp');
+  if(!inp||!inp.value.trim()||!_ttdTaskId)return;
+  var text=inp.value.trim(),btn=document.querySelector('#ttdCommentSection .ttd-reply-send');
+  if(btn)btn.disabled=true;
+  var task=(tm.inbox||[]).find(function(t){return t.id===_ttdTaskId;});
+  try{await tmAPI('POST','/task/comment',{taskId:_ttdTaskId,text,from:'member'});}
+  catch(e){if(btn)btn.disabled=false;inp.value=text;toast_('','❌ خطا در ارسال پیام',2500);return;}
+  if(task){
+    if(!task.comments)task.comments=[];
+    task.comments.push({from:'member',text,ts:Date.now(),at:Date.now()});
+  }
+  inp.value='';inp.style.height='auto';
+  var thr=document.getElementById('ttdThreadMsgs');
+  if(thr&&task&&typeof _renderThread==='function')_renderThread(task.comments||[],'member',thr,task);
+  if(thr)thr.scrollTop=thr.scrollHeight;
+  if(btn)btn.disabled=false;
+}
+function tmShowAnnoReceipts(){
+  var el=document.getElementById('tmAnnoReceiptsPanel');
+  if(!el)return;
+  el.innerHTML=typeof tmRenderAnnoReceipts==='function'?tmRenderAnnoReceipts():'<div style="color:var(--t3)">اطلاعیه‌ای نداری</div>';
+  el.style.display=el.style.display==='none'?'':'none';
+}
+function _tmSetReportPeriod(p) {
+  _tmReportPeriod = p;
+  _tmSbReport(document.getElementById('tmPanelSidebar'));
+  tmLoadReport(p === 'weekly' ? 'weekly' : 'monthly');
+}ipt>
 
 
 <!-- JALALI DATE PICKER -->
