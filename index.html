@@ -8607,7 +8607,12 @@ function _bdRenderSidePanel(sorted){
   const el=document.getElementById('bdSidePanel');
   if(!el||window.innerWidth<900) return;
   if(!sorted.length){
-    el.innerHTML=`<div style="color:var(--t3);font-size:var(--fs-xs);text-align:center;padding:24px 0">مناسبتی ثبت نشده</div>`;
+    el.innerHTML=`
+      <div style="background:var(--bg1);border:1px solid var(--b1);border-radius:var(--r3);padding:20px 16px;text-align:center">
+        <div style="font-size:var(--fs-sm);font-weight:700;color:var(--t2);margin-bottom:8px">مناسبتی ثبت نشده</div>
+        <div style="font-size:var(--fs-xs);color:var(--t3);margin-bottom:16px;line-height:1.6">تولد و سالگردها رو اینجا ثبت کن</div>
+        <button onclick="openBirthdayForm(null)" style="width:100%;padding:10px;background:var(--a);color:#fff;border:none;border-radius:var(--r2);font-size:var(--fs-sm);font-weight:700;font-family:var(--f);cursor:pointer">+ افزودن مناسبت</button>
+      </div>`;
     return;
   }
   const next=sorted[0];
