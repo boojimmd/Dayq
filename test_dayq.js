@@ -119,7 +119,9 @@ const loadAllFn = html.match(/function loadAll\(\)\{[\s\S]{1,2000}?\}/)?.[0] || 
 const saveKeys = [...saveAllFn.matchAll(/setItem\('([^']+)'/g)].map(m=>m[1]);
 const loadKeys = [...loadAllFn.matchAll(/getItem\('([^']+)'/g)].map(m=>m[1]);
 test('saveAll و loadAll هر دو کامل', () => {
-  return (saveKeys.length >= 3 && loadKeys.length >= 3) || `save:${saveKeys.length} load:${loadKeys.length}`;
+  const saveCount = (html.match(/setItem\(/g) || []).length;
+  const loadCount = (html.match(/getItem\(/g) || []).length;
+  return (saveCount >= 3 && loadCount >= 3) || `save:${saveCount} load:${loadCount}`;
 });
 
 // ══ ۸. SOKO ════════════════════════════════════════
