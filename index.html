@@ -1069,7 +1069,7 @@ select.fi{
 .cal-day.selected{background:var(--am);}
 .cal-day.today.selected .cal-day-num{box-shadow:0 0 0 3px rgba(0,184,122,.25);}
 .cal-day-num{font-size:1.05rem;font-weight:800;color:var(--t1);width:30px;height:30px;display:flex;align-items:center;justify-content:center;margin-bottom:4px;}
-.cal-day-holiday{font-size:var(--fs-2xs);color:var(--red);font-weight:700;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;margin-bottom:2px;flex-shrink:0;}
+.cal-day-holiday{font-size:.6rem;color:var(--red);font-weight:600;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;margin-bottom:2px;}
 .cal-day-evts{display:flex;flex-direction:column;gap:1.5px;width:100%;align-items:stretch;overflow:hidden;}
 .cal-evt-chip{font-size:.56rem;font-weight:600;padding:1.5px 5px;border-radius:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.35;text-align:right;flex-shrink:0;}
 .cal-evt-more{font-size:.55rem;color:var(--t3);font-weight:700;padding:0 4px;}
@@ -5054,9 +5054,7 @@ body.show-dpanel #dpanel {
 .ov-simple-btn:active{opacity:.8;}
 .ov-simple-btn.yes{background:var(--am);color:var(--a);}
 .ov-simple-btn.pick{background:var(--bg2);color:var(--t1);border:1px solid var(--b1);}
-.ov-simple-btn.no{background:transparent;color:var(--t3);font-size:var(--fs-sm);padding:var(--sp2);}
-/* holiday visible */
-.is-holiday .cal-day-holiday{display:block;}</style>
+.ov-simple-btn.no{background:transparent;color:var(--t3);font-size:var(--fs-sm);padding:var(--sp2);}</style>
 </head>
 <body>
 <div id="app">
@@ -7196,8 +7194,7 @@ function goPage(n){
     var _calDP=document.getElementById('calDayPanelDesktop');
     if(_calDP)_calDP.style.display=n==='Calendar'&&window.innerWidth>=900?'flex':'none';
   }
-  if(n==='Home')      { renderTasks(); applyWidgets(); updateMeta();
-    if(tm&&tm.code&&tm.token) setTimeout(tmSyncBackground,200); }
+  if(n==='Home')      { renderTasks(); applyWidgets(); updateMeta(); }
   if(n==='Me')       { setGreeting(); syncProfile(); updateMeStats(); if(window.innerWidth>=900) renderMeDashboard(); }
   if(n==='Bag')       { renderBag(); }
   if(n==='Birthdays') { renderBirthdayPage(); }
@@ -15279,12 +15276,9 @@ async function tmInit() {
     tmSyncBackground();
     // هر ۲ دقیقه sync
     if (tm._syncTimer) clearInterval(tm._syncTimer);
-    tm._syncTimer = setInterval(function(){if(document.visibilityState!=='hidden')tmSyncBackground();},30000);
+    tm._syncTimer = setInterval(function(){if(document.visibilityState!=='hidden')tmSyncBackground();},120000);
     document.addEventListener('visibilitychange', () => {
-      if (!document.hidden){
-        // صبر کن device بیاد بالا بعد sync کن
-        setTimeout(tmSyncBackground, 500);
-      }
+      if (!document.hidden) tmSyncBackground();
     });
   } else {
     tmApplyUI();
@@ -19946,7 +19940,7 @@ function _asDl(btn){
   if(inp)inp.value=y+'-'+(mo<10?'0'+mo:mo)+'-'+(d<10?'0'+d:d);
 }
 
-// boot already called above
+boot();
 // IDB safety check: 50ms بعد از boot
 setTimeout(function(){
   _idbRestoreCheck(function(restored){
