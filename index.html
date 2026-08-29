@@ -6843,6 +6843,9 @@ function goPage(n){
   if(n==='Bag')       { renderBag(); }
   if(n==='Birthdays') { renderBirthdayPage(); }
   if(n==='Projects'){loadProjects();renderProjects();if(window.innerWidth>=900)projDesktopInit();}
+  // calendar day panel فقط روی تقویم
+  const _cdp=document.getElementById('calDayPanelDesktop');
+  if(_cdp) _cdp.style.display=(n==='Calendar'&&window.innerWidth>=900)?'flex':'none';
   if(n==='Calendar'){calInit();
     if(window.innerWidth>=900){
       document.getElementById('calDayPanelDesktop').style.display='flex';
