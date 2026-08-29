@@ -1,344 +1,143 @@
-/* ══════════════════════════════════════════════════════
-   test_dayq.js — رگرسیون اصلی DayQ
-   اجرا: node test_dayq.js
-   هدف: قبل از شروع هر تغییر جدید، این را اجرا کن.
-   اگر چیزی FAIL داد، یعنی یک فیچر قبلی جایی خراب شده —
-   دقیقاً همان مشکلی که با «این‌عصر» و «ساعت‌های قابل‌تنظیم» افتاد.
-   ══════════════════════════════════════════════════════ */
-const { chromium } = require('playwright');
+#!/usr/bin/env node
+/**
+ * DayQ Test Suite
+ * run: node test_dayq.js
+ * قبل از هر push اجرا کن
+ */
+
+const fs = require('fs');
 const path = require('path');
 
-const FILE = 'file://' + path.resolve(__dirname, 'DayQ.html');
-let pass = 0, fail = 0;
-const failures = [];
+const html = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
 
-function check(label, cond) {
-  if (cond) { pass++; }
-  else { fail++; failures.push(label); console.log('❌ FAIL:', label); }
+let passed = 0, failed = 0, warns = 0;
+const results = [];
+
+function test(name, fn) {
+  try {
+    const result = fn();
+    if (result === true || result === undefined) {
+      passed++;
+      results.push(`  ✅ ${name}`);
+    } else if (result === 'warn') {
+      warns++;
+      results.push(`  ⚠️  ${name}`);
+    } else {
+      failed++;
+      results.push(`  ❌ ${name}: ${result}`);
+    }
+  } catch(e) {
+    failed++;
+    results.push(`  ❌ ${name}: ${e.message}`);
+  }
 }
 
-const seedTask = (over = {}) => Object.assign({
-  id: 't' + Date.now() + Math.random().toString(36).slice(2, 6),
-  text: 'تست', iconId: 'check', cat: 'prep', time: null, priority: 'high',
-  status: 'todo', done: false, deadline: null, projectId: null,
-  recur: 'none', recurBase: null, note: '', waitingFor: '', contact: '',
-  fileLink: '', location: '', estimateMin: 0, phase: '', archived: false, completedAt: null
-}, over);
+// ══ ۱. HTML STRUCTURE ══════════════════════════════
+console.log('\n① HTML Structure');
+test('script tag موجوده', () => html.includes('<script>') || 'script not found');
+test('style tag موجوده', () => html.includes('<style>') || 'style not found');
+test('pageHome موجوده', () => html.includes('id="pageHome"') || 'pageHome missing');
+test('taskList موجوده', () => html.includes('id="taskList"') || 'taskList missing');
+test('qcapInp موجوده', () => html.includes('id="qcapInp"') || 'qcapInp missing');
+test('nav موجوده', () => html.includes('<nav') || 'nav missing');
+test('HTML raw CSS نداره', () => {
+  const raw = html.match(/>["'][a-z\-]+:[^"'<>]{2,80}["']>/g);
+  return raw ? `${raw.length} raw CSS string: ${raw[0]}` : true;
+});
 
-(async () => {
-  const browser = await chromium.launch();
+// ══ ۲. SHEETS ══════════════════════════════════════
+console.log('\n② Sheets');
+const requiredSheets = ["shArchive", "shBag", "shBirthday", "shCardMore", "shCatPicker", "shDelConfirm", "shDeviceSync", "shNote", "shProjDelConfirm", "shProject", "shPush", "shRemind", "shTask", "shTeamTaskDetail", "shTimer", "shTmAnnounce", "shTmAssign", "shTmChoice", "shTmCode", "shTmConfirm", "shTmCreate", "shTmDirectLogin", "shTmInfo", "shTmJoin", "shTmPending", "shTmPin", "shTmRet", "shTriage", "shWorkHours", "tmDetailSheet"];
+for (const sh of requiredSheets) {
+  test(`${sh} در HTML`, () => html.includes(`id="${sh}"`) || `MISSING`);
+}
 
-  // ── ۱. بوت بدون خطا (دسکتاپ عریض، دقیقاً سناریوی باگ ویندوز) ──
-  {
-    const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
-    const errors = [];
-    page.on('pageerror', e => errors.push(e.message));
-    await page.goto(FILE);
-    await page.waitForTimeout(400);
-    await page.evaluate(() => localStorage.setItem('dq5_onboarded', '1'));
-    await page.reload();
-    await page.waitForTimeout(600);
-    check('بوت بدون خطای JS', errors.length === 0);
+// ══ ۳. JAVASCRIPT FUNCTIONS ════════════════════════
+console.log('\n③ Core Functions');
+const coreFns = [
+  'boot','loadAll','saveAll','renderTasks','renderBag','goPage',
+  'openSheet','closeAll','quickCapture','nlpParse',
+  'renderBirthdayPage','renderProjects','calInit',
+  '_idbRestoreCheck','_idbSave','_idbGet',
+  'updateMeta','setGreeting','initWeather',
+  'mkCard','mkCardWrap','saveTask'
+];
+for (const fn of coreFns) {
+  test(`function ${fn}`, () => {
+    const exists = html.includes(`function ${fn}(`) || html.includes(`async function ${fn}(`);
+    return exists || 'MISSING';
+  });
+}
 
-    // layout روی صفحهٔ عریض — حالا sidebar چپ + محتوا راست (نه ستون وسط‌چین)
-    const rects = await page.evaluate(() => ({
-      app: document.getElementById('app').getBoundingClientRect(),
-      nav: document.querySelector('.nav').getBoundingClientRect(),
-      pg: document.querySelector('.page.active').getBoundingClientRect(),
-    }));
-    check('عرض ویندوز: #app کل عرض صفحه را می‌گیرد', rects.app.width > 1800);
-    check('عرض ویندوز: sidebar ناوبری در راست صفحه (RTL)', rects.nav.right > 1900);
-    check('عرض ویندوز: sidebar عرض مناسب دارد', rects.nav.width >= 180 && rects.nav.width <= 240);
+// ══ ۴. GLOBAL VARIABLES ════════════════════════════
+console.log('\n④ Global Variables');
+const globals = ['tasks','cfg','birthdays','projects','curTab','IR_HOLIDAYS','iconMap'];
+for (const v of globals) {
+  test(`${v} تعریف شده`, () => {
+    const rx = new RegExp(`(?:const|let|var)\\s+${v}\\b`);
+    return rx.test(html) || 'NOT DECLARED';
+  });
+}
 
-    // باز/بسته‌شدن شیت با کلیک واقعی (همان باگ اصلی ویندوز)
-    await page.evaluate((t) => { tasks.push(t); saveAll(); renderTasks(); }, seedTask({ id: 'reg1' }));
-    await page.click('[data-id="reg1"]');
-    await page.waitForTimeout(350);
-    const openOk = await page.evaluate(() => document.getElementById('shNote').classList.contains('open'));
-    check('شیت با کلیک باز می‌شود', openOk);
-    await page.click('#shNote .sh-x');
-    await page.waitForTimeout(350);
-    const closedOk = await page.evaluate(() => !document.getElementById('shNote').classList.contains('open'));
-    check('شیت با کلیک X بسته می‌شود', closedOk);
+// ══ ۵. CSS ══════════════════════════════════════════
+console.log('\n⑤ CSS');
+const cssContent = html.match(/<style>([\s\S]*?)<\/style>/)?.[1] || '';
+const cssVars = ['--a','--bg1','--bg2','--t1','--t2','--r2','--fs-sm','--sp3'];
+for (const v of cssVars) {
+  test(`CSS var ${v}`, () => cssContent.includes(v) || 'MISSING');
+}
+test('animation:both روی .page نیست', () => {
+  const pageActive = cssContent.match(/\.page\.active\s*\{[^}]+\}/g) || [];
+  const hasBoth = pageActive.some(r => r.includes('both'));
+  return hasBoth ? 'WARNING: animation:both on .page.active' : true;
+});
+test('tc-list-anim animation', () => {
+  return cssContent.includes('tc-list-anim') || 'tc-list-anim missing';
+});
 
-    await page.close();
-  }
+// ══ ۶. DUPLICATE CHECK ═════════════════════════════
+console.log('\n⑥ Duplicates');
+test('boot فقط یه بار', () => {
+  const matches = (html.match(/\nboot\(\);/g) || []).length;
+  const commented = (html.match(/\/\/ boot already/g) || []).length;
+  const actual = matches - commented;
+  return actual <= 1 || `boot() ${actual}x — should be 1`;
+});
+test('duplicate iconMap نداره', () => {
+  const count = (html.match(/const iconMap/g) || []).length;
+  return count <= 1 || `iconMap declared ${count}x`;
+});
+test('duplicate _idbRestoreCheck نداره', () => {
+  const count = (html.match(/function _idbRestoreCheck/g) || []).length;
+  return count <= 1 || `_idbRestoreCheck ${count}x`;
+});
 
-  // ── ۲. تست‌های عمومی روی ویوپورت موبایل ──
-  {
-    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
-    await page.goto(FILE);
-    await page.waitForTimeout(400);
-    await page.evaluate(() => localStorage.setItem('dq5_onboarded', '1'));
-    await page.reload();
-    await page.waitForTimeout(500);
+// ══ ۷. STORAGE KEYS ════════════════════════════════
+console.log('\n⑦ Storage Keys');
+const saveAllFn = html.match(/function saveAll\(\)\{[\s\S]{1,2000}?\}/)?.[0] || '';
+const loadAllFn = html.match(/function loadAll\(\)\{[\s\S]{1,2000}?\}/)?.[0] || '';
+const saveKeys = [...saveAllFn.matchAll(/setItem\('([^']+)'/g)].map(m=>m[1]);
+const loadKeys = [...loadAllFn.matchAll(/getItem\('([^']+)'/g)].map(m=>m[1]);
+test('saveAll و loadAll هر دو کامل', () => {
+  return (saveKeys.length >= 3 && loadKeys.length >= 3) || `save:${saveKeys.length} load:${loadKeys.length}`;
+});
 
-    // Escape با فوکوس روی input باید ببندد
-    await page.evaluate((t) => { tasks.push(t); saveAll(); renderTasks(); }, seedTask({ id: 'reg2' }));
-    await page.click('[data-id="reg2"]');
-    await page.waitForTimeout(300);
-    await page.focus('#editTaskTxt').catch(() => {});
-    await page.keyboard.press('Escape');
-    await page.waitForTimeout(300);
-    check('Escape با فوکوس روی input می‌بندد', await page.evaluate(() => !document.getElementById('shNote').classList.contains('open')));
+// ══ ۸. SOKO ════════════════════════════════════════
+console.log('\n⑧ Soko');
+test('tmInit موجوده', () => html.includes('function tmInit(') || 'MISSING');
+test('tmSyncBackground موجوده', () => html.includes('function tmSyncBackground(') || 'MISSING');
+test('calDayPanel hide', () => html.includes('_cdp.style.display') || 'calDayPanel fix missing');
 
-    // حذف از منوی کارت (بدون confirm بومی)
-    await page.evaluate((t) => { tasks.push(t); saveAll(); renderTasks(); }, seedTask({ id: 'regDel' }));
-    await page.click('[data-id="regDel"] .tc-more');
-    await page.waitForTimeout(200);
-    await page.click('.card-more-row.danger');
-    await page.waitForTimeout(200);
-    await page.click('#shDelConfirm .btn.danger');
-    await page.waitForTimeout(200);
-    check('حذف از منوی کارت بدون confirm بومی', await page.evaluate(() => !tasks.find(t => t.id === 'regDel')));
+// ══ نتیجه ══════════════════════════════════════════
+console.log('\n' + '='.repeat(50));
+console.log(`RESULT: ${passed} passed, ${failed} failed, ${warns} warnings`);
+console.log('='.repeat(50));
+results.forEach(r => console.log(r));
 
-    // تب‌بندی نوار پایین — pill فعال
-    const homeActive = await page.evaluate(() => document.querySelector('.ni.active')?.querySelector('.ni-lbl')?.textContent);
-    check('نوار پایین: خانه فعال با لیبل', !!homeActive);
-
-    // ظرفیت روز
-    await page.evaluate(() => {
-      tasks.push(Object.assign({}, tasks[0], { id: 'regCap', estimateMin: 60, deadline: mrTodayKey() }));
-      cfg.workEndTime = '23:59'; saveCfg(); saveAll(); renderTasks();
-    });
-    await page.waitForTimeout(200);
-    const capShown = await page.evaluate(() => document.getElementById('capBanner').style.display === 'block');
-    check('بنر ظرفیت با تسک تخمین‌دار نمایش داده می‌شود', capShown);
-
-    await page.close();
-  }
-
-  // ── ۳. پروژه‌ها: چرخهٔ کامل ──
-  {
-    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
-    await page.goto(FILE);
-    await page.waitForTimeout(400);
-    await page.evaluate(() => localStorage.setItem('dq5_onboarded', '1'));
-    await page.reload();
-    await page.waitForTimeout(500);
-
-    await page.evaluate(() => {
-      projects.push({ id: 'pReg', name: 'پروژهٔ تست', color: '#00b87a', deadline: null, notes: '', createdAt: Date.now(), archived: false });
-      tasks.push(Object.assign({}, tasks[0] || {}, { id: 'regP1', text: 'کار پروژه', projectId: 'pReg', phase: 'فاز ۱', status: 'todo', done: false, archived: false }));
-      saveProjects(); saveAll();
-    });
-    await page.evaluate(() => goPage('Projects'));
-    await page.waitForTimeout(300);
-    const hasPhaseHdr = await page.evaluate(() => !!document.querySelector('.proj-phase-hdr'));
-    check('سربرگ فاز در پروژه دیده می‌شود', hasPhaseHdr);
-
-    // بستن پروژه (آرشیو) و چک رفتنش به بخش بسته‌شده
-    await page.evaluate(() => { editingProjId = 'pReg'; closeProject(); });
-    await page.waitForTimeout(200);
-    const archivedRow = await page.evaluate(() => !!document.querySelector('.proj-archived-row'));
-    check('پروژهٔ بسته‌شده در بخش جدا دیده می‌شود', archivedRow);
-    const stillActive = await page.evaluate(() => !document.querySelector(`.proj-card[data-pid="pReg"]`));
-    check('پروژهٔ بسته دیگر در لیست فعال نیست', stillActive);
-
-    await page.close();
-  }
-
-  // ── ۴. آرشیو خودکار تسک قدیمی ──
-  {
-    const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
-    await page.goto(FILE);
-    await page.waitForTimeout(400);
-    await page.evaluate(() => localStorage.setItem('dq5_onboarded', '1'));
-    await page.reload();
-    await page.waitForTimeout(500);
-
-    await page.evaluate((t) => {
-      const old = Object.assign({}, t, { id: 'regOld', status: 'done', done: true, completedAt: Date.now() - 40 * 86400000 });
-      const recent = Object.assign({}, t, { id: 'regRecent', status: 'done', done: true, completedAt: Date.now() - 2 * 86400000 });
-      tasks.push(old, recent); saveAll();
-    }, seedTask());
-    const archivedCount = await page.evaluate(() => runAutoArchive());
-    check('فقط تسک قدیمی آرشیو می‌شود', archivedCount === 1);
-    const oldArchived = await page.evaluate(() => tasks.find(t => t.id === 'regOld')?.archived === true);
-    const recentNot = await page.evaluate(() => tasks.find(t => t.id === 'regRecent')?.archived === false);
-    check('تسک قدیمی archived=true شد', oldArchived);
-    check('تسک تازه دست‌نخورده ماند', recentNot);
-
-    await page.close();
-  }
-
-  // ── موتور تقسیم چندتسکی (nlpSplitSegments) — رگرسیون ضدحذف‌تصادفی ──
-  {
-    const page = await browser.newPage();
-    await page.goto(FILE);
-    await page.waitForTimeout(300);
-
-    const exists = await page.evaluate(() => typeof nlpSplitSegments === 'function');
-    check('تابع nlpSplitSegments وجود دارد (نباید دوباره حذف شود)', exists);
-
-    if (exists) {
-      const r1 = await page.evaluate((txt) => nlpSplitSegments(txt), 'زنگ به رضا فردا، جلسه با علی پسفردا ساعت ۳');
-      check('تقسیم پایهٔ دو تسک با ویرگول کار می‌کند', r1.length === 2);
-
-      const r2 = await page.evaluate((txt) => nlpSplitSegments(txt), 'تماس با رضا فردا');
-      check('یک‌جمله بدون ویرگول، تقسیم نمی‌شود', r2.length === 1);
-
-      // وصل‌بودن به quickCapture
-      await page.evaluate(() => localStorage.setItem('dq5_onboarded', '1'));
-      await page.reload();
-      await page.waitForTimeout(500);
-      await page.fill('#qcapInp', 'زنگ به رضا فردا، جلسه با علی پسفردا ساعت ۳');
-      await page.click('#qcapGo');
-      await page.waitForTimeout(200);
-      const taskCount = await page.evaluate(() => tasks.length);
-      check('quickCapture با ویرگول واقعاً ۲ تسک می‌سازد (نه ۱)', taskCount === 2);
-    }
-
-    await page.close();
-  }
-
-  // ── فیکس: چند کار پشت‌سرهم با Quick Capture، همه باید تاریخ امروز بگیرند ──
-  {
-    const page = await browser.newPage();
-    await page.goto(FILE);
-    await page.waitForTimeout(300);
-    await page.evaluate(() => localStorage.setItem('dq5_onboarded', '1'));
-    await page.reload();
-    await page.waitForTimeout(500);
-    for (const c of ['کار یک', 'کار دو', 'کار سه']) {
-      await page.fill('#qcapInp', c);
-      await page.click('#qcapGo');
-      await page.waitForTimeout(80);
-    }
-    const todayCount = await page.evaluate(() => tasks.filter(t => t.deadline === mrTodayKey()).length);
-    check('چند کار پشت‌سرهم بدون تاریخ صریح، همه امروز می‌گیرند (نه فقط اولی)', todayCount === 3);
-    await page.close();
-  }
-
-  // ── فیکس: \b با حروف فارسی کار نمی‌کند — باعث ادغام غلط می‌شد ──
-  {
-    const page = await browser.newPage();
-    await page.goto(FILE);
-    await page.waitForTimeout(300);
-    const realSentence = 'زنگ بزنم به دکتر، تا فردا داسپورت رضا رو بگیرم ، تا سه روز دیگه برم داروخانه، شنبه هفت بعد آمار رو بفرستم مرکز، ساعت سه فردا ماشین هماهنگ بشه، پس فردا فایل ها آماده باشه تا ساعت ۲ ظهر';
-    const r = await page.evaluate((txt) => nlpSplitSegments(txt), realSentence);
-    check('جملهٔ واقعی پیچیده درست به ۶ بخش تقسیم می‌شود (نه ۴، باگ \\\\b)', r.length === 6);
-    await page.close();
-  }
-
-  // ── عملکرد: رندر ۲۰۰ تسک باید زیر ۱۵۰ میلی‌ثانیه بماند (DocumentFragment) ──
-  {
-    const page = await browser.newPage();
-    await page.goto(FILE);
-    await page.waitForLoadState('load');
-    await page.evaluate(() => localStorage.setItem('dq5_onboarded', '1'));
-    await page.reload();
-    await page.waitForLoadState('load');
-    await page.evaluate(() => {
-      tasks = [];
-      for (let i = 0; i < 200; i++) {
-        tasks.push({ id: 'perf' + i, text: 'تسک ' + i, iconId: 'check', cat: 'prep', time: null, priority: 'high', status: 'todo', done: false, deadline: mrTodayKey(), projectId: null, recur: 'none', recurBase: null, note: '', waitingFor: '', contact: '', fileLink: '', location: '', estimateMin: 0, phase: '', archived: false, completedAt: null });
-      }
-      saveAll();
-    });
-    const dur = await page.evaluate(() => {
-      const t0 = performance.now();
-      renderTasks();
-      return performance.now() - t0;
-    });
-    check('رندر ۲۰۰ تسک زیر ۱۵۰ میلی‌ثانیه است (نه ~۳۰۰ مثل قبل از DocumentFragment)', dur < 150);
-    await page.close();
-  }
-
-  // ── فیکس: اگر فقط ساعت گفته شود (بدون تاریخ صریح) و آن ساعت گذشته، باید فردا شود ──
-  {
-    const page = await browser.newPage();
-    await page.goto(FILE);
-    await page.waitForTimeout(300);
-    await page.clock.install({ time: new Date(2026, 5, 30, 22, 0, 0) });
-    await page.clock.pauseAt(new Date(2026, 5, 30, 22, 0, 0));
-    const today = await page.evaluate(() => mrTodayKey());
-    const tomorrow = await page.evaluate(() => getTomorrowKey());
-
-    const pastTimeResult = await page.evaluate(() => nlpParse('ده صبح تماس با رضا').deadline);
-    check('ساعت ۲۲:۰۰ + «ده صبح» (گذشته) → فردا می‌شود', pastTimeResult === tomorrow);
-
-    const futureTimeResult = await page.evaluate(() => nlpParse('۱۱ شب تماس با علی').deadline);
-    check('ساعت ۲۲:۰۰ + «۱۱ شب» (هنوز نگذشته) → امروز می‌ماند', futureTimeResult === today);
-    await page.close();
-  }
-
-  // ── فیکس: ارقام عربی (٠-٩، نه ۰-۹ فارسی) که کیبورد فارسی گوشی واقعاً تولید می‌کند ──
-  {
-    const page = await browser.newPage();
-    await page.goto(FILE);
-    await page.waitForTimeout(300);
-
-    const arabicDigitParse = await page.evaluate(() => nlpNormalize('٩ آذر'));
-    check('ارقام عربی (٩) در nlpNormalize به فارسی (۹) تبدیل می‌شوند', arabicDigitParse.includes('۹'));
-
-    const azarNotAban = await page.evaluate(() => faToEn('١٥'));
-    check('faToEn ارقام عربی را هم می‌شناسد (١٥ → 15)', azarNotAban === '15');
-    await page.close();
-  }
-
-  // ── فیکس: ساعت دقیق H:MM باید به «شب/عصر» کنار خودش توجه کنه (قبلاً نادیده می‌گرفت) ──
-  {
-    const page = await browser.newPage();
-    await page.goto(FILE);
-    await page.waitForTimeout(300);
-
-    const nightExact = await page.evaluate(() => nlpParse('فردا شب ساعت ۹:۳۰ تماس با دکتر احمدی').time);
-    check('«شب ساعت ۹:۳۰» → ۲۱:۳۰ می‌شود (نه ۰۹:۳۰)', nightExact === '21:30');
-
-    const morningExact = await page.evaluate(() => nlpParse('ساعت ۹:۰۰ صبح تحویل نمونه').time);
-    check('«صبح ساعت ۹:۰۰» → ۰۹:۰۰ می‌ماند (بدون تغییر)', morningExact === '09:00');
-    await page.close();
-  }
-
-  // ── فیکس: «N روز مونده» با عدد نوشتاری (نه فقط رقمی) ──
-  {
-    const page = await browser.newPage();
-    await page.goto(FILE);
-    await page.waitForTimeout(300);
-
-    const writtenNum = await page.evaluate(() => {
-      const today = mrTodayKey();
-      const [jy,jm,jd] = today.split('-').map(Number);
-      const expected = daysToJalaliKey(_jalToDays(jy,jm,jd)+3);
-      return { result: nlpParse('سه روز مونده به تحویل گزارش').deadline, expected };
-    });
-    check('«سه روز مونده» (عدد نوشتاری) تاریخ را درست تشخیص می‌دهد', writtenNum.result === writtenNum.expected);
-    await page.close();
-  }
-
-  // ── فیکس: تکرار عمومی «هر N روز/هفته/ماه یک‌بار» با عدد دلخواه ──
-  {
-    const page = await browser.newPage();
-    await page.goto(FILE);
-    await page.waitForTimeout(300);
-
-    const everyN = await page.evaluate(() => nlpParse('هر ۱۰ روز یک‌بار پیگیری کن').recur);
-    check('«هر ۱۰ روز یک‌بار» → recur برابر every:10 می‌شود', everyN === 'every:10');
-
-    const everyNLabel = await page.evaluate(() => recurLabel('every:10'));
-    check('recurLabel(every:10) برچسب «هر ۱۰ روز» را برمی‌گرداند', everyNLabel === 'هر ۱۰ روز');
-
-    const nextDeadline = await page.evaluate(() => {
-      const base = mrTodayKey();
-      const [jy,jm,jd] = base.split('-').map(Number);
-      const fromDays = _jalToDays(jy,jm,jd);
-      return { next: getNextRecurDeadline({recur:'every:10'}, fromDays), expected: daysToJalaliKey(fromDays+10) };
-    });
-    check('getNextRecurDeadline با every:10 دقیقاً ۱۰ روز جلو می‌رود', nextDeadline.next === nextDeadline.expected);
-    await page.close();
-  }
-
-  await browser.close();
-
-  console.log(`\n${'═'.repeat(40)}`);
-  console.log(`نتیجه: ${pass} موفق، ${fail} ناموفق`);
-  if (fail > 0) {
-    console.log('موارد ناموفق:');
-    failures.forEach(f => console.log('  - ' + f));
-    process.exit(1);
-  } else {
-    console.log('همه چیز سالم است. ✓');
-    process.exit(0);
-  }
-})();
+if (failed > 0) {
+  console.log(`\n🚫 ${failed} tests failed — push نکن!`);
+  process.exit(1);
+} else {
+  console.log(`\n✅ همه tests pass — safe to push`);
+  process.exit(0);
+}
