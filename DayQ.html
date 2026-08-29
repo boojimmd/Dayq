@@ -4651,7 +4651,14 @@ body:has(#tmSokoPanel.open) #ov {
 /* tasks فوری visible — بدون animation delay */
 .tc-list-anim .tc-wrap{animation:none !important;opacity:1 !important;}
 #shTeamTaskDetail:not(.open){opacity:0 !important;pointer-events:none !important;}
-</style>
+
+/* تمام شیت‌های بسته روی desktop کاملاً invisible */
+@media(min-width:900px){
+  .sheet:not(.open){
+    opacity:0 !important;
+    pointer-events:none !important;
+  }
+}</style>
 </head>
 <body>
 <div id="app">
