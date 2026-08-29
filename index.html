@@ -5007,7 +5007,11 @@ body.show-dpanel #dpanel {
   transition: background 100ms ease, color 100ms ease, border-color 100ms ease;
 }
 
-#dtlView{display:none;} #timeBanner{display:none;} #tmTodaySection{display:none;} #tmAnnosSection{display:none;}</style>
+#dtlView, #dtlView.dtl-active{display:none!important;}
+#timeBanner{display:none!important;}
+#tmTodaySection{display:none!important;}
+#tmAnnosSection{display:none!important;}
+/* Soko sections فقط وقتی تیم active هست show میشن — از طریق inline style */</style>
 </head>
 <body>
 <div id="app">
@@ -6689,11 +6693,7 @@ function _tmSbSel(uuid){
   {id:'flag',c:'var(--red)',s:`<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" stroke-width="1.5"/><line x1="4" y1="22" x2="4" y2="15" stroke-width="1.5"/>`},
 ];
 const iconMap={};ICONS.forEach(i=>iconMap[i.id]=i);
-function svgIco(id,w=16){const ic=iconMap[id]||iconMap.check;return`<svg viewBox="0 0 24 24" width="${w}" height="${w}" fill="none" stroke="${ic.c}" stroke-linecap="round" stroke-linejoin="round">${ic.s}</svg>`;}
-
-/* ══ STATE ══ */
-<script>
-const SK='dq5_t',SB='dq5_b',SS='dq5_s',SD='dq5_bd';
+function svgIco(id,w=16){const ic=iconMap[id]||iconMap.check;return`<svg viewBox="0 0 24 24" width="${wconst SK='dq5_t',SB='dq5_b',SS='dq5_s',SD='dq5_bd';
 let birthdays=[];
 let tasks=[],bagItems=[];
 let cfg={theme:'auto',persian:true,confetti:false,name:'',company:'',city:'',visitTime:'09:00',mood:0,reflect:false,timeline:false,reflection:'',workEndTime:'18:00',eveningStart:'17:00',autoArchiveDays:30,autoArchiveOn:true,pushWorkerUrl:'',syncCode:''};
@@ -12688,7 +12688,7 @@ function _dtlApply(){
   if(!view) return;
 
   if(_dtlActive){
-    view.classList.add('dtl-active');
+    if(tm&&tm.code&&tm.token) view.classList.add('dtl-active');
     if(list) list.style.display='none';
     if(empty) empty.style.display='none';
     if(btn){ btn.classList.remove('list-mode'); btn.classList.add('timeline-mode'); }
@@ -19850,6 +19850,13 @@ setTimeout(function(){
     if(restored){
       // data از IDB برگشت — reload تا اعمال بشه
       console.log('[DayQ] reloading with restored data...');
+      setTimeout(function(){window.location.reload();},100);
+    }
+  });
+},50);
+
+
+ console.log('[DayQ] reloading with restored data...');
       setTimeout(function(){window.location.reload();},100);
     }
   });
