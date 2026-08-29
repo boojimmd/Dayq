@@ -19160,7 +19160,25 @@ async function _mgSendComment(){
   if(btn)btn.disabled=false;
   setTimeout(tmSyncBackground,1500);
 }
-function _calSetFilter(f){if(typeof setCalView==='function'&&f)setCalView(f);else if(typeof renderCal==='function')renderCal();}</script>
+function _calSetFilter(f){if(typeof setCalView==='function'&&f)setCalView(f);else if(typeof renderCal==='function')renderCal();}
+function _idbRestoreCheck(onDone){
+  var SK='dq5_t', SS='dq5_s', SB='dq5_b', SD='dq5_bd';
+  var raw=localStorage.getItem(SK);
+  var isEmpty=!raw||raw==='[]'||raw==='null';
+  if(!isEmpty){onDone(false);return;}
+  Promise.all([_idbGet(SK),_idbGet(SS),_idbGet(SB),_idbGet(SD)])
+    .then(function(vals){
+      var tasks=vals[0],cfg=vals[1],bag=vals[2],bd=vals[3];
+      if(!tasks||tasks==='[]'){onDone(false);return;}
+      if(tasks)localStorage.setItem(SK,tasks);
+      if(cfg)localStorage.setItem(SS,cfg);
+      if(bag)localStorage.setItem(SB,bag);
+      if(bd)localStorage.setItem(SD,bd);
+      console.log('[DayQ] ✅ IDB restore: data recovered');
+      onDone(true);
+    }).catch(function(){onDone(false);});
+}
+</script>
 
 
 <!-- JALALI DATE PICKER -->
