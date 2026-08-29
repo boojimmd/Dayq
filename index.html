@@ -22003,3 +22003,16 @@ async function _tmTryPushToMember(memberUuid,taskTitle,broadcast){
 }
 
 
+
+function _tmDlOkBtn(){console.warn("_tmDlOkBtn not impl");}
+function _tmDlShortBtn(){console.warn("_tmDlShortBtn not impl");}
+function _tmSbSel(){console.warn("_tmSbSel not impl");}
+function _openFirstUnread(){
+  var unread=(tm.inbox||[]).filter(function(t){
+    if(!t.comments||!t.comments.length)return false;
+    var last=t.comments[t.comments.length-1];
+    var ts=last.ts||last.at||0;
+    return (last.from||last.role)==='manager'&&(!t.lastReadAt||ts>t.lastReadAt);
+  });
+  if(unread.length)openTeamTaskDetail(unread[0].id);
+}
